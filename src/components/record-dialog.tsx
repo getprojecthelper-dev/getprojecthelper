@@ -25,9 +25,9 @@ export interface FieldConfig {
   label: string;
   type: "text" | "textarea" | "select" | "date" | "number";
   options?: ReadonlyArray<{ value: string; label: string }>;
-  placeholder?: string;
-  required?: boolean;
-  rows?: number;
+  placeholder?: string | undefined;
+  required?: boolean | undefined;
+  rows?: number | undefined;
 }
 
 export type RecordValues = Record<string, string>;
@@ -46,11 +46,11 @@ export function RecordDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description?: string;
+  description?: string | undefined;
   fields: FieldConfig[];
-  initial?: RecordValues;
-  submitLabel?: string;
-  busy?: boolean;
+  initial?: RecordValues | undefined;
+  submitLabel?: string | undefined;
+  busy?: boolean | undefined;
   onSubmit: (values: RecordValues) => void;
 }) {
   const [values, setValues] = useState<RecordValues>({});
@@ -137,7 +137,7 @@ export function ListRow({
   meta?: ReactNode;
   badges?: ReactNode;
   actions?: ReactNode;
-  children?: ReactNode;
+  children?: ReactNode | undefined;
 }) {
   return (
     <div className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">

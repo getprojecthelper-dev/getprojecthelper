@@ -51,14 +51,15 @@ function RequirementsPage() {
   const nextCode = `FR-${String(items.length + 1).padStart(2, "0")}`;
 
   const submit = (values: RecordValues) => {
+    const v = (k: string) => (values[k] ?? "").trim();
     const payload = {
-      code: values.code!.trim(),
-      title: values.title!.trim(),
-      description: values.description?.trim() || null,
-      acceptance_criteria: values.acceptance_criteria?.trim() || null,
-      req_type: values.req_type!,
-      status: values.status!,
-      priority: values.priority!,
+      code: v("code"),
+      title: v("title"),
+      description: v("description") || null,
+      acceptance_criteria: v("acceptance_criteria") || null,
+      req_type: v("req_type"),
+      status: v("status"),
+      priority: v("priority"),
     };
     if (editing) update.mutate({ id: editing.id, values: payload }, { onSuccess: () => setOpen(false) });
     else create.mutate(payload, { onSuccess: () => setOpen(false) });

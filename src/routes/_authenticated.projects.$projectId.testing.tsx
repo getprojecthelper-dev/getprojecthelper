@@ -54,12 +54,13 @@ function TestingPage() {
   ];
 
   const submit = (values: RecordValues) => {
+    const v = (k: string) => (values[k] ?? "").trim();
     const payload = {
-      title: values.title!.trim(),
-      expected_result: values.expected_result?.trim() || null,
-      actual_result: values.actual_result?.trim() || null,
-      status: values.status!,
-      requirement_id: values.requirement_id && values.requirement_id !== "none" ? values.requirement_id : null,
+      title: v("title"),
+      expected_result: v("expected_result") || null,
+      actual_result: v("actual_result") || null,
+      status: v("status"),
+      requirement_id: v("requirement_id") && v("requirement_id") !== "none" ? v("requirement_id") : null,
     };
     if (editing) update.mutate({ id: editing.id, values: payload }, { onSuccess: () => setOpen(false) });
     else create.mutate(payload, { onSuccess: () => setOpen(false) });

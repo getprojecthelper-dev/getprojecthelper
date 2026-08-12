@@ -43,14 +43,15 @@ function ExperimentsPage() {
   const items = data.experiments;
 
   const submit = (values: RecordValues) => {
+    const v = (k: string) => (values[k] ?? "").trim();
     const payload = {
-      name: values.name!.trim(),
-      dataset: values.dataset?.trim() || null,
-      model: values.model?.trim() || null,
-      parameters: values.parameters?.trim() || null,
-      metrics: values.metrics?.trim() || null,
-      results: values.results?.trim() || null,
-      notes: values.notes?.trim() || null,
+      name: v("name"),
+      dataset: v("dataset") || null,
+      model: v("model") || null,
+      parameters: v("parameters") || null,
+      metrics: v("metrics") || null,
+      results: v("results") || null,
+      notes: v("notes") || null,
     };
     if (editing) update.mutate({ id: editing.id, values: payload }, { onSuccess: () => setOpen(false) });
     else create.mutate(payload, { onSuccess: () => setOpen(false) });

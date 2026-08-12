@@ -51,13 +51,14 @@ function TasksPage() {
   const tasks = data.tasks;
 
   const submit = (values: RecordValues) => {
+    const v = (k: string) => (values[k] ?? "").trim();
     const payload = {
-      title: values.title!.trim(),
-      description: values.description?.trim() || null,
-      stage: values.stage!,
-      status: values.status!,
-      priority: values.priority!,
-      due_date: values.due_date || null,
+      title: v("title"),
+      description: v("description") || null,
+      stage: v("stage"),
+      status: v("status"),
+      priority: v("priority"),
+      due_date: v("due_date") || null,
     };
     if (editing) update.mutate({ id: editing.id, values: payload }, { onSuccess: () => setOpen(false) });
     else create.mutate(payload, { onSuccess: () => setOpen(false) });

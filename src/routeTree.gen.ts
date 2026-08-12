@@ -17,6 +17,10 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedNewProjectRouteImport } from './routes/_authenticated.new-project'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
+import { Route as AuthenticatedProjectsProjectIdExperimentsRouteImport } from './routes/_authenticated.projects.$projectId.experiments'
+import { Route as AuthenticatedProjectsProjectIdRequirementsRouteImport } from './routes/_authenticated.projects.$projectId.requirements'
+import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
+import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +63,30 @@ const AuthenticatedProjectsProjectIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const AuthenticatedProjectsProjectIdExperimentsRoute =
+  AuthenticatedProjectsProjectIdExperimentsRouteImport.update({
+    id: '/experiments',
+    path: '/experiments',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdRequirementsRoute =
+  AuthenticatedProjectsProjectIdRequirementsRouteImport.update({
+    id: '/requirements',
+    path: '/requirements',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdTasksRoute =
+  AuthenticatedProjectsProjectIdTasksRouteImport.update({
+    id: '/tasks',
+    path: '/tasks',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdTestingRoute =
+  AuthenticatedProjectsProjectIdTestingRouteImport.update({
+    id: '/testing',
+    path: '/testing',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,6 +95,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
+  '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
+  '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +107,10 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
+  '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
+  '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
+  '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
@@ -86,6 +122,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/_authenticated/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/_authenticated/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
+  '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
+  '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +137,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/new-project'
     | '/projects/$projectId'
+    | '/projects/$projectId/experiments'
+    | '/projects/$projectId/requirements'
+    | '/projects/$projectId/tasks'
+    | '/projects/$projectId/testing'
     | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -105,6 +149,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/dashboard'
     | '/new-project'
+    | '/projects/$projectId/experiments'
+    | '/projects/$projectId/requirements'
+    | '/projects/$projectId/tasks'
+    | '/projects/$projectId/testing'
     | '/projects/$projectId'
   id:
     | '__root__'
@@ -115,6 +163,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/new-project'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/projects/$projectId/experiments'
+    | '/_authenticated/projects/$projectId/requirements'
+    | '/_authenticated/projects/$projectId/tasks'
+    | '/_authenticated/projects/$projectId/testing'
     | '/_authenticated/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
@@ -183,15 +235,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdIndexRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/experiments': {
+      id: '/_authenticated/projects/$projectId/experiments'
+      path: '/experiments'
+      fullPath: '/projects/$projectId/experiments'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdExperimentsRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/requirements': {
+      id: '/_authenticated/projects/$projectId/requirements'
+      path: '/requirements'
+      fullPath: '/projects/$projectId/requirements'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdRequirementsRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/tasks': {
+      id: '/_authenticated/projects/$projectId/tasks'
+      path: '/tasks'
+      fullPath: '/projects/$projectId/tasks'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdTasksRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/testing': {
+      id: '/_authenticated/projects/$projectId/testing'
+      path: '/testing'
+      fullPath: '/projects/$projectId/testing'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdTestingRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
   }
 }
 
 interface AuthenticatedProjectsProjectIdRouteChildren {
+  AuthenticatedProjectsProjectIdExperimentsRoute: typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  AuthenticatedProjectsProjectIdRequirementsRoute: typeof AuthenticatedProjectsProjectIdRequirementsRoute
+  AuthenticatedProjectsProjectIdTasksRoute: typeof AuthenticatedProjectsProjectIdTasksRoute
+  AuthenticatedProjectsProjectIdTestingRoute: typeof AuthenticatedProjectsProjectIdTestingRoute
   AuthenticatedProjectsProjectIdIndexRoute: typeof AuthenticatedProjectsProjectIdIndexRoute
 }
 
 const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectIdRouteChildren =
   {
+    AuthenticatedProjectsProjectIdExperimentsRoute:
+      AuthenticatedProjectsProjectIdExperimentsRoute,
+    AuthenticatedProjectsProjectIdRequirementsRoute:
+      AuthenticatedProjectsProjectIdRequirementsRoute,
+    AuthenticatedProjectsProjectIdTasksRoute:
+      AuthenticatedProjectsProjectIdTasksRoute,
+    AuthenticatedProjectsProjectIdTestingRoute:
+      AuthenticatedProjectsProjectIdTestingRoute,
     AuthenticatedProjectsProjectIdIndexRoute:
       AuthenticatedProjectsProjectIdIndexRoute,
   }

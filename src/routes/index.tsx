@@ -14,7 +14,7 @@ import {
   TestTube,
 } from "lucide-react";
 
-import heroAsset from "@/assets/hero.png.asset.json";
+import heroFullAsset from "@/assets/hero-full.png.asset.json";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({

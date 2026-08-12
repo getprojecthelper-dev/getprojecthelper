@@ -42,7 +42,19 @@ function Landing() {
             <GraduationCap className="h-5 w-5 text-primary" />
             Project Helper
           </Link>
+          <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
+            <a href="#how-it-works" className="story-link transition-colors hover:text-foreground">
+              How it works
+            </a>
+            <a href="#features" className="story-link transition-colors hover:text-foreground">
+              Features
+            </a>
+            <a href="#mentor" className="story-link transition-colors hover:text-foreground">
+              AI Mentor
+            </a>
+          </nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
               <Link to="/auth">Log in</Link>
             </Button>
@@ -58,23 +70,67 @@ function Landing() {
       <main>
         <KineticHero />
 
-
-
         <section id="how-it-works" className="border-y border-border bg-secondary/50">
-          <div className="mx-auto max-w-6xl px-5 py-14">
-            <h2 className="font-display text-2xl font-semibold">The whole lifecycle, in order</h2>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Project Helper is not a board with a chatbot bolted on. Every screen answers three
-              questions: where am I, how am I doing, and what should I do next.
-            </p>
+          <div className="mx-auto max-w-6xl px-5 py-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
+                How it works
+              </span>
+              <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">
+                The complete project lifecycle, in order
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Every stage, every deliverable, zero confusion. Each screen answers three questions:
+                where am I, how am I doing, and what should I do next.
+              </p>
+            </div>
             <LifecycleStepper />
+
+            <div className="panel mt-10 grid gap-6 p-6 sm:grid-cols-3">
+              {[
+                {
+                  icon: GraduationCap,
+                  title: "Designed for academic success",
+                  body: "Built around how projects are actually marked.",
+                },
+                {
+                  icon: Lock,
+                  title: "Your data is yours",
+                  body: "Your work stays private to your account.",
+                },
+                {
+                  icon: Sparkles,
+                  title: "AI that understands your project",
+                  body: "Context-aware, honest, and never inventing results.",
+                },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-3">
+                  <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <div>
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-16">
-          <h2 className="font-display text-2xl font-semibold">Everything the project needs</h2>
+        <section id="features" className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
+              Features
+            </span>
+            <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">
+              Everything the project needs
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              One workspace for planning, research, code, evidence and the final defence.
+            </p>
+          </div>
           <FeatureGrid />
         </section>
+
 
         <section className="border-t border-border bg-secondary/40">
           <MentorDialogue />

@@ -29,13 +29,24 @@ export interface SectionPlan {
   kind: string;
 }
 
-export interface SectionContent {
+export interface CodeBlock {
+  title: string;
   code: string;
-  language: string;
   explanation: string[];
+}
+
+export interface StructureFile {
+  path: string;
+  content: string;
+}
+
+export interface SectionContent {
+  language: string;
+  blocks: CodeBlock[];
   insights: string[];
   business_connection: string;
   structure: string | null;
+  files: StructureFile[];
 }
 
 const DATA_DOMAINS = ["data_science", "analytics", "ml_ai", "research"];

@@ -237,6 +237,7 @@ export function useProjectMutations() {
   const qc = useQueryClient();
   const invalidate = (id?: string) => {
     void qc.invalidateQueries({ queryKey: projectsKey });
+    void qc.invalidateQueries({ queryKey: ["projects-overview"] });
     if (id) void qc.invalidateQueries({ queryKey: bundleKey(id) });
   };
 

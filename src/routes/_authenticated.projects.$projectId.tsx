@@ -53,7 +53,8 @@ function WorkspaceLayout() {
               {data?.project.name ?? "Loading project…"}
             </p>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            <CreditChip />
             <ThemeToggle />
           </div>
         </div>

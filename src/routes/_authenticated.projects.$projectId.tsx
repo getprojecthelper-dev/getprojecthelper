@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { ErrorState, LoadingState } from "@/components/state-views";
+import { CreditChip } from "@/components/credit-chip";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
@@ -53,7 +54,8 @@ function WorkspaceLayout() {
               {data?.project.name ?? "Loading project…"}
             </p>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            <CreditChip />
             <ThemeToggle />
           </div>
         </div>

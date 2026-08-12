@@ -7,12 +7,44 @@
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/responses";
 const MODEL = "openai/gpt-5.6-sol";
 
+export interface UsageMeta {
+  userId: string;
+  projectId?: string | null;
+  feature: string;
+}
+
 export interface JsonRequest {
   instructions: string;
   input: string;
   name: string;
   schema: Record<string, unknown>;
+  usage?: UsageMeta;
 }
+
+/** Best-effort AI credit accounting — never breaks the user-facing call. */
+async function recordUsage(
+  meta: UsageMeta | undefined,
+  tokens: { input: number; output: number; total: number },
+) {
+  if (!meta) return;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("ai_usage_events").insert({
+      user_id: meta.userId,
+      project_id: meta.projectId ?? null,
+      feature: meta.feature,
+      model: MODEL,
+      input_tokens: tokens.input,
+      output_tokens: tokens.output,
+      total_tokens: tokens.total,
+      // 1 credit per 1k tokens
+      credits: Number((tokens.total / 1000).toFixed(4)),
+    });
+  } catch (error) {
+    console.error("ai usage logging failed", error);
+  }
+}
+
 
 export async function generateJson<T>(req: JsonRequest): Promise<T> {
   const apiKey = process.env["LOVABLE_API_KEY"];

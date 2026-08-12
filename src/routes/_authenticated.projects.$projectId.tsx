@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { ErrorState, LoadingState } from "@/components/state-views";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,9 @@ function WorkspaceLayout() {
             <p className="truncate font-display font-semibold">
               {data?.project.name ?? "Loading project…"}
             </p>
+          </div>
+          <div className="ml-auto">
+            <ThemeToggle />
           </div>
         </div>
       </header>

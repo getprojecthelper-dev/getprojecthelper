@@ -84,11 +84,13 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   });
 
   if (!res.ok || !res.body) {
+    await release();
     const body = await res.text().catch(() => "");
     if (res.status === 429) throw new Error("The AI is busy right now. Please try again in a moment.");
     if (res.status === 402) throw new Error("AI credits are exhausted for this workspace.");
     throw new Error(`AI request failed [${res.status}]: ${body.slice(0, 400)}`);
   }
+
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();

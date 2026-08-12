@@ -43,6 +43,18 @@ Action costs charged to the user (flat, deducted before the call, reconciled to 
 | Generate a step | 8 |
 | Fix my code | 4 |
 
+## Live credit usage meter
+
+Whenever an AI action starts, a meter appears (docked chip in the header, expandable panel):
+
+- The estimated cost is held (reserved) the moment the action starts, so the visible balance drops immediately and can't be double-spent by a second tab.
+- While the run is in progress the meter animates: action name, elapsed time, credits ticking up toward the estimate, and a bar filling against the remaining balance.
+- When the run finishes, the real token usage is reconciled — if it cost less than the hold, the difference is refunded and the meter shows "used X of Y held, Z refunded"; if it cost more, the extra is deducted (capped so a single run can never push the balance below zero).
+- If the run fails or is aborted, the full hold is released.
+- The meter then settles into the resting state: remaining balance, last action cost, and a link to the credits page.
+- Low balance (<20) turns the meter amber; zero turns it red with a "Redeem a code" button inline.
+
+
 ## Technical section
 
 Database (one migration):

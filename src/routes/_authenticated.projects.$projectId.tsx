@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BookMarked,
   CheckSquare,
+  Code2,
   ClipboardList,
   FlaskConical,
   GraduationCap,

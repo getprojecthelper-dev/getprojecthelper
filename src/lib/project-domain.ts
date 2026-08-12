@@ -301,7 +301,7 @@ export function labelOf(
 /* ---------------------------------------------------------------- metrics */
 
 export interface ProjectSignals {
-  tasks: { status: string; due_date: string | null; priority: string }[];
+  tasks: { title?: string; status: string; due_date: string | null; priority: string }[];
   requirements: { status: string }[];
   tests: { status: string }[];
   docSections: { status: string }[];

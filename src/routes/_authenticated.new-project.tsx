@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { withMeter } from "@/components/credit-meter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {

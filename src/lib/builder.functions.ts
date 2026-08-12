@@ -164,7 +164,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const plan = await generateJson<{ sections: SectionPlan[] }>({
       name: "implementation_plan",
       instructions:
-        "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. The first section should be a plain problem statement / goal section. Keep 'question' and 'objective' in plain, short language too.",
+        "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, tech stack, objective), never code. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. Keep 'question' and 'objective' in plain, short language too.",
       input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\n\nReturn the sections in execution order — only as many as this project actually needs.`,
       schema: obj({
         sections: {
@@ -201,7 +201,12 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       title: s.title,
       question: s.question,
       objective: s.objective,
-      kind: s.kind === "structure" ? "structure" : "step",
+      kind:
+        index === 0 || s.kind === "overview"
+          ? "overview"
+          : s.kind === "structure"
+            ? "structure"
+            : "step",
       status: "pending",
     }));
 
@@ -229,6 +234,15 @@ const sectionSchema = obj({
     items: obj({ path: str, content: str }),
   },
 });
+
+interface OverviewContent {
+  problem_statement: string;
+  solution: string;
+  tech_stack: { name: string; reason: string }[];
+  objectives: string[];
+  insights: string[];
+  business_connection: string;
+}
 
 const joinBlocks = (blocks: CodeBlock[]) =>
   (blocks ?? []).map((b) => `# ${b.title}\n${b.code}`).join("\n\n");
@@ -288,6 +302,56 @@ export const generateSection = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { section, brief } = await loadContext(supabase as never, data.sectionId);
+
+    const isOverview =
+      section.kind === "overview" ||
+      (section.position === 0 && /problem\s*statement/i.test(section.title));
+
+    if (isOverview) {
+      const overview = await generateJson<OverviewContent>({
+        name: "section_overview",
+        instructions:
+          "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters, 2-4 short paragraphs worth of bullet-free prose), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler.",
+        input: `${brief}\n\nCURRENT SECTION: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
+        schema: obj({
+          problem_statement: str,
+          solution: str,
+          tech_stack: { type: "array", items: obj({ name: str, reason: str }) },
+          objectives: strArray,
+          insights: strArray,
+          business_connection: str,
+        }),
+      });
+
+      const blocks = [
+        { title: "Problem statement", code: "", explanation: [overview.problem_statement] },
+        { title: "Solution / approach", code: "", explanation: [overview.solution] },
+        {
+          title: "Technology stack",
+          code: "",
+          explanation: (overview.tech_stack ?? []).map((t) => `${t.name} — ${t.reason}`),
+        },
+        { title: "Objectives", code: "", explanation: overview.objectives ?? [] },
+      ];
+
+      const { error: overviewError } = await supabase
+        .from("build_sections")
+        .update({
+          code: null,
+          blocks: JSON.parse(JSON.stringify(blocks)),
+          files: [],
+          language: "text",
+          explanation: blocks.flatMap((b) => b.explanation),
+          insights: overview.insights ?? [],
+          business_connection: overview.business_connection,
+          structure: null,
+          status: "generated",
+        })
+        .eq("id", section.id);
+      if (overviewError) throw new Error("The generated section could not be saved.");
+
+      return { blocks, insights: overview.insights ?? [], language: "text" };
+    }
 
     const isStructure = section.kind === "structure";
     const task = isStructure

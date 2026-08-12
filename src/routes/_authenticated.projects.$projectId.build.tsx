@@ -209,6 +209,9 @@ function SectionCard({
   const [errorText, setErrorText] = useState("");
   const [zipping, setZipping] = useState(false);
   const confirmed = section.status === "confirmed";
+  const isOverview =
+    section.kind === "overview" ||
+    (section.position === 0 && /problem\s*statement/i.test(section.title));
   const generated = Boolean(section.code) || section.blocks.length > 0;
 
   const blocks: Block[] =
@@ -321,21 +324,38 @@ function SectionCard({
             </div>
           ) : null}
 
-          {blocks.map((block, i) => (
-            <div key={`${block.title}-${i}`} className="space-y-2">
-              <p className="text-sm font-semibold">
-                Part {i + 1} — {block.title}
-              </p>
-              <CodeBlock code={block.code} language={section.language} />
-              {block.explanation?.length ? (
-                <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">
-                  {block.explanation.map((line, li) => (
-                    <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ))}
+          {blocks.map((block, i) => {
+            const hasCode = Boolean(block.code?.trim());
+            return (
+              <div key={`${block.title}-${i}`} className="space-y-2">
+                <p className="text-sm font-semibold">
+                  {hasCode ? `Part ${i + 1} — ${block.title}` : block.title}
+                </p>
+                {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
+                {block.explanation?.length ? (
+                  hasCode ? (
+                    <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">
+                      {block.explanation.map((line, li) => (
+                        <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
+                      {block.explanation.length === 1 ? (
+                        <p>{block.explanation[0]}</p>
+                      ) : (
+                        <ul className="list-disc space-y-1 pl-5">
+                          {block.explanation.map((line, li) => (
+                            <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )
+                ) : null}
+              </div>
+            );
+          })}
 
           {section.insights.length ? (
             <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
@@ -355,7 +375,7 @@ function SectionCard({
             </div>
           ) : null}
 
-          {generated ? (
+          {generated && !isOverview ? (
             <div className="rounded-lg border border-border bg-card p-3">
               <button
                 type="button"

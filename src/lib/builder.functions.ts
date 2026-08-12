@@ -29,13 +29,24 @@ export interface SectionPlan {
   kind: string;
 }
 
-export interface SectionContent {
+export interface CodeBlock {
+  title: string;
   code: string;
-  language: string;
   explanation: string[];
+}
+
+export interface StructureFile {
+  path: string;
+  content: string;
+}
+
+export interface SectionContent {
+  language: string;
+  blocks: CodeBlock[];
   insights: string[];
   business_connection: string;
   structure: string | null;
+  files: StructureFile[];
 }
 
 const DATA_DOMAINS = ["data_science", "analytics", "ml_ai", "research"];
@@ -153,8 +164,8 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const plan = await generateJson<{ sections: SectionPlan[] }>({
       name: "implementation_plan",
       instructions:
-        "You break a student project into sequential implementation sections. Each section must build on the previous one. Exactly one section must have kind 'structure' (the project folder/file structure) and it should come early (position 2 or 3). All other sections use kind 'step'. Sections must be domain-appropriate: data projects cover acquisition, cleaning, feature work, EDA, modelling, evaluation; software projects cover architecture, data model, backend, frontend, integration, testing, deployment; cybersecurity projects cover scoping, recon, tooling, detection, hardening, reporting.",
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\n\nReturn 7 or 8 sections in execution order.`,
+        "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. The first section should be a plain problem statement / goal section. Keep 'question' and 'objective' in plain, short language too.",
+      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\n\nReturn the sections in execution order — only as many as this project actually needs.`,
       schema: obj({
         sections: {
           type: "array",
@@ -183,7 +194,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 
     if (error || !project) throw new Error("The project could not be created.");
 
-    const rows = plan.sections.slice(0, 8).map((s, index) => ({
+    const rows = plan.sections.slice(0, 12).map((s, index) => ({
       user_id: userId,
       project_id: project.id,
       position: index,
@@ -205,13 +216,22 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 /* ------------------------------------------------------------------ */
 
 const sectionSchema = obj({
-  code: str,
   language: str,
-  explanation: strArray,
+  blocks: {
+    type: "array",
+    items: obj({ title: str, code: str, explanation: strArray }),
+  },
   insights: strArray,
   business_connection: str,
   structure: nullableStr,
+  files: {
+    type: "array",
+    items: obj({ path: str, content: str }),
+  },
 });
+
+const joinBlocks = (blocks: CodeBlock[]) =>
+  (blocks ?? []).map((b) => `# ${b.title}\n${b.code}`).join("\n\n");
 
 interface SectionRow {
   id: string;
@@ -271,12 +291,12 @@ export const generateSection = createServerFn({ method: "POST" })
 
     const isStructure = section.kind === "structure";
     const task = isStructure
-      ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, and in `code` put the shell commands that create it. Explanation must describe what each top-level folder is for."
-      : "Produce runnable, production-quality code for THIS section only. It must continue directly from the previous sections' code (same variable names, same file conventions) so the project stays continuous.";
+      ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, AND fill `files` with EVERY file of that structure: a relative path (e.g. 'src/data/loader.py', 'requirements.txt', 'README.md') and sensible starter content for each (config files and READMEs should be real, code files can be short stubs with comments). Folders are implied by the paths. `blocks` should contain 1-3 small parts, e.g. the folder tree creation commands, then the config file. Do not dump the whole project into one block."
+      : "Produce runnable code for THIS section only, split into SMALL PARTS. Each block is one small logical part (e.g. 'Install the libraries', then 'Import them', then 'Load the data'), with a short simple title and 2-4 plain-language bullets explaining just that part. NEVER put installation commands and the rest of the code in one block. Keep every block short (typically under 20 lines) and continue directly from the previous sections' code (same variable names, same file conventions).";
 
     const draft = await generateJson<SectionContent>({
       name: "section_content",
-      instructions: `You are a senior engineer mentoring a student. ${task} Explanation: 5-8 bullets describing what the code does. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal.`,
+      instructions: `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`,
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
     });
@@ -294,9 +314,11 @@ export const generateSection = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("build_sections")
       .update({
-        code: reviewed.code,
+        code: joinBlocks(reviewed.blocks),
+        blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
+        files: JSON.parse(JSON.stringify(reviewed.files ?? [])),
         language: reviewed.language || "python",
-        explanation: reviewed.explanation,
+        explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: reviewed.structure,
@@ -325,7 +347,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const fixed = await generateJson<SectionContent>({
       name: "section_content",
       instructions:
-        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section. In `explanation`, start with a bullet explaining what caused the error and what you changed.",
+        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files.",
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CODE:\n${section.code ?? ""}\n\nERROR REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: sectionSchema,
     });
@@ -333,9 +355,11 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("build_sections")
       .update({
-        code: fixed.code,
+        code: joinBlocks(fixed.blocks),
+        blocks: JSON.parse(JSON.stringify(fixed.blocks ?? [])),
+        files: JSON.parse(JSON.stringify(fixed.files ?? [])),
         language: fixed.language || "python",
-        explanation: fixed.explanation,
+        explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,
         business_connection: fixed.business_connection,
         structure: fixed.structure,

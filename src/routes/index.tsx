@@ -1,21 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Beaker,
-  BookOpen,
-  Bot,
-  ClipboardList,
-  FileText,
-  FlaskConical,
-  GraduationCap,
-  ListChecks,
-  Presentation,
-  ShieldCheck,
-  TestTube,
-} from "lucide-react";
+import { Beaker, GraduationCap } from "lucide-react";
 
+import { FeatureGrid } from "@/components/feature-grid";
 import { KineticHero } from "@/components/kinetic-hero";
+import { LifecycleStepper } from "@/components/lifecycle-stepper";
+import { MentorDialogue } from "@/components/mentor-dialogue";
 import { Button } from "@/components/ui/button";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({

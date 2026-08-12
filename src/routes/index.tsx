@@ -30,52 +30,8 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const WORKFLOW = ["Idea", "Plan", "Build", "Test", "Document", "Present", "Showcase"];
-
-const FEATURES = [
-  {
-    icon: ClipboardList,
-    title: "Project Planning",
-    body: "Start from a domain template and get a lifecycle, stages and starter tasks — not an empty board.",
-  },
-  {
-    icon: Bot,
-    title: "AI Mentor",
-    body: "A project-aware mentor that reads your real tasks, requirements and results, and challenges weak reasoning.",
-  },
-  {
-    icon: ListChecks,
-    title: "Requirements Management",
-    body: "Typed, prioritised requirements with acceptance criteria, traced through to tasks and tests.",
-  },
-  {
-    icon: BookOpen,
-    title: "Research Workspace",
-    body: "Sources, notes and themes stay attached to the project instead of scattered across tabs.",
-  },
-  {
-    icon: FlaskConical,
-    title: "Data & Experiments",
-    body: "Record datasets, parameters, metrics and results so your evaluation story is reproducible.",
-  },
-  {
-    icon: TestTube,
-    title: "Testing",
-    body: "Test cases with expected and actual results, linked to the requirement they verify.",
-  },
-  {
-    icon: FileText,
-    title: "Documentation",
-    body: "A structured report with per-section completion, so nothing is written the night before.",
-  },
-  {
-    icon: Presentation,
-    title: "Showcase & Viva",
-    body: "README, case study, CV lines and viva questions generated only from what your project actually contains.",
-  },
-];
-
 function Landing() {
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">

@@ -9,14 +9,9 @@ import {
   Play,
   Plus,
   Settings,
-  ShieldCheck,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-
-import { checkIsAdmin } from "@/lib/admin.functions";
 
 import { MeterBar, healthTone, meterTone } from "@/components/metrics";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
@@ -59,8 +54,6 @@ function Dashboard() {
   const navigate = useNavigate();
   const { remove } = useProjectMutations();
   const [pendingDelete, setPendingDelete] = useState<ProjectOverview | null>(null);
-  const fetchIsAdmin = useServerFn(checkIsAdmin);
-  const { data: isAdmin } = useQuery({ queryKey: ["is-admin"], queryFn: () => fetchIsAdmin() });
 
   return (
     <div className="min-h-screen bg-secondary/30">
@@ -72,14 +65,6 @@ function Dashboard() {
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            {isAdmin?.isAdmin ? (
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/admin">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">Admin</span>
-                </Link>
-              </Button>
-            ) : null}
             <Button asChild variant="ghost" size="sm">
               <Link to="/settings">
                 <Settings className="h-4 w-4" />

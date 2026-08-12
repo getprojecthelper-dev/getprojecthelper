@@ -48,14 +48,14 @@ function AdminDashboard() {
     const forbidden = /forbidden/i.test(error?.message ?? "");
     return (
       <div className="mx-auto max-w-md p-10 text-center">
-        <ErrorState
-          message={
-            forbidden
-              ? "You need an administrator account to view this dashboard."
-              : (error?.message ?? "Could not load admin metrics.")
-          }
-          onRetry={forbidden ? undefined : () => void refetch()}
-        />
+        {forbidden ? (
+          <ErrorState message="You need an administrator account to view this dashboard." />
+        ) : (
+          <ErrorState
+            message={error?.message ?? "Could not load admin metrics."}
+            onRetry={() => void refetch()}
+          />
+        )}
         <Button className="mt-4" variant="outline" onClick={() => navigate({ to: "/dashboard" })}>
           Back to my projects
         </Button>

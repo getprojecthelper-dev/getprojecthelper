@@ -85,6 +85,7 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   const decoder = new TextDecoder();
   let buffer = "";
   let text = "";
+  const tokens = { input: 0, output: 0, total: 0 };
 
   for (;;) {
     const { done, value } = await reader.read();
@@ -100,12 +101,21 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
         const event = JSON.parse(payload) as {
           type?: string;
           delta?: string;
-          response?: { output_text?: string };
+          response?: {
+            output_text?: string;
+            usage?: { input_tokens?: number; output_tokens?: number; total_tokens?: number };
+          };
         };
         if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
           text += event.delta;
-        } else if (event.type === "response.completed" && event.response?.output_text) {
-          text = event.response.output_text;
+        } else if (event.type === "response.completed" && event.response) {
+          if (event.response.output_text) text = event.response.output_text;
+          const u = event.response.usage;
+          if (u) {
+            tokens.input = u.input_tokens ?? 0;
+            tokens.output = u.output_tokens ?? 0;
+            tokens.total = u.total_tokens ?? tokens.input + tokens.output;
+          }
         }
       } catch {
         // ignore keep-alive / partial frames
@@ -113,7 +123,10 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
     }
   }
 
+  await recordUsage(req.usage, tokens);
+
   if (!text.trim()) throw new Error("The AI returned an empty response. Please try again.");
+
   try {
     return JSON.parse(text) as T;
   } catch {

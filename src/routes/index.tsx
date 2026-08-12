@@ -36,29 +36,29 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold">
+      <header className="absolute inset-x-0 top-0 z-50 bg-gradient-to-b from-black/45 via-black/15 to-transparent">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
+          <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold text-hero-ink">
             <GraduationCap className="h-5 w-5 text-primary" />
             Project Helper
           </Link>
-          <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
-            <a href="#how-it-works" className="story-link transition-colors hover:text-foreground">
+          <nav className="hidden items-center gap-7 text-sm md:flex">
+            <a href="#how-it-works" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
               How it works
             </a>
-            <a href="#features" className="story-link transition-colors hover:text-foreground">
+            <a href="#features" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
               Features
             </a>
-            <a href="#mentor" className="story-link transition-colors hover:text-foreground">
+            <a href="#mentor" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
               AI Mentor
             </a>
           </nav>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button asChild variant="ghost" size="sm">
+          <div className="flex items-center gap-1">
+            <ThemeToggle className="text-hero-ink hover:bg-hero-ink/10" />
+            <Button asChild variant="ghost" size="sm" className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink">
               <Link to="/auth">Log in</Link>
             </Button>
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="bg-hero-ink text-hero-ink-foreground hover:bg-hero-ink/90">
               <Link to="/auth" search={{ mode: "signup" }}>
                 Start Your Project
               </Link>

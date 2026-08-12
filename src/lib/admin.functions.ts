@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -112,4 +113,110 @@ export const getAdminStats = createServerFn({ method: "GET" })
         created_at: p.created_at,
       })),
     };
+  });
+
+export interface ReferralCodeRow {
+  id: string;
+  code: string;
+  credits: number;
+  label: string | null;
+  max_redemptions: number | null;
+  redemption_count: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
+  if (isAdmin !== true) throw new Error("Forbidden");
+}
+
+const toRow = (r: any): ReferralCodeRow => ({
+  id: r.id,
+  code: r.code,
+  credits: Number(r.credits ?? 0),
+  label: r.label ?? null,
+  max_redemptions: r.max_redemptions ?? null,
+  redemption_count: r.redemption_count ?? 0,
+  expires_at: r.expires_at ?? null,
+  is_active: !!r.is_active,
+  created_at: r.created_at,
+});
+
+export const listReferralCodes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ReferralCodeRow[]> => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase
+      .from("referral_codes")
+      .select("id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map(toRow);
+  });
+
+export const createReferralCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        code: z.string().trim().min(3).max(40).optional(),
+        credits: z.number().min(1).max(100000),
+        label: z.string().trim().max(120).optional(),
+        maxRedemptions: z.number().int().min(1).max(100000).nullable().optional(),
+        expiresAt: z.string().trim().min(1).nullable().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<ReferralCodeRow> => {
+    await assertAdmin(context);
+
+    const random = () => {
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let out = "";
+      const bytes = crypto.getRandomValues(new Uint8Array(8));
+      for (const b of bytes) out += alphabet[b % alphabet.length];
+      return `PH-${out}`;
+    };
+
+    const code = (data.code?.toUpperCase().replace(/\s+/g, "") || random()).slice(0, 40);
+
+    const { data: row, error } = await context.supabase
+      .from("referral_codes")
+      .insert({
+        code,
+        credits: data.credits,
+        label: data.label || null,
+        max_redemptions: data.maxRedemptions ?? null,
+        expires_at: data.expiresAt ? new Date(data.expiresAt).toISOString() : null,
+        created_by: context.userId,
+      })
+      .select("id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at")
+      .single();
+
+    if (error) {
+      if (/duplicate|unique/i.test(error.message)) throw new Error("That code already exists.");
+      throw new Error(error.message);
+    }
+    return toRow(row);
+  });
+
+export const setReferralCodeActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), isActive: z.boolean() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("referral_codes")
+      .update({ is_active: data.isActive })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

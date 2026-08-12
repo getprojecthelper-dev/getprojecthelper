@@ -49,6 +49,79 @@ export function useProjects() {
   });
 }
 
+export interface ProjectOverview {
+  project: Project;
+  progress: number;
+  health: number;
+  buildTotal: number;
+  buildConfirmed: number;
+  /** Section the student should resume from, if any. */
+  resumeSection: { id: string; title: string; position: number } | null;
+}
+
+/** Lightweight cross-project metrics used by the dashboard KPI cards. */
+export function useProjectsOverview() {
+  return useQuery({
+    queryKey: ["projects-overview"],
+    queryFn: async (): Promise<ProjectOverview[]> => {
+      const [projects, tasks, requirements, tests, docs, risks, build] = await Promise.all([
+        supabase.from("projects").select("*").order("updated_at", { ascending: false }),
+        supabase.from("tasks").select("project_id,title,status,due_date,priority"),
+        supabase.from("requirements").select("project_id,status"),
+        supabase.from("test_cases").select("project_id,status"),
+        supabase.from("document_sections").select("project_id,status"),
+        supabase.from("risks").select("project_id,status,severity"),
+        supabase
+          .from("build_sections")
+          .select("id,project_id,title,status,position")
+          .order("position"),
+      ]);
+
+      if (projects.error) fail("We couldn't load your projects.", projects.error);
+
+      const by = <T extends { project_id: string }>(rows: T[] | null, id: string) =>
+        (rows ?? []).filter((r) => r.project_id === id);
+
+      return (projects.data ?? []).map((project) => {
+        const sections = by(build.data, project.id);
+        const confirmed = sections.filter((s) => s.status === "confirmed").length;
+        const signals: ProjectSignals = {
+          tasks: by(tasks.data, project.id).map((t) => ({
+            title: t.title,
+            status: t.status,
+            due_date: t.due_date,
+            priority: t.priority,
+          })),
+          requirements: by(requirements.data, project.id).map((r) => ({ status: r.status })),
+          tests: by(tests.data, project.id).map((t) => ({ status: t.status })),
+          docSections: by(docs.data, project.id).map((d) => ({ status: d.status })),
+          risks: by(risks.data, project.id).map((r) => ({
+            status: r.status,
+            severity: r.severity,
+          })),
+          deadline: project.deadline,
+        };
+        const taskProgress = computeProgress(signals);
+        const progress = sections.length
+          ? Math.round((confirmed / sections.length) * 100)
+          : taskProgress;
+        const next = sections.find((s) => s.status !== "confirmed") ?? null;
+        return {
+          project,
+          progress,
+          health: computeHealth(signals, progress).score,
+          buildTotal: sections.length,
+          buildConfirmed: confirmed,
+          resumeSection: next
+            ? { id: next.id, title: next.title, position: next.position }
+            : null,
+        };
+      });
+    },
+  });
+}
+
+
 export interface ProjectBundle {
   project: Project;
   tasks: Task[];

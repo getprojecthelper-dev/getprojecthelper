@@ -54,10 +54,12 @@ export type Database = {
       }
       build_sections: {
         Row: {
+          blocks: Json
           business_connection: string | null
           code: string | null
           created_at: string
           explanation: Json
+          files: Json
           id: string
           insights: Json
           kind: string
@@ -73,10 +75,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          blocks?: Json
           business_connection?: string | null
           code?: string | null
           created_at?: string
           explanation?: Json
+          files?: Json
           id?: string
           insights?: Json
           kind?: string
@@ -92,10 +96,12 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          blocks?: Json
           business_connection?: string | null
           code?: string | null
           created_at?: string
           explanation?: Json
+          files?: Json
           id?: string
           insights?: Json
           kind?: string

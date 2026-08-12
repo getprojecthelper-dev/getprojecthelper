@@ -15,6 +15,7 @@ import {
 
 import { ErrorState, LoadingState } from "@/components/state-views";
 import { CreditChip } from "@/components/credit-chip";
+import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
@@ -60,6 +61,8 @@ function WorkspaceLayout() {
           </div>
         </div>
       </header>
+
+      <LowCreditsBanner />
 
       <div className="mx-auto flex max-w-7xl gap-6 px-5 py-6">
         <nav className="hidden w-56 shrink-0 lg:block">

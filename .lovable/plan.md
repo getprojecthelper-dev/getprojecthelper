@@ -69,8 +69,10 @@ Database (one migration):
 
 Server:
 - `src/lib/credits.functions.ts` — `getMyCredits`, `redeemCode` (auth middleware), both user-facing.
-- `src/lib/credits.server.ts` — `chargeCredits(userId, feature)` called at the top of every AI server function in `builder.functions.ts`; throws a friendly "not enough credits" error that the UI catches.
+- `src/lib/credits.server.ts` — `holdCredits(userId, feature)` before the AI call and `settleCredits(holdId, actualTokens)` after it; throws a friendly "not enough credits" error that the UI catches. Holds are rows in `credit_transactions` with kind `hold`, resolved to `spend` or released.
 - Cost table lives in one shared constant so pricing changes are a one-line edit.
+- `src/components/credit-meter.tsx` + a small `useCreditMeter` store: starts on mutation start, polls/receives the settled cost, animates, and invalidates the balance query when done.
+
 - `admin.functions.ts` gains `listReferralCodes`, `createReferralCode`, `toggleReferralCode`, `adjustUserCredits` — all behind the existing `has_role('admin')` check, all using the service-role client.
 
 UI:

@@ -92,6 +92,7 @@ export const getAdminStats = createServerFn({ method: "GET" })
     const since30 = iso(30);
 
     return {
+      forbidden: false,
       users: {
         total: profileRows.length,
         last7d: profileRows.filter((p) => p.created_at >= since7).length,

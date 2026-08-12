@@ -14,7 +14,7 @@ import {
   TestTube,
 } from "lucide-react";
 
-import heroFullAsset from "@/assets/hero-full.png.asset.json";
+import { KineticHero } from "@/components/kinetic-hero";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -107,54 +107,8 @@ function Landing() {
       </header>
 
       <main>
-        <section className="relative min-h-[100svh] w-full overflow-hidden">
-          <img
-            src={heroFullAsset.url}
-            alt="Students planning a project on a whiteboard, coding on a laptop and taking notes together in a warm studio"
-            className="absolute inset-0 h-full w-full object-cover"
-            width={1536}
-            height={1024}
-          />
-          <div className="hero-scrim" aria-hidden />
+        <KineticHero />
 
-          <div className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col justify-center px-5 py-24 text-hero-ink">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-hero-ink-muted">
-              An intelligent project operating system for students
-            </p>
-            <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.05] font-semibold sm:text-6xl lg:text-7xl">
-              Your Project. Your Story. Your Future.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base text-hero-ink-muted sm:text-lg">
-              Plan, build, analyse, document and showcase your academic or personal projects in one
-              intelligent workspace — from the first idea to the final viva.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/auth" search={{ mode: "signup" }}>
-                  Start Your Project
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="secondary">
-                <a href="#how-it-works">Explore How It Works</a>
-              </Button>
-            </div>
-            <div className="mt-14 grid max-w-lg grid-cols-3 gap-4 text-sm text-hero-ink-muted">
-              <div>
-                <p className="font-display text-2xl font-semibold text-hero-ink">13</p>
-                project domains
-              </div>
-              <div>
-                <p className="font-display text-2xl font-semibold text-hero-ink">9</p>
-                lifecycle stages
-              </div>
-              <div>
-                <p className="font-display text-2xl font-semibold text-hero-ink">1</p>
-                clear next action
-              </div>
-            </div>
-          </div>
-        </section>
 
 
         <section id="how-it-works" className="border-y border-border bg-secondary/50">

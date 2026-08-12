@@ -105,8 +105,9 @@ export const findDatasets = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const result = await generateJson<{ datasets: DatasetOption[] }>({
+      usage: { userId: context.userId, feature: "find_datasets" },
       name: "dataset_options",
       instructions:
         "You find real, publicly available datasets from sources such as Kaggle, UCI ML Repository, data.gov, HuggingFace Datasets, Zenodo, government and research portals. Only list datasets you are confident actually exist, with their canonical landing-page URL. Never invent URLs.",
@@ -163,6 +164,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
 
     const plan = await generateJson<{ sections: SectionPlan[] }>({
+      usage: { userId, feature: "plan_sections" },
       name: "implementation_plan",
       instructions:
         "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, tech stack, objective), never code. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. Keep 'question' and 'objective' in plain, short language too.",
@@ -310,6 +312,7 @@ export const generateSection = createServerFn({ method: "POST" })
 
     if (isOverview) {
       const overview = await generateJson<OverviewContent>({
+        usage: { userId: context.userId, projectId: section.project_id, feature: "section_overview" },
         name: "section_overview",
         instructions:
           "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters, 2-4 short paragraphs worth of bullet-free prose), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler.",
@@ -360,6 +363,7 @@ export const generateSection = createServerFn({ method: "POST" })
       : "Produce runnable code for THIS section only, split into SMALL PARTS. Each block is one small logical part (e.g. 'Install the libraries', then 'Import them', then 'Load the data'), with a short simple title and 2-4 plain-language bullets explaining just that part. NEVER put installation commands and the rest of the code in one block. Keep every block short (typically under 20 lines) and continue directly from the previous sections' code (same variable names, same file conventions). Write BEGINNER-FRIENDLY code: simple, readable, straight-line steps with clear descriptive variable names and a short comment above each important line. Prefer the simplest efficient approach (vectorised/standard library helpers) over clever one-liners, custom classes, decorators, deep nesting, metaprogramming or heavy abstractions. No unnecessary try/except, no premature optimisation.";
 
     const draft = await generateJson<SectionContent>({
+      usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
       instructions: `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`,
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
@@ -369,6 +373,7 @@ export const generateSection = createServerFn({ method: "POST" })
     // Second, independent review pass — the code is checked twice before the
     // student ever sees it.
     const reviewed = await generateJson<SectionContent>({
+      usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
       instructions:
         "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient.",
@@ -410,6 +415,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const { section, brief } = await loadContext(supabase as never, data.sectionId);
 
     const fixed = await generateJson<SectionContent>({
+      usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
       name: "section_content",
       instructions:
         "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files.",

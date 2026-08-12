@@ -17,6 +17,8 @@ interface MeterState {
   spent: number;
   startedAt: number;
   finishedAt: number | null;
+  /** Bumped whenever a run settles or fails, so listeners can refresh balances. */
+  revision: number;
 }
 
 const initial: MeterState = {
@@ -26,7 +28,9 @@ const initial: MeterState = {
   spent: 0,
   startedAt: 0,
   finishedAt: null,
+  revision: 0,
 };
+
 
 let state: MeterState = initial;
 const listeners = new Set<() => void>();

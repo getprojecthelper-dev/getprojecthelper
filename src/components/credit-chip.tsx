@@ -6,6 +6,8 @@ import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCredits } from "@/lib/credit-costs";
 import { getMyCredits } from "@/lib/credits.functions";
+import { LOW_CREDIT_THRESHOLD } from "@/components/low-credits-banner";
+import { cn } from "@/lib/utils";
 
 /** Compact AI credit read-out: credits left and credits used so far. */
 export function CreditChip() {
@@ -18,6 +20,7 @@ export function CreditChip() {
   });
 
   const left = data ? formatCredits(data.balance) : "—";
+  const low = !!data && data.balance <= LOW_CREDIT_THRESHOLD;
   const used = data ? formatCredits(data.lifetimeSpent) : "—";
 
   return (
@@ -25,13 +28,13 @@ export function CreditChip() {
       asChild
       variant="ghost"
       size="sm"
-      className="h-9 gap-2 px-2.5"
+      className={cn("h-9 gap-2 px-2.5", low && "bg-destructive/10 text-destructive hover:bg-destructive/15")}
       title={`AI credits — ${left} left, ${used} used`}
     >
       <Link to="/credits">
-        <Zap className="h-4 w-4 text-primary" />
+        <Zap className={cn("h-4 w-4", low ? "text-destructive" : "text-primary")} />
         <span className="flex items-baseline gap-1 font-mono text-xs tabular-nums">
-          <span className="font-semibold text-foreground">{left}</span>
+          <span className={cn("font-semibold", low ? "text-destructive" : "text-foreground")}>{left}</span>
           <span className="text-muted-foreground">left</span>
           <span className="text-border">·</span>
           <span className="font-semibold text-foreground">{used}</span>

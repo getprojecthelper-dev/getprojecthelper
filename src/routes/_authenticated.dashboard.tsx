@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CreditChip } from "@/components/credit-chip";
+import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectMutations, useProjectsOverview, type ProjectOverview } from "@/lib/db";
 import { signOutAndRedirect } from "@/lib/sign-out";
@@ -84,6 +85,8 @@ function Dashboard() {
           </div>
         </div>
       </header>
+
+      <LowCreditsBanner />
 
       <main className="mx-auto max-w-6xl px-5 py-10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

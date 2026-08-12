@@ -45,11 +45,10 @@ function AdminDashboard() {
   });
 
   if (isPending) return <LoadingState label="Loading admin metrics…" />;
-  if (isError) {
-    const forbidden = /forbidden/i.test(error?.message ?? "");
+  if (isError || data.forbidden) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
-        {forbidden ? (
+        {data?.forbidden ? (
           <ErrorState message="You need an administrator account to view this dashboard." />
         ) : (
           <ErrorState

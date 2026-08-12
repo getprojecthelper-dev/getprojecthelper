@@ -50,8 +50,17 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured for this project.");
 
+  // Reserve an estimated cost before the run; settled against real tokens below.
+  const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
+  const holdId = req.usage ? await holdCredits(req.usage.userId, req.usage.feature) : null;
+
+  const release = async () => {
+    if (holdId) await releaseCredits(holdId);
+  };
+
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
+
     headers: {
       "Content-Type": "application/json",
       "Lovable-API-Key": apiKey,

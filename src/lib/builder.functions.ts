@@ -291,12 +291,12 @@ export const generateSection = createServerFn({ method: "POST" })
 
     const isStructure = section.kind === "structure";
     const task = isStructure
-      ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, and in `code` put the shell commands that create it. Explanation must describe what each top-level folder is for."
-      : "Produce runnable, production-quality code for THIS section only. It must continue directly from the previous sections' code (same variable names, same file conventions) so the project stays continuous.";
+      ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, AND fill `files` with EVERY file of that structure: a relative path (e.g. 'src/data/loader.py', 'requirements.txt', 'README.md') and sensible starter content for each (config files and READMEs should be real, code files can be short stubs with comments). Folders are implied by the paths. `blocks` should contain 1-3 small parts, e.g. the folder tree creation commands, then the config file. Do not dump the whole project into one block."
+      : "Produce runnable code for THIS section only, split into SMALL PARTS. Each block is one small logical part (e.g. 'Install the libraries', then 'Import them', then 'Load the data'), with a short simple title and 2-4 plain-language bullets explaining just that part. NEVER put installation commands and the rest of the code in one block. Keep every block short (typically under 20 lines) and continue directly from the previous sections' code (same variable names, same file conventions).";
 
     const draft = await generateJson<SectionContent>({
       name: "section_content",
-      instructions: `You are a senior engineer mentoring a student. ${task} Explanation: 5-8 bullets describing what the code does. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal.`,
+      instructions: `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`,
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
     });

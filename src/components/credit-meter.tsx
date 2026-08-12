@@ -17,6 +17,8 @@ interface MeterState {
   spent: number;
   startedAt: number;
   finishedAt: number | null;
+  /** Bumped whenever a run settles or fails, so listeners can refresh balances. */
+  revision: number;
 }
 
 const initial: MeterState = {
@@ -26,7 +28,9 @@ const initial: MeterState = {
   spent: 0,
   startedAt: 0,
   finishedAt: null,
+  revision: 0,
 };
+
 
 let state: MeterState = initial;
 const listeners = new Set<() => void>();
@@ -54,11 +58,17 @@ export const creditMeter = {
     });
   },
   finish(spent?: number) {
-    set({ active: false, spent: spent ?? state.estimate, finishedAt: Date.now() });
+    set({
+      active: false,
+      spent: spent ?? state.estimate,
+      finishedAt: Date.now(),
+      revision: state.revision + 1,
+    });
   },
   cancel() {
-    set({ active: false, spent: 0, finishedAt: null });
+    set({ active: false, spent: 0, finishedAt: null, revision: state.revision + 1 });
   },
+
 };
 
 /** Wrap any AI server function so the meter runs while it is in flight. */
@@ -94,15 +104,21 @@ export function CreditMeter() {
     return () => window.clearInterval(id);
   }, [meter.active]);
 
+  // Refresh balances after every settled or failed run (revision bumps both times).
+  useEffect(() => {
+    if (meter.revision === 0) return;
+    void queryClient.invalidateQueries({ queryKey: ["credits"] });
+  }, [meter.revision, queryClient]);
+
   useEffect(() => {
     if (meter.active || meter.finishedAt) setVisible(true);
     if (!meter.active && meter.finishedAt) {
-      void queryClient.invalidateQueries({ queryKey: ["credits"] });
       const id = window.setTimeout(() => setVisible(false), 4000);
       return () => window.clearTimeout(id);
     }
     return undefined;
-  }, [meter.active, meter.finishedAt, queryClient]);
+  }, [meter.active, meter.finishedAt]);
+
 
   if (!visible) return null;
 

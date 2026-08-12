@@ -79,21 +79,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Project Helper — Build Better Projects" },
+      { title: "Project Helper — From Idea to Final Submission" },
       {
         name: "description",
         content:
-          "An intelligent workspace that guides student projects from idea to final submission.",
+          "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace.",
       },
-      { property: "og:title", content: "Project Helper" },
+      { property: "og:title", content: "Project Helper — From Idea to Final Submission" },
       {
         property: "og:description",
         content:
-          "Plan, build, analyse, document and showcase your projects in one intelligent workspace.",
+          "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Project Helper — From Idea to Final Submission" },
+      { name: "twitter:description", content: "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/02cb8f22f81ed6d06f7be855f32a8bc7/id-preview-e609873a--340a8cfe-0ebb-47c8-8fe1-b3be45e9420d.lovable.app-1786549573899.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/02cb8f22f81ed6d06f7be855f32a8bc7/id-preview-e609873a--340a8cfe-0ebb-47c8-8fe1-b3be45e9420d.lovable.app-1786549573899.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

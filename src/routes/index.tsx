@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A project-centric workspace that always tells you where you are, how you're doing and what to do next.",
+          "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

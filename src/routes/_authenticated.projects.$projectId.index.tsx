@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, CalendarClock, Target } from "lucide-react";
 
-import { MeterBar, MetricCard, healthTone } from "@/components/metrics";
+import { MeterBar, MetricCard, healthTone, meterTone } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,14 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   component: Overview,
 });
 
+const NEXT_TO: Record<string, "/projects/$projectId/tasks" | "/projects/$projectId/requirements" | "/projects/$projectId/testing" | "/projects/$projectId/documents" | "/projects/$projectId/review"> = {
+  tasks: "/projects/$projectId/tasks",
+  requirements: "/projects/$projectId/requirements",
+  testing: "/projects/$projectId/testing",
+  documents: "/projects/$projectId/documents",
+  review: "/projects/$projectId/review",
+};
+
 function Overview() {
   const { projectId, data, metrics } = useWorkspace();
   if (!data || !metrics) return null;
@@ -58,7 +66,7 @@ function Overview() {
           value={`${metrics.health.score}`}
           hint={tone === "good" ? "On track" : tone === "warn" ? "Needs attention" : "At risk"}
         >
-          <MeterBar value={metrics.health.score} tone={tone} />
+          <MeterBar value={metrics.health.score} tone={meterTone(metrics.health.score)} />
         </MetricCard>
         <MetricCard
           label="Current stage"
@@ -80,10 +88,7 @@ function Overview() {
           <h2 className="mt-3 font-display text-xl font-semibold">{metrics.nextAction.title}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{metrics.nextAction.reason}</p>
           <Button asChild className="mt-4">
-            <Link
-              to={`/projects/$projectId/${metrics.nextAction.to}` as "/projects/$projectId/tasks"}
-              params={{ projectId }}
-            >
+            <Link to={NEXT_TO[metrics.nextAction.to] ?? "/projects/$projectId"} params={{ projectId }}>
               Go there <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -154,7 +159,7 @@ function Overview() {
               {openRisks.slice(0, 5).map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-2">
                   <span className="truncate">{r.title}</span>
-                  <StatusBadge value={r.severity} />
+                  <StatusBadge value={r.severity} label={r.severity} />
                 </li>
               ))}
             </ul>

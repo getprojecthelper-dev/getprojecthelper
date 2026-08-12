@@ -93,7 +93,7 @@ function WorkspaceLayout() {
             <LoadingState label="Loading workspace…" />
           ) : isError ? (
             <ErrorState
-              description={error instanceof Error ? error.message : undefined}
+              message={error instanceof Error ? error.message : "Something went wrong."}
               onRetry={() => void refetch()}
             />
           ) : (

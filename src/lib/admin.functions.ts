@@ -10,16 +10,6 @@ export interface AdminStats {
   recentUsers: { id: string; email: string; name: string | null; created_at: string }[];
 }
 
-/** True when the signed-in user holds the admin role. */
-export const checkIsAdmin = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    return { isAdmin: data === true };
-  });
 
 export const getAdminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

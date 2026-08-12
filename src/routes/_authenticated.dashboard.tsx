@@ -276,9 +276,9 @@ function Kpi({
           : "text-foreground";
   return (
     <div className="rounded-lg border border-border bg-secondary/40 p-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
         {icon}
-        <span className="truncate">{label}</span>
+        <span className="leading-tight">{label}</span>
       </div>
       <p className={cn("mt-1 truncate font-display text-lg font-semibold", toneClass)}>{value}</p>
       {children}

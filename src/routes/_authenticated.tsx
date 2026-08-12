@@ -2,7 +2,9 @@ import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
+import { CreditMeter } from "@/components/credit-meter";
 import { useAuth } from "@/hooks/use-auth";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -25,5 +27,11 @@ function AuthenticatedLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <CreditMeter />
+    </>
+  );
 }
+

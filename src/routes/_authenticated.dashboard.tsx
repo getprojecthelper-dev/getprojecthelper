@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CreditChip } from "@/components/credit-chip";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectMutations, useProjectsOverview, type ProjectOverview } from "@/lib/db";
 import { signOutAndRedirect } from "@/lib/sign-out";
@@ -64,6 +65,7 @@ function Dashboard() {
             Project Helper
           </Link>
           <div className="flex items-center gap-1">
+            <CreditChip />
             <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
               <Link to="/settings">

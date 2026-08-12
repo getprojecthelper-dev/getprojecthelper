@@ -50,8 +50,17 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured for this project.");
 
+  // Reserve an estimated cost before the run; settled against real tokens below.
+  const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
+  const holdId = req.usage ? await holdCredits(req.usage.userId, req.usage.feature) : null;
+
+  const release = async () => {
+    if (holdId) await releaseCredits(holdId);
+  };
+
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
+
     headers: {
       "Content-Type": "application/json",
       "Lovable-API-Key": apiKey,
@@ -75,11 +84,13 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   });
 
   if (!res.ok || !res.body) {
+    await release();
     const body = await res.text().catch(() => "");
     if (res.status === 429) throw new Error("The AI is busy right now. Please try again in a moment.");
     if (res.status === 402) throw new Error("AI credits are exhausted for this workspace.");
     throw new Error(`AI request failed [${res.status}]: ${body.slice(0, 400)}`);
   }
+
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -124,8 +135,10 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   }
 
   await recordUsage(req.usage, tokens);
+  if (holdId) await settleCredits(holdId, tokens.total);
 
   if (!text.trim()) throw new Error("The AI returned an empty response. Please try again.");
+
 
   try {
     return JSON.parse(text) as T;

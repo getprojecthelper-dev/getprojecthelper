@@ -165,6 +165,101 @@ export type Database = {
           },
         ]
       }
+      code_redemptions: {
+        Row: {
+          code_id: string
+          created_at: string
+          credits: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          created_at?: string
+          credits?: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          created_at?: string
+          credits?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_balances: {
+        Row: {
+          balance: number
+          created_at: string
+          lifetime_granted: number
+          lifetime_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          lifetime_granted?: number
+          lifetime_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          lifetime_granted?: number
+          lifetime_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          created_at: string
+          delta: number
+          feature: string | null
+          id: string
+          kind: string
+          reason: string | null
+          ref_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta?: number
+          feature?: string | null
+          id?: string
+          kind?: string
+          reason?: string | null
+          ref_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          feature?: string | null
+          id?: string
+          kind?: string
+          reason?: string | null
+          ref_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       document_sections: {
         Row: {
           content: string | null
@@ -346,6 +441,48 @@ export type Database = {
           template?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          credits: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          label: string | null
+          max_redemptions: number | null
+          redemption_count: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          max_redemptions?: number | null
+          redemption_count?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          max_redemptions?: number | null
+          redemption_count?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -700,12 +837,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: number
+      }
+      ensure_credit_balance: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      hold_credits: {
+        Args: { _amount: number; _feature: string; _user_id: string }
+        Returns: string
+      }
+      redeem_referral_code: { Args: { _code: string }; Returns: number }
+      release_credit_hold: { Args: { _hold_id: string }; Returns: undefined }
+      settle_credit_hold: {
+        Args: { _actual: number; _hold_id: string }
+        Returns: number
       }
     }
     Enums: {

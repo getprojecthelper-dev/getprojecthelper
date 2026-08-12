@@ -20,14 +20,16 @@ export interface AdminStats {
 }
 
 
+export type AdminStatsResult = { forbidden: true } | ({ forbidden: false } & AdminStats);
+
 export const getAdminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AdminStats> => {
+  .handler(async ({ context }): Promise<AdminStatsResult> => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });
-    if (isAdmin !== true) throw new Error("Forbidden");
+    if (isAdmin !== true) return { forbidden: true };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

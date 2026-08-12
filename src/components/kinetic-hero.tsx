@@ -3,6 +3,7 @@ import { ArrowRight, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import heroFullAsset from "@/assets/hero-full.png.asset.json";
+import heroLoopAsset from "@/assets/hero-loop.mp4.asset.json";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -78,13 +79,17 @@ export function KineticHero() {
       onMouseLeave={() => setOffset({ x: 0, y: 0 })}
       className="relative min-h-[100svh] w-full overflow-hidden"
     >
-      <img
-        src={heroFullAsset.url}
-        alt="Students planning a project on a whiteboard, coding on a laptop and taking notes together in a warm studio"
+      <video
+        src={heroLoopAsset.url}
+        poster={heroFullAsset.url}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-label="Students planning a project, coding and taking notes together in a warm studio"
         className="absolute inset-0 h-full w-full scale-110 object-cover transition-transform duration-500 ease-out"
         style={{ transform: `scale(1.08) translate3d(${offset.x}px, ${offset.y}px, 0)` }}
-        width={1536}
-        height={1024}
       />
       <div className="hero-scrim" aria-hidden />
       <div

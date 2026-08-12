@@ -3,7 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Download,
+  FolderTree,
   Loader2,
   Lock,
   Sparkles,
@@ -12,6 +15,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CodeBlock } from "@/components/code-block";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +28,17 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/build"
   component: BuildPage,
 });
 
+interface Block {
+  title: string;
+  code: string;
+  explanation: string[];
+}
+
+interface StructureFile {
+  path: string;
+  content: string;
+}
+
 interface BuildSection {
   id: string;
   position: number;
@@ -33,6 +48,8 @@ interface BuildSection {
   kind: string;
   code: string | null;
   language: string;
+  blocks: Block[];
+  files: StructureFile[];
   explanation: string[];
   insights: string[];
   business_connection: string | null;
@@ -41,6 +58,8 @@ interface BuildSection {
 }
 
 const sectionsKey = (projectId: string) => ["build-sections", projectId] as const;
+
+const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
 
 function useSections(projectId: string) {
   return useQuery({
@@ -54,8 +73,10 @@ function useSections(projectId: string) {
       if (error) throw new Error("We couldn't load the implementation sections.");
       return (data ?? []).map((row) => ({
         ...(row as unknown as BuildSection),
-        explanation: Array.isArray(row.explanation) ? (row.explanation as string[]) : [],
-        insights: Array.isArray(row.insights) ? (row.insights as string[]) : [],
+        blocks: asArray<Block>((row as Record<string, unknown>)["blocks"]),
+        files: asArray<StructureFile>((row as Record<string, unknown>)["files"]),
+        explanation: asArray<string>(row.explanation),
+        insights: asArray<string>(row.insights),
       }));
     },
   });
@@ -67,13 +88,15 @@ function BuildPage() {
   const { data: sections = [], isPending } = useSections(projectId);
   const generate = useServerFn(generateSection);
   const fix = useServerFn(fixSectionError);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: sectionsKey(projectId) });
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
-    onSuccess: () => {
+    onSuccess: (_r, sectionId) => {
       void invalidate();
+      setOpenId(sectionId);
       toast.success("Section generated and reviewed.");
     },
     onError: (error: unknown) =>
@@ -116,10 +139,10 @@ function BuildPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
-        title="Project implementation sections"
-        description="Generate each section only when you're ready. Every section builds on the code before it."
+        title="Implementation steps"
+        description="Simple steps, in order. Open a step, generate it when you're ready, then confirm to move on."
       />
 
       <div className="panel space-y-2 p-5">
@@ -127,7 +150,7 @@ function BuildPage() {
           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
         </div>
         <p className="text-xs text-muted-foreground">
-          {completed} of {sections.length} sections completed
+          {completed} of {sections.length} steps completed
         </p>
       </div>
 
@@ -139,6 +162,8 @@ function BuildPage() {
             section={section}
             index={index}
             locked={locked}
+            open={openId === section.id}
+            onToggle={() => setOpenId((v) => (v === section.id ? null : section.id))}
             generating={generateMutation.isPending && generateMutation.variables === section.id}
             fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
             onGenerate={() => generateMutation.mutate(section.id)}
@@ -161,6 +186,8 @@ function SectionCard({
   section,
   index,
   locked,
+  open,
+  onToggle,
   generating,
   fixing,
   onGenerate,
@@ -170,6 +197,8 @@ function SectionCard({
   section: BuildSection;
   index: number;
   locked: boolean;
+  open: boolean;
+  onToggle: () => void;
   generating: boolean;
   fixing: boolean;
   onGenerate: () => void;
@@ -178,130 +207,188 @@ function SectionCard({
 }) {
   const [showFix, setShowFix] = useState(false);
   const [errorText, setErrorText] = useState("");
+  const [zipping, setZipping] = useState(false);
   const confirmed = section.status === "confirmed";
-  const generated = Boolean(section.code);
+  const generated = Boolean(section.code) || section.blocks.length > 0;
 
-  const download = () => {
-    const content = section.structure ?? section.code ?? "";
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "project-structure.txt";
-    a.click();
-    URL.revokeObjectURL(url);
+  const blocks: Block[] =
+    section.blocks.length > 0
+      ? section.blocks
+      : section.code
+        ? [{ title: "Code", code: section.code, explanation: section.explanation }]
+        : [];
+
+  const downloadZip = async () => {
+    setZipping(true);
+    try {
+      const { default: JSZip } = await import("jszip");
+      const zip = new JSZip();
+      const files = section.files.filter((f) => f.path && !f.path.endsWith("/"));
+      if (files.length === 0) {
+        zip.file("project-structure.txt", section.structure ?? "");
+      } else {
+        for (const file of files) {
+          zip.file(file.path.replace(/^\.?\//, ""), file.content ?? "");
+        }
+        if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "project-structure.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Couldn't build the zip file.");
+    } finally {
+      setZipping(false);
+    }
   };
 
   return (
     <section
       className={cn(
-        "panel space-y-4 p-5",
-        confirmed ? "border-success/40 bg-success/5" : locked ? "opacity-70" : "",
+        "panel overflow-hidden transition-colors",
+        confirmed ? "border-success/40" : locked ? "opacity-70" : "",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h2 className="flex items-center gap-2 font-display text-base font-semibold">
-            {index + 1}. {section.title}
-            {confirmed ? <CheckCircle2 className="h-4 w-4 text-success" /> : null}
-            {locked ? <Lock className="h-4 w-4 text-muted-foreground" /> : null}
-          </h2>
-          {section.question ? (
-            <p className="text-sm text-primary">Question: {section.question}</p>
+      <div className="flex items-start justify-between gap-3 p-4">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex flex-1 items-start gap-3 text-left"
+          aria-expanded={open}
+        >
+          <span
+            className={cn(
+              "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+              confirmed
+                ? "bg-success text-success-foreground"
+                : locked
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary text-primary-foreground",
+            )}
+          >
+            {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+          </span>
+          <span className="space-y-1">
+            <span className="flex items-center gap-2 font-display text-base font-semibold">
+              {section.title}
+              {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
+            </span>
+            {section.objective ? (
+              <span className="block text-sm text-muted-foreground">{section.objective}</span>
+            ) : null}
+          </span>
+        </button>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {!locked && !generated ? (
+            <Button size="sm" onClick={onGenerate} disabled={generating}>
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {generating ? "Generating…" : "Generate"}
+            </Button>
           ) : null}
-          {section.objective ? (
-            <p className="text-sm text-muted-foreground">Objective: {section.objective}</p>
-          ) : null}
-        </div>
-        {!locked && !generated ? (
-          <Button size="sm" onClick={onGenerate} disabled={generating}>
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {generating ? "Generating…" : "Generate"}
+          <Button size="icon" variant="ghost" onClick={onToggle} aria-label={open ? "Close section" : "Open section"}>
+            {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
-        ) : null}
+        </div>
       </div>
 
-      {generated ? (
-        <div className="space-y-4">
+      {open ? (
+        <div className="space-y-5 border-t border-border bg-muted/20 p-5">
+          {section.question ? (
+            <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
+          ) : null}
+
+          {!generated ? (
+            <p className="text-sm text-muted-foreground">
+              Nothing generated yet. Press Generate when you're ready to work on this step.
+            </p>
+          ) : null}
+
           {section.structure ? (
             <div className="space-y-2">
-              <p className="text-sm font-medium">Project structure</p>
-              <pre className="overflow-x-auto rounded-lg bg-foreground p-4 text-xs text-background">
-                {section.structure}
-              </pre>
-              <Button size="sm" variant="outline" onClick={download}>
-                <Download className="h-4 w-4" /> Download structure
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <FolderTree className="h-4 w-4" /> Project structure
+              </p>
+              <CodeBlock code={section.structure} filename="project structure" />
+              <Button size="sm" variant="outline" onClick={downloadZip} disabled={zipping}>
+                {zipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {zipping ? "Preparing…" : "Download as .zip"}
               </Button>
             </div>
           ) : null}
 
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Code</p>
-            <pre className="overflow-x-auto rounded-lg bg-foreground p-4 text-xs text-background">
-              {section.code}
-            </pre>
-          </div>
-
-          {section.explanation.length ? (
-            <div>
-              <p className="text-sm font-medium">What happens in this section</p>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                {section.explanation.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
+          {blocks.map((block, i) => (
+            <div key={`${block.title}-${i}`} className="space-y-2">
+              <p className="text-sm font-semibold">
+                Part {i + 1} — {block.title}
+              </p>
+              <CodeBlock code={block.code} language={section.language} />
+              {block.explanation?.length ? (
+                <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">
+                  {block.explanation.map((line, li) => (
+                    <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
-          ) : null}
+          ))}
 
           {section.insights.length ? (
-            <div className="rounded-lg bg-warning/10 p-3">
-              <p className="text-sm font-medium">Key insights</p>
+            <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
+              <p className="text-sm font-medium">Watch out for</p>
               <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
-                {section.insights.map((line) => (
-                  <li key={line}>{line}</li>
+                {section.insights.map((line, i) => (
+                  <li key={`${i}-${line.slice(0, 10)}`}>{line}</li>
                 ))}
               </ul>
             </div>
           ) : null}
 
           {section.business_connection ? (
-            <div className="rounded-lg bg-primary/5 p-3 text-sm">
-              <p className="font-medium">Business connection</p>
+            <div className="rounded-lg bg-accent/10 p-3 text-sm">
+              <p className="font-medium">Why this matters</p>
               <p className="text-muted-foreground">{section.business_connection}</p>
             </div>
           ) : null}
 
-          <div className="rounded-lg border border-border p-3">
-            <button
-              type="button"
-              className="flex items-center gap-2 text-sm font-medium"
-              onClick={() => setShowFix((v) => !v)}
-            >
-              <Wrench className="h-4 w-4" /> Fix error
-            </button>
-            {showFix ? (
-              <div className="mt-3 space-y-2">
-                <Textarea
-                  rows={4}
-                  value={errorText}
-                  onChange={(e) => setErrorText(e.target.value)}
-                  placeholder="Paste the error you got when running this code…"
-                />
-                <Button
-                  size="sm"
-                  disabled={fixing || errorText.trim().length < 3}
-                  onClick={() => onFix(errorText)}
-                >
-                  {fixing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
-                  {fixing ? "Fixing…" : "Fix my code"}
-                </Button>
-              </div>
-            ) : null}
-          </div>
+          {generated ? (
+            <div className="rounded-lg border border-border bg-card p-3">
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm font-medium"
+                onClick={() => setShowFix((v) => !v)}
+              >
+                <Wrench className="h-4 w-4" /> Fix error
+                {showFix ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              </button>
+              {showFix ? (
+                <div className="mt-3 space-y-2">
+                  <Textarea
+                    rows={4}
+                    value={errorText}
+                    onChange={(e) => setErrorText(e.target.value)}
+                    placeholder="Paste the error you got when running this code…"
+                  />
+                  <Button
+                    size="sm"
+                    disabled={fixing || errorText.trim().length < 3}
+                    onClick={() => onFix(errorText)}
+                  >
+                    {fixing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
+                    {fixing ? "Fixing…" : "Fix my code"}
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
-          {!confirmed ? (
+          {generated && !confirmed ? (
             <Button className="w-full" onClick={onConfirm}>
-              <CheckCircle2 className="h-4 w-4" /> Confirm &amp; continue to next section
+              <CheckCircle2 className="h-4 w-4" /> Confirm &amp; continue to next step
             </Button>
           ) : null}
         </div>

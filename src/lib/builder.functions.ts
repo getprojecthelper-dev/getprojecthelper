@@ -314,9 +314,11 @@ export const generateSection = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("build_sections")
       .update({
-        code: reviewed.code,
+        code: joinBlocks(reviewed.blocks),
+        blocks: reviewed.blocks ?? [],
+        files: reviewed.files ?? [],
         language: reviewed.language || "python",
-        explanation: reviewed.explanation,
+        explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: reviewed.structure,
@@ -345,7 +347,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const fixed = await generateJson<SectionContent>({
       name: "section_content",
       instructions:
-        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section. In `explanation`, start with a bullet explaining what caused the error and what you changed.",
+        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files.",
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CODE:\n${section.code ?? ""}\n\nERROR REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: sectionSchema,
     });
@@ -353,9 +355,11 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("build_sections")
       .update({
-        code: fixed.code,
+        code: joinBlocks(fixed.blocks),
+        blocks: fixed.blocks ?? [],
+        files: fixed.files ?? [],
         language: fixed.language || "python",
-        explanation: fixed.explanation,
+        explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,
         business_connection: fixed.business_connection,
         structure: fixed.structure,

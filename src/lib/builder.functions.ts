@@ -68,8 +68,9 @@ export const suggestProjects = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const result = await generateJson<{ projects: SuggestedProject[] }>({
+      usage: { userId: context.userId, feature: "suggest_projects" },
       name: "project_suggestions",
       instructions:
         "You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea and domain. Keep descriptions to 2-3 sentences. Tech stack: 5-8 concrete tools/libraries.",

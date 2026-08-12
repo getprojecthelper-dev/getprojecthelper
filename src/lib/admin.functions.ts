@@ -7,7 +7,7 @@ import {
   randomReferralCode,
   toReferralRow,
   type ReferralCodeRow,
-} from "@/lib/admin-codes.server";
+} from "@/lib/admin-codes";
 
 export type { ReferralCodeRow };
 

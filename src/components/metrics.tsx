@@ -8,13 +8,16 @@ export function MetricCard({
   hint,
   icon,
   tone = "default",
+  children,
 }: {
   label: string;
   value: ReactNode;
   hint?: string;
   icon?: ReactNode;
   tone?: "default" | "good" | "warn" | "bad";
+  children?: ReactNode;
 }) {
+
   const toneClass =
     tone === "good"
       ? "text-success"
@@ -33,9 +36,11 @@ export function MetricCard({
       </div>
       <p className={cn("mt-3 font-display text-3xl font-semibold", toneClass)}>{value}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
+      {children ? <div className="mt-3">{children}</div> : null}
     </div>
   );
 }
+
 
 export function MeterBar({
   value,
@@ -67,3 +72,8 @@ export function MeterBar({
 export function healthTone(score: number): "good" | "warn" | "bad" {
   return score >= 75 ? "good" : score >= 50 ? "warn" : "bad";
 }
+
+export function meterTone(score: number): "primary" | "warning" | "danger" {
+  return score >= 75 ? "primary" : score >= 50 ? "warning" : "danger";
+}
+

@@ -18,6 +18,7 @@ import { Route as AuthenticatedNewProjectRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
+import { Route as AuthenticatedProjectsProjectIdBuildRouteImport } from './routes/_authenticated.projects.$projectId.build'
 import { Route as AuthenticatedProjectsProjectIdDocumentsRouteImport } from './routes/_authenticated.projects.$projectId.documents'
 import { Route as AuthenticatedProjectsProjectIdExperimentsRouteImport } from './routes/_authenticated.projects.$projectId.experiments'
 import { Route as AuthenticatedProjectsProjectIdRequirementsRouteImport } from './routes/_authenticated.projects.$projectId.requirements'
@@ -71,6 +72,12 @@ const AuthenticatedProjectsProjectIdIndexRoute =
   AuthenticatedProjectsProjectIdIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdBuildRoute =
+  AuthenticatedProjectsProjectIdBuildRouteImport.update({
+    id: '/build',
+    path: '/build',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
 const AuthenticatedProjectsProjectIdDocumentsRoute =
@@ -130,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
@@ -167,6 +176,7 @@ export interface FileRoutesById {
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/_authenticated/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
   '/_authenticated/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/new-project'
     | '/settings'
     | '/projects/$projectId'
+    | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
     | '/projects/$projectId/requirements'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/new-project'
     | '/settings'
+    | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
     | '/projects/$projectId/requirements'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/new-project'
     | '/_authenticated/settings'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
     | '/_authenticated/projects/$projectId/experiments'
     | '/_authenticated/projects/$projectId/requirements'
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdIndexRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/build': {
+      id: '/_authenticated/projects/$projectId/build'
+      path: '/build'
+      fullPath: '/projects/$projectId/build'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdBuildRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
     '/_authenticated/projects/$projectId/documents': {
       id: '/_authenticated/projects/$projectId/documents'
       path: '/documents'
@@ -366,6 +386,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedProjectsProjectIdRouteChildren {
+  AuthenticatedProjectsProjectIdBuildRoute: typeof AuthenticatedProjectsProjectIdBuildRoute
   AuthenticatedProjectsProjectIdDocumentsRoute: typeof AuthenticatedProjectsProjectIdDocumentsRoute
   AuthenticatedProjectsProjectIdExperimentsRoute: typeof AuthenticatedProjectsProjectIdExperimentsRoute
   AuthenticatedProjectsProjectIdRequirementsRoute: typeof AuthenticatedProjectsProjectIdRequirementsRoute
@@ -379,6 +400,8 @@ interface AuthenticatedProjectsProjectIdRouteChildren {
 
 const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectIdRouteChildren =
   {
+    AuthenticatedProjectsProjectIdBuildRoute:
+      AuthenticatedProjectsProjectIdBuildRoute,
     AuthenticatedProjectsProjectIdDocumentsRoute:
       AuthenticatedProjectsProjectIdDocumentsRoute,
     AuthenticatedProjectsProjectIdExperimentsRoute:

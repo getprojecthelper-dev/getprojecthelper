@@ -52,6 +52,74 @@ export type Database = {
           },
         ]
       }
+      build_sections: {
+        Row: {
+          business_connection: string | null
+          code: string | null
+          created_at: string
+          explanation: Json
+          id: string
+          insights: Json
+          kind: string
+          language: string
+          objective: string | null
+          position: number
+          project_id: string
+          question: string | null
+          status: string
+          structure: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_connection?: string | null
+          code?: string | null
+          created_at?: string
+          explanation?: Json
+          id?: string
+          insights?: Json
+          kind?: string
+          language?: string
+          objective?: string | null
+          position?: number
+          project_id: string
+          question?: string | null
+          status?: string
+          structure?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          business_connection?: string | null
+          code?: string | null
+          created_at?: string
+          explanation?: Json
+          id?: string
+          insights?: Json
+          kind?: string
+          language?: string
+          objective?: string | null
+          position?: number
+          project_id?: string
+          question?: string | null
+          status?: string
+          structure?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "build_sections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_sections: {
         Row: {
           content: string | null
@@ -173,51 +241,63 @@ export type Database = {
       projects: {
         Row: {
           academic_level: string | null
+          builder_step: string
           created_at: string
           current_stage: string
+          dataset: Json | null
           deadline: string | null
           description: string | null
           domain: string
           id: string
+          idea: string | null
           name: string
           project_type: string | null
           purpose: string
           repo_url: string | null
           status: string
+          tech_stack: Json
           template: string
           updated_at: string
           user_id: string
         }
         Insert: {
           academic_level?: string | null
+          builder_step?: string
           created_at?: string
           current_stage?: string
+          dataset?: Json | null
           deadline?: string | null
           description?: string | null
           domain?: string
           id?: string
+          idea?: string | null
           name: string
           project_type?: string | null
           purpose?: string
           repo_url?: string | null
           status?: string
+          tech_stack?: Json
           template?: string
           updated_at?: string
           user_id?: string
         }
         Update: {
           academic_level?: string | null
+          builder_step?: string
           created_at?: string
           current_stage?: string
+          dataset?: Json | null
           deadline?: string | null
           description?: string | null
           domain?: string
           id?: string
+          idea?: string | null
           name?: string
           project_type?: string | null
           purpose?: string
           repo_url?: string | null
           status?: string
+          tech_stack?: Json
           template?: string
           updated_at?: string
           user_id?: string

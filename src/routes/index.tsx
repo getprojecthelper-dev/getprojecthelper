@@ -14,7 +14,7 @@ import {
   TestTube,
 } from "lucide-react";
 
-import heroAsset from "@/assets/hero.png.asset.json";
+import heroFullAsset from "@/assets/hero-full.png.asset.json";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -107,54 +107,55 @@ function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+        <section className="relative min-h-[100svh] w-full overflow-hidden">
+          <img
+            src={heroFullAsset.url}
+            alt="Students planning a project on a whiteboard, coding on a laptop and taking notes together in a warm studio"
+            className="absolute inset-0 h-full w-full object-cover"
+            width={1536}
+            height={1024}
+          />
+          <div className="hero-scrim" aria-hidden />
+
+          <div className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col justify-center px-5 py-24 text-hero-ink">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-hero-ink-muted">
               An intelligent project operating system for students
             </p>
-            <h1 className="mt-4 font-display text-4xl leading-[1.05] font-semibold sm:text-5xl lg:text-6xl">
-              Build Better Projects. From Idea to Final Submission.
+            <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.05] font-semibold sm:text-6xl lg:text-7xl">
+              Your Project. Your Story. Your Future.
             </h1>
-            <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base text-hero-ink-muted sm:text-lg">
               Plan, build, analyse, document and showcase your academic or personal projects in one
-              intelligent workspace.
+              intelligent workspace — from the first idea to the final viva.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/auth" search={{ mode: "signup" }}>
                   Start Your Project
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="lg" variant="secondary">
                 <a href="#how-it-works">Explore How It Works</a>
               </Button>
             </div>
-            <div className="mt-10 grid max-w-lg grid-cols-3 gap-4 text-sm">
+            <div className="mt-14 grid max-w-lg grid-cols-3 gap-4 text-sm text-hero-ink-muted">
               <div>
-                <p className="font-display text-2xl font-semibold">13</p>
-                <p className="text-muted-foreground">project domains</p>
+                <p className="font-display text-2xl font-semibold text-hero-ink">13</p>
+                project domains
               </div>
               <div>
-                <p className="font-display text-2xl font-semibold">9</p>
-                <p className="text-muted-foreground">lifecycle stages</p>
+                <p className="font-display text-2xl font-semibold text-hero-ink">9</p>
+                lifecycle stages
               </div>
               <div>
-                <p className="font-display text-2xl font-semibold">1</p>
-                <p className="text-muted-foreground">clear next action</p>
+                <p className="font-display text-2xl font-semibold text-hero-ink">1</p>
+                clear next action
               </div>
             </div>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-lift)]">
-            <img
-              src={heroAsset.url}
-              alt="Students planning, coding and documenting a project together in a warm studio"
-              className="h-full w-full object-cover"
-              width={1536}
-              height={1024}
-            />
-          </div>
         </section>
+
 
         <section id="how-it-works" className="border-y border-border bg-secondary/50">
           <div className="mx-auto max-w-6xl px-5 py-14">

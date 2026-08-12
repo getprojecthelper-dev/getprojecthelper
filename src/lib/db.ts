@@ -97,9 +97,25 @@ export function useProjectBundle(projectId: string) {
   });
 }
 
+/**
+ * Loosely typed view of the query builder. The generated types can't narrow a
+ * generic table name, so writes go through this shape while the public API of
+ * `useRecordMutations` stays fully typed per table.
+ */
+interface LooseBuilder {
+  insert: (values: unknown) => {
+    select: () => { single: () => Promise<{ data: unknown; error: unknown }> };
+  };
+  update: (values: unknown) => {
+    eq: (column: string, value: string) => Promise<{ error: unknown }>;
+  };
+  delete: () => { eq: (column: string, value: string) => Promise<{ error: unknown }> };
+}
+
 /** Generic create / update / delete for any project-owned table. */
 export function useRecordMutations<T extends ProjectChildTable>(table: T, projectId: string) {
   const qc = useQueryClient();
+  const from = () => supabase.from(table) as unknown as LooseBuilder;
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: bundleKey(projectId) });
   };
@@ -110,9 +126,8 @@ export function useRecordMutations<T extends ProjectChildTable>(table: T, projec
 
   const create = useMutation({
     mutationFn: async (values: Omit<Tables[T]["Insert"], "project_id">) => {
-      const { data, error } = await supabase
-        .from(table)
-        .insert({ ...values, project_id: projectId } as never)
+      const { data, error } = await from()
+        .insert({ ...values, project_id: projectId })
         .select()
         .single();
       if (error) throw error;
@@ -124,10 +139,7 @@ export function useRecordMutations<T extends ProjectChildTable>(table: T, projec
 
   const update = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: Tables[T]["Update"] }) => {
-      const { error } = await supabase
-        .from(table)
-        .update(values as never)
-        .eq("id", id);
+      const { error } = await from().update(values).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -136,7 +148,7 @@ export function useRecordMutations<T extends ProjectChildTable>(table: T, projec
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table).delete().eq("id", id);
+      const { error } = await from().delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -145,6 +157,7 @@ export function useRecordMutations<T extends ProjectChildTable>(table: T, projec
 
   return { create, update, remove };
 }
+
 
 export function useProjectMutations() {
   const qc = useQueryClient();

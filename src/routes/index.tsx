@@ -58,7 +58,7 @@ function Landing() {
             <Button asChild variant="ghost" size="sm" className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink">
               <Link to="/auth">Log in</Link>
             </Button>
-            <Button asChild size="sm" className="bg-hero-ink text-hero-ink-foreground hover:bg-hero-ink/90">
+            <Button asChild size="sm">
               <Link to="/auth" search={{ mode: "signup" }}>
                 Start Your Project
               </Link>

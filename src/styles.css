@@ -193,6 +193,7 @@
 :root {
   --hero-ink: oklch(0.98 0.02 85);
   --hero-ink-muted: oklch(0.9 0.03 80);
+  --hero-ink-foreground: oklch(0.18 0.02 45);
   --gradient-hero-scrim: linear-gradient(
     180deg,
     oklch(0.18 0.04 45 / 0.72) 0%,
@@ -204,6 +205,7 @@
 @theme inline {
   --color-hero-ink: var(--hero-ink);
   --color-hero-ink-muted: var(--hero-ink-muted);
+  --color-hero-ink-foreground: var(--hero-ink-foreground);
 }
 
 @utility hero-scrim {

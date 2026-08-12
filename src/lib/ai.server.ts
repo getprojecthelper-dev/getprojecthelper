@@ -135,8 +135,10 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   }
 
   await recordUsage(req.usage, tokens);
+  if (holdId) await settleCredits(holdId, tokens.total);
 
   if (!text.trim()) throw new Error("The AI returned an empty response. Please try again.");
+
 
   try {
     return JSON.parse(text) as T;

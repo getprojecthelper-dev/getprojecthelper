@@ -194,7 +194,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 
     if (error || !project) throw new Error("The project could not be created.");
 
-    const rows = plan.sections.slice(0, 8).map((s, index) => ({
+    const rows = plan.sections.slice(0, 12).map((s, index) => ({
       user_id: userId,
       project_id: project.id,
       position: index,
@@ -216,13 +216,22 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 /* ------------------------------------------------------------------ */
 
 const sectionSchema = obj({
-  code: str,
   language: str,
-  explanation: strArray,
+  blocks: {
+    type: "array",
+    items: obj({ title: str, code: str, explanation: strArray }),
+  },
   insights: strArray,
   business_connection: str,
   structure: nullableStr,
+  files: {
+    type: "array",
+    items: obj({ path: str, content: str }),
+  },
 });
+
+const joinBlocks = (blocks: CodeBlock[]) =>
+  (blocks ?? []).map((b) => `# ${b.title}\n${b.code}`).join("\n\n");
 
 interface SectionRow {
   id: string;

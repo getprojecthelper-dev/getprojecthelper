@@ -132,7 +132,7 @@ function Landing() {
         </section>
 
 
-        <section className="border-t border-border bg-secondary/40">
+        <section id="mentor" className="border-t border-border bg-secondary/40">
           <MentorDialogue />
         </section>
 

@@ -133,7 +133,7 @@ export const listReferralCodes = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
-    return (data ?? []).map(toRow);
+    return (data ?? []).map(toReferralRow);
   });
 
 export const createReferralCode = createServerFn({ method: "POST" })

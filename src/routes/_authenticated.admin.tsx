@@ -199,6 +199,8 @@ function AdminDashboard() {
           </p>
         </section>
       </div>
+
+      <AdminReferralCodes />
     </div>
   );
 }

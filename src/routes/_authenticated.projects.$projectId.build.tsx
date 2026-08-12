@@ -86,8 +86,9 @@ function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
   const { data: sections = [], isPending } = useSections(projectId);
-  const generate = useServerFn(generateSection);
-  const fix = useServerFn(fixSectionError);
+  const generate = withMeter("generate_section", useServerFn(generateSection));
+  const fix = withMeter("fix_section", useServerFn(fixSectionError));
+
   const [openId, setOpenId] = useState<string | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: sectionsKey(projectId) });

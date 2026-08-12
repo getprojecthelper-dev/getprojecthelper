@@ -59,9 +59,10 @@ const STEPS = ["Your idea", "Pick a project", "Dataset", "Finalise"];
 
 function NewProject() {
   const navigate = useNavigate();
-  const suggest = useServerFn(suggestProjects);
-  const datasetSearch = useServerFn(findDatasets);
-  const create = useServerFn(createGuidedProject);
+  const suggest = withMeter("suggest_projects", useServerFn(suggestProjects));
+  const datasetSearch = withMeter("find_datasets", useServerFn(findDatasets));
+  const create = withMeter("create_project", useServerFn(createGuidedProject));
+
 
   const [step, setStep] = useState(0);
   const [idea, setIdea] = useState("");

@@ -315,8 +315,8 @@ export const generateSection = createServerFn({ method: "POST" })
       .from("build_sections")
       .update({
         code: joinBlocks(reviewed.blocks),
-        blocks: reviewed.blocks ?? [],
-        files: reviewed.files ?? [],
+        blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
+        files: JSON.parse(JSON.stringify(reviewed.files ?? [])),
         language: reviewed.language || "python",
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
@@ -356,8 +356,8 @@ export const fixSectionError = createServerFn({ method: "POST" })
       .from("build_sections")
       .update({
         code: joinBlocks(fixed.blocks),
-        blocks: fixed.blocks ?? [],
-        files: fixed.files ?? [],
+        blocks: JSON.parse(JSON.stringify(fixed.blocks ?? [])),
+        files: JSON.parse(JSON.stringify(fixed.files ?? [])),
         language: fixed.language || "python",
         explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,

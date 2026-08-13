@@ -7,8 +7,8 @@ import { useChat } from "@ai-sdk/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { Eraser } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { Check, Eraser, FolderInput, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import mentorMark from "@/assets/mentor-mark.png";
@@ -27,7 +27,18 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { creditMeter } from "@/components/credit-meter";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useProjects } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import { clearMentorChat, getMentorHistory, type MentorMessage } from "@/lib/mentor.functions";
 import { cn } from "@/lib/utils";
@@ -47,34 +58,48 @@ function toUIMessages(rows: MentorMessage[]): UIMessage[] {
   }));
 }
 
-export function MentorChat({ projectId, className }: { projectId: string; className?: string }) {
+export function MentorChat({
+  projectId,
+  className,
+  fresh = false,
+}: {
+  projectId: string;
+  className?: string;
+  /** Fresh session: start with an empty view and don't save this conversation. */
+  fresh?: boolean;
+}) {
   const queryClient = useQueryClient();
   const fetchHistory = useServerFn(getMentorHistory);
   const clearChat = useServerFn(clearMentorChat);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const [importedIds, setImportedIds] = useState<string[]>([]);
+  const [importOpen, setImportOpen] = useState(false);
+  const projects = useProjects();
+
   const history = useQuery({
     queryKey: ["mentor-history", projectId],
     queryFn: () => fetchHistory({ data: { projectId } }),
     staleTime: 60_000,
+    enabled: !fresh,
   });
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { projectId },
+        body: { projectId, importedProjectIds: importedIds, persist: !fresh },
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           const token = data.session?.access_token;
           return token ? { Authorization: `Bearer ${token}` } : {};
         },
       }),
-    [projectId],
+    [projectId, importedIds, fresh],
   );
 
   const { messages, sendMessage, status, stop, setMessages } = useChat({
-    id: projectId,
+    id: fresh ? `${projectId}:fresh` : projectId,
     transport,
     onError: (error) => {
       creditMeter.cancel();
@@ -90,10 +115,10 @@ export function MentorChat({ projectId, className }: { projectId: string; classN
   // Seed the conversation from saved history once it arrives.
   const seeded = useRef<string | null>(null);
   useEffect(() => {
-    if (!history.data || seeded.current === projectId) return;
+    if (fresh || !history.data || seeded.current === projectId) return;
     seeded.current = projectId;
     if (history.data.length) setMessages(toUIMessages(history.data));
-  }, [history.data, projectId, setMessages]);
+  }, [fresh, history.data, projectId, setMessages]);
 
   const busy = status === "submitted" || status === "streaming";
 
@@ -109,7 +134,10 @@ export function MentorChat({ projectId, className }: { projectId: string; classN
   };
 
   const reset = useMutation({
-    mutationFn: () => clearChat({ data: { projectId } }),
+    mutationFn: async () => {
+      if (fresh) return;
+      await clearChat({ data: { projectId } });
+    },
     onSuccess: () => {
       setMessages([]);
       void queryClient.invalidateQueries({ queryKey: ["mentor-history", projectId] });
@@ -179,6 +207,84 @@ export function MentorChat({ projectId, className }: { projectId: string; classN
       </Conversation>
 
       <div className="mx-auto w-full max-w-3xl shrink-0 px-1 pb-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <Dialog open={importOpen} onOpenChange={setImportOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="text-xs">
+                <FolderInput className="mr-1.5 h-3.5 w-3.5" />
+                Import project
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import a project</DialogTitle>
+                <DialogDescription>
+                  Pick up to 3 projects you&apos;ve worked on. The mentor will read their plan,
+                  requirements, tests and results so you can ask questions about them.
+                </DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-80 pr-2">
+                <div className="space-y-2">
+                  {(projects.data ?? []).map((project) => {
+                    const selected = importedIds.includes(project.id);
+                    const full = importedIds.length >= 3 && !selected;
+                    return (
+                      <button
+                        key={project.id}
+                        type="button"
+                        disabled={full}
+                        onClick={() =>
+                          setImportedIds((current) =>
+                            selected
+                              ? current.filter((id) => id !== project.id)
+                              : [...current, project.id],
+                          )
+                        }
+                        className={cn(
+                          "flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/40",
+                          selected && "border-primary/60 bg-primary/5",
+                          full && "opacity-50",
+                        )}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate font-medium">{project.name}</span>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {project.domain} · {project.current_stage}
+                          </span>
+                        </span>
+                        {selected ? <Check className="h-4 w-4 shrink-0 text-primary" /> : null}
+                      </button>
+                    );
+                  })}
+                  {projects.data && projects.data.length === 0 ? (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                      You don&apos;t have any other projects yet.
+                    </p>
+                  ) : null}
+                </div>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+
+          {importedIds.map((id) => {
+            const project = (projects.data ?? []).find((item) => item.id === id);
+            return (
+              <Badge key={id} variant="secondary" className="gap-1 text-xs">
+                {project?.name ?? "Project"}
+                <button
+                  type="button"
+                  aria-label={`Remove ${project?.name ?? "project"}`}
+                  onClick={() => setImportedIds((current) => current.filter((x) => x !== id))}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            );
+          })}
+
+          <span className="ml-auto" />
+        </div>
+
         {messages.length > 0 ? (
           <div className="mb-2 flex justify-end">
             <Button
@@ -189,7 +295,7 @@ export function MentorChat({ projectId, className }: { projectId: string; classN
               className="text-xs text-muted-foreground"
             >
               <Eraser className="mr-1.5 h-3.5 w-3.5" />
-              Clear conversation
+              {fresh ? "Clear view" : "Clear conversation"}
             </Button>
           </div>
         ) : null}

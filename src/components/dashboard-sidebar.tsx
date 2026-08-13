@@ -32,6 +32,7 @@ type NavItem = {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   active?: boolean;
+  search?: Record<string, unknown> | undefined;
 };
 
 function CreditCard() {
@@ -98,6 +99,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
     {
       title: "AI Mentor",
       url: projectId ? "/projects/$projectId/mentor" : fallbackUrl,
+      search: projectId ? { fresh: true } : undefined,
       icon: Bot,
       active: pathname.startsWith("/projects/") && pathname.includes("/mentor"),
     },
@@ -145,6 +147,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
                     <Link
                       to={item.url as "/projects/$projectId"}
                       params={{ projectId: projectId! }}
+                      search={item.search as never}
                     >
                       {content}
                     </Link>

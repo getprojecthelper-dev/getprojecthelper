@@ -29,9 +29,18 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-        const body = (await request.json()) as { messages?: UIMessage[]; projectId?: string };
+        const body = (await request.json()) as {
+          messages?: UIMessage[];
+          projectId?: string;
+          importedProjectIds?: string[];
+          persist?: boolean;
+        };
         const messages = body.messages;
         const projectId = body.projectId;
+        const persist = body.persist !== false;
+        const importedProjectIds = Array.isArray(body.importedProjectIds)
+          ? body.importedProjectIds.filter((id) => typeof id === "string" && id !== projectId).slice(0, 3)
+          : [];
         if (!Array.isArray(messages) || !projectId) {
           return new Response("messages and projectId are required", { status: 400 });
         }
@@ -41,6 +50,13 @@ export const Route = createFileRoute("/api/chat")({
 
         const context = await buildProjectContext(auth.supabase, projectId);
         if (!context) return new Response("Project not found", { status: 404 });
+
+        // Extra projects the student explicitly imported into this conversation.
+        const imported = (
+          await Promise.all(
+            importedProjectIds.map((id) => buildProjectContext(auth.supabase, id)),
+          )
+        ).filter((value): value is string => Boolean(value));
 
         const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
         const hold: { id: string | null; settled: boolean } = { id: null, settled: false };
@@ -54,7 +70,7 @@ export const Route = createFileRoute("/api/chat")({
 
         // Persist the student's newest message before the model runs.
         const last = messages[messages.length - 1];
-        if (last?.role === "user") {
+        if (persist && last?.role === "user") {
           const { error } = await auth.supabase.from("ai_messages").insert({
             user_id: auth.userId,
             project_id: projectId,
@@ -77,7 +93,11 @@ export const Route = createFileRoute("/api/chat")({
         try {
           const result = streamText({
             model: lovable.responses(MODEL),
-            system: `${MENTOR_SYSTEM}\n\nPROJECT CONTEXT (live data from the student's workspace):\n${context}`,
+            system: `${MENTOR_SYSTEM}\n\nPROJECT CONTEXT (live data from the student's workspace):\n${context}${
+              imported.length
+                ? `\n\nIMPORTED PROJECTS the student asked you to also consider:\n${imported.join("\n\n---\n\n")}`
+                : ""
+            }`,
             messages: await convertToModelMessages(messages),
             abortSignal: request.signal,
             providerOptions: {
@@ -127,7 +147,7 @@ export const Route = createFileRoute("/api/chat")({
                 console.error("mentor: usage accounting failed", error);
               }
 
-              if (text.trim()) {
+              if (persist && text.trim()) {
                 const { error } = await auth.supabase.from("ai_messages").insert({
                   user_id: auth.userId,
                   project_id: projectId,

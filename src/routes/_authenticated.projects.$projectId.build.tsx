@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
+import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
@@ -87,6 +88,14 @@ function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
   const { data: sections = [], isPending } = useSections(projectId);
+  const { data: domain } = useQuery({
+    queryKey: ["project-domain", projectId],
+    queryFn: async () => {
+      const { data } = await supabase.from("projects").select("domain").eq("id", projectId).maybeSingle();
+      return (data?.domain as string | null) ?? null;
+    },
+  });
+  const playbook = getPlaybook(domain);
   const generate = withMeter("generate_section", useServerFn(generateSection));
   const fix = withMeter("fix_section", useServerFn(fixSectionError));
 
@@ -143,8 +152,8 @@ function BuildPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Implementation steps"
-        description="Simple steps, in order. Open a step, generate it when you're ready, then confirm to move on."
+        title={playbook.headline}
+        description={playbook.subhead}
       />
 
       <div className="panel space-y-2 p-5">
@@ -152,7 +161,7 @@ function BuildPage() {
           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
         </div>
         <p className="text-xs text-muted-foreground">
-          {completed} of {sections.length} steps completed
+          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"} completed
         </p>
       </div>
 
@@ -162,6 +171,7 @@ function BuildPage() {
           <SectionCard
             key={section.id}
             section={section}
+            playbook={playbook}
             index={index}
             locked={locked}
             open={openId === section.id}
@@ -186,6 +196,7 @@ function BuildPage() {
 
 function SectionCard({
   section,
+  playbook,
   index,
   locked,
   open,
@@ -197,6 +208,7 @@ function SectionCard({
   onConfirm,
 }: {
   section: BuildSection;
+  playbook: DomainPlaybook;
   index: number;
   locked: boolean;
   open: boolean;
@@ -313,7 +325,7 @@ function SectionCard({
             </p>
           ) : null}
 
-          {section.structure ? (
+          {section.structure && playbook.buildsCode ? (
             <div className="space-y-2">
               <p className="flex items-center gap-2 text-sm font-medium">
                 <FolderTree className="h-4 w-4" /> Project structure
@@ -328,10 +340,11 @@ function SectionCard({
 
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
+            const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
             return (
               <div key={`${block.title}-${i}`} className="space-y-2">
                 <p className="text-sm font-semibold">
-                  {hasCode ? `Part ${i + 1} — ${block.title}` : block.title}
+                  {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                 </p>
                 {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
                 {block.explanation?.length ? (
@@ -384,7 +397,7 @@ function SectionCard({
                 className="flex items-center gap-2 text-sm font-medium"
                 onClick={() => setShowFix((v) => !v)}
               >
-                <Wrench className="h-4 w-4" /> Fix error
+                <Wrench className="h-4 w-4" /> {playbook.buildsCode ? "Fix error" : "Ask for a revision"}
                 {showFix ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               </button>
               {showFix ? (
@@ -393,7 +406,11 @@ function SectionCard({
                     rows={4}
                     value={errorText}
                     onChange={(e) => setErrorText(e.target.value)}
-                    placeholder="Paste the error you got when running this code…"
+                    placeholder={
+                      playbook.buildsCode
+                        ? "Paste the error you got when running this code…"
+                        : "Tell us what's wrong or unrealistic in this deliverable…"
+                    }
                   />
                   <Button
                     size="sm"
@@ -401,7 +418,7 @@ function SectionCard({
                     onClick={() => onFix(errorText)}
                   >
                     {fixing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
-                    {fixing ? "Fixing…" : "Fix my code"}
+                    {fixing ? "Fixing…" : playbook.buildsCode ? "Fix my code" : "Revise this deliverable"}
                   </Button>
                 </div>
               ) : null}

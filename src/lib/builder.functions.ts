@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, nullableStr, obj, str, strArray } from "@/lib/ai.server";
+import { getPlaybook } from "@/lib/domain-playbooks";
+
 
 export interface SuggestedProject {
   title: string;
@@ -246,12 +248,15 @@ export const createGuidedProject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    const playbook = getPlaybook(data.domain);
+
     const plan = await generateJson<{ sections: SectionPlan[] }>({
       usage: { userId, feature: "plan_sections" },
       name: "implementation_plan",
       instructions:
-        "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, tech stack, objective), never code. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. Keep 'question' and 'objective' in plain, short language too.",
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\n${data.domain === "project_management" ? "This is a Project Management student project: the steps are management deliverables (project charter, stakeholder map, scope & WBS, schedule/Gantt, budget, risk register, status reporting, closure & lessons learned), not software features. Use documents, tables and templates instead of programming code.\n" : ""}\nReturn the sections in execution order — only as many as this project actually needs.`,
+        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
+      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
+
       schema: obj({
         sections: {
           type: "array",
@@ -290,9 +295,10 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       kind:
         index === 0 || s.kind === "overview"
           ? "overview"
-          : s.kind === "structure"
+          : s.kind === "structure" && playbook.buildsCode
             ? "structure"
             : "step",
+
       status: "pending",
     }));
 
@@ -393,9 +399,12 @@ async function loadContext(
     )
     .join("\n\n");
 
-  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\n\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+  const playbook = getPlaybook(project.domain as string | null);
 
-  return { section: section as SectionRow & { project_id: string }, brief, supabase };
+  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+
+  return { section: section as SectionRow & { project_id: string }, brief, playbook, supabase };
+
 }
 
 export const generateSection = createServerFn({ method: "POST" })
@@ -403,7 +412,8 @@ export const generateSection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ sectionId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief } = await loadContext(supabase as never, data.sectionId);
+    const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
+
 
     const isOverview =
       section.kind === "overview" ||
@@ -413,8 +423,10 @@ export const generateSection = createServerFn({ method: "POST" })
       const overview = await generateJson<OverviewContent>({
         usage: { userId: context.userId, projectId: section.project_id, feature: "section_overview" },
         name: "section_overview",
-        instructions:
-          "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters, 2-4 short paragraphs worth of bullet-free prose), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler.",
+        instructions: playbook.buildsCode
+          ? "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler."
+          : "You are a mentor introducing a student project that is managed, not programmed. Write NO CODE AT ALL and never mention programming languages or libraries. Explain in simple plain language: the problem statement (what needs to happen and why it matters, who it is for, what is in and out of scope), the approach for delivering it, the tools, methods and roles involved (each with a one-line reason — e.g. Gantt chart, RACI matrix, risk register, weekly status review, stakeholders), and 3-5 concrete measurable success criteria.",
+
         input: `${brief}\n\nCURRENT SECTION: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
         schema: obj({
           problem_statement: str,
@@ -428,14 +440,23 @@ export const generateSection = createServerFn({ method: "POST" })
 
       const blocks = [
         { title: "Problem statement", code: "", explanation: [overview.problem_statement] },
-        { title: "Solution / approach", code: "", explanation: [overview.solution] },
         {
-          title: "Technology stack",
+          title: playbook.buildsCode ? "Solution / approach" : "Approach",
+          code: "",
+          explanation: [overview.solution],
+        },
+        {
+          title: playbook.buildsCode ? "Technology stack" : "Tools, methods and roles",
           code: "",
           explanation: (overview.tech_stack ?? []).map((t) => `${t.name} — ${t.reason}`),
         },
-        { title: "Objectives", code: "", explanation: overview.objectives ?? [] },
+        {
+          title: playbook.buildsCode ? "Objectives" : "Success criteria",
+          code: "",
+          explanation: overview.objectives ?? [],
+        },
       ];
+
 
       const { error: overviewError } = await supabase
         .from("build_sections")
@@ -456,26 +477,30 @@ export const generateSection = createServerFn({ method: "POST" })
       return { blocks, insights: overview.insights ?? [], language: "text" };
     }
 
-    const isStructure = section.kind === "structure";
+    const isStructure = section.kind === "structure" && playbook.buildsCode;
     const task = isStructure
       ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, AND fill `files` with EVERY file of that structure: a relative path (e.g. 'src/data/loader.py', 'requirements.txt', 'README.md') and sensible starter content for each (config files and READMEs should be real, code files can be short stubs with comments). Folders are implied by the paths. `blocks` should contain 1-3 small parts, e.g. the folder tree creation commands, then the config file. Do not dump the whole project into one block."
-      : "Produce runnable code for THIS section only, split into SMALL PARTS. Each block is one small logical part (e.g. 'Install the libraries', then 'Import them', then 'Load the data'), with a short simple title and 2-4 plain-language bullets explaining just that part. NEVER put installation commands and the rest of the code in one block. Keep every block short (typically under 20 lines) and continue directly from the previous sections' code (same variable names, same file conventions). Write BEGINNER-FRIENDLY code: simple, readable, straight-line steps with clear descriptive variable names and a short comment above each important line. Prefer the simplest efficient approach (vectorised/standard library helpers) over clever one-liners, custom classes, decorators, deep nesting, metaprogramming or heavy abstractions. No unnecessary try/except, no premature optimisation.";
+      : playbook.sectionTask;
 
     const draft = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
-      instructions: `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`,
+      instructions: playbook.buildsCode
+        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
+        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. Return 2-5 blocks.`,
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
     });
 
-    // Second, independent review pass — the code is checked twice before the
+    // Second, independent review pass — content is checked twice before the
     // student ever sees it.
     const reviewed = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
-      instructions:
-        "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient.",
+      instructions: playbook.buildsCode
+        ? "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient."
+        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project.",
+
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
       schema: sectionSchema,
     });
@@ -486,7 +511,7 @@ export const generateSection = createServerFn({ method: "POST" })
         code: joinBlocks(reviewed.blocks),
         blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
         files: JSON.parse(JSON.stringify(reviewed.files ?? [])),
-        language: reviewed.language || "python",
+        language: reviewed.language || (playbook.buildsCode ? "python" : "markdown"),
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
@@ -511,14 +536,15 @@ export const fixSectionError = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief } = await loadContext(supabase as never, data.sectionId);
+    const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
 
     const fixed = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
       name: "section_content",
-      instructions:
-        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files.",
-      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CODE:\n${section.code ?? ""}\n\nERROR REPORTED BY THE STUDENT:\n${data.errorText}`,
+      instructions: playbook.buildsCode
+        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files."
+        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. The first block's explanation must start with what was wrong and what you changed. Write no programming code.",
+      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CONTENT:\n${section.code ?? ""}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: sectionSchema,
     });
 
@@ -528,7 +554,8 @@ export const fixSectionError = createServerFn({ method: "POST" })
         code: joinBlocks(fixed.blocks),
         blocks: JSON.parse(JSON.stringify(fixed.blocks ?? [])),
         files: JSON.parse(JSON.stringify(fixed.files ?? [])),
-        language: fixed.language || "python",
+        language: fixed.language || (playbook.buildsCode ? "python" : "markdown"),
+
         explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,
         business_connection: fixed.business_connection,

@@ -4,11 +4,8 @@ import {
   CalendarClock,
   FolderKanban,
   GaugeCircle,
-  GraduationCap,
-  LogOut,
   Play,
   Plus,
-  Settings,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";

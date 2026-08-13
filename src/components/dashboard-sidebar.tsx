@@ -61,20 +61,6 @@ function CreditCard() {
   );
 }
 
-function useProjectDomain(projectId?: string) {
-  return useQuery({
-    queryKey: ["project-domain", projectId],
-    queryFn: async () => {
-      if (!projectId) return null;
-      const { data, error } = await supabase.from("projects").select("domain").eq("id", projectId).maybeSingle();
-      if (error) return null;
-      return (data?.domain as string | undefined) ?? null;
-    },
-    enabled: !!projectId,
-    staleTime: 60_000,
-  });
-}
-
 /**
  * Workspace navigation for the dashboard shell.
  */

@@ -1,9 +1,9 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, GraduationCap, Lock, Sparkles } from "lucide-react";
+import { ArrowRight, GraduationCap, Sparkles } from "lucide-react";
 
 import { DomainCards } from "@/components/domain-cards";
-import { FeatureGrid } from "@/components/feature-grid";
 import { HeroShowcase } from "@/components/hero-showcase";
+
 import { LifecycleStepper } from "@/components/lifecycle-stepper";
 import { MentorDialogue } from "@/components/mentor-dialogue";
 import { Testimonials } from "@/components/testimonials";

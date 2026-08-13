@@ -1,9 +1,8 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
 import { MeterBar, MetricCard, healthTone, meterTone } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import {
   DOMAINS,
   PURPOSES,

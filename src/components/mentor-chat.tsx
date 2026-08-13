@@ -146,31 +146,36 @@ export function MentorChat({
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="mx-auto w-full max-w-5xl gap-6">
+        <ConversationContent
+          className={cn(
+            "mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6",
+            messages.length === 0 && "min-h-full justify-center",
+          )}
+        >
           {messages.length === 0 ? (
-            <ConversationEmptyState className="gap-5">
+            <ConversationEmptyState className="my-auto gap-6 p-0">
               <img
                 src={mentorMark}
                 alt="AI Mentor"
                 loading="lazy"
                 width={512}
                 height={512}
-                className="h-16 w-16"
+                className="h-14 w-14 opacity-90"
               />
-              <div className="space-y-1">
-                <h3 className="font-display text-lg">Your project mentor</h3>
-                <p className="max-w-sm text-sm text-muted-foreground">
+              <div className="space-y-2">
+                <h3 className="font-display text-2xl tracking-tight">Your project mentor</h3>
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
                   I can already see this project&apos;s plan, requirements, tests and results. Ask
                   me anything about it.
                 </p>
               </div>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="grid w-full max-w-xl gap-2 sm:grid-cols-2">
                 {STARTERS.map((starter) => (
                   <button
                     key={starter}
                     type="button"
                     onClick={() => ask(starter)}
-                    className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                    className="rounded-xl border border-border/70 bg-card/60 px-3.5 py-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground"
                   >
                     {starter}
                   </button>
@@ -203,7 +208,8 @@ export function MentorChat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="mx-auto w-full max-w-5xl shrink-0 px-1 pb-2">
+      <div className="shrink-0 border-t border-border/60 bg-background/80 px-4 py-3 backdrop-blur">
+        <div className="mx-auto w-full max-w-3xl">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Dialog open={importOpen} onOpenChange={setImportOpen}>
             <DialogTrigger asChild>
@@ -279,25 +285,22 @@ export function MentorChat({
             );
           })}
 
-          <span className="ml-auto" />
-        </div>
-
-        {messages.length > 0 ? (
-          <div className="mb-2 flex justify-end">
+          {messages.length > 0 ? (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => reset.mutate()}
               disabled={reset.isPending || busy}
-              className="text-xs text-muted-foreground"
+              className="ml-auto text-xs text-muted-foreground"
             >
               <Eraser className="mr-1.5 h-3.5 w-3.5" />
               Clear conversation
             </Button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         <PromptInput
+          className="rounded-2xl"
           onSubmit={(message, event) => {
             event.preventDefault();
             const text = message.text ?? "";
@@ -309,12 +312,17 @@ export function MentorChat({
           <PromptInputTextarea
             ref={textareaRef}
             autoFocus
+            rows={2}
             placeholder="Ask your mentor about this project…"
           />
-          <PromptInputFooter className="justify-end">
+          <PromptInputFooter className="justify-between">
+            <span className="pl-1 text-[11px] text-muted-foreground">
+              Enter to send · Shift + Enter for a new line
+            </span>
             <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
         </PromptInput>
+        </div>
       </div>
     </div>
   );

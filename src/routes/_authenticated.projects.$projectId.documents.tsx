@@ -156,7 +156,7 @@ function DocumentsPage() {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{doc.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {doc.meta?.doc_type_label ?? doc.doc_type} · {doc.meta?.format_label ?? doc.format} ·{" "}
+                    {doc.meta?.['doc_type_label'] ?? doc.doc_type} · {doc.meta?.['format_label'] ?? doc.format} ·{" "}
                     {new Date(doc.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -498,7 +498,7 @@ function DocumentViewer({ doc, onClose }: { doc: GeneratedDocument; onClose: () 
         <DialogHeader>
           <DialogTitle className="pr-8">{doc.title}</DialogTitle>
           <DialogDescription>
-            {doc.meta?.doc_type_label ?? doc.doc_type} · {doc.meta?.format_label ?? doc.format}
+            {doc.meta?.['doc_type_label'] ?? doc.doc_type} · {doc.meta?.['format_label'] ?? doc.format}
             {doc.authors.length ? ` · ${doc.authors.map((a) => a.name).join(", ")}` : ""}
           </DialogDescription>
         </DialogHeader>
@@ -525,10 +525,10 @@ function DocumentViewer({ doc, onClose }: { doc: GeneratedDocument; onClose: () 
 
           <TabsContent value="draft" className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
             <article className="space-y-5">
-              {doc.meta?.keywords ? (
+              {doc.meta?.['keywords'] ? (
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">Keywords: </span>
-                  {doc.meta.keywords}
+                  {doc.meta['keywords']}
                 </p>
               ) : null}
               {doc.sections.map((section, i) => (

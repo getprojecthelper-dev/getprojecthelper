@@ -156,7 +156,7 @@ export function LifecycleStepper() {
                 </span>
                 <span
                   className={cn(
-                    "font-display text-base font-semibold transition-colors",
+                    "font-display text-base transition-colors",
                     isActive ? "text-primary" : "text-foreground",
                   )}
                 >

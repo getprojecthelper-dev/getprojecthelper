@@ -75,7 +75,7 @@ function SettingsPage() {
         </div>
 
         <div className="panel space-y-3 p-6">
-          <h2 className="font-display text-lg font-semibold">Session</h2>
+          <h2 className="font-display text-lg">Session</h2>
           <p className="text-sm text-muted-foreground">
             Signing out clears this session on this device.
           </p>

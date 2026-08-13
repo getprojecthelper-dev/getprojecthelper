@@ -81,7 +81,7 @@ function ReviewPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Readiness
             </p>
-            <p className="mt-2 font-display text-3xl font-semibold">{metrics.progress}%</p>
+            <p className="mt-2 font-display text-3xl">{metrics.progress}%</p>
           </div>
           <ShieldCheck className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -109,7 +109,7 @@ function ReviewPage() {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+          <h2 className="flex items-center gap-2 font-display text-lg">
             <AlertTriangle className="h-4 w-4" /> Risks
           </h2>
           <Button

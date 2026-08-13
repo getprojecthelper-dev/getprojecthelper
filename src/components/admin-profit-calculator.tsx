@@ -54,7 +54,7 @@ export function AdminProfitCalculator() {
 
   return (
     <div className="panel p-5">
-      <h3 className="flex items-center gap-2 font-display text-base font-semibold">
+      <h3 className="flex items-center gap-2 font-display text-base">
         <Calculator className="h-4 w-4 text-primary" />
         Profitability calculator
       </h3>

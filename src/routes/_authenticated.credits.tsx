@@ -97,27 +97,27 @@ function CreditsPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
-          <p className="mt-2 flex items-center gap-2 font-display text-3xl font-semibold">
+          <p className="mt-2 flex items-center gap-2 font-display text-3xl">
             <Zap className="h-6 w-6 text-primary" />
             {formatCredits(data.balance)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Total received</p>
-          <p className="mt-2 font-display text-3xl font-semibold">
+          <p className="mt-2 font-display text-3xl">
             {formatCredits(data.lifetimeGranted)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Total used</p>
-          <p className="mt-2 font-display text-3xl font-semibold">
+          <p className="mt-2 font-display text-3xl">
             {formatCredits(data.lifetimeSpent)}
           </p>
         </div>
       </section>
 
       <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+        <h2 className="flex items-center gap-2 font-display text-lg">
           <Gift className="h-4 w-4 text-primary" />
           Redeem a code
         </h2>
@@ -145,7 +145,7 @@ function CreditsPage() {
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold">Credit packs</h2>
+        <h2 className="font-display text-lg">Credit packs</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Every new account starts with {STARTER_CREDITS} free credits. Packs are coming soon —
           checkout is not enabled yet.
@@ -154,7 +154,7 @@ function CreditsPage() {
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold">Recent activity</h2>
+        <h2 className="font-display text-lg">Recent activity</h2>
         {data.transactions.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No credit activity yet.</p>
         ) : (

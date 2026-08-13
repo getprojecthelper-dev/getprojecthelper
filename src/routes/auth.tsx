@@ -111,7 +111,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-12">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-6 flex items-center gap-2 font-display text-lg font-semibold">
+        <Link to="/" className="mb-6 flex items-center gap-2 font-display text-lg">
           <GraduationCap className="h-5 w-5 text-primary" />
           Project Helper
         </Link>

@@ -51,7 +51,7 @@ function WorkspaceLayout() {
             <span className="hidden sm:inline">Projects</span>
           </Button>
           <div className="min-w-0">
-            <p className="truncate font-display font-semibold">
+            <p className="truncate font-display">
               {data?.project.name ?? "Loading project…"}
             </p>
           </div>

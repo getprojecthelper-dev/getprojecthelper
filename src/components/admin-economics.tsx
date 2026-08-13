@@ -38,7 +38,7 @@ export function AdminEconomics() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold">Unit economics</h2>
+          <h2 className="font-display text-lg">Unit economics</h2>
           <p className="text-sm text-muted-foreground">
             Money in versus what the AI actually costs, at {usd(USD_PER_1K_TOKENS)} per 1,000 tokens.
           </p>
@@ -99,7 +99,7 @@ export function AdminEconomics() {
 
           <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
             <div className="panel p-5">
-              <h3 className="font-display text-base font-semibold">Revenue vs cost by week</h3>
+              <h3 className="font-display text-base">Revenue vs cost by week</h3>
               {data.weekly.length === 0 ? (
                 <p className="mt-4 text-sm text-muted-foreground">Nothing recorded in this window.</p>
               ) : (
@@ -134,7 +134,7 @@ export function AdminEconomics() {
             </div>
 
             <div className="panel p-5">
-              <h3 className="font-display text-base font-semibold">Per-credit and per-user</h3>
+              <h3 className="font-display text-base">Per-credit and per-user</h3>
               <dl className="mt-4 space-y-2 text-sm">
                 {[
                   ["Price per credit sold", usd(data.avgPricePerCreditUsd)],
@@ -157,7 +157,7 @@ export function AdminEconomics() {
 
           <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
             <div className="panel p-5">
-              <h3 className="font-display text-base font-semibold">Heaviest consumers</h3>
+              <h3 className="font-display text-base">Heaviest consumers</h3>
               {data.topUsers.length === 0 ? (
                 <p className="mt-4 text-sm text-muted-foreground">No AI usage in this window.</p>
               ) : (
@@ -183,7 +183,7 @@ export function AdminEconomics() {
             </div>
 
             <div className="panel p-5">
-              <h3 className="font-display text-base font-semibold">Break-even per pack</h3>
+              <h3 className="font-display text-base">Break-even per pack</h3>
 
               <ul className="mt-4 space-y-3 text-sm">
                 {packs.map((p) => (

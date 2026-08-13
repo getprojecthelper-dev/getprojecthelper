@@ -71,7 +71,7 @@ export function AdminReferralCodes() {
     <section className="panel p-5">
       <div className="flex items-center gap-2">
         <Gift className="h-4 w-4 text-primary" />
-        <h2 className="font-display text-lg font-semibold">Redeem codes</h2>
+        <h2 className="font-display text-lg">Redeem codes</h2>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         Generate a code with a credit amount. Students enter it on their Credits page to top up instantly.

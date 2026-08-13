@@ -32,7 +32,6 @@ export interface GeneratedDocument {
   updated_at: string;
 }
 
-
 export const listDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ projectId: z.string().uuid() }).parse(input))
@@ -96,7 +95,10 @@ export const generateDocument = createServerFn({ method: "POST" })
     ).filter((v): v is string => Boolean(v));
 
     const authorLine = data.authors
-      .map((a) => `${a.name} (${a.role || "Author"}${a.affiliation ? `, ${a.affiliation}` : ""}${a.email ? `, ${a.email}` : ""})`)
+      .map(
+        (a) =>
+          `${a.name} (${a.role || "Author"}${a.affiliation ? `, ${a.affiliation}` : ""}${a.email ? `, ${a.email}` : ""})`,
+      )
       .join("; ");
 
     const result = await generateJson<{
@@ -171,7 +173,6 @@ Return the polished document.`,
 /* Manual edit, AI revision and originality analysis                    */
 /* ------------------------------------------------------------------ */
 
-
 /** Saves manual edits made in the on-site editor. */
 export const updateDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -226,7 +227,10 @@ export const reviseDocument = createServerFn({ method: "POST" })
 
     const current = doc as unknown as GeneratedDocument;
     const source = current.project_id
-      ? await projectSource(context.supabase as unknown as { from: (t: string) => any }, current.project_id)
+      ? await projectSource(
+          context.supabase as unknown as { from: (t: string) => any },
+          current.project_id,
+        )
       : null;
 
     const result = await generateJson<{ title: string; sections: DocSection[]; latex: string }>({
@@ -296,7 +300,10 @@ export const analyzeDocument = createServerFn({ method: "POST" })
     if (error || !doc) throw new Error("Document not found.");
     const current = doc as unknown as GeneratedDocument;
     const source = current.project_id
-      ? await projectSource(context.supabase as unknown as { from: (t: string) => any }, current.project_id)
+      ? await projectSource(
+          context.supabase as unknown as { from: (t: string) => any },
+          current.project_id,
+        )
       : null;
 
     const result = await generateJson<Omit<DocumentAnalysis, "checked_at">>({
@@ -309,7 +316,10 @@ export const analyzeDocument = createServerFn({ method: "POST" })
 These are heuristic estimates from reading the text — say so plainly in the verdict. Give concrete, specific reasons and actionable suggestions.`,
       input: `=== DOCUMENT ===
 Title: ${current.title}
-${current.sections.map((s) => `## ${s.heading}\n${s.body}`).join("\n\n").slice(0, 24000)}
+${current.sections
+  .map((s) => `## ${s.heading}\n${s.body}`)
+  .join("\n\n")
+  .slice(0, 24000)}
 
 ${source ? `=== STUDENT'S PROJECT DATA ===\n${source}` : "No project data available."}`,
       schema: obj({
@@ -326,7 +336,9 @@ ${source ? `=== STUDENT'S PROJECT DATA ===\n${source}` : "No project data availa
     const analysis: DocumentAnalysis = { ...result, checked_at: new Date().toISOString() };
     await context.supabase
       .from("documents")
-      .update({ meta: { ...(current.meta ?? {}), analysis: JSON.stringify(analysis) } as unknown as never })
+      .update({
+        meta: { ...(current.meta ?? {}), analysis: JSON.stringify(analysis) } as unknown as never,
+      })
       .eq("id", data.id);
     return analysis;
   });

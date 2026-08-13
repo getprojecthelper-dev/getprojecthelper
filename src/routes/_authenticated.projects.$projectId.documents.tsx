@@ -68,7 +68,8 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/docume
       { property: "og:title", content: "Documentation Templates — Project Helper" },
       {
         property: "og:description",
-        content: "AI-written academic documents built from your own project, readable and editable on site.",
+        content:
+          "AI-written academic documents built from your own project, readable and editable on site.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -168,7 +169,8 @@ function DocumentsPage() {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{doc.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {doc.meta?.['doc_type_label'] ?? doc.doc_type} · {doc.meta?.['format_label'] ?? doc.format} ·{" "}
+                    {doc.meta?.["doc_type_label"] ?? doc.doc_type} ·{" "}
+                    {doc.meta?.["format_label"] ?? doc.format} ·{" "}
                     {new Date(doc.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -254,7 +256,10 @@ function DocumentWizard({
     if (!keywords.trim()) {
       const domain = (current as { domain?: string | null } | null)?.domain;
       const stack = (current as { tech_stack?: string[] | null } | null)?.tech_stack;
-      const seed = [domain?.replaceAll("_", " "), ...(Array.isArray(stack) ? stack.slice(0, 4) : [])]
+      const seed = [
+        domain?.replaceAll("_", " "),
+        ...(Array.isArray(stack) ? stack.slice(0, 4) : []),
+      ]
         .filter(Boolean)
         .join(", ");
       if (seed) setKeywords(seed);
@@ -273,9 +278,7 @@ function DocumentWizard({
           formatLabel: format?.label ?? "",
           formatBrief: format?.brief ?? "",
           title: title.trim(),
-          authors: authors
-            .filter((a) => a.name.trim())
-            .map((a) => ({ ...a, name: a.name.trim() })),
+          authors: authors.filter((a) => a.name.trim()).map((a) => ({ ...a, name: a.name.trim() })),
           venue,
           keywords,
           notes,
@@ -342,7 +345,6 @@ function DocumentWizard({
             ))}
           </div>
         ) : null}
-
 
         {step === 2 ? (
           <div className="space-y-5">
@@ -465,7 +467,11 @@ function DocumentWizard({
                         checked={checked}
                         onCheckedChange={(v) =>
                           setImported((prev) =>
-                            v ? (prev.length >= 3 ? prev : [...prev, p.id]) : prev.filter((id) => id !== p.id),
+                            v
+                              ? prev.length >= 3
+                                ? prev
+                                : [...prev, p.id]
+                              : prev.filter((id) => id !== p.id),
                           )
                         }
                       />
@@ -479,7 +485,9 @@ function DocumentWizard({
                   );
                 })}
               {(projects.data ?? []).filter((p) => p.id !== projectId).length === 0 ? (
-                <p className="text-sm text-muted-foreground">You have no other projects to import.</p>
+                <p className="text-sm text-muted-foreground">
+                  You have no other projects to import.
+                </p>
               ) : null}
             </div>
           </div>
@@ -491,7 +499,9 @@ function DocumentWizard({
             onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}
             disabled={run.isPending}
           >
-            {step === 0 ? "Cancel" : (
+            {step === 0 ? (
+              "Cancel"
+            ) : (
               <>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back
               </>
@@ -547,7 +557,9 @@ function ScoreCard({
   const pct = Math.max(0, Math.min(100, Math.round(value)));
   return (
     <div className="panel p-4">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
       <p className={`mt-2 font-display text-3xl ${scoreTone(pct, invert)}`}>
         {pct}
         <span className="text-base text-muted-foreground">/100</span>
@@ -676,7 +688,8 @@ function DocumentViewer({
         <DialogHeader>
           <DialogTitle className="pr-8">{title}</DialogTitle>
           <DialogDescription>
-            {doc.meta?.["doc_type_label"] ?? doc.doc_type} · {doc.meta?.["format_label"] ?? doc.format}
+            {doc.meta?.["doc_type_label"] ?? doc.doc_type} ·{" "}
+            {doc.meta?.["format_label"] ?? doc.format}
             {doc.authors.length ? ` · ${doc.authors.map((a) => a.name).join(", ")}` : ""}
           </DialogDescription>
         </DialogHeader>
@@ -693,10 +706,18 @@ function DocumentViewer({
               <Button size="sm" variant="outline" onClick={() => setAskOpen(true)}>
                 <Wand2 className="mr-1 h-3.5 w-3.5" /> Ask AI to edit
               </Button>
-              <Button size="sm" variant="outline" onClick={() => download(plain, "txt", "text/plain")}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => download(plain, "txt", "text/plain")}
+              >
                 <Download className="mr-1 h-3.5 w-3.5" /> Text
               </Button>
-              <Button size="sm" disabled={!latex} onClick={() => download(latex, "tex", "application/x-tex")}>
+              <Button
+                size="sm"
+                disabled={!latex}
+                onClick={() => download(latex, "tex", "application/x-tex")}
+              >
                 <Download className="mr-1 h-3.5 w-3.5" /> .tex
               </Button>
             </div>
@@ -774,10 +795,7 @@ function DocumentViewer({
               </div>
             ))}
             <div className="sticky bottom-0 flex justify-end gap-2 bg-background/90 py-2 backdrop-blur">
-              <Button
-                disabled={!dirty || saveEdits.isPending}
-                onClick={() => saveEdits.mutate()}
-              >
+              <Button disabled={!dirty || saveEdits.isPending} onClick={() => saveEdits.mutate()}>
                 {saveEdits.isPending ? (
                   <>
                     <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Saving…
@@ -818,8 +836,8 @@ function DocumentViewer({
               <div>
                 <p className="font-medium">AI &amp; plagiarism check</p>
                 <p className="text-xs text-muted-foreground">
-                  Heuristic estimate of AI-likeness, plagiarism risk and how relevant the paper is to
-                  your project.
+                  Heuristic estimate of AI-likeness, plagiarism risk and how relevant the paper is
+                  to your project.
                 </p>
               </div>
               <Button disabled={runScore.isPending} onClick={() => runScore.mutate()}>
@@ -838,7 +856,12 @@ function DocumentViewer({
             {analysis ? (
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <ScoreCard label="AI score" value={analysis.ai_score} invert hint="Lower reads more human." />
+                  <ScoreCard
+                    label="AI score"
+                    value={analysis.ai_score}
+                    invert
+                    hint="Lower reads more human."
+                  />
                   <ScoreCard
                     label="Plagiarism risk"
                     value={analysis.plagiarism_score}
@@ -919,7 +942,11 @@ function DocumentViewer({
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="ghost" onClick={() => setAskOpen(false)} disabled={askAi.isPending}>
+                <Button
+                  variant="ghost"
+                  onClick={() => setAskOpen(false)}
+                  disabled={askAi.isPending}
+                >
                   Cancel
                 </Button>
                 <Button

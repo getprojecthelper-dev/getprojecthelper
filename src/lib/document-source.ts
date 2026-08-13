@@ -25,9 +25,15 @@ export async function projectSource(
       .select("title,question,objective,business_connection,insights")
       .eq("project_id", projectId)
       .order("position"),
-    supabase.from("requirements").select("code,title,description,status").eq("project_id", projectId),
+    supabase
+      .from("requirements")
+      .select("code,title,description,status")
+      .eq("project_id", projectId),
     supabase.from("test_cases").select("title,status,expected").eq("project_id", projectId),
-    supabase.from("research_sources").select("title,authors,year,url,summary").eq("project_id", projectId),
+    supabase
+      .from("research_sources")
+      .select("title,authors,year,url,summary")
+      .eq("project_id", projectId),
   ]);
 
   const p = project.data;
@@ -50,15 +56,18 @@ export async function projectSource(
     ),
     "",
     "REQUIREMENTS:",
-    ...(requirements.data ?? []).map((r: any) => `- [${r.status}] ${r.code ?? ""} ${r.title}: ${r.description ?? ""}`),
+    ...(requirements.data ?? []).map(
+      (r: any) => `- [${r.status}] ${r.code ?? ""} ${r.title}: ${r.description ?? ""}`,
+    ),
     "",
     "TESTS:",
     ...(tests.data ?? []).map((t: any) => `- [${t.status}] ${t.title}: ${t.expected ?? ""}`),
     "",
     "REFERENCES COLLECTED:",
-    ...(sources.data ?? []).map((s: any) => `- ${s.authors ?? ""} (${s.year ?? "n.d."}). ${s.title}. ${s.url ?? ""}`),
+    ...(sources.data ?? []).map(
+      (s: any) => `- ${s.authors ?? ""} (${s.year ?? "n.d."}). ${s.title}. ${s.url ?? ""}`,
+    ),
   ];
 
   return lines.filter(Boolean).join("\n").slice(0, 14000);
 }
-

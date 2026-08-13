@@ -202,10 +202,25 @@
   );
 }
 
+/* Dark editorial hero surface used by the landing page. */
+:root {
+  --hero-surface: oklch(0.19 0.035 40);
+  --hero-surface-2: oklch(0.24 0.05 38);
+  --hero-line: oklch(0.98 0.02 85 / 0.14);
+  --gradient-hero-surface: radial-gradient(
+      120% 90% at 78% 12%,
+      oklch(0.36 0.09 42 / 0.55) 0%,
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--hero-surface) 0%, var(--hero-surface-2) 100%);
+}
+
 @theme inline {
   --color-hero-ink: var(--hero-ink);
   --color-hero-ink-muted: var(--hero-ink-muted);
   --color-hero-ink-foreground: var(--hero-ink-foreground);
+  --color-hero-surface: var(--hero-surface);
+  --color-hero-line: var(--hero-line);
 }
 
 @utility hero-scrim {
@@ -213,3 +228,9 @@
   inset: 0;
   background-image: var(--gradient-hero-scrim);
 }
+
+@utility hero-surface {
+  background-image: var(--gradient-hero-surface);
+  color: var(--hero-ink);
+}
+

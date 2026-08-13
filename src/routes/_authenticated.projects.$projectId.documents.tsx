@@ -7,18 +7,23 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Copy,
   Download,
   FileText,
   Loader2,
   Plus,
+  Save,
+  ShieldCheck,
   Sparkles,
   Trash2,
   Users,
+  Wand2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { CodeBlock } from "@/components/code-block";
+import { MeterBar } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,10 +43,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useProjects } from "@/lib/db";
 import { DOC_TYPES, type DocFormat, type DocType } from "@/lib/doc-templates";
 import {
+  analyzeDocument,
   deleteDocument,
   generateDocument,
   listDocuments,
+  reviseDocument,
+  updateDocument,
   type DocAuthor,
+  type DocSection,
+  type DocumentAnalysis,
   type GeneratedDocument,
 } from "@/lib/documents.functions";
 import { useProjectId } from "@/lib/use-workspace";
@@ -53,12 +63,12 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/docume
       {
         name: "description",
         content:
-          "Pick a template — research paper, literature review, report or synopsis — and let AI draft it from your project data, ready for Overleaf.",
+          "Pick a template — research paper, literature review, report or synopsis — and let AI draft it from your project data, readable and editable right here.",
       },
       { property: "og:title", content: "Documentation Templates — Project Helper" },
       {
         property: "og:description",
-        content: "AI-written academic documents built from your own project, exported as LaTeX.",
+        content: "AI-written academic documents built from your own project, readable and editable on site.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -101,7 +111,7 @@ function DocumentsPage() {
     <div className="space-y-8 p-6">
       <PageHeader
         title="Documentation"
-        description="Choose a template, tell us who is on the team, import your project — the AI writes the document and hands you compile-ready LaTeX for Overleaf."
+        description="Choose a template, tell us who is on the team, import your project — the AI writes the document, shows it here, and hands you compile-ready LaTeX."
       />
 
       <section className="space-y-3">
@@ -194,7 +204,13 @@ function DocumentsPage() {
         />
       ) : null}
 
-      {open ? <DocumentViewer doc={open} onClose={() => setOpen(null)} /> : null}
+      {open ? (
+        <DocumentViewer
+          doc={open}
+          onClose={() => setOpen(null)}
+          onSaved={() => void qc.invalidateQueries({ queryKey: ["documents", projectId] })}
+        />
+      ) : null}
     </div>
   );
 }

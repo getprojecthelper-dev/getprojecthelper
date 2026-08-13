@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { MentorThreadList } from "@/components/mentor-thread-list";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor")({
   head: () => ({
@@ -25,15 +27,16 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor
 
 function MentorLayout() {
   const { projectId } = useParams({ from: "/_authenticated/projects/$projectId/mentor" });
+  const { setOpen } = useSidebar();
+
+  // The mentor gets the full width: collapse the workspace sidebar while here.
+  useEffect(() => {
+    setOpen(false);
+    return () => setOpen(true);
+  }, [setOpen]);
 
   return (
-    <section className="flex h-[calc(100vh-14rem)] min-h-[32rem] flex-col">
-      <header className="mb-4 shrink-0">
-        <h1 className="font-display text-2xl">AI Mentor</h1>
-        <p className="text-sm text-muted-foreground">
-          Every conversation is saved, so you can come back to it later.
-        </p>
-      </header>
+    <section className="flex h-[calc(100vh-10rem)] min-h-[32rem] flex-col">
       <MentorThreadList projectId={projectId} className="mb-4 max-h-56 shrink-0 lg:hidden" />
       <div className="flex min-h-0 flex-1">
         <Outlet />

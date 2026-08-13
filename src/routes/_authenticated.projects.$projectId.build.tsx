@@ -165,6 +165,8 @@ function BuildPage() {
         </p>
       </div>
 
+      {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
+
       {sections.map((section, index) => {
         const locked = activeIndex !== -1 && index > activeIndex;
         return (

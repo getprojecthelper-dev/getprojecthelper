@@ -81,7 +81,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={item.active}
+                    isActive={Boolean(item.active)}
                     tooltip={item.title}
                     className="py-2.5"
                   >

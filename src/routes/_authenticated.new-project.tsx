@@ -143,17 +143,20 @@ function NewProject() {
   };
 
 
-  const pickProject = async (project: SuggestedProject) => {
+  const pickProject = (project: SuggestedProject) => {
     setChosen(project);
     setStep(2);
     setPapers(null);
     setSelectedPapers([]);
     setPaperPage(0);
+  };
 
+  const runPaperSearch = async () => {
+    if (!chosen) return;
     setBusy(true);
     try {
       const found = await paperSearch({
-        data: { title: project.title, description: project.description, domain },
+        data: { title: chosen.title, description: chosen.description, domain },
       });
       setPapers(found);
     } catch (error) {
@@ -163,6 +166,7 @@ function NewProject() {
       setBusy(false);
     }
   };
+
 
   const togglePaper = (paper: ResearchPaper) =>
     setSelectedPapers((current) =>

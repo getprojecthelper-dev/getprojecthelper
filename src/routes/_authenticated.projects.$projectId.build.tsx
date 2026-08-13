@@ -6,10 +6,13 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileSpreadsheet,
   FileText,
+  FileType,
   FolderTree,
   Loader2,
   Lock,
+  Presentation,
   Sparkles,
   Wrench,
 } from "lucide-react";
@@ -24,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
+import { getFileGuidance, type FileGuidance, type OfficeApp } from "@/lib/file-guidance";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
@@ -218,35 +222,110 @@ function GettingStarted({
       </button>
 
       {open ? (
-        <div className="space-y-4 border-t border-border bg-muted/20 p-5">
-          <p className="text-sm text-muted-foreground">{guide.intro}</p>
+        <div className="space-y-5 border-t border-border bg-muted/20 p-5">
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">{guide.intro}</p>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            {guide.tools.map((tool) => (
-              <div key={tool.label} className="rounded-lg border border-border bg-card p-3">
-                <p className="text-sm font-semibold">{tool.label}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tool.detail}</p>
-              </div>
-            ))}
+            {guide.tools.map((tool) => {
+              const app = toolApp(tool.label);
+              const meta = metaOf(app);
+              const Icon = meta.icon;
+              return (
+                <div
+                  key={tool.label}
+                  className="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-panel"
+                >
+                  <span
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-lg",
+                      meta.tint,
+                    )}
+                  >
+                    <Icon className="h-4.5 w-4.5" />
+                  </span>
+                  <p className="mt-3 text-sm font-semibold">{tool.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tool.detail}</p>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-sm font-medium">How it works</p>
-            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-              {guide.how.map((line) => (
-                <li key={line}>{line}</li>
+            <ol className="grid gap-2 sm:grid-cols-2">
+              {guide.how.map((line, i) => (
+                <li
+                  key={line}
+                  className="flex gap-3 rounded-lg border border-border/70 bg-card/60 p-3 text-sm text-muted-foreground"
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {i + 1}
+                  </span>
+                  <span className="leading-relaxed">{line}</span>
+                </li>
               ))}
             </ol>
           </div>
 
           {guide.note ? (
-            <p className="rounded-lg bg-accent/10 p-3 text-sm text-muted-foreground">{guide.note}</p>
+            <p className="rounded-lg border border-accent/30 bg-accent/10 p-3 text-sm text-muted-foreground">
+              {guide.note}
+            </p>
           ) : null}
         </div>
       ) : null}
     </section>
   );
 }
+
+const APP_META: Record<
+  OfficeApp,
+  { icon: typeof FileText; tint: string; short: string }
+> = {
+  word: {
+    icon: FileType,
+    tint: "bg-info/15 text-info",
+    short: "Word",
+  },
+  excel: {
+    icon: FileSpreadsheet,
+    tint: "bg-success/15 text-success",
+    short: "Excel",
+  },
+  powerpoint: {
+    icon: Presentation,
+    tint: "bg-warning/20 text-warning",
+    short: "PowerPoint",
+  },
+};
+
+const metaOf = (app: OfficeApp) => APP_META[app] ?? APP_META.word;
+
+function toolApp(label: string): OfficeApp {
+  const l = label.toLowerCase();
+  if (l.includes("excel") || l.includes("sheet")) return "excel";
+  if (l.includes("power") || l.includes("slide")) return "powerpoint";
+  return "word";
+}
+
+function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
+  const meta = metaOf(guidance.app);
+  const Icon = meta.icon;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
+      <span className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}>
+        <Icon className="h-3.5 w-3.5" /> {meta.short}
+      </span>
+      <span className="text-muted-foreground">{guidance.action}</span>
+      <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
+        {guidance.target}
+      </span>
+      <span className="text-muted-foreground">· use {guidance.appLabel}</span>
+    </div>
+  );
+}
+
+
 
 
 function SectionCard({
@@ -396,11 +475,15 @@ function SectionCard({
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const guidance = playbook.buildsCode
+              ? null
+              : getFileGuidance(block.title, section.title, block.code ?? "");
             return (
               <div key={`${block.title}-${i}`} className="space-y-2">
                 <p className="text-sm font-semibold">
                   {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                 </p>
+                {guidance ? <FileGuidanceBar guidance={guidance} /> : null}
                 {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
                 {block.explanation?.length ? (
                   hasCode ? (
@@ -426,6 +509,7 @@ function SectionCard({
               </div>
             );
           })}
+
 
           {section.insights.length ? (
             <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">

@@ -536,14 +536,15 @@ export const fixSectionError = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief } = await loadContext(supabase as never, data.sectionId);
+    const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
 
     const fixed = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
       name: "section_content",
-      instructions:
-        "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files.",
-      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CODE:\n${section.code ?? ""}\n\nERROR REPORTED BY THE STUDENT:\n${data.errorText}`,
+      instructions: playbook.buildsCode
+        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files."
+        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. The first block's explanation must start with what was wrong and what you changed. Write no programming code.",
+      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CONTENT:\n${section.code ?? ""}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: sectionSchema,
     });
 
@@ -553,7 +554,8 @@ export const fixSectionError = createServerFn({ method: "POST" })
         code: joinBlocks(fixed.blocks),
         blocks: JSON.parse(JSON.stringify(fixed.blocks ?? [])),
         files: JSON.parse(JSON.stringify(fixed.files ?? [])),
-        language: fixed.language || "python",
+        language: fixed.language || (playbook.buildsCode ? "python" : "markdown"),
+
         explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,
         business_connection: fixed.business_connection,

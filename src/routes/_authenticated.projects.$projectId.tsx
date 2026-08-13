@@ -22,6 +22,7 @@ function WorkspaceLayout() {
 
   // Viva (review), Documentation and AI Mentor have their own page headers, so
   // the shared project breadcrumb bar is removed there.
+  const isMentor = /\/mentor(\/[^/]+)*$/.test(pathname);
   const showHeader = !/(\/review|\/documents|\/mentor)(\/[^/]+)*$/.test(pathname);
 
   return (
@@ -42,7 +43,7 @@ function WorkspaceLayout() {
         </header>
       ) : null}
 
-      <div className="mx-auto w-full max-w-none px-5 py-6">
+      <div className={isMentor ? "w-full" : "mx-auto w-full max-w-none px-5 py-6"}>
         {isPending ? (
           <LoadingState label="Loading workspace…" />
         ) : isError ? (
@@ -56,7 +57,7 @@ function WorkspaceLayout() {
       </div>
 
       {/* The dock is redundant on the mentor page itself. */}
-      {/\/mentor(\/[^/]+)*$/.test(pathname) ? null : <MentorDock projectId={projectId} />}
+      {isMentor ? null : <MentorDock projectId={projectId} />}
     </div>
   );
 }

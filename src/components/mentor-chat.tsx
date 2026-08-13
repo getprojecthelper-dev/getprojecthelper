@@ -144,11 +144,11 @@ export function MentorChat({
   });
 
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
+    <div className={cn("flex min-h-0 w-full flex-1 flex-col overflow-hidden", className)}>
       <Conversation className="min-h-0 flex-1">
         <ConversationContent
           className={cn(
-            "mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6",
+            "mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6",
             messages.length === 0 && "min-h-full justify-center",
           )}
         >
@@ -300,7 +300,7 @@ export function MentorChat({
         </div>
 
         <PromptInput
-          className="rounded-2xl"
+          className="[&_[data-slot=input-group]]:rounded-2xl [&_[data-slot=input-group]]:border-border/70 [&_[data-slot=input-group]]:bg-card/70 [&_[data-slot=input-group]]:shadow-sm [&:has([data-slot=input-group-control]:focus-visible)_[data-slot=input-group]]:border-primary/25 [&:has([data-slot=input-group-control]:focus-visible)_[data-slot=input-group]]:ring-0"
           onSubmit={(message, event) => {
             event.preventDefault();
             const text = message.text ?? "";
@@ -312,7 +312,8 @@ export function MentorChat({
           <PromptInputTextarea
             ref={textareaRef}
             autoFocus
-            rows={2}
+            rows={1}
+            className="max-h-48 min-h-[52px] py-3.5 text-sm"
             placeholder="Ask your mentor about this project…"
           />
           <PromptInputFooter className="justify-between">

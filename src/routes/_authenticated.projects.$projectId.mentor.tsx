@@ -96,23 +96,29 @@ function MentorLayout() {
   }, [setOpen]);
 
   return (
-    <section className="flex h-[calc(100vh-10rem)] min-h-[32rem] flex-col md:h-[calc(100vh-11rem)] md:flex-row">
+    <section className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">
       {/* Desktop conversation history — resizable so users can choose how much room it takes. */}
-      <div className="relative hidden md:flex" style={{ width }}>
+      <div
+        className="relative hidden shrink-0 border-r border-border/60 bg-card/30 md:block"
+        style={{ width }}
+      >
         <MentorThreadList
           projectId={projectId}
-          className="h-full w-full shrink-0 rounded-none border-0 border-r border-border/60 bg-transparent p-0"
+          className="h-full w-full rounded-none border-0 bg-transparent p-3"
         />
         <button
           type="button"
           aria-label="Resize conversation history"
           onMouseDown={startResize}
-          className="absolute right-0 top-0 z-10 h-full w-3 -translate-x-0.5 cursor-col-resize bg-transparent hover:bg-primary/10 active:bg-primary/20"
+          className="absolute inset-y-0 right-0 z-10 w-1.5 translate-x-1/2 cursor-col-resize bg-transparent transition-colors hover:bg-primary/40 active:bg-primary/60"
         />
       </div>
       {/* Mobile conversation history — compact horizontal strip. */}
-      <MentorThreadList projectId={projectId} className="mb-4 max-h-48 shrink-0 md:hidden" />
-      <div className="flex min-h-0 flex-1">
+      <MentorThreadList
+        projectId={projectId}
+        className="max-h-44 shrink-0 rounded-none border-0 border-b border-border/60 bg-transparent md:hidden"
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Outlet />
       </div>
     </section>

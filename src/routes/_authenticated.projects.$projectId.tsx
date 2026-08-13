@@ -57,7 +57,7 @@ function WorkspaceLayout() {
       </div>
 
       {/* The dock is redundant on the mentor page itself. */}
-      {/\/mentor(\/[^/]+)*$/.test(pathname) ? null : <MentorDock projectId={projectId} />}
+      {isMentor ? null : <MentorDock projectId={projectId} />}
     </div>
   );
 }

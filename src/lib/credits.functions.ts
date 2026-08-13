@@ -60,12 +60,12 @@ export const redeemCode = createServerFn({ method: "POST" })
     });
 
     if (error) {
-      const message = error.message ?? "";
-      if (/already/i.test(message)) throw new Error("You have already used this code.");
-      if (/expired/i.test(message)) throw new Error("This code has expired.");
-      if (/limit|exhaust/i.test(message)) throw new Error("This code has reached its limit.");
-      throw new Error("That code is not valid.");
+      // The database function raises a clear, user-facing reason — show it
+      // instead of a generic "not valid" that hides why redemption failed.
+      const message = (error.message ?? "").trim();
+      throw new Error(message || "That code is not valid.");
     }
+
 
     return { credits: Number(granted ?? 0) };
   });

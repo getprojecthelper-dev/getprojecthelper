@@ -143,17 +143,20 @@ function NewProject() {
   };
 
 
-  const pickProject = async (project: SuggestedProject) => {
+  const pickProject = (project: SuggestedProject) => {
     setChosen(project);
     setStep(2);
     setPapers(null);
     setSelectedPapers([]);
     setPaperPage(0);
+  };
 
+  const runPaperSearch = async () => {
+    if (!chosen) return;
     setBusy(true);
     try {
       const found = await paperSearch({
-        data: { title: project.title, description: project.description, domain },
+        data: { title: chosen.title, description: chosen.description, domain },
       });
       setPapers(found);
     } catch (error) {
@@ -163,6 +166,7 @@ function NewProject() {
       setBusy(false);
     }
   };
+
 
   const togglePaper = (paper: ResearchPaper) =>
     setSelectedPapers((current) =>
@@ -415,6 +419,23 @@ function NewProject() {
               </p>
             </div>
 
+            {!busy && papers === null ? (
+              <div className="panel space-y-4 p-6">
+                <p className="text-sm text-muted-foreground">
+                  Want us to look for relevant research papers for this project? You can also skip
+                  and add references later.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={() => void runPaperSearch()}>
+                    <BookOpen className="h-4 w-4" /> Find research papers
+                  </Button>
+                  <Button variant="outline" onClick={() => void afterPapers()}>
+                    Skip for now <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             {busy ? (
               <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Searching for relevant papers…
@@ -422,6 +443,7 @@ function NewProject() {
             ) : null}
 
             {!busy && papers && papers.length === 0 ? (
+
               <div className="panel p-6 text-sm text-muted-foreground">
                 We couldn't verify any papers for this idea right now. You can continue and add
                 references later from the project's research section.
@@ -524,9 +546,11 @@ function NewProject() {
               <Button variant="ghost" onClick={() => setStep(1)} disabled={busy}>
                 Back to suggestions
               </Button>
-              <Button onClick={() => void afterPapers()} disabled={busy}>
-                {needsDataset ? "Continue to dataset" : "Continue"} <ArrowRight className="h-4 w-4" />
-              </Button>
+              {papers !== null ? (
+                <Button onClick={() => void afterPapers()} disabled={busy}>
+                  {needsDataset ? "Continue to dataset" : "Continue"} <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : null}
             </div>
           </div>
         ) : null}

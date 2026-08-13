@@ -79,6 +79,8 @@ function NewProject() {
   const [chosen, setChosen] = useState<SuggestedProject | null>(null);
   const [papers, setPapers] = useState<ResearchPaper[] | null>(null);
   const [selectedPapers, setSelectedPapers] = useState<ResearchPaper[]>([]);
+  const [paperPage, setPaperPage] = useState(0);
+
   const [datasets, setDatasets] = useState<DatasetOption[] | null>(null);
   const [dataset, setDataset] = useState<DatasetOption | null>(null);
   const [busy, setBusy] = useState(false);
@@ -117,6 +119,8 @@ function NewProject() {
     setStep(2);
     setPapers(null);
     setSelectedPapers([]);
+    setPaperPage(0);
+
     setBusy(true);
     try {
       const found = await paperSearch({
@@ -330,7 +334,15 @@ function NewProject() {
               </div>
             ) : null}
 
-            {(papers ?? []).map((paper) => {
+            {!busy && papers && papers.length === 0 ? (
+              <div className="panel p-6 text-sm text-muted-foreground">
+                We couldn't verify any papers for this idea right now. You can continue and add
+                references later from the project's research section.
+              </div>
+            ) : null}
+
+            {(papers ?? []).slice(paperPage * 4, paperPage * 4 + 4).map((paper) => {
+
               const picked = selectedPapers.some((p) => p.url === paper.url && p.title === paper.title);
               return (
                 <button
@@ -391,6 +403,35 @@ function NewProject() {
                 </button>
               );
             })}
+
+            {(papers?.length ?? 0) > 4 ? (
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paperPage === 0}
+                  onClick={() => setPaperPage((p) => Math.max(0, p - 1))}
+                >
+                  Previous
+                </Button>
+                <span className="text-muted-foreground">
+                  Page {paperPage + 1} of {Math.ceil((papers?.length ?? 0) / 4)} ·{" "}
+                  {selectedPapers.length} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paperPage >= Math.ceil((papers?.length ?? 0) / 4) - 1}
+                  onClick={() =>
+                    setPaperPage((p) => Math.min(Math.ceil((papers?.length ?? 0) / 4) - 1, p + 1))
+                  }
+                >
+                  Next
+                </Button>
+              </div>
+            ) : null}
+
+
 
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep(1)} disabled={busy}>

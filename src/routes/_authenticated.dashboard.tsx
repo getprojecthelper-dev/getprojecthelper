@@ -132,7 +132,7 @@ function Dashboard() {
               }
             />
           ) : (
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {overviews.map((o) => (
                 <ProjectCard key={o.project.id} overview={o} onDelete={setPendingDelete} />
               ))}

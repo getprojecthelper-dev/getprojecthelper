@@ -1,4 +1,9 @@
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { MentorDock } from "@/components/mentor-dock";
@@ -13,22 +18,29 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
 function WorkspaceLayout() {
   const { projectId, data, isPending, isError, error, refetch } = useWorkspace();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Viva (review) and Documentation have their own page headers, so the shared
+  // project breadcrumb bar is hidden there.
+  const showHeader = !/(\/review|\/documents)$/.test(pathname);
 
   return (
     <div className="min-h-full">
-      <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
-          <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/dashboard" })}>
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Projects</span>
-          </Button>
-          <div className="min-w-0">
-            <p className="truncate font-display">
-              {data?.project.name ?? "Loading project…"}
-            </p>
+      {showHeader ? (
+        <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
+            <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/dashboard" })}>
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Projects</span>
+            </Button>
+            <div className="min-w-0">
+              <p className="truncate font-display">
+                {data?.project.name ?? "Loading project…"}
+              </p>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      ) : null}
 
       <div className="mx-auto w-full max-w-none px-5 py-6">
         {isPending ? (

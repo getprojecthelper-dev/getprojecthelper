@@ -326,7 +326,7 @@ function DocumentWizard({
         ) : null}
 
 
-        {step === 1 ? (
+        {step === 2 ? (
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="doc-title">Title</Label>

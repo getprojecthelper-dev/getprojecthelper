@@ -22,6 +22,16 @@ export interface DomainPlaybook {
   sectionTask: string;
   /** Typical deliverables the AI should draw from. */
   deliverables: string[];
+  /** Plain-language primer shown before the student starts the steps. */
+  gettingStarted?: {
+    title: string;
+    intro: string;
+    /** What the student physically creates, and in which everyday tool. */
+    tools: { label: string; detail: string }[];
+    /** How the workflow runs, step by step, in plain words. */
+    how: string[];
+    note?: string;
+  };
 }
 
 const CODE_PLAN =

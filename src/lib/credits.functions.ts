@@ -69,3 +69,25 @@ export const redeemCode = createServerFn({ method: "POST" })
 
     return { credits: Number(granted ?? 0) };
   });
+
+/**
+ * The real amount the ledger charged for the most recent run started after
+ * `since`. The meter uses it so the UI never reports the reserved estimate.
+ */
+export const getLastCharge = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ since: z.string() }).parse(input))
+  .handler(async ({ data, context }): Promise<{ charged: number | null }> => {
+    const { data: row } = await context.supabase
+      .from("credit_transactions")
+      .select("delta,status,created_at")
+      .eq("user_id", context.userId)
+      .in("status", ["settled", "released"])
+      .gte("created_at", data.since)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!row) return { charged: null };
+    return { charged: Math.abs(Number(row.delta)) };
+  });

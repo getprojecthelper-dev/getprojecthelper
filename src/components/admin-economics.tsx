@@ -182,9 +182,9 @@ export function AdminEconomics() {
               )}
             </div>
 
-            <div className="panel space-y-6 p-0">
-              <div className="panel border-0 p-5 shadow-none">
+            <div className="panel p-5">
               <h3 className="font-display text-base font-semibold">Break-even per pack</h3>
+
               <ul className="mt-4 space-y-3 text-sm">
                 {packs.map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-4">

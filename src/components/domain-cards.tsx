@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { BrainCircuit, Database, GraduationCap, Globe, Smartphone } from "lucide-react";
+import { BrainCircuit, ClipboardList, Database, GraduationCap, Globe, Smartphone } from "lucide-react";
+
 
 const DOMAINS = [
   {

@@ -89,6 +89,8 @@ function NewProject() {
 
 
   const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<"idea" | "suggest">("idea");
+  const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
   const [domain, setDomain] = useState("data_science");
   const [page, setPage] = useState(1);
@@ -112,7 +114,15 @@ function NewProject() {
     }
     setBusy(true);
     try {
-      const projects = await suggest({ data: { idea, domain, page: target, exclude: seen } });
+      const projects = await suggest({
+        data: {
+          idea: mode === "idea" ? idea : "",
+          domain,
+          page: target,
+          exclude: seen,
+          ...(mode === "suggest" ? { difficulty } : {}),
+        },
+      });
       setPages((p) => ({ ...p, [target]: projects }));
       setPage(target);
     } catch (error) {
@@ -123,13 +133,15 @@ function NewProject() {
   };
 
   const startSuggestions = async () => {
-    if (idea.trim().length < 3) {
+    if (mode === "idea" && idea.trim().length < 3) {
       toast.error("Tell us a little about the project you want to build.");
       return;
     }
+    setPages({});
     setStep(1);
     await loadPage(1);
   };
+
 
   const pickProject = async (project: SuggestedProject) => {
     setChosen(project);

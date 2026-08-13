@@ -119,12 +119,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
             const active = Boolean(item.active);
             const content = (
               <>
-                <item.icon
-                  className={cn(
-                    ICON_CLASS,
-                    active ? "text-primary-foreground" : "text-sidebar-foreground/70",
-                  )}
-                />
+                <item.icon className={cn(ICON_CLASS, "text-current")} />
                 <span className="truncate">{item.title}</span>
               </>
             );

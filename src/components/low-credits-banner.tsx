@@ -50,11 +50,6 @@ export function LowCreditsBanner() {
         >
           Add credits
         </Link>
-
-          className="font-semibold text-primary underline-offset-4 hover:underline"
-        >
-          Add credits
-        </Link>
       </div>
     </div>
   );

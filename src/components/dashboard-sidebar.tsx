@@ -21,6 +21,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+const ICON_CLASS = "h-5 w-5 shrink-0";
+
+type NavItem = {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  active?: boolean;
+};
+
 /**
  * Workspace navigation for the dashboard shell.
  * Project-scoped links resolve against the most recent project when one exists,
@@ -30,11 +39,35 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (path: string) => pathname === path;
 
+  const items: NavItem[] = [
+    { title: "Home", url: "/", icon: Home, active: isActive("/") },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, active: isActive("/dashboard") },
+    {
+      title: "Projects",
+      url: projectId ? "/projects/$projectId" : "/new-project",
+      icon: FolderKanban,
+      active: pathname.startsWith("/projects/"),
+    },
+    {
+      title: "Documentation",
+      url: projectId ? "/projects/$projectId/documents" : "/new-project",
+      icon: FileText,
+      active: pathname.startsWith("/projects/") && pathname.includes("/documents"),
+    },
+    {
+      title: "Viva",
+      url: projectId ? "/projects/$projectId/review" : "/new-project",
+      icon: MessagesSquare,
+      active: pathname.startsWith("/projects/") && pathname.includes("/review"),
+    },
+    { title: "Settings", url: "/settings", icon: Settings, active: isActive("/settings") },
+  ];
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-3 py-4">
         <Link to="/dashboard" className="flex items-center gap-2 font-display">
-          <GraduationCap className="h-5 w-5 shrink-0 text-primary" />
+          <GraduationCap className="h-6 w-6 shrink-0 text-primary" />
           <span className="truncate group-data-[collapsible=icon]:hidden">Project Helper</span>
         </Link>
       </SidebarHeader>
@@ -44,80 +77,28 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/")} tooltip="Home">
-                  <Link to="/">
-                    <Home className="h-4 w-4" />
-                    <span>Home</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/dashboard")} tooltip="Dashboard">
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Projects">
-                  {projectId ? (
-                    <Link to="/projects/$projectId" params={{ projectId }}>
-                      <FolderKanban className="h-4 w-4" />
-                      <span>Projects</span>
-                    </Link>
-                  ) : (
-                    <Link to="/new-project">
-                      <FolderKanban className="h-4 w-4" />
-                      <span>Projects</span>
-                    </Link>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Documentation">
-                  {projectId ? (
-                    <Link to="/projects/$projectId/documents" params={{ projectId }}>
-                      <FileText className="h-4 w-4" />
-                      <span>Documentation</span>
-                    </Link>
-                  ) : (
-                    <Link to="/new-project">
-                      <FileText className="h-4 w-4" />
-                      <span>Documentation</span>
-                    </Link>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Viva">
-                  {projectId ? (
-                    <Link to="/projects/$projectId/review" params={{ projectId }}>
-                      <MessagesSquare className="h-4 w-4" />
-                      <span>Viva</span>
-                    </Link>
-                  ) : (
-                    <Link to="/new-project">
-                      <MessagesSquare className="h-4 w-4" />
-                      <span>Viva</span>
-                    </Link>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/settings")} tooltip="Settings">
-                  <Link to="/settings">
-                    <Settings className="h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={Boolean(item.active)}
+                    tooltip={item.title}
+                    className="py-2.5"
+                  >
+                    {item.url.includes("$") ? (
+                      <Link to={item.url as "/projects/$projectId"} params={{ projectId: projectId! }}>
+                        <item.icon className={ICON_CLASS} />
+                        <span>{item.title}</span>
+                      </Link>
+                    ) : (
+                      <Link to={item.url}>
+                        <item.icon className={ICON_CLASS} />
+                        <span>{item.title}</span>
+                      </Link>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

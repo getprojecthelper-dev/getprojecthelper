@@ -258,7 +258,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       usage: { userId, feature: "plan_sections" },
       name: "implementation_plan",
       instructions:
-        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
+        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. AT MOST ONE section may have kind 'structure' (the project folder/file layout) — never plan two structure sections, and never repeat the folder tree in another section. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
       input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
 
       schema: obj({
@@ -530,7 +530,7 @@ export const generateSection = createServerFn({ method: "POST" })
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
-        structure: reviewed.structure,
+        structure: isStructure ? reviewed.structure : null,
         status: "generated",
       })
       .eq("id", section.id);
@@ -574,7 +574,8 @@ export const fixSectionError = createServerFn({ method: "POST" })
         explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: fixed.insights,
         business_connection: fixed.business_connection,
-        structure: fixed.structure,
+        structure:
+          section.kind === "structure" && playbook.buildsCode ? fixed.structure : null,
         status: "generated",
       })
       .eq("id", section.id);

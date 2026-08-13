@@ -300,7 +300,7 @@ export function MentorChat({
         </div>
 
         <PromptInput
-          className="rounded-2xl border-border/70 bg-card/70 shadow-sm has-[textarea:focus-visible]:border-primary/50 has-[textarea:focus-visible]:ring-0"
+          className="rounded-2xl border-border/70 bg-card/70 shadow-sm has-[[data-slot=input-group-control]:focus-visible]:border-primary/50 has-[[data-slot=input-group-control]:focus-visible]:ring-0"
           onSubmit={(message, event) => {
             event.preventDefault();
             const text = message.text ?? "";

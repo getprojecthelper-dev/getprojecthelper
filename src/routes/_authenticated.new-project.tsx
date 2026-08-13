@@ -119,6 +119,8 @@ function NewProject() {
     setStep(2);
     setPapers(null);
     setSelectedPapers([]);
+    setPaperPage(0);
+
     setBusy(true);
     try {
       const found = await paperSearch({

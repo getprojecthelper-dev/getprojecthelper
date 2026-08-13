@@ -270,3 +270,32 @@
   margin: 8pt 0 4pt;
   break-after: avoid;
 }
+
+/* ---- Code syntax highlighting tokens ---- */
+:root {
+  --syntax-keyword: oklch(0.52 0.19 300);
+  --syntax-string: oklch(0.5 0.13 150);
+  --syntax-number: oklch(0.55 0.15 45);
+  --syntax-comment: oklch(0.62 0.02 285);
+  --syntax-function: oklch(0.52 0.14 250);
+  --syntax-builtin: oklch(0.55 0.14 200);
+  --syntax-punct: oklch(0.5 0.01 285);
+}
+
+.dark {
+  --syntax-keyword: oklch(0.78 0.15 305);
+  --syntax-string: oklch(0.8 0.14 150);
+  --syntax-number: oklch(0.82 0.14 60);
+  --syntax-comment: oklch(0.6 0.015 285);
+  --syntax-function: oklch(0.78 0.13 245);
+  --syntax-builtin: oklch(0.8 0.11 195);
+  --syntax-punct: oklch(0.7 0.01 285);
+}
+
+.tok-keyword { color: var(--syntax-keyword); font-weight: 600; }
+.tok-string { color: var(--syntax-string); }
+.tok-number { color: var(--syntax-number); }
+.tok-comment { color: var(--syntax-comment); font-style: italic; }
+.tok-function { color: var(--syntax-function); }
+.tok-builtin { color: var(--syntax-builtin); }
+.tok-punct { color: var(--syntax-punct); }

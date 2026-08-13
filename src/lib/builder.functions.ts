@@ -399,9 +399,12 @@ async function loadContext(
     )
     .join("\n\n");
 
-  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\n\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+  const playbook = getPlaybook(project.domain as string | null);
 
-  return { section: section as SectionRow & { project_id: string }, brief, supabase };
+  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+
+  return { section: section as SectionRow & { project_id: string }, brief, playbook, supabase };
+
 }
 
 export const generateSection = createServerFn({ method: "POST" })

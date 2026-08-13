@@ -13,7 +13,10 @@ import {
 } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
-const CODES: CurrencyCode[] = ["USD", "INR"];
+/** Currency codes, USD first and the rest alphabetical. */
+const CODES = (Object.keys(CURRENCIES) as CurrencyCode[]).sort((a, b) =>
+  a === "USD" ? -1 : b === "USD" ? 1 : a.localeCompare(b),
+);
 
 interface PricingPacksProps {
   /** Rendered inside each card instead of the default disabled button. */
@@ -23,33 +26,34 @@ interface PricingPacksProps {
 
 /** Shared three-pack price grid with a currency toggle. */
 export function PricingPacks({ action, className }: PricingPacksProps) {
-  const { currency, setCurrency } = useCurrency();
+  const { currency, setCurrency, country, autoDetected } = useCurrency();
 
   return (
     <div className={className}>
-      <div className="flex justify-center">
-        <div
-          role="group"
-          aria-label="Currency"
-          className="flex gap-1 rounded-full border border-border/70 bg-card p-1"
+      <div className="flex flex-col items-center gap-2">
+        <label
+          htmlFor="currency-select"
+          className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+        >
+          Prices for your region
+        </label>
+        <select
+          id="currency-select"
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+          className="h-10 rounded-full border border-border/70 bg-card px-4 text-sm font-medium"
         >
           {CODES.map((code) => (
-            <button
-              key={code}
-              type="button"
-              onClick={() => setCurrency(code)}
-              aria-pressed={currency === code}
-              className={cn(
-                "rounded-full px-4 py-1 text-sm font-medium transition-colors",
-                currency === code
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
+            <option key={code} value={code}>
               {CURRENCIES[code].symbol} {CURRENCIES[code].label}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
+        {autoDetected && country ? (
+          <p className="text-xs text-muted-foreground">
+            Showing {CURRENCIES[currency].label} prices for your location ({country}).
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -77,7 +81,7 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               {pack.credits.toLocaleString()} credits
               <span className="text-xs">
-                ({formatMoney(perCreditPrice(pack, currency), currency, currency === "INR" ? 2 : 3)}{" "}
+                ({formatMoney(perCreditPrice(pack, currency), currency, CURRENCIES[currency].fx >= 20 ? 2 : 3)}{" "}
                 each)
               </span>
             </p>

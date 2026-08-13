@@ -68,20 +68,7 @@ function Overview() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="panel p-5 lg:col-span-2">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <Target className="h-4 w-4" /> Next recommended action
-          </div>
-          <h2 className="mt-3 font-display text-xl">{metrics.nextAction.title}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{metrics.nextAction.reason}</p>
-          <Button asChild className="mt-4">
-            <Link to={NEXT_TO[metrics.nextAction.to] ?? "/projects/$projectId"} params={{ projectId }}>
-              Go there <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="panel p-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Health factors
@@ -101,9 +88,7 @@ function Overview() {
             </ul>
           )}
         </div>
-      </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
         <div className="panel p-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Project details
@@ -114,44 +99,6 @@ function Overview() {
             <Detail label="Purpose" value={labelOf(PURPOSES, project.purpose)} />
             <Detail label="Type" value={project.project_type ?? "—"} />
           </dl>
-        </div>
-
-        <div className="panel p-5">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <CalendarClock className="h-4 w-4" /> Overdue work
-          </div>
-          {overdue.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">No overdue tasks. Nice.</p>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {overdue.slice(0, 5).map((t) => (
-                <li key={t.id} className="flex items-center justify-between gap-2">
-                  <span className="truncate">{t.title}</span>
-                  <span className="shrink-0 text-xs text-destructive">{t.due_date}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="panel p-5">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <AlertTriangle className="h-4 w-4" /> Open risks
-          </div>
-          {openRisks.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              No open risks recorded. Add them in Review.
-            </p>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {openRisks.slice(0, 5).map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-2">
-                  <span className="truncate">{r.title}</span>
-                  <StatusBadge value={r.severity} label={r.severity} />
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
 

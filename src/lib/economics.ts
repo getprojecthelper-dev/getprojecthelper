@@ -33,6 +33,14 @@ export const costPer1kTokens = (model?: string | null) => {
 export const tokenCostUsd = (tokens: number, model?: string | null) =>
   (tokens / 1000) * costPer1kTokens(model);
 
+/** Payment processor cut: percentage plus a fixed fee per charge. */
+export const PAYMENT_FEE_PCT = 0.029;
+export const PAYMENT_FEE_FIXED_USD = 0.3;
+
+/** Processor fees on some revenue spread over a number of charges. */
+export const paymentFeeUsd = (revenueUsd: number, charges: number) =>
+  revenueUsd * PAYMENT_FEE_PCT + charges * PAYMENT_FEE_FIXED_USD;
+
 /** Average USD a sold credit brings in, across the published packs. */
 export const avgPricePerCreditUsd = (() => {
   const credits = CREDIT_PACKS.reduce((s, p) => s + p.credits, 0);
@@ -45,13 +53,15 @@ export const packEconomics = () =>
   CREDIT_PACKS.map((pack) => {
     // 1 credit ≈ 1,000 tokens, so credits map straight onto token cost.
     const cost = tokenCostUsd(pack.credits * 1000);
-    const margin = pack.priceUsd - cost;
+    const fees = paymentFeeUsd(pack.priceUsd, 1);
+    const margin = pack.priceUsd - cost - fees;
     return {
       id: pack.id,
       name: pack.name,
       credits: pack.credits,
       priceUsd: pack.priceUsd,
       costUsd: Number(cost.toFixed(2)),
+      feesUsd: Number(fees.toFixed(2)),
       marginUsd: Number(margin.toFixed(2)),
       marginPct: pack.priceUsd > 0 ? Math.round((margin / pack.priceUsd) * 100) : 0,
     };

@@ -3,7 +3,12 @@
  * *.functions.ts module so the server function file stays a thin wrapper.
  */
 
-import { avgPricePerCreditUsd, tokenCostUsd, type EconomicsWindow } from "@/lib/economics";
+import {
+  avgPricePerCreditUsd,
+  paymentFeeUsd,
+  tokenCostUsd,
+  type EconomicsWindow,
+} from "@/lib/economics";
 
 export interface UnitEconomics {
   window: EconomicsWindow;
@@ -14,6 +19,9 @@ export interface UnitEconomics {
   grossMarginUsd: number;
   grossMarginPct: number;
   freeCreditBurnUsd: number;
+  paymentFeesUsd: number;
+  netMarginUsd: number;
+  netMarginPct: number;
   tokens: number;
   creditsConsumed: number;
   creditsGrantedFree: number;
@@ -98,12 +106,14 @@ export async function computeUnitEconomics(
 
   let creditsSold = 0;
   let creditsGrantedFree = 0;
+  let paidChargeCount = 0;
   const weekRevenue = new Map<string, number>();
   for (const tx of txRows) {
     const delta = Number(tx.delta ?? 0);
     if (delta <= 0) continue;
     if (PAID_KINDS.has(tx.kind)) {
       creditsSold += delta;
+      paidChargeCount += 1;
       const wk = weekKey(tx.created_at);
       weekRevenue.set(wk, (weekRevenue.get(wk) ?? 0) + delta * avgPricePerCreditUsd);
     } else if (FREE_KINDS.has(tx.kind)) {
@@ -122,10 +132,15 @@ export async function computeUnitEconomics(
   const revenueUsd = creditSalesUsd + subscriptionMrrUsd;
   const grossMarginUsd = revenueUsd - aiCostUsd;
 
+  // What the payment processor keeps out of that revenue.
+  const paymentFeesUsd = paymentFeeUsd(revenueUsd, paidChargeCount);
+  const netMarginUsd = grossMarginUsd - paymentFeesUsd;
+
   // Share of consumption funded by credits we gave away.
   const totalIssued = creditsSold + creditsGrantedFree;
   const freeShare = totalIssued > 0 ? creditsGrantedFree / totalIssued : 1;
   const freeCreditBurnUsd = aiCostUsd * freeShare;
+
 
   const signups = (profiles.data ?? []).length;
   const activeUsers = perUser.size;
@@ -153,6 +168,9 @@ export async function computeUnitEconomics(
     grossMarginUsd: round(grossMarginUsd, 4),
     grossMarginPct: revenueUsd > 0 ? Math.round((grossMarginUsd / revenueUsd) * 100) : 0,
     freeCreditBurnUsd: round(freeCreditBurnUsd, 4),
+    paymentFeesUsd: round(paymentFeesUsd, 4),
+    netMarginUsd: round(netMarginUsd, 4),
+    netMarginPct: revenueUsd > 0 ? Math.round((netMarginUsd / revenueUsd) * 100) : 0,
     tokens,
     creditsConsumed: round(creditsConsumed),
     creditsGrantedFree: round(creditsGrantedFree),

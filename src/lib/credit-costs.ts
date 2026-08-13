@@ -47,8 +47,5 @@ export const formatCredits = (value: number) =>
 
 export const STARTER_CREDITS = 50;
 
-export const CREDIT_PACKS = [
-  { id: "starter", name: "Starter", credits: 200, priceUsd: 5, blurb: "A few sections and revisions." },
-  { id: "builder", name: "Builder", credits: 550, priceUsd: 12, blurb: "A full project, start to finish.", popular: true },
-  { id: "semester", name: "Semester", credits: 1200, priceUsd: 20, blurb: "Multiple projects and a viva." },
-] as const;
+/** Public price list lives in pricing.ts; re-exported here for older imports. */
+export { PACKS as CREDIT_PACKS } from "@/lib/pricing";

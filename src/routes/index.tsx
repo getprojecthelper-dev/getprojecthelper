@@ -1,13 +1,11 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, GraduationCap } from "lucide-react";
 
-
 import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";
-
 import { LifecycleStepper } from "@/components/lifecycle-stepper";
-import { MentorDialogue } from "@/components/mentor-dialogue";
 import { Testimonials } from "@/components/testimonials";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
@@ -136,9 +134,6 @@ function Landing() {
         </section>
 
 
-        <section id="mentor">
-          <MentorDialogue />
-        </section>
 
         <section className="border-t border-border bg-secondary/40">
           <div className="mx-auto max-w-6xl px-5 py-20">

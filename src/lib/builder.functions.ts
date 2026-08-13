@@ -74,20 +74,22 @@ export const suggestProjects = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().min(3).max(600),
+        idea: z.string().trim().max(600).default(""),
         domain: z.string().min(1).max(40),
+        difficulty: z.enum(["easy", "intermediate", "hard"]).optional(),
         page: z.number().int().min(1).max(20),
         exclude: z.array(z.string()).max(60).default([]),
       })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
+    const wanted = data.difficulty ?? "any";
     const result = await generateJson<{ projects: SuggestedProject[] }>({
       usage: { userId: context.userId, feature: "suggest_projects" },
       name: "project_suggestions",
       instructions:
-        "You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea and domain. Keep descriptions to 2-3 sentences. Tech stack: 5-8 concrete tools/libraries.",
-      input: `Idea: ${data.idea}\nDomain: ${data.domain}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas.`,
+        "You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. Tech stack: 5-8 concrete tools/libraries. The difficulty field must be exactly one of: Easy, Intermediate, Hard.",
+      input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\nRequested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
       schema: obj({
         projects: {
           type: "array",
@@ -102,6 +104,7 @@ export const suggestProjects = createServerFn({ method: "POST" })
     });
     return result.projects.slice(0, 4);
   });
+
 
 /* ------------------------------------------------------------------ */
 /* 1b. Find research papers for the chosen project                     */

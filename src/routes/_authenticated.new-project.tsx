@@ -63,6 +63,23 @@ export const Route = createFileRoute("/_authenticated/new-project")({
 
 const STEPS = ["Your idea", "Pick a project", "Research papers", "Dataset", "Finalise"];
 
+const DIFFICULTIES = [
+  { value: "easy", label: "Easy" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "hard", label: "Hard" },
+] as const;
+
+type Difficulty = (typeof DIFFICULTIES)[number]["value"];
+
+const difficultyTone = (value: string) => {
+  const key = value.toLowerCase();
+  if (key.includes("easy") || key.includes("beginner")) return "border-success/30 bg-success/10 text-success";
+  if (key.includes("hard") || key.includes("advanced"))
+    return "border-destructive/30 bg-destructive/10 text-destructive";
+  return "border-info/30 bg-info/10 text-info";
+};
+
+
 function NewProject() {
   const navigate = useNavigate();
   const suggest = withMeter("suggest_projects", useServerFn(suggestProjects));
@@ -72,6 +89,8 @@ function NewProject() {
 
 
   const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<"idea" | "suggest">("idea");
+  const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
   const [domain, setDomain] = useState("data_science");
   const [page, setPage] = useState(1);
@@ -88,15 +107,23 @@ function NewProject() {
   const needsDataset = isDataDomain(domain);
   const seen = Object.values(pages).flat().map((p) => p.title);
 
-  const loadPage = async (target: number) => {
-    if (pages[target]) {
+  const loadPage = async (target: number, force = false) => {
+    if (!force && pages[target]) {
       setPage(target);
       return;
     }
     setBusy(true);
     try {
-      const projects = await suggest({ data: { idea, domain, page: target, exclude: seen } });
-      setPages((p) => ({ ...p, [target]: projects }));
+      const projects = await suggest({
+        data: {
+          idea: mode === "idea" ? idea : "",
+          domain,
+          page: target,
+          exclude: seen,
+          ...(mode === "suggest" ? { difficulty } : {}),
+        },
+      });
+      setPages((p) => (force ? { [target]: projects } : { ...p, [target]: projects }));
       setPage(target);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Couldn't load suggestions.");
@@ -106,13 +133,14 @@ function NewProject() {
   };
 
   const startSuggestions = async () => {
-    if (idea.trim().length < 3) {
+    if (mode === "idea" && idea.trim().length < 3) {
       toast.error("Tell us a little about the project you want to build.");
       return;
     }
     setStep(1);
-    await loadPage(1);
+    await loadPage(1, true);
   };
+
 
   const pickProject = async (project: SuggestedProject) => {
     setChosen(project);
@@ -223,16 +251,42 @@ function NewProject() {
 
         {step === 0 ? (
           <div className="panel space-y-5 p-6">
-            <div className="space-y-2">
-              <Label htmlFor="idea">Enter the project idea you want to build</Label>
-              <Textarea
-                id="idea"
-                rows={4}
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                placeholder="e.g. Something that predicts flight delays from historical data"
-              />
+            <div className="flex gap-2">
+              {(
+                [
+                  ["idea", "I have an idea"],
+                  ["suggest", "Suggest a project"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setMode(value)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-sm",
+                    mode === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
+
+            {mode === "idea" ? (
+              <div className="space-y-2">
+                <Label htmlFor="idea">Enter the project idea you want to build</Label>
+                <Textarea
+                  id="idea"
+                  rows={4}
+                  value={idea}
+                  onChange={(e) => setIdea(e.target.value)}
+                  placeholder="e.g. Something that predicts flight delays from historical data"
+                />
+              </div>
+            ) : null}
+
             <div className="space-y-2">
               <Label>Which domain does it belong to?</Label>
               <Select value={domain} onValueChange={setDomain}>
@@ -253,6 +307,30 @@ function NewProject() {
                   : "This domain skips datasets and goes straight to implementation."}
               </p>
             </div>
+
+            {mode === "suggest" ? (
+              <div className="space-y-2">
+                <Label>How hard should it be?</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DIFFICULTIES.map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() => setDifficulty(d.value)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-sm",
+                        difficulty === d.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground",
+                      )}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="flex justify-end border-t border-border pt-4">
               <Button disabled={busy} onClick={() => void startSuggestions()}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -261,6 +339,7 @@ function NewProject() {
             </div>
           </div>
         ) : null}
+
 
         {step === 1 ? (
           <div className="space-y-4">
@@ -289,7 +368,14 @@ function NewProject() {
                 <div key={project.title} className="panel flex flex-col gap-3 p-5">
                   <div>
                     <h2 className="font-display text-lg">{project.title}</h2>
-                    <p className="text-xs text-muted-foreground">{project.difficulty}</p>
+                    <span
+                      className={cn(
+                        "mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium",
+                        difficultyTone(project.difficulty),
+                      )}
+                    >
+                      {project.difficulty}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{project.description}</p>
                   <div className="flex flex-wrap gap-1.5">

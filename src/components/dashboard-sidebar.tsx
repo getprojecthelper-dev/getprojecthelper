@@ -131,10 +131,9 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
                   isActive={active}
                   tooltip={item.title}
                   className={cn(
-                    "h-11 rounded-xl px-3 text-[15px] font-medium transition-all",
-                    active
-                      ? "bg-primary/15 text-primary shadow-none hover:bg-primary/20 hover:text-primary"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                    "h-11 rounded-xl px-3 text-[15px] font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                    active &&
+                      "data-[active=true]:bg-primary/15 data-[active=true]:text-primary hover:data-[active=true]:bg-primary/20 hover:data-[active=true]:text-primary",
                   )}
                 >
                   {item.url.includes("$") ? (

@@ -289,7 +289,23 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const { error: sectionError } = await supabase.from("build_sections").insert(rows);
     if (sectionError) throw new Error("The implementation sections could not be saved.");
 
+    if (data.papers.length > 0) {
+      await supabase.from("research_sources").insert(
+        data.papers.map((p) => ({
+          user_id: userId,
+          project_id: project.id,
+          title: p.title,
+          authors: p.authors || null,
+          year: Number.parseInt(p.year, 10) || null,
+          source_type: "paper",
+          url: p.pdf_url ?? p.url,
+          notes: [p.summary, p.relevance].filter(Boolean).join("\n\n") || null,
+        })),
+      );
+    }
+
     return { projectId: project.id };
+
   });
 
 /* ------------------------------------------------------------------ */

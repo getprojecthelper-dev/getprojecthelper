@@ -23,6 +23,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
+import { Route as AuthenticatedProjectsProjectIdBudgetRouteImport } from './routes/_authenticated.projects.$projectId.budget'
 import { Route as AuthenticatedProjectsProjectIdBuildRouteImport } from './routes/_authenticated.projects.$projectId.build'
 import { Route as AuthenticatedProjectsProjectIdDocumentsRouteImport } from './routes/_authenticated.projects.$projectId.documents'
 import { Route as AuthenticatedProjectsProjectIdExperimentsRouteImport } from './routes/_authenticated.projects.$projectId.experiments'
@@ -30,7 +31,10 @@ import { Route as AuthenticatedProjectsProjectIdMentorRouteImport } from './rout
 import { Route as AuthenticatedProjectsProjectIdRequirementsRouteImport } from './routes/_authenticated.projects.$projectId.requirements'
 import { Route as AuthenticatedProjectsProjectIdResearchRouteImport } from './routes/_authenticated.projects.$projectId.research'
 import { Route as AuthenticatedProjectsProjectIdReviewRouteImport } from './routes/_authenticated.projects.$projectId.review'
+import { Route as AuthenticatedProjectsProjectIdRisksRouteImport } from './routes/_authenticated.projects.$projectId.risks'
+import { Route as AuthenticatedProjectsProjectIdScheduleRouteImport } from './routes/_authenticated.projects.$projectId.schedule'
 import { Route as AuthenticatedProjectsProjectIdShowcaseRouteImport } from './routes/_authenticated.projects.$projectId.showcase'
+import { Route as AuthenticatedProjectsProjectIdStakeholdersRouteImport } from './routes/_authenticated.projects.$projectId.stakeholders'
 import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
 import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
 import { Route as AuthenticatedProjectsProjectIdMentorIndexRouteImport } from './routes/_authenticated.projects.$projectId.mentor.index'
@@ -107,6 +111,12 @@ const AuthenticatedProjectsProjectIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const AuthenticatedProjectsProjectIdBudgetRoute =
+  AuthenticatedProjectsProjectIdBudgetRouteImport.update({
+    id: '/budget',
+    path: '/budget',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
 const AuthenticatedProjectsProjectIdBuildRoute =
   AuthenticatedProjectsProjectIdBuildRouteImport.update({
     id: '/build',
@@ -149,10 +159,28 @@ const AuthenticatedProjectsProjectIdReviewRoute =
     path: '/review',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const AuthenticatedProjectsProjectIdRisksRoute =
+  AuthenticatedProjectsProjectIdRisksRouteImport.update({
+    id: '/risks',
+    path: '/risks',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdScheduleRoute =
+  AuthenticatedProjectsProjectIdScheduleRouteImport.update({
+    id: '/schedule',
+    path: '/schedule',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
 const AuthenticatedProjectsProjectIdShowcaseRoute =
   AuthenticatedProjectsProjectIdShowcaseRouteImport.update({
     id: '/showcase',
     path: '/showcase',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdStakeholdersRoute =
+  AuthenticatedProjectsProjectIdStakeholdersRouteImport.update({
+    id: '/stakeholders',
+    path: '/stakeholders',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
 const AuthenticatedProjectsProjectIdTasksRoute =
@@ -193,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
@@ -200,7 +229,10 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
+  '/projects/$projectId/risks': typeof AuthenticatedProjectsProjectIdRisksRoute
+  '/projects/$projectId/schedule': typeof AuthenticatedProjectsProjectIdScheduleRoute
   '/projects/$projectId/showcase': typeof AuthenticatedProjectsProjectIdShowcaseRoute
+  '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
@@ -219,13 +251,17 @@ export interface FileRoutesByTo {
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
+  '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
+  '/projects/$projectId/risks': typeof AuthenticatedProjectsProjectIdRisksRoute
+  '/projects/$projectId/schedule': typeof AuthenticatedProjectsProjectIdScheduleRoute
   '/projects/$projectId/showcase': typeof AuthenticatedProjectsProjectIdShowcaseRoute
+  '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
@@ -247,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/_authenticated/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/_authenticated/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
@@ -254,7 +291,10 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/_authenticated/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/_authenticated/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
+  '/_authenticated/projects/$projectId/risks': typeof AuthenticatedProjectsProjectIdRisksRoute
+  '/_authenticated/projects/$projectId/schedule': typeof AuthenticatedProjectsProjectIdScheduleRoute
   '/_authenticated/projects/$projectId/showcase': typeof AuthenticatedProjectsProjectIdShowcaseRoute
+  '/_authenticated/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
@@ -276,6 +316,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/chat'
     | '/projects/$projectId'
+    | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
@@ -283,7 +324,10 @@ export interface FileRouteTypes {
     | '/projects/$projectId/requirements'
     | '/projects/$projectId/research'
     | '/projects/$projectId/review'
+    | '/projects/$projectId/risks'
+    | '/projects/$projectId/schedule'
     | '/projects/$projectId/showcase'
+    | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId/'
@@ -302,13 +346,17 @@ export interface FileRouteTypes {
     | '/new-project'
     | '/settings'
     | '/api/chat'
+    | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
     | '/projects/$projectId/requirements'
     | '/projects/$projectId/research'
     | '/projects/$projectId/review'
+    | '/projects/$projectId/risks'
+    | '/projects/$projectId/schedule'
     | '/projects/$projectId/showcase'
+    | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId'
@@ -329,6 +377,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/api/chat'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/projects/$projectId/budget'
     | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
     | '/_authenticated/projects/$projectId/experiments'
@@ -336,7 +385,10 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/requirements'
     | '/_authenticated/projects/$projectId/research'
     | '/_authenticated/projects/$projectId/review'
+    | '/_authenticated/projects/$projectId/risks'
+    | '/_authenticated/projects/$projectId/schedule'
     | '/_authenticated/projects/$projectId/showcase'
+    | '/_authenticated/projects/$projectId/stakeholders'
     | '/_authenticated/projects/$projectId/tasks'
     | '/_authenticated/projects/$projectId/testing'
     | '/_authenticated/projects/$projectId/'
@@ -454,6 +506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdIndexRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/budget': {
+      id: '/_authenticated/projects/$projectId/budget'
+      path: '/budget'
+      fullPath: '/projects/$projectId/budget'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdBudgetRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
     '/_authenticated/projects/$projectId/build': {
       id: '/_authenticated/projects/$projectId/build'
       path: '/build'
@@ -503,11 +562,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdReviewRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/risks': {
+      id: '/_authenticated/projects/$projectId/risks'
+      path: '/risks'
+      fullPath: '/projects/$projectId/risks'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdRisksRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/schedule': {
+      id: '/_authenticated/projects/$projectId/schedule'
+      path: '/schedule'
+      fullPath: '/projects/$projectId/schedule'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdScheduleRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
     '/_authenticated/projects/$projectId/showcase': {
       id: '/_authenticated/projects/$projectId/showcase'
       path: '/showcase'
       fullPath: '/projects/$projectId/showcase'
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdShowcaseRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/stakeholders': {
+      id: '/_authenticated/projects/$projectId/stakeholders'
+      path: '/stakeholders'
+      fullPath: '/projects/$projectId/stakeholders'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdStakeholdersRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
     '/_authenticated/projects/$projectId/tasks': {
@@ -560,6 +640,7 @@ const AuthenticatedProjectsProjectIdMentorRouteWithChildren =
   )
 
 interface AuthenticatedProjectsProjectIdRouteChildren {
+  AuthenticatedProjectsProjectIdBudgetRoute: typeof AuthenticatedProjectsProjectIdBudgetRoute
   AuthenticatedProjectsProjectIdBuildRoute: typeof AuthenticatedProjectsProjectIdBuildRoute
   AuthenticatedProjectsProjectIdDocumentsRoute: typeof AuthenticatedProjectsProjectIdDocumentsRoute
   AuthenticatedProjectsProjectIdExperimentsRoute: typeof AuthenticatedProjectsProjectIdExperimentsRoute
@@ -567,7 +648,10 @@ interface AuthenticatedProjectsProjectIdRouteChildren {
   AuthenticatedProjectsProjectIdRequirementsRoute: typeof AuthenticatedProjectsProjectIdRequirementsRoute
   AuthenticatedProjectsProjectIdResearchRoute: typeof AuthenticatedProjectsProjectIdResearchRoute
   AuthenticatedProjectsProjectIdReviewRoute: typeof AuthenticatedProjectsProjectIdReviewRoute
+  AuthenticatedProjectsProjectIdRisksRoute: typeof AuthenticatedProjectsProjectIdRisksRoute
+  AuthenticatedProjectsProjectIdScheduleRoute: typeof AuthenticatedProjectsProjectIdScheduleRoute
   AuthenticatedProjectsProjectIdShowcaseRoute: typeof AuthenticatedProjectsProjectIdShowcaseRoute
+  AuthenticatedProjectsProjectIdStakeholdersRoute: typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   AuthenticatedProjectsProjectIdTasksRoute: typeof AuthenticatedProjectsProjectIdTasksRoute
   AuthenticatedProjectsProjectIdTestingRoute: typeof AuthenticatedProjectsProjectIdTestingRoute
   AuthenticatedProjectsProjectIdIndexRoute: typeof AuthenticatedProjectsProjectIdIndexRoute
@@ -575,6 +659,8 @@ interface AuthenticatedProjectsProjectIdRouteChildren {
 
 const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectIdRouteChildren =
   {
+    AuthenticatedProjectsProjectIdBudgetRoute:
+      AuthenticatedProjectsProjectIdBudgetRoute,
     AuthenticatedProjectsProjectIdBuildRoute:
       AuthenticatedProjectsProjectIdBuildRoute,
     AuthenticatedProjectsProjectIdDocumentsRoute:
@@ -589,8 +675,14 @@ const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectI
       AuthenticatedProjectsProjectIdResearchRoute,
     AuthenticatedProjectsProjectIdReviewRoute:
       AuthenticatedProjectsProjectIdReviewRoute,
+    AuthenticatedProjectsProjectIdRisksRoute:
+      AuthenticatedProjectsProjectIdRisksRoute,
+    AuthenticatedProjectsProjectIdScheduleRoute:
+      AuthenticatedProjectsProjectIdScheduleRoute,
     AuthenticatedProjectsProjectIdShowcaseRoute:
       AuthenticatedProjectsProjectIdShowcaseRoute,
+    AuthenticatedProjectsProjectIdStakeholdersRoute:
+      AuthenticatedProjectsProjectIdStakeholdersRoute,
     AuthenticatedProjectsProjectIdTasksRoute:
       AuthenticatedProjectsProjectIdTasksRoute,
     AuthenticatedProjectsProjectIdTestingRoute:

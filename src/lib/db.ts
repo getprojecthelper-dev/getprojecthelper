@@ -28,6 +28,92 @@ export type ProjectChildTable =
   | "experiments"
   | "risks";
 
+export interface Stakeholder {
+  id: string;
+  user_id: string;
+  project_id: string;
+  name: string;
+  role: string | null;
+  influence: string | null;
+  interest: string | null;
+  contact: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RaciAssignment {
+  id: string;
+  user_id: string;
+  project_id: string;
+  stakeholder_id: string | null;
+  task_name: string;
+  responsibility: "R" | "A" | "C" | "I";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WbsItem {
+  id: string;
+  user_id: string;
+  project_id: string;
+  code: string;
+  name: string;
+  parent_id: string | null;
+  description: string | null;
+  owner: string | null;
+  status: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ScheduleTask {
+  id: string;
+  user_id: string;
+  project_id: string;
+  name: string;
+  start_date: string | null;
+  end_date: string | null;
+  duration_days: number | null;
+  dependencies: string | null;
+  milestone: boolean;
+  status: string;
+  owner: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BudgetLine {
+  id: string;
+  user_id: string;
+  project_id: string;
+  category: string;
+  item_name: string | null;
+  planned: number;
+  actual: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StatusReport {
+  id: string;
+  user_id: string;
+  project_id: string;
+  period: string;
+  overall_status: string | null;
+  accomplishments: string | null;
+  blockers: string | null;
+  next_steps: string | null;
+  risks_snapshot: string | null;
+  schedule_snapshot: string | null;
+  budget_snapshot: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const bundleKey = (projectId: string) => ["project-bundle", projectId] as const;
 export const projectsKey = ["projects"] as const;
 
@@ -133,24 +219,51 @@ export interface ProjectBundle {
   docSections: DocumentSection[];
   experiments: Experiment[];
   risks: Risk[];
+  stakeholders: Stakeholder[];
+  raci: RaciAssignment[];
+  wbs: WbsItem[];
+  schedule: ScheduleTask[];
+  budget: BudgetLine[];
+  statusReports: StatusReport[];
 }
 
 export function useProjectBundle(projectId: string) {
   return useQuery({
     queryKey: bundleKey(projectId),
     queryFn: async (): Promise<ProjectBundle> => {
-      const [project, tasks, requirements, tests, sources, notes, docSections, experiments, risks] =
-        await Promise.all([
-          supabase.from("projects").select("*").eq("id", projectId).maybeSingle(),
-          supabase.from("tasks").select("*").eq("project_id", projectId).order("created_at"),
-          supabase.from("requirements").select("*").eq("project_id", projectId).order("code"),
-          supabase.from("test_cases").select("*").eq("project_id", projectId).order("created_at"),
-          supabase.from("research_sources").select("*").eq("project_id", projectId).order("created_at"),
-          supabase.from("research_notes").select("*").eq("project_id", projectId).order("created_at"),
-          supabase.from("document_sections").select("*").eq("project_id", projectId).order("position"),
-          supabase.from("experiments").select("*").eq("project_id", projectId).order("created_at"),
-          supabase.from("risks").select("*").eq("project_id", projectId).order("created_at"),
-        ]);
+      const [
+        project,
+        tasks,
+        requirements,
+        tests,
+        sources,
+        notes,
+        docSections,
+        experiments,
+        risks,
+        stakeholders,
+        raci,
+        wbs,
+        schedule,
+        budget,
+        statusReports,
+      ] = await Promise.all([
+        supabase.from("projects").select("*").eq("id", projectId).maybeSingle(),
+        supabase.from("tasks").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("requirements").select("*").eq("project_id", projectId).order("code"),
+        supabase.from("test_cases").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("research_sources").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("research_notes").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("document_sections").select("*").eq("project_id", projectId).order("position"),
+        supabase.from("experiments").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("risks").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("stakeholders").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("raci_assignments").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("wbs_items").select("*").eq("project_id", projectId).order("position"),
+        supabase.from("schedule_tasks").select("*").eq("project_id", projectId).order("position"),
+        supabase.from("budget_lines").select("*").eq("project_id", projectId).order("created_at"),
+        supabase.from("status_reports").select("*").eq("project_id", projectId).order("created_at", { ascending: false }),
+      ]);
 
       if (project.error) fail("We couldn't load this project.", project.error);
       if (!project.data) throw new Error("Project not found, or you don't have access to it.");
@@ -165,6 +278,12 @@ export function useProjectBundle(projectId: string) {
         docSections: docSections.data ?? [],
         experiments: experiments.data ?? [],
         risks: risks.data ?? [],
+        stakeholders: (stakeholders.data ?? []) as Stakeholder[],
+        raci: (raci.data ?? []) as RaciAssignment[],
+        wbs: (wbs.data ?? []) as WbsItem[],
+        schedule: (schedule.data ?? []) as ScheduleTask[],
+        budget: (budget.data ?? []) as BudgetLine[],
+        statusReports: (statusReports.data ?? []) as StatusReport[],
       };
     },
     retry: false,
@@ -213,6 +332,55 @@ export function useRecordMutations<T extends ProjectChildTable>(table: T, projec
 
   const update = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: Tables[T]["Update"] }) => {
+      const { error } = await from().update(values).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError,
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await from().delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError,
+  });
+
+  return { create, update, remove };
+}
+
+export type PmTable =
+  | "schedule_tasks"
+  | "stakeholders"
+  | "raci_assignments"
+  | "wbs_items"
+  | "budget_lines"
+  | "status_reports";
+
+/** CRUD helper for project-management tables not in the generated child table set. */
+export function usePmMutations(table: PmTable, projectId: string) {
+  const qc = useQueryClient();
+  const from = () => supabase.from(table) as unknown as LooseBuilder;
+  const invalidate = () => void qc.invalidateQueries({ queryKey: bundleKey(projectId) });
+  const onError = (error: unknown) => {
+    console.error(error);
+    toast.error("That change couldn't be saved. Please try again.");
+  };
+
+  const create = useMutation({
+    mutationFn: async (values: Record<string, unknown>) => {
+      const { data, error } = await from().insert({ ...values, project_id: projectId }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: invalidate,
+    onError,
+  });
+
+  const update = useMutation({
+    mutationFn: async ({ id, values }: { id: string; values: Record<string, unknown> }) => {
       const { error } = await from().update(values).eq("id", id);
       if (error) throw error;
     },

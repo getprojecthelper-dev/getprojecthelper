@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileText,
   FolderTree,
   Loader2,
   Lock,

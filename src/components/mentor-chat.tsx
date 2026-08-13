@@ -144,16 +144,16 @@ export function MentorChat({
   });
 
   return (
-    <div className={cn("flex min-h-0 w-full flex-1 flex-col overflow-hidden", className)}>
+    <div className={cn("flex h-full w-full flex-1 flex-col overflow-hidden", className)}>
       <Conversation className="min-h-0 flex-1">
         <ConversationContent
           className={cn(
-            "mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6",
-            messages.length === 0 && "min-h-full justify-center",
+            "mx-auto flex w-full max-w-5xl flex-col gap-6 px-5 py-6",
+            messages.length === 0 && "h-full justify-center",
           )}
         >
           {messages.length === 0 ? (
-            <ConversationEmptyState className="my-auto gap-6 p-0">
+            <ConversationEmptyState className="h-full gap-6 p-0">
               <img
                 src={mentorMark}
                 alt="AI Mentor"
@@ -175,7 +175,7 @@ export function MentorChat({
                     key={starter}
                     type="button"
                     onClick={() => ask(starter)}
-                    className="rounded-xl border border-border/70 bg-card/60 px-3.5 py-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground"
+                    className="rounded-xl border border-border/70 bg-card/60 px-3.5 py-3 text-left text-sm text-muted-foreground"
                   >
                     {starter}
                   </button>
@@ -209,7 +209,7 @@ export function MentorChat({
       </Conversation>
 
       <div className="shrink-0 border-t border-border/60 bg-background/80 px-4 py-3 backdrop-blur">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className="mx-auto w-full max-w-5xl">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Dialog open={importOpen} onOpenChange={setImportOpen}>
             <DialogTrigger asChild>
@@ -244,7 +244,7 @@ export function MentorChat({
                           )
                         }
                         className={cn(
-                          "flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/40",
+                          "flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left text-sm",
                           selected && "border-primary/60 bg-primary/5",
                           full && "opacity-50",
                         )}

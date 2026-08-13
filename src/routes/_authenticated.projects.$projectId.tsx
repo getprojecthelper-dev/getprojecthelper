@@ -19,7 +19,6 @@ import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   component: WorkspaceLayout,
@@ -83,23 +82,6 @@ function WorkspaceLayout() {
         </nav>
 
         <div className="min-w-0 flex-1">
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-            {NAV.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                params={{ projectId }}
-                activeOptions={{ exact: "exact" in item ? item.exact : false }}
-                className={cn(
-                  "whitespace-nowrap rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground",
-                  "data-[status=active]:border-primary data-[status=active]:bg-primary/10 data-[status=active]:text-primary",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
           {isPending ? (
             <LoadingState label="Loading workspace…" />
           ) : isError ? (

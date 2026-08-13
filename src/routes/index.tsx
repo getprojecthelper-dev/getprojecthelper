@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, GraduationCap, Sparkles } from "lucide-react";
+import { ArrowRight, GraduationCap } from "lucide-react";
+
 
 import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";
@@ -153,20 +154,6 @@ function Landing() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-3xl px-5 py-20 text-center">
-          <Sparkles className="mx-auto h-6 w-6 text-primary" />
-          <h2 className="mt-4 font-display text-3xl font-semibold">
-            Start the project you keep postponing
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Pick a domain, define the objective, and get a plan you can actually follow.
-          </p>
-          <Button asChild size="lg" className="mt-7">
-            <Link to="/auth" search={{ mode: "signup" }}>
-              Start your project
-            </Link>
-          </Button>
-        </section>
       </main>
 
       <footer className="border-t border-border py-8">

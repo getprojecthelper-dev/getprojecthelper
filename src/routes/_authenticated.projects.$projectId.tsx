@@ -61,7 +61,9 @@ function WorkspaceLayout() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl gap-6 px-5 py-6">
+      <div
+        className={`mx-auto flex gap-6 px-5 py-6 ${onMentor ? "w-full max-w-none" : "max-w-7xl"}`}
+      >
         <nav className="hidden w-56 shrink-0 lg:block">
           {onMentor ? (
             <div className="sticky top-24 flex h-[calc(100vh-9rem)]">

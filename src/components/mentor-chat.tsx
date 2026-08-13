@@ -312,7 +312,8 @@ export function MentorChat({
           <PromptInputTextarea
             ref={textareaRef}
             autoFocus
-            rows={2}
+            rows={1}
+            className="max-h-48 min-h-[52px] py-3.5 text-sm"
             placeholder="Ask your mentor about this project…"
           />
           <PromptInputFooter className="justify-between">

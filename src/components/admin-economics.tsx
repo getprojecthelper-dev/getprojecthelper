@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Coins, Flame, TrendingUp, Wallet } from "lucide-react";
 import { useState } from "react";
 
+import { AdminProfitCalculator } from "@/components/admin-profit-calculator";
 import { MetricCard } from "@/components/metrics";
 import { Button } from "@/components/ui/button";
 import { getUnitEconomics } from "@/lib/admin.functions";
@@ -81,7 +82,7 @@ export function AdminEconomics() {
               value={usd(data.grossMarginUsd)}
               hint={
                 data.revenueUsd > 0
-                  ? `${data.grossMarginPct}% margin`
+                  ? `${data.grossMarginPct}% gross · ${usd(data.netMarginUsd)} net after ${usd(data.paymentFeesUsd)} fees`
                   : "No revenue yet — every run is a loss"
               }
               icon={<TrendingUp className="h-4 w-4" />}
@@ -137,6 +138,8 @@ export function AdminEconomics() {
               <dl className="mt-4 space-y-2 text-sm">
                 {[
                   ["Price per credit sold", usd(data.avgPricePerCreditUsd)],
+                  ["Payment fees", usd(data.paymentFeesUsd)],
+                  ["Net margin", `${usd(data.netMarginUsd)} (${data.netMarginPct}%)`],
                   ["Cost per credit consumed", usd(data.avgCostPerCreditUsd)],
                   ["Signups in window", String(data.signups)],
                   ["AI cost per signup", usd(data.costPerSignupUsd)],
@@ -179,7 +182,8 @@ export function AdminEconomics() {
               )}
             </div>
 
-            <div className="panel p-5">
+            <div className="panel space-y-6 p-0">
+              <div className="panel border-0 p-5 shadow-none">
               <h3 className="font-display text-base font-semibold">Break-even per pack</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 {packs.map((p) => (
@@ -187,7 +191,7 @@ export function AdminEconomics() {
                     <span>
                       {p.name}
                       <span className="ml-2 text-xs text-muted-foreground">
-                        {p.credits} cr · {usd(p.priceUsd)}
+                        {p.credits} cr · {usd(p.priceUsd)} · {usd(p.feesUsd)} fees
                       </span>
                     </span>
                     <span
@@ -202,7 +206,8 @@ export function AdminEconomics() {
                 ))}
               </ul>
               <p className="mt-4 text-xs text-muted-foreground">
-                Margin assumes every credit in the pack is consumed. Unused credits are pure profit.
+                Margin is after AI cost and payment fees, assuming every credit is consumed.
+                Unused credits are pure profit.
               </p>
             </div>
           </div>

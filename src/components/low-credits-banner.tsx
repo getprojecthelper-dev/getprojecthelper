@@ -41,11 +41,16 @@ export function LowCreditsBanner() {
         </span>
         <span className="text-muted-foreground">
           {empty
-            ? "Redeem a code to keep generating."
-            : "Top up before your next generation is interrupted."}
+            ? "Redeem a code or grab a pack to keep generating."
+            : `Top up from ${formatMoney(cheapest.priceUsd, "USD")} for ${cheapest.credits} credits.`}
         </span>
         <Link
           to="/credits"
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Add credits
+        </Link>
+
           className="font-semibold text-primary underline-offset-4 hover:underline"
         >
           Add credits

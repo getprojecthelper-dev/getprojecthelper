@@ -246,12 +246,15 @@ export const createGuidedProject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    const playbook = getPlaybook(data.domain);
+
     const plan = await generateJson<{ sections: SectionPlan[] }>({
       usage: { userId, feature: "plan_sections" },
       name: "implementation_plan",
       instructions:
-        "You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words, e.g. 'Problem Statement', 'Create Project Structure', 'Install Libraries', 'Load the Data', 'Clean the Data', 'Train the Model', 'Test the App', 'Deploy the Project'. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, tech stack, objective), never code. Exactly one section must have kind 'structure' (creating the project folder/file structure) and it should come early. All other sections use kind 'step'. Keep 'question' and 'objective' in plain, short language too.",
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\n${data.domain === "project_management" ? "This is a Project Management student project: the steps are management deliverables (project charter, stakeholder map, scope & WBS, schedule/Gantt, budget, risk register, status reporting, closure & lessons learned), not software features. Use documents, tables and templates instead of programming code.\n" : ""}\nReturn the sections in execution order — only as many as this project actually needs.`,
+        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
+      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
+
       schema: obj({
         sections: {
           type: "array",

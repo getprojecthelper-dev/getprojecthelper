@@ -61,6 +61,10 @@ function CreditsPage() {
   const redeemMutation = useMutation({
     mutationFn: (value: string) => redeem({ data: { code: value } }),
     onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
       setCode("");
       void qc.invalidateQueries({ queryKey: ["credits"] });
       toast.success(`${formatCredits(result.credits)} credits added to your balance.`);

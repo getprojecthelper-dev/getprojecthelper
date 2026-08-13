@@ -209,8 +209,12 @@ export function AdminEconomics() {
                 Margin is after AI cost and payment fees, assuming every credit is consumed.
                 Unused credits are pure profit.
               </p>
+              </div>
             </div>
           </div>
+
+          <AdminProfitCalculator />
+
         </>
       )}
     </section>

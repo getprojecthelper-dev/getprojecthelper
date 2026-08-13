@@ -163,7 +163,7 @@ export const generateDocument = createServerFn({ method: "POST" })
       name: "academic_document",
       instructions: `You are an academic writing assistant for students. You write a complete ${data.docTypeLabel} in the ${data.formatLabel} template. ${data.formatBrief}
 Rules:
-- Use ONLY the student's real project data supplied below; never invent results that contradict it. If data is missing, write it in a clearly generic but plausible academic way.
+- RELEVANCE IS MANDATORY: every section must be about the student's actual project below — its problem, domain, tech stack, implementation steps, requirements, tests and results. Never write about a generic or different topic, and never invent results that contradict the data. If data is missing, extrapolate conservatively from what IS there and keep it on-topic.
 - Write full, publishable prose (not bullet fragments) — each section several paragraphs where appropriate.
 - Sections must follow the conventions of a ${data.docTypeLabel} in this template.
 - The "latex" field must be a COMPLETE, compile-ready LaTeX document for Overleaf using the correct document class and preamble for ${data.formatLabel}, including title, authors with affiliations, abstract, all sections, and a bibliography (thebibliography environment with the references used). Escape LaTeX special characters properly.`,

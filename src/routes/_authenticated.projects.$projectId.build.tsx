@@ -6,10 +6,13 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileSpreadsheet,
   FileText,
+  FileType,
   FolderTree,
   Loader2,
   Lock,
+  Presentation,
   Sparkles,
   Wrench,
 } from "lucide-react";
@@ -24,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
-import { getFileGuidance, type FileGuidance } from "@/lib/file-guidance";
+import { getFileGuidance, type FileGuidance, type OfficeApp } from "@/lib/file-guidance";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
@@ -225,7 +228,7 @@ function GettingStarted({
           <div className="grid gap-3 sm:grid-cols-3">
             {guide.tools.map((tool) => {
               const app = toolApp(tool.label);
-              const meta = APP_META[app];
+              const meta = metaOf(app);
               const Icon = meta.icon;
               return (
                 <div
@@ -296,6 +299,8 @@ const APP_META: Record<
   },
 };
 
+const metaOf = (app: OfficeApp) => APP_META[app] ?? APP_META.word;
+
 function toolApp(label: string): OfficeApp {
   const l = label.toLowerCase();
   if (l.includes("excel") || l.includes("sheet")) return "excel";
@@ -304,7 +309,7 @@ function toolApp(label: string): OfficeApp {
 }
 
 function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
-  const meta = APP_META[guidance.app];
+  const meta = metaOf(guidance.app);
   const Icon = meta.icon;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">

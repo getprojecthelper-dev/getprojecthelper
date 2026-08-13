@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/hooks/use-currency";
 import {
-  COUNTRY_CURRENCY,
   CURRENCIES,
   PACKS,
   formatMoney,
@@ -27,33 +26,23 @@ const countryName = (code: string) => {
   }
 };
 
-/** Supported countries, alphabetical by display name. */
-const COUNTRIES = Object.keys(COUNTRY_CURRENCY)
-  .map((code) => ({ code, name: countryName(code) }))
-  .sort((a, b) => a.name.localeCompare(b.name));
-
 interface PricingPacksProps {
   /** Rendered inside each card instead of the default disabled button. */
   action?: (packId: string) => ReactNode;
   className?: string;
 }
 
-/** Shared three-pack price grid with a region + currency switch. */
+/** Shared three-pack price grid with a region-suggested currency switch. */
 export function PricingPacks({ action, className }: PricingPacksProps) {
   const {
     currency,
     setCurrency,
-    country,
-    detectedCountry,
-    countryOverride,
-    setCountry,
     resetRegion,
     locked,
+    detectedCountry,
+    suggestedCurrency,
     autoDetected,
   } = useCurrency();
-
-  const selectClass =
-    "h-10 rounded-full border border-border/70 bg-card px-4 text-sm font-medium";
 
   return (
     <div className={className}>
@@ -63,25 +52,6 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
         </span>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <label htmlFor="country-select" className="sr-only">
-            Country
-          </label>
-          <select
-            id="country-select"
-            value={country ?? ""}
-            onChange={(e) => setCountry(e.target.value)}
-            className={selectClass}
-          >
-            <option value="" disabled>
-              Select country
-            </option>
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
           <label htmlFor="currency-select" className="sr-only">
             Currency
           </label>
@@ -89,11 +59,12 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
             id="currency-select"
             value={currency}
             onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-            className={selectClass}
+            className="h-10 rounded-full border border-border/70 bg-card px-4 text-sm font-medium"
           >
             {CODES.map((code) => (
               <option key={code} value={code}>
                 {CURRENCIES[code].symbol} {CURRENCIES[code].label}
+                {code === suggestedCurrency ? " — suggested" : ""}
               </option>
             ))}
           </select>
@@ -101,7 +72,7 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
           {autoDetected ? null : (
             <Button variant="ghost" size="sm" className="rounded-full" onClick={resetRegion}>
               <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-              Use my location
+              Use suggested
             </Button>
           )}
         </div>
@@ -112,18 +83,17 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
               <Lock className="h-3.5 w-3.5" />
               {CURRENCIES[currency].label} locked for all prices.
             </>
-          ) : countryOverride ? (
-            <>Showing {CURRENCIES[currency].label} prices for {countryName(countryOverride)}.</>
           ) : detectedCountry ? (
             <>
-              Showing {CURRENCIES[currency].label} prices for your location (
+              Showing {CURRENCIES[currency].label} prices suggested for your location (
               {countryName(detectedCountry)}).
             </>
           ) : (
-            <>Pick your country to see local pricing.</>
+            <>Showing {CURRENCIES[currency].label} prices suggested for your region.</>
           )}
         </p>
       </div>
+
 
 
       <div className="mt-8 grid gap-5 md:grid-cols-3">

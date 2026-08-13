@@ -81,7 +81,7 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               {pack.credits.toLocaleString()} credits
               <span className="text-xs">
-                ({formatMoney(perCreditPrice(pack, currency), currency, currency === "INR" ? 2 : 3)}{" "}
+                ({formatMoney(perCreditPrice(pack, currency), currency, CURRENCIES[currency].fx >= 20 ? 2 : 3)}{" "}
                 each)
               </span>
             </p>

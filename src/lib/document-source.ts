@@ -1,3 +1,17 @@
+import { z } from "zod";
+
+export const authorSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  affiliation: z.string().trim().max(200).default(""),
+  email: z.string().trim().max(160).default(""),
+  role: z.string().trim().max(80).default("Author"),
+});
+
+export const sectionSchema = z.object({
+  heading: z.string().trim().min(1).max(200),
+  body: z.string().max(40000).default(""),
+});
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /** Compact snapshot of one project used as source material for the writer. */
 export async function projectSource(

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, obj, str, strArray } from "@/lib/ai.server";
-import { projectSource } from "@/lib/document-source";
+import { authorSchema, projectSource, sectionSchema } from "@/lib/document-source";
 
 export interface DocAuthor {
   name: string;
@@ -32,12 +32,6 @@ export interface GeneratedDocument {
   updated_at: string;
 }
 
-const authorSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  affiliation: z.string().trim().max(200).default(""),
-  email: z.string().trim().max(160).default(""),
-  role: z.string().trim().max(80).default("Author"),
-});
 
 export const listDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -177,10 +171,6 @@ Return the polished document.`,
 /* Manual edit, AI revision and originality analysis                    */
 /* ------------------------------------------------------------------ */
 
-const sectionSchema = z.object({
-  heading: z.string().trim().min(1).max(200),
-  body: z.string().max(40000).default(""),
-});
 
 /** Saves manual edits made in the on-site editor. */
 export const updateDocument = createServerFn({ method: "POST" })

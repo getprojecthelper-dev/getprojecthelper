@@ -8,7 +8,6 @@ import {
   toReferralRow,
   type ReferralCodeRow,
 } from "@/lib/admin-codes";
-import type { EconomicsWindow } from "@/lib/economics";
 import type { UnitEconomics } from "@/lib/economics.server";
 
 export type { ReferralCodeRow };

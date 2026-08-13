@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
+import { getFileGuidance, type FileGuidance } from "@/lib/file-guidance";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 

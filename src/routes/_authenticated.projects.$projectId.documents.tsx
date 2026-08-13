@@ -493,7 +493,10 @@ function DocumentWizard({
           </div>
         ) : null}
 
+        <CreditBreakdown importedCount={imported.length} />
+
         <DialogFooter className="gap-2 sm:justify-between">
+
           <Button
             variant="ghost"
             onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}

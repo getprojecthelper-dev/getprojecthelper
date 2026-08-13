@@ -44,6 +44,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
         let holdId: string | null = null;
+        let settled = false;
         try {
           holdId = await holdCredits(auth.userId, "mentor_chat");
         } catch (error) {
@@ -146,7 +147,10 @@ export const Route = createFileRoute("/api/chat")({
             sendReasoning: true,
           });
         } catch (error) {
-          if (holdId) await releaseCredits(holdId);
+          if (holdId && !settled) {
+            settled = true;
+            await releaseCredits(holdId);
+          }
           if (error instanceof Error && error.name === "AbortError") {
             return new Response("Cancelled", { status: 499 });
           }

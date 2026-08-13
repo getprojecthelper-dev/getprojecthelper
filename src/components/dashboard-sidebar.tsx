@@ -68,7 +68,6 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const domain = useProjectDomain(projectId).data;
 
   const isActive = (path: string) => pathname === path;
 

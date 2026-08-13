@@ -89,12 +89,28 @@ export const Route = createFileRoute("/api/chat")({
                 include: ["reasoning.encrypted_content"],
               },
             },
+            // The stream can end three ways; each must close out the hold
+            // exactly once, or reserved credits stay locked forever.
+            onError: async () => {
+              if (!holdId || settled) return;
+              settled = true;
+              await releaseCredits(holdId);
+            },
+            onAbort: async () => {
+              if (!holdId || settled) return;
+              settled = true;
+              await releaseCredits(holdId);
+            },
             onFinish: async ({ text, usage }) => {
               const total =
                 usage?.totalTokens ??
                 (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
               try {
-                if (holdId) await settleCredits(holdId, total);
+                let charged = 0;
+                if (holdId && !settled) {
+                  settled = true;
+                  charged = await settleCredits(holdId, total);
+                }
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
                 await supabaseAdmin.from("ai_usage_events").insert({
                   user_id: auth.userId,
@@ -104,7 +120,8 @@ export const Route = createFileRoute("/api/chat")({
                   input_tokens: usage?.inputTokens ?? 0,
                   output_tokens: usage?.outputTokens ?? 0,
                   total_tokens: total,
-                  credits: Number((total / 1000).toFixed(4)),
+                  // Log exactly what the ledger charged, not a second estimate.
+                  credits: charged,
                 });
               } catch (error) {
                 console.error("mentor: usage accounting failed", error);
@@ -121,6 +138,7 @@ export const Route = createFileRoute("/api/chat")({
                 if (error) console.error("mentor: failed to save reply", error);
               }
             },
+
           });
 
           return result.toUIMessageStreamResponse({

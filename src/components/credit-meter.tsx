@@ -8,6 +8,7 @@ import { Loader2, Sparkles, Zap } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { ACTION_LABELS, formatCredits } from "@/lib/credit-costs";
+import { getLastCharge } from "@/lib/credits.functions";
 import { cn } from "@/lib/utils";
 
 interface MeterState {
@@ -15,6 +16,8 @@ interface MeterState {
   label: string;
   estimate: number;
   spent: number;
+  /** True while we look up the real settled amount in the ledger. */
+  settling: boolean;
   startedAt: number;
   finishedAt: number | null;
   /** Bumped whenever a run settles or fails, so listeners can refresh balances. */
@@ -26,6 +29,7 @@ const initial: MeterState = {
   label: "",
   estimate: 0,
   spent: 0,
+  settling: false,
   startedAt: 0,
   finishedAt: null,
   revision: 0,
@@ -53,20 +57,52 @@ export const creditMeter = {
       label: meta.label,
       estimate: meta.estimate,
       spent: 0,
+      settling: false,
       startedAt: Date.now(),
       finishedAt: null,
     });
   },
   finish(spent?: number) {
-    set({
-      active: false,
-      spent: spent ?? state.estimate,
-      finishedAt: Date.now(),
-      revision: state.revision + 1,
-    });
+    if (typeof spent === "number") {
+      set({
+        active: false,
+        spent,
+        settling: false,
+        finishedAt: Date.now(),
+        revision: state.revision + 1,
+      });
+      return;
+    }
+
+    // The hold settles server-side; read what the ledger actually charged
+    // instead of showing the reserved estimate.
+    const since = new Date(state.startedAt - 5_000).toISOString();
+    set({ active: false, spent: 0, settling: true, finishedAt: Date.now() });
+
+    void (async () => {
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        try {
+          const { charged } = await getLastCharge({ data: { since } });
+          if (charged !== null) {
+            set({ spent: charged, settling: false, revision: state.revision + 1 });
+            return;
+          }
+        } catch {
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+      set({ settling: false, revision: state.revision + 1 });
+    })();
   },
   cancel() {
-    set({ active: false, spent: 0, finishedAt: null, revision: state.revision + 1 });
+    set({
+      active: false,
+      spent: 0,
+      settling: false,
+      finishedAt: null,
+      revision: state.revision + 1,
+    });
   },
 
 };
@@ -112,12 +148,12 @@ export function CreditMeter() {
 
   useEffect(() => {
     if (meter.active || meter.finishedAt) setVisible(true);
-    if (!meter.active && meter.finishedAt) {
+    if (!meter.active && !meter.settling && meter.finishedAt) {
       const id = window.setTimeout(() => setVisible(false), 4000);
       return () => window.clearTimeout(id);
     }
     return undefined;
-  }, [meter.active, meter.finishedAt]);
+  }, [meter.active, meter.settling, meter.finishedAt]);
 
 
   if (!visible) return null;
@@ -142,11 +178,11 @@ export function CreditMeter() {
             ) : (
               <Sparkles className="h-4 w-4 text-primary" />
             )}
-            {meter.active ? meter.label : "Run complete"}
+            {meter.active ? meter.label : meter.settling ? "Settling credits" : "Run complete"}
           </span>
           <span className="flex items-center gap-1 font-mono text-sm tabular-nums text-foreground">
             <Zap className="h-3.5 w-3.5 text-primary" />
-            {formatCredits(meter.active ? running : meter.spent)}
+            {meter.settling ? "…" : formatCredits(meter.active ? running : meter.spent)}
           </span>
         </div>
 
@@ -159,8 +195,10 @@ export function CreditMeter() {
 
         <p className="mt-2 text-xs text-muted-foreground">
           {meter.active
-            ? `Reserved ${formatCredits(meter.estimate)} credits — unused credits are returned.`
-            : `Charged ${formatCredits(meter.spent)} credits for this run.`}
+            ? `Holding ${formatCredits(meter.estimate)} credits — you only pay for what the run uses.`
+            : meter.settling
+              ? "Working out the exact cost…"
+              : `Charged ${formatCredits(meter.spent)} credits for this run.`}
         </p>
       </div>
     </div>

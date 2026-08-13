@@ -107,8 +107,8 @@ function NewProject() {
   const needsDataset = isDataDomain(domain);
   const seen = Object.values(pages).flat().map((p) => p.title);
 
-  const loadPage = async (target: number) => {
-    if (pages[target]) {
+  const loadPage = async (target: number, force = false) => {
+    if (!force && pages[target]) {
       setPage(target);
       return;
     }
@@ -123,7 +123,7 @@ function NewProject() {
           ...(mode === "suggest" ? { difficulty } : {}),
         },
       });
-      setPages((p) => ({ ...p, [target]: projects }));
+      setPages((p) => (force ? { [target]: projects } : { ...p, [target]: projects }));
       setPage(target);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Couldn't load suggestions.");
@@ -137,9 +137,8 @@ function NewProject() {
       toast.error("Tell us a little about the project you want to build.");
       return;
     }
-    setPages({});
     setStep(1);
-    await loadPage(1);
+    await loadPage(1, true);
   };
 
 
@@ -369,7 +368,14 @@ function NewProject() {
                 <div key={project.title} className="panel flex flex-col gap-3 p-5">
                   <div>
                     <h2 className="font-display text-lg">{project.title}</h2>
-                    <p className="text-xs text-muted-foreground">{project.difficulty}</p>
+                    <span
+                      className={cn(
+                        "mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium",
+                        difficultyTone(project.difficulty),
+                      )}
+                    >
+                      {project.difficulty}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{project.description}</p>
                   <div className="flex flex-wrap gap-1.5">

@@ -289,22 +289,33 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 
     if (error || !project) throw new Error("The project could not be created.");
 
-    const rows = plan.sections.slice(0, 12).map((s, index) => ({
-      user_id: userId,
-      project_id: project.id,
-      position: index,
-      title: s.title,
-      question: s.question,
-      objective: s.objective,
-      kind:
-        index === 0 || s.kind === "overview"
-          ? "overview"
-          : s.kind === "structure" && playbook.buildsCode
-            ? "structure"
-            : "step",
+    // Only ONE section may be the project-structure section; any later
+    // structure-ish section is downgraded to a normal step so the folder tree
+    // is never produced twice.
+    let structureUsed = false;
+    const rows = plan.sections.slice(0, 12).map((s, index) => {
+      let kind: string;
+      if (index === 0 || s.kind === "overview") {
+        kind = "overview";
+      } else if (s.kind === "structure" && playbook.buildsCode && !structureUsed) {
+        kind = "structure";
+        structureUsed = true;
+      } else {
+        kind = "step";
+      }
 
-      status: "pending",
-    }));
+      return {
+        user_id: userId,
+        project_id: project.id,
+        position: index,
+        title: s.title,
+        question: s.question,
+        objective: s.objective,
+        kind,
+        status: "pending",
+      };
+    });
+
 
     const { error: sectionError } = await supabase.from("build_sections").insert(rows);
     if (sectionError) throw new Error("The implementation sections could not be saved.");

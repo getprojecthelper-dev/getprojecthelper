@@ -44,6 +44,13 @@ function WorkspaceLayout() {
   const matchRoute = useMatchRoute();
   // On the mentor pages the side column becomes the saved conversation history.
   const onMentor = Boolean(matchRoute({ to: "/projects/$projectId/mentor", fuzzy: true }));
+  // Documentation, Viva/Review and Implementation get the full width: the
+  // secondary section list is hidden there.
+  const hideNav = ["/projects/$projectId/documents", "/projects/$projectId/review", "/projects/$projectId/build"].some(
+    (to) => Boolean(matchRoute({ to: to as "/projects/$projectId", fuzzy: true })),
+  );
+  const fullWidth = onMentor || hideNav;
+
 
   return (
     <div className="min-h-full">

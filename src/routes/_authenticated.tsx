@@ -1,7 +1,8 @@
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
+import { AppShell } from "@/components/app-shell";
 import { CreditMeter } from "@/components/credit-meter";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     if (!loading && !session) void navigate({ to: "/auth", replace: true });
@@ -27,11 +29,24 @@ function AuthenticatedLayout() {
     );
   }
 
+  // The admin console keeps its own standalone chrome.
+  if (pathname.startsWith("/admin")) {
+    return (
+      <>
+        <Outlet />
+        <CreditMeter />
+      </>
+    );
+  }
+
   return (
     <>
-      <Outlet />
+      <AppShell>
+        <Outlet />
+      </AppShell>
       <CreditMeter />
     </>
   );
 }
+
 

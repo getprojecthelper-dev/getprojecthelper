@@ -1,8 +1,21 @@
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { highlightLine, isPlainLanguage, type TokenKind } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
+
+const TOKEN_CLASS: Record<TokenKind, string> = {
+  keyword: "tok-keyword",
+  string: "tok-string",
+  number: "tok-number",
+  comment: "tok-comment",
+  function: "tok-function",
+  builtin: "tok-builtin",
+  punct: "tok-punct",
+  plain: "",
+};
+
 
 export function CodeBlock({
   code,
@@ -27,7 +40,11 @@ export function CodeBlock({
     }
   };
 
-  const lines = code.replace(/\n$/, "").split("\n");
+  const plain = isPlainLanguage(language, filename);
+  const lines = useMemo(
+    () => code.replace(/\n$/, "").split("\n").map((line) => highlightLine(line, plain)),
+    [code, plain],
+  );
 
   return (
     <div
@@ -53,12 +70,20 @@ export function CodeBlock({
       <div className="max-h-[26rem] overflow-auto bg-card">
         <table className="w-full border-collapse font-mono text-[12.5px] leading-relaxed">
           <tbody>
-            {lines.map((line, i) => (
-              <tr key={`${i}-${line.slice(0, 12)}`} className="align-top">
+            {lines.map((tokens, i) => (
+              <tr key={`${i}-${tokens[0]?.text.slice(0, 12) ?? ""}`} className="align-top">
                 <td className="w-10 select-none border-r border-border bg-muted/40 px-2 py-0.5 text-right text-[11px] text-muted-foreground">
                   {i + 1}
                 </td>
-                <td className="whitespace-pre px-3 py-0.5 text-card-foreground">{line || " "}</td>
+                <td className="whitespace-pre px-3 py-0.5 text-card-foreground">
+                  {tokens.length === 0
+                    ? " "
+                    : tokens.map((token, index) => (
+                        <span key={index} className={TOKEN_CLASS[token.kind]}>
+                          {token.text}
+                        </span>
+                      ))}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -66,4 +91,5 @@ export function CodeBlock({
       </div>
     </div>
   );
+
 }

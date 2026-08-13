@@ -138,7 +138,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
                   className={cn(
                     "h-11 rounded-xl px-3 text-[15px] font-medium transition-all",
                     active
-                      ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
+                      ? "bg-primary/15 text-primary shadow-none hover:bg-primary/20 hover:text-primary"
                       : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   )}
                 >

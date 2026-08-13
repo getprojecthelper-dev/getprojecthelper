@@ -6,10 +6,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
+import { PricingPacks } from "@/components/pricing-packs";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CREDIT_PACKS, STARTER_CREDITS, formatCredits } from "@/lib/credit-costs";
+import { STARTER_CREDITS, formatCredits } from "@/lib/credit-costs";
 import { getMyCredits, redeemCode } from "@/lib/credits.functions";
 import { cn } from "@/lib/utils";
 
@@ -149,33 +150,7 @@ function CreditsPage() {
           Every new account starts with {STARTER_CREDITS} free credits. Packs are coming soon —
           checkout is not enabled yet.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          {CREDIT_PACKS.map((pack) => (
-            <div
-              key={pack.id}
-              className={cn(
-                "relative rounded-xl border border-border bg-card p-5",
-                "popular" in pack && pack.popular && "border-primary shadow-sm",
-              )}
-            >
-              {"popular" in pack && pack.popular ? (
-                <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-                  Most popular
-                </span>
-              ) : null}
-              <p className="font-display text-base font-semibold">{pack.name}</p>
-              <p className="mt-2 font-display text-2xl font-semibold">${pack.priceUsd}</p>
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                {pack.credits} credits
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">{pack.blurb}</p>
-              <Button className="mt-4 w-full" variant="outline" disabled>
-                Coming soon
-              </Button>
-            </div>
-          ))}
-        </div>
+        <PricingPacks className="mt-5" />
       </section>
 
       <section>

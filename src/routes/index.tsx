@@ -49,6 +49,9 @@ function Landing() {
             <a href="#features" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
               Features
             </a>
+            <Link to="/pricing" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
+              Pricing
+            </Link>
             <a href="#mentor" className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">
               AI Mentor
             </a>

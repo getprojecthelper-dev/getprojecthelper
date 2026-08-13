@@ -223,16 +223,42 @@ function NewProject() {
 
         {step === 0 ? (
           <div className="panel space-y-5 p-6">
-            <div className="space-y-2">
-              <Label htmlFor="idea">Enter the project idea you want to build</Label>
-              <Textarea
-                id="idea"
-                rows={4}
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                placeholder="e.g. Something that predicts flight delays from historical data"
-              />
+            <div className="flex gap-2">
+              {(
+                [
+                  ["idea", "I have an idea"],
+                  ["suggest", "Suggest a project"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setMode(value)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-sm",
+                    mode === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
+
+            {mode === "idea" ? (
+              <div className="space-y-2">
+                <Label htmlFor="idea">Enter the project idea you want to build</Label>
+                <Textarea
+                  id="idea"
+                  rows={4}
+                  value={idea}
+                  onChange={(e) => setIdea(e.target.value)}
+                  placeholder="e.g. Something that predicts flight delays from historical data"
+                />
+              </div>
+            ) : null}
+
             <div className="space-y-2">
               <Label>Which domain does it belong to?</Label>
               <Select value={domain} onValueChange={setDomain}>
@@ -253,6 +279,30 @@ function NewProject() {
                   : "This domain skips datasets and goes straight to implementation."}
               </p>
             </div>
+
+            {mode === "suggest" ? (
+              <div className="space-y-2">
+                <Label>How hard should it be?</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DIFFICULTIES.map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() => setDifficulty(d.value)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-sm",
+                        difficulty === d.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground",
+                      )}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="flex justify-end border-t border-border pt-4">
               <Button disabled={busy} onClick={() => void startSuggestions()}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -261,6 +311,7 @@ function NewProject() {
             </div>
           </div>
         ) : null}
+
 
         {step === 1 ? (
           <div className="space-y-4">

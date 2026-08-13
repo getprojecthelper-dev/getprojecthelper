@@ -34,6 +34,7 @@ import { Route as AuthenticatedProjectsProjectIdShowcaseRouteImport } from './ro
 import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
 import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
 import { Route as AuthenticatedProjectsProjectIdMentorIndexRouteImport } from './routes/_authenticated.projects.$projectId.mentor.index'
+import { Route as AuthenticatedProjectsProjectIdMentorThreadIdRouteImport } from './routes/_authenticated.projects.$projectId.mentor.$threadId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -172,6 +173,12 @@ const AuthenticatedProjectsProjectIdMentorIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedProjectsProjectIdMentorRoute,
   } as any)
+const AuthenticatedProjectsProjectIdMentorThreadIdRoute =
+  AuthenticatedProjectsProjectIdMentorThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedProjectsProjectIdMentorRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRoutesByTo {
@@ -221,6 +229,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRoutesById {
@@ -249,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/_authenticated/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/_authenticated/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRouteTypes {
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId/'
+    | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId'
+    | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor'
   id:
     | '__root__'
@@ -328,6 +340,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/tasks'
     | '/_authenticated/projects/$projectId/testing'
     | '/_authenticated/projects/$projectId/'
+    | '/_authenticated/projects/$projectId/mentor/$threadId'
     | '/_authenticated/projects/$projectId/mentor/'
   fileRoutesById: FileRoutesById
 }
@@ -518,15 +531,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdMentorIndexRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdMentorRoute
     }
+    '/_authenticated/projects/$projectId/mentor/$threadId': {
+      id: '/_authenticated/projects/$projectId/mentor/$threadId'
+      path: '/$threadId'
+      fullPath: '/projects/$projectId/mentor/$threadId'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdMentorThreadIdRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdMentorRoute
+    }
   }
 }
 
 interface AuthenticatedProjectsProjectIdMentorRouteChildren {
+  AuthenticatedProjectsProjectIdMentorThreadIdRoute: typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   AuthenticatedProjectsProjectIdMentorIndexRoute: typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 
 const AuthenticatedProjectsProjectIdMentorRouteChildren: AuthenticatedProjectsProjectIdMentorRouteChildren =
   {
+    AuthenticatedProjectsProjectIdMentorThreadIdRoute:
+      AuthenticatedProjectsProjectIdMentorThreadIdRoute,
     AuthenticatedProjectsProjectIdMentorIndexRoute:
       AuthenticatedProjectsProjectIdMentorIndexRoute,
   }

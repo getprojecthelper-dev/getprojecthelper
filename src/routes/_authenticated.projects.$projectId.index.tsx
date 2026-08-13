@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
 });
 
 function Overview() {
-  const { projectId, data, metrics } = useWorkspace();
+  const { data, metrics } = useWorkspace();
   if (!data || !metrics) return null;
 
   const { project } = data;

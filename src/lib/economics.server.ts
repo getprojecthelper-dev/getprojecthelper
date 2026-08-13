@@ -3,7 +3,12 @@
  * *.functions.ts module so the server function file stays a thin wrapper.
  */
 
-import { avgPricePerCreditUsd, tokenCostUsd, type EconomicsWindow } from "@/lib/economics";
+import {
+  avgPricePerCreditUsd,
+  paymentFeeUsd,
+  tokenCostUsd,
+  type EconomicsWindow,
+} from "@/lib/economics";
 
 export interface UnitEconomics {
   window: EconomicsWindow;
@@ -14,6 +19,9 @@ export interface UnitEconomics {
   grossMarginUsd: number;
   grossMarginPct: number;
   freeCreditBurnUsd: number;
+  paymentFeesUsd: number;
+  netMarginUsd: number;
+  netMarginPct: number;
   tokens: number;
   creditsConsumed: number;
   creditsGrantedFree: number;
@@ -160,6 +168,9 @@ export async function computeUnitEconomics(
     grossMarginUsd: round(grossMarginUsd, 4),
     grossMarginPct: revenueUsd > 0 ? Math.round((grossMarginUsd / revenueUsd) * 100) : 0,
     freeCreditBurnUsd: round(freeCreditBurnUsd, 4),
+    paymentFeesUsd: round(paymentFeesUsd, 4),
+    netMarginUsd: round(netMarginUsd, 4),
+    netMarginPct: revenueUsd > 0 ? Math.round((netMarginUsd / revenueUsd) * 100) : 0,
     tokens,
     creditsConsumed: round(creditsConsumed),
     creditsGrantedFree: round(creditsGrantedFree),

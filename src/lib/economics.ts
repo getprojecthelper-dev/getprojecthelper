@@ -57,12 +57,18 @@ export const packEconomics = () =>
     };
   });
 
-export const usd = (value: number) =>
-  new Intl.NumberFormat("en-US", {
+export const usd = (value: number) => {
+  const abs = Math.abs(value);
+  // Sub-cent figures (per-token, per-credit costs) need more precision.
+  const digits = abs === 0 ? 2 : abs < 0.01 ? 4 : abs < 10 ? 2 : 0;
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: Math.abs(value) < 10 ? 2 : 0,
+    minimumFractionDigits: digits === 4 ? 3 : undefined,
+    maximumFractionDigits: digits,
   }).format(value);
+};
+
 
 export type EconomicsWindow = "7d" | "30d" | "all";
 

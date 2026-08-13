@@ -43,10 +43,9 @@ export const Route = createFileRoute("/api/chat")({
         if (!context) return new Response("Project not found", { status: 404 });
 
         const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
-        let holdId: string | null = null;
-        let settled = false;
+        const hold: { id: string | null; settled: boolean } = { id: null, settled: false };
         try {
-          holdId = await holdCredits(auth.userId, "mentor_chat");
+          hold.id = await holdCredits(auth.userId, "mentor_chat");
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "You are out of AI credits.";
@@ -93,14 +92,14 @@ export const Route = createFileRoute("/api/chat")({
             // The stream can end three ways; each must close out the hold
             // exactly once, or reserved credits stay locked forever.
             onError: async () => {
-              if (!holdId || settled) return;
-              settled = true;
-              await releaseCredits(holdId);
+              if (!hold.id || hold.settled) return;
+              hold.settled = true;
+              await releaseCredits(hold.id);
             },
             onAbort: async () => {
-              if (!holdId || settled) return;
-              settled = true;
-              await releaseCredits(holdId);
+              if (!hold.id || hold.settled) return;
+              hold.settled = true;
+              await releaseCredits(hold.id);
             },
             onFinish: async ({ text, usage }) => {
               const total =
@@ -108,9 +107,9 @@ export const Route = createFileRoute("/api/chat")({
                 (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
               try {
                 let charged = 0;
-                if (holdId && !settled) {
-                  settled = true;
-                  charged = await settleCredits(holdId, total);
+                if (hold.id && !hold.settled) {
+                  hold.settled = true;
+                  charged = await settleCredits(hold.id, total);
                 }
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
                 await supabaseAdmin.from("ai_usage_events").insert({
@@ -147,9 +146,9 @@ export const Route = createFileRoute("/api/chat")({
             sendReasoning: true,
           });
         } catch (error) {
-          if (holdId && !settled) {
-            settled = true;
-            await releaseCredits(holdId);
+          if (hold.id && !hold.settled) {
+            hold.settled = true;
+            await releaseCredits(hold.id);
           }
           if (error instanceof Error && error.name === "AbortError") {
             return new Response("Cancelled", { status: 499 });

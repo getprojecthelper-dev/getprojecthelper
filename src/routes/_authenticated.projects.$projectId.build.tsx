@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileText,
   FolderTree,
   Loader2,
   Lock,
@@ -165,6 +166,8 @@ function BuildPage() {
         </p>
       </div>
 
+      {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
+
       {sections.map((section, index) => {
         const locked = activeIndex !== -1 && index > activeIndex;
         return (
@@ -193,6 +196,58 @@ function BuildPage() {
     </div>
   );
 }
+
+function GettingStarted({
+  guide,
+}: {
+  guide: NonNullable<DomainPlaybook["gettingStarted"]>;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="panel overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 p-4 text-left"
+      >
+        <span className="flex items-center gap-2 font-display text-base">
+          <FileText className="h-4 w-4 text-primary" /> {guide.title}
+        </span>
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+
+      {open ? (
+        <div className="space-y-4 border-t border-border bg-muted/20 p-5">
+          <p className="text-sm text-muted-foreground">{guide.intro}</p>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            {guide.tools.map((tool) => (
+              <div key={tool.label} className="rounded-lg border border-border bg-card p-3">
+                <p className="text-sm font-semibold">{tool.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tool.detail}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">How it works</p>
+            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+              {guide.how.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ol>
+          </div>
+
+          {guide.note ? (
+            <p className="rounded-lg bg-accent/10 p-3 text-sm text-muted-foreground">{guide.note}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 
 function SectionCard({
   section,

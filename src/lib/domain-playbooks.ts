@@ -22,6 +22,16 @@ export interface DomainPlaybook {
   sectionTask: string;
   /** Typical deliverables the AI should draw from. */
   deliverables: string[];
+  /** Plain-language primer shown before the student starts the steps. */
+  gettingStarted?: {
+    title: string;
+    intro: string;
+    /** What the student physically creates, and in which everyday tool. */
+    tools: { label: string; detail: string }[];
+    /** How the workflow runs, step by step, in plain words. */
+    how: string[];
+    note?: string;
+  };
 }
 
 const CODE_PLAN =
@@ -72,10 +82,38 @@ const PM: DomainPlaybook = nonCodePlaybook({
   subhead:
     "Each step produces a real management deliverable — charter, WBS, schedule, risk register, status reports and closure. No coding required.",
   planInstructions:
-    "This is a PROJECT MANAGEMENT project. There is NO CODE anywhere. Every section is a management deliverable a project manager actually produces, in real project order: define the project, plan the work, plan people and responsibilities, plan the schedule, plan cost and resources, plan risk, plan communication, execute and track progress, control scope and change, then close the project with lessons learned. Titles must be plain deliverable names such as 'Define the Project', 'Project Charter', 'Stakeholder Map', 'Scope and WBS', 'Schedule and Dependencies', 'Budget and Resources', 'Risk Register', 'Communication Plan', 'Track Progress', 'Close the Project'. Never use a 'structure' section and never mention programming. All sections after the first use kind 'step'.",
+    "This is a PROJECT MANAGEMENT project. There is NO CODE anywhere. Every section is a management deliverable a project manager actually produces, in real project order: define the project, plan the work, plan people and responsibilities, plan the schedule, plan cost and resources, plan risk, plan communication, execute and track progress, control scope and change, then close the project with lessons learned. Titles must be plain deliverable names such as 'Define the Project', 'Project Charter', 'Stakeholder Map', 'Scope and WBS', 'Schedule and Dependencies', 'Budget and Resources', 'Risk Register', 'Communication Plan', 'Track Progress', 'Close the Project'. Never use a 'structure' section. NEVER mention programming, terminals, command line, shells, installing packages, repositories, IDEs or any developer tooling. The reader is not technical: assume the deliverables are written in Word, Excel/Google Sheets and PowerPoint. All sections after the first use kind 'step'.",
   sectionTask:
-    "Produce the actual management deliverable for THIS section as a real, usable document — never code. Split it into 2-5 blocks. For each block, put the deliverable content itself in `code` as clean plain text or a markdown table (for example a WBS list, a schedule table with Task | Duration | Dependency | Owner, a RACI matrix, or a risk register table with Risk | Likelihood | Impact | Mitigation | Owner), and use `explanation` for 2-4 plain-language bullets telling the student how to read, use and defend it. Fill the tables with realistic, project-specific rows — never placeholders like 'TBD'. Set `language` to 'markdown', return an empty `files` array and null `structure`.",
+    "Produce the actual management deliverable for THIS section as a real, usable document — never code. Split it into 2-5 blocks. For each block, put the deliverable content itself in `code` as clean plain text or a markdown table (for example a WBS list, a schedule table with Task | Duration | Dependency | Owner, a RACI matrix, or a risk register table with Risk | Likelihood | Impact | Mitigation | Owner), and use `explanation` for 2-4 plain-language bullets telling the student how to read, use and defend it. In the FIRST bullet of each block, say plainly where this content goes — e.g. 'Paste this table into a new sheet in Excel called Schedule' or 'Add this as a section in your Word charter document'. Fill the tables with realistic, project-specific rows — never placeholders like 'TBD'. STRICTLY FORBIDDEN: code, terminal or command-line instructions, install commands, file paths, repositories, or any developer tool. Set `language` to 'markdown', return an empty `files` array and null `structure`.",
   deliverables: PM_DELIVERABLES,
+  gettingStarted: {
+    title: "Before you start — how this project gets made",
+    intro:
+      "This is a management project, so you won't write any code or use a terminal. Everything you produce here is an ordinary document you can open, edit, print and hand in.",
+    tools: [
+      {
+        label: "Word (or Google Docs)",
+        detail:
+          "Your written documents: project charter, scope statement, communication plan, status reports and the closure report.",
+      },
+      {
+        label: "Excel (or Google Sheets)",
+        detail:
+          "Your tables: work breakdown structure, schedule with dates and dependencies, budget, RACI matrix and risk register.",
+      },
+      {
+        label: "PowerPoint (or Google Slides)",
+        detail: "Your final presentation and viva slides summarising the project.",
+      },
+    ],
+    how: [
+      "Open a step below and press Generate — the AI drafts that deliverable for your project.",
+      "Copy the text or table it gives you into the matching Word or Excel file.",
+      "Edit the details so they fit your real project — dates, names, costs and risks.",
+      "Confirm the step to move on. Each step builds on the one before it.",
+    ],
+    note: "Keep all files in one folder (for example 'Project Documents') so your charter, schedule, budget and reports stay together for submission.",
+  },
 });
 
 const RESEARCH: DomainPlaybook = nonCodePlaybook({

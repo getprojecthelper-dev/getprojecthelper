@@ -98,6 +98,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
     {
       title: "AI Mentor",
       url: projectId ? "/projects/$projectId/mentor" : fallbackUrl,
+      search: projectId ? { fresh: true } : undefined,
       icon: Bot,
       active: pathname.startsWith("/projects/") && pathname.includes("/mentor"),
     },

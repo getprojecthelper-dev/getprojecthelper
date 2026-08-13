@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { MentorThreadList } from "@/components/mentor-thread-list";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor")({
   head: () => ({

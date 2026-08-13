@@ -330,7 +330,15 @@ function NewProject() {
               </div>
             ) : null}
 
-            {(papers ?? []).map((paper) => {
+            {!busy && papers && papers.length === 0 ? (
+              <div className="panel p-6 text-sm text-muted-foreground">
+                We couldn't verify any papers for this idea right now. You can continue and add
+                references later from the project's research section.
+              </div>
+            ) : null}
+
+            {(papers ?? []).slice(paperPage * 4, paperPage * 4 + 4).map((paper) => {
+
               const picked = selectedPapers.some((p) => p.url === paper.url && p.title === paper.title);
               return (
                 <button

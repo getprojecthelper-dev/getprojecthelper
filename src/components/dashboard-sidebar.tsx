@@ -60,7 +60,7 @@ function CreditCard() {
         <span className="text-sm text-sidebar-foreground/50">/ {total}</span>
       </div>
       <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-primary">
-        <Zap className="h-4 w-4 fill-current" />
+        <Zap className="h-4 w-4" />
         <span>Top up</span>
       </div>
     </Link>

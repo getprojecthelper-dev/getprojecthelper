@@ -440,14 +440,23 @@ export const generateSection = createServerFn({ method: "POST" })
 
       const blocks = [
         { title: "Problem statement", code: "", explanation: [overview.problem_statement] },
-        { title: "Solution / approach", code: "", explanation: [overview.solution] },
         {
-          title: "Technology stack",
+          title: playbook.buildsCode ? "Solution / approach" : "Approach",
+          code: "",
+          explanation: [overview.solution],
+        },
+        {
+          title: playbook.buildsCode ? "Technology stack" : "Tools, methods and roles",
           code: "",
           explanation: (overview.tech_stack ?? []).map((t) => `${t.name} — ${t.reason}`),
         },
-        { title: "Objectives", code: "", explanation: overview.objectives ?? [] },
+        {
+          title: playbook.buildsCode ? "Objectives" : "Success criteria",
+          code: "",
+          explanation: overview.objectives ?? [],
+        },
       ];
+
 
       const { error: overviewError } = await supabase
         .from("build_sections")

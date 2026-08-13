@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, GraduationCap, Sparkles } from "lucide-react";
+import { ArrowRight, GraduationCap } from "lucide-react";
+
 
 import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";

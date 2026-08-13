@@ -77,7 +77,7 @@ export function MentorChat({ projectId, className }: { projectId: string; classN
     id: projectId,
     transport,
     onError: (error) => {
-      creditMeter.fail?.();
+      creditMeter.cancel();
       toast.error(error.message || "The mentor could not answer right now.");
     },
     onFinish: () => {

@@ -32,7 +32,7 @@ type NavItem = {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   active?: boolean;
-  search?: Record<string, unknown>;
+  search?: Record<string, unknown> | undefined;
 };
 
 function CreditCard() {

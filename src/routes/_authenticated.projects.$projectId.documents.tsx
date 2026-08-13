@@ -427,7 +427,7 @@ function DocumentWizard({
           </div>
         ) : null}
 
-        {step === 2 ? (
+        {step === 1 ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
               This project is always used as the source. You can also import up to 3 of your other

@@ -511,7 +511,7 @@ export const generateSection = createServerFn({ method: "POST" })
         code: joinBlocks(reviewed.blocks),
         blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
         files: JSON.parse(JSON.stringify(reviewed.files ?? [])),
-        language: reviewed.language || "python",
+        language: reviewed.language || (playbook.buildsCode ? "python" : "markdown"),
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,

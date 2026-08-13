@@ -419,6 +419,23 @@ function NewProject() {
               </p>
             </div>
 
+            {!busy && papers === null ? (
+              <div className="panel space-y-4 p-6">
+                <p className="text-sm text-muted-foreground">
+                  Want us to look for relevant research papers for this project? You can also skip
+                  and add references later.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={() => void runPaperSearch()}>
+                    <BookOpen className="h-4 w-4" /> Find research papers
+                  </Button>
+                  <Button variant="outline" onClick={() => void afterPapers()}>
+                    Skip for now <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             {busy ? (
               <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Searching for relevant papers…
@@ -426,6 +443,7 @@ function NewProject() {
             ) : null}
 
             {!busy && papers && papers.length === 0 ? (
+
               <div className="panel p-6 text-sm text-muted-foreground">
                 We couldn't verify any papers for this idea right now. You can continue and add
                 references later from the project's research section.

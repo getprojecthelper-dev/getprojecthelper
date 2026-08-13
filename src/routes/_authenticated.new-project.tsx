@@ -63,6 +63,23 @@ export const Route = createFileRoute("/_authenticated/new-project")({
 
 const STEPS = ["Your idea", "Pick a project", "Research papers", "Dataset", "Finalise"];
 
+const DIFFICULTIES = [
+  { value: "easy", label: "Easy" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "hard", label: "Hard" },
+] as const;
+
+type Difficulty = (typeof DIFFICULTIES)[number]["value"];
+
+const difficultyTone = (value: string) => {
+  const key = value.toLowerCase();
+  if (key.includes("easy") || key.includes("beginner")) return "border-success/30 bg-success/10 text-success";
+  if (key.includes("hard") || key.includes("advanced"))
+    return "border-destructive/30 bg-destructive/10 text-destructive";
+  return "border-info/30 bg-info/10 text-info";
+};
+
+
 function NewProject() {
   const navigate = useNavigate();
   const suggest = withMeter("suggest_projects", useServerFn(suggestProjects));

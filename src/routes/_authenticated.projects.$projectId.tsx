@@ -14,9 +14,6 @@ import {
 } from "lucide-react";
 
 import { ErrorState, LoadingState } from "@/components/state-views";
-import { CreditChip } from "@/components/credit-chip";
-import { LowCreditsBanner } from "@/components/low-credits-banner";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
 
@@ -42,8 +39,8 @@ function WorkspaceLayout() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+    <div className="min-h-full">
+      <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
           <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/dashboard" })}>
             <ArrowLeft className="h-4 w-4" />
@@ -54,14 +51,8 @@ function WorkspaceLayout() {
               {data?.project.name ?? "Loading project…"}
             </p>
           </div>
-          <div className="ml-auto flex items-center gap-1">
-            <CreditChip />
-            <ThemeToggle />
-          </div>
         </div>
       </header>
-
-      <LowCreditsBanner />
 
       <div className="mx-auto flex max-w-7xl gap-6 px-5 py-6">
         <nav className="hidden w-56 shrink-0 lg:block">

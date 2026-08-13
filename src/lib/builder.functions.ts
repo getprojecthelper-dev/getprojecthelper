@@ -144,8 +144,11 @@ export const findResearchPapers = createServerFn({ method: "POST" })
       }),
     });
     const { verifyPapers } = await import("@/lib/paper-verify.server");
-    const verified = await verifyPapers(result.papers);
-    return verified.length > 0 ? verified : [];
+    return await verifyPapers(result.papers, {
+      title: data.title,
+      description: data.description,
+      domain: data.domain,
+    });
 
   });
 

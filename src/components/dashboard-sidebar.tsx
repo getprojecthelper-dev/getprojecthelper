@@ -95,6 +95,12 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
       icon: MessagesSquare,
       active: pathname.startsWith("/projects/") && pathname.includes("/review"),
     },
+    {
+      title: "AI Mentor",
+      url: projectId ? "/projects/$projectId/mentor" : fallbackUrl,
+      icon: Bot,
+      active: pathname.startsWith("/projects/") && pathname.includes("/mentor"),
+    },
     { title: "Settings", url: "/settings", icon: Settings, active: isActive("/settings") },
   ];
 

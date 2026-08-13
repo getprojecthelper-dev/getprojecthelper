@@ -26,6 +26,7 @@ import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './route
 import { Route as AuthenticatedProjectsProjectIdBuildRouteImport } from './routes/_authenticated.projects.$projectId.build'
 import { Route as AuthenticatedProjectsProjectIdDocumentsRouteImport } from './routes/_authenticated.projects.$projectId.documents'
 import { Route as AuthenticatedProjectsProjectIdExperimentsRouteImport } from './routes/_authenticated.projects.$projectId.experiments'
+import { Route as AuthenticatedProjectsProjectIdMentorRouteImport } from './routes/_authenticated.projects.$projectId.mentor'
 import { Route as AuthenticatedProjectsProjectIdRequirementsRouteImport } from './routes/_authenticated.projects.$projectId.requirements'
 import { Route as AuthenticatedProjectsProjectIdResearchRouteImport } from './routes/_authenticated.projects.$projectId.research'
 import { Route as AuthenticatedProjectsProjectIdReviewRouteImport } from './routes/_authenticated.projects.$projectId.review'
@@ -122,6 +123,12 @@ const AuthenticatedProjectsProjectIdExperimentsRoute =
     path: '/experiments',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const AuthenticatedProjectsProjectIdMentorRoute =
+  AuthenticatedProjectsProjectIdMentorRouteImport.update({
+    id: '/mentor',
+    path: '/mentor',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
 const AuthenticatedProjectsProjectIdRequirementsRoute =
   AuthenticatedProjectsProjectIdRequirementsRouteImport.update({
     id: '/requirements',
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -198,6 +206,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -224,6 +233,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/_authenticated/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  '/_authenticated/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
   '/_authenticated/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/_authenticated/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/_authenticated/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
+    | '/projects/$projectId/mentor'
     | '/projects/$projectId/requirements'
     | '/projects/$projectId/research'
     | '/projects/$projectId/review'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
+    | '/projects/$projectId/mentor'
     | '/projects/$projectId/requirements'
     | '/projects/$projectId/research'
     | '/projects/$projectId/review'
@@ -298,6 +310,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
     | '/_authenticated/projects/$projectId/experiments'
+    | '/_authenticated/projects/$projectId/mentor'
     | '/_authenticated/projects/$projectId/requirements'
     | '/_authenticated/projects/$projectId/research'
     | '/_authenticated/projects/$projectId/review'
@@ -438,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdExperimentsRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/mentor': {
+      id: '/_authenticated/projects/$projectId/mentor'
+      path: '/mentor'
+      fullPath: '/projects/$projectId/mentor'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdMentorRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
     '/_authenticated/projects/$projectId/requirements': {
       id: '/_authenticated/projects/$projectId/requirements'
       path: '/requirements'
@@ -487,6 +507,7 @@ interface AuthenticatedProjectsProjectIdRouteChildren {
   AuthenticatedProjectsProjectIdBuildRoute: typeof AuthenticatedProjectsProjectIdBuildRoute
   AuthenticatedProjectsProjectIdDocumentsRoute: typeof AuthenticatedProjectsProjectIdDocumentsRoute
   AuthenticatedProjectsProjectIdExperimentsRoute: typeof AuthenticatedProjectsProjectIdExperimentsRoute
+  AuthenticatedProjectsProjectIdMentorRoute: typeof AuthenticatedProjectsProjectIdMentorRoute
   AuthenticatedProjectsProjectIdRequirementsRoute: typeof AuthenticatedProjectsProjectIdRequirementsRoute
   AuthenticatedProjectsProjectIdResearchRoute: typeof AuthenticatedProjectsProjectIdResearchRoute
   AuthenticatedProjectsProjectIdReviewRoute: typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -504,6 +525,8 @@ const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectI
       AuthenticatedProjectsProjectIdDocumentsRoute,
     AuthenticatedProjectsProjectIdExperimentsRoute:
       AuthenticatedProjectsProjectIdExperimentsRoute,
+    AuthenticatedProjectsProjectIdMentorRoute:
+      AuthenticatedProjectsProjectIdMentorRoute,
     AuthenticatedProjectsProjectIdRequirementsRoute:
       AuthenticatedProjectsProjectIdRequirementsRoute,
     AuthenticatedProjectsProjectIdResearchRoute:

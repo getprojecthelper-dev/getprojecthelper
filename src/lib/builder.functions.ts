@@ -124,7 +124,8 @@ export const findResearchPapers = createServerFn({ method: "POST" })
       name: "research_papers",
       instructions:
         "You find real, well-known academic papers from arXiv, IEEE, ACM, Springer, ScienceDirect, PubMed and similar venues. Only list papers you are confident exist, with their canonical landing page URL. If the paper is open access (arXiv, PMC, open-access journals), set downloadable true and give the direct PDF URL; otherwise set downloadable false and pdf_url null. Never invent URLs.",
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\n\nReturn 4-6 relevant papers, newest and most-cited first, each with a 2-sentence takeaway written for a student and how it helps this project.`,
+      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\n\nReturn 8-12 relevant papers, newest and most-cited first, each with a 2-sentence takeaway written for a student and how it helps this project.`,
+
       schema: obj({
         papers: {
           type: "array",

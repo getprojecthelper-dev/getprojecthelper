@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, nullableStr, obj, str, strArray } from "@/lib/ai.server";
+import { getPlaybook } from "@/lib/domain-playbooks";
+
 
 export interface SuggestedProject {
   title: string;

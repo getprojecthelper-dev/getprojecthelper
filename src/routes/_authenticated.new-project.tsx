@@ -37,6 +37,7 @@ import {
   type ResearchPaper,
   type SuggestedProject,
 } from "@/lib/builder.functions";
+import { domainBuildsCode } from "@/lib/domain-playbooks";
 import { DOMAINS } from "@/lib/project-domain";
 import { cn } from "@/lib/utils";
 
@@ -600,7 +601,10 @@ function NewProject() {
             </h2>
             <Row label="Title" value={chosen.title} />
             <Row label="Description" value={chosen.description} />
-            <Row label="Tech stack" value={chosen.tech_stack.join(", ")} />
+            <Row
+              label={domainBuildsCode(domain) ? "Tech stack" : "Tools & methods"}
+              value={chosen.tech_stack.join(", ")}
+            />
             <Row label="Domain" value={DOMAINS.find((d) => d.value === domain)?.label ?? domain} />
             {needsDataset ? <Row label="Dataset" value={dataset?.name ?? "Not selected"} /> : null}
             <Row

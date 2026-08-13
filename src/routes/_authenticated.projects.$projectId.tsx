@@ -44,6 +44,13 @@ function WorkspaceLayout() {
   const matchRoute = useMatchRoute();
   // On the mentor pages the side column becomes the saved conversation history.
   const onMentor = Boolean(matchRoute({ to: "/projects/$projectId/mentor", fuzzy: true }));
+  // Documentation, Viva/Review and Implementation get the full width: the
+  // secondary section list is hidden there.
+  const hideNav = ["/projects/$projectId/documents", "/projects/$projectId/review", "/projects/$projectId/build"].some(
+    (to) => Boolean(matchRoute({ to: to as "/projects/$projectId", fuzzy: true })),
+  );
+  const fullWidth = onMentor || hideNav;
+
 
   return (
     <div className="min-h-full">
@@ -62,9 +69,9 @@ function WorkspaceLayout() {
       </header>
 
       <div
-        className={`mx-auto flex gap-6 px-5 py-6 ${onMentor ? "w-full max-w-none" : "max-w-7xl"}`}
+        className={`mx-auto flex gap-6 px-5 py-6 ${fullWidth ? "w-full max-w-none" : "max-w-7xl"}`}
       >
-        <nav className="hidden w-56 shrink-0 lg:block">
+        <nav className={`hidden w-56 shrink-0 ${hideNav ? "" : "lg:block"}`}>
           {onMentor ? (
             <div className="sticky top-24 flex h-[calc(100vh-9rem)]">
               <MentorThreadList projectId={projectId} className="flex-1" />

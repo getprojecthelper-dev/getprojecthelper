@@ -32,6 +32,7 @@ type NavItem = {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   active?: boolean;
+  search?: Record<string, unknown>;
 };
 
 function CreditCard() {
@@ -146,6 +147,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
                     <Link
                       to={item.url as "/projects/$projectId"}
                       params={{ projectId: projectId! }}
+                      search={item.search as never}
                     >
                       {content}
                     </Link>

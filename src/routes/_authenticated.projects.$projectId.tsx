@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { MentorDock } from "@/components/mentor-dock";
 import { ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({

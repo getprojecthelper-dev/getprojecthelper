@@ -123,14 +123,6 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
     },
   ];
 
-  if (domain === "project_management" && projectId) {
-    items.push(
-      { title: "Schedule", url: "/projects/$projectId/schedule", icon: Calendar, active: pathname.includes("/schedule") },
-      { title: "Stakeholders", url: "/projects/$projectId/stakeholders", icon: Users, active: pathname.includes("/stakeholders") },
-      { title: "Budget", url: "/projects/$projectId/budget", icon: Banknote, active: pathname.includes("/budget") },
-      { title: "Risks", url: "/projects/$projectId/risks", icon: ShieldAlert, active: pathname.includes("/risks") },
-    );
-  }
 
   items.push({ title: "Settings", url: "/settings", icon: Settings, active: isActive("/settings") });
 

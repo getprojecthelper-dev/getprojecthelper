@@ -166,7 +166,7 @@ function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      </SidebarInset>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

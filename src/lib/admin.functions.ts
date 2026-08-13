@@ -8,6 +8,7 @@ import {
   toReferralRow,
   type ReferralCodeRow,
 } from "@/lib/admin-codes";
+import type { UnitEconomics } from "@/lib/economics.server";
 
 export type { ReferralCodeRow };
 
@@ -190,4 +191,23 @@ export const setReferralCodeActive = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export type UnitEconomicsResult = { forbidden: true } | ({ forbidden: false } & UnitEconomics);
+
+export const getUnitEconomics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ window: z.enum(["7d", "30d", "all"]).default("30d") }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<UnitEconomicsResult> => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (isAdmin !== true) return { forbidden: true };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { computeUnitEconomics } = await import("@/lib/economics.server");
+    return { forbidden: false, ...(await computeUnitEconomics(supabaseAdmin, data.window)) };
   });

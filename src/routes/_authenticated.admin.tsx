@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide-react";
 
+import { AdminEconomics } from "@/components/admin-economics";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
 import { MeterBar, MetricCard } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
@@ -199,6 +200,8 @@ function AdminDashboard() {
           </p>
         </section>
       </div>
+
+      <AdminEconomics />
 
       <AdminReferralCodes />
     </div>

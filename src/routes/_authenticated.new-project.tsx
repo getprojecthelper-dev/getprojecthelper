@@ -546,9 +546,11 @@ function NewProject() {
               <Button variant="ghost" onClick={() => setStep(1)} disabled={busy}>
                 Back to suggestions
               </Button>
-              <Button onClick={() => void afterPapers()} disabled={busy}>
-                {needsDataset ? "Continue to dataset" : "Continue"} <ArrowRight className="h-4 w-4" />
-              </Button>
+              {papers !== null ? (
+                <Button onClick={() => void afterPapers()} disabled={busy}>
+                  {needsDataset ? "Continue to dataset" : "Continue"} <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : null}
             </div>
           </div>
         ) : null}

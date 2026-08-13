@@ -508,84 +508,422 @@ function DocumentWizard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Viewer: readable draft + Overleaf-ready LaTeX                        */
+/* Viewer: rendered paper, manual + AI editing, LaTeX and score check   */
 /* ------------------------------------------------------------------ */
 
-function DocumentViewer({ doc, onClose }: { doc: GeneratedDocument; onClose: () => void }) {
+function scoreTone(value: number, invert = true) {
+  const good = invert ? value <= 35 : value >= 70;
+  const mid = invert ? value <= 65 : value >= 45;
+  return good ? "text-success" : mid ? "text-warning" : "text-destructive";
+}
+
+function ScoreCard({
+  label,
+  value,
+  invert,
+  hint,
+}: {
+  label: string;
+  value: number;
+  invert?: boolean;
+  hint: string;
+}) {
+  const pct = Math.max(0, Math.min(100, Math.round(value)));
+  return (
+    <div className="panel p-4">
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className={`mt-2 font-display text-3xl ${scoreTone(pct, invert)}`}>
+        {pct}
+        <span className="text-base text-muted-foreground">/100</span>
+      </p>
+      <MeterBar
+        className="mt-3"
+        value={pct}
+        tone={
+          (invert ? pct <= 35 : pct >= 70)
+            ? "primary"
+            : (invert ? pct <= 65 : pct >= 45)
+              ? "warning"
+              : "danger"
+        }
+      />
+      <p className="mt-2 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function DocumentViewer({
+  doc: initial,
+  onClose,
+  onSaved,
+}: {
+  doc: GeneratedDocument;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [doc, setDoc] = useState(initial);
+  const [title, setTitle] = useState(initial.title);
+  const [sections, setSections] = useState<DocSection[]>(initial.sections);
+  const [latex, setLatex] = useState(initial.latex ?? "");
+  const [dirty, setDirty] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [instructions, setInstructions] = useState("");
+  const [focusSection, setFocusSection] = useState("");
+
+  const parsedAnalysis = (() => {
+    const raw = doc.meta?.["analysis"];
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as DocumentAnalysis;
+    } catch {
+      return null;
+    }
+  })();
+  const [analysis, setAnalysis] = useState<DocumentAnalysis | null>(parsedAnalysis);
+
+  const save = useServerFn(updateDocument);
+  const revise = withMeter("revise_document", useServerFn(reviseDocument));
+  const analyze = withMeter("analyze_document", useServerFn(analyzeDocument));
+
+  const apply = (next: GeneratedDocument) => {
+    setDoc(next);
+    setTitle(next.title);
+    setSections(next.sections);
+    setLatex(next.latex ?? "");
+    setDirty(false);
+    onSaved();
+  };
+
+  const saveEdits = useMutation({
+    mutationFn: () =>
+      save({ data: { id: doc.id, title: title.trim(), sections, latex: latex || null } }),
+    onSuccess: (next) => {
+      apply(next);
+      toast.success("Changes saved.");
+    },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "Your changes couldn't be saved."),
+  });
+
+  const askAi = useMutation({
+    mutationFn: () =>
+      revise({
+        data: { id: doc.id, instructions: instructions.trim(), sectionHeading: focusSection },
+      }),
+    onSuccess: (next) => {
+      apply(next);
+      setAskOpen(false);
+      setInstructions("");
+      toast.success("The paper has been revised.");
+    },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "The revision failed. Please try again."),
+  });
+
+  const runScore = useMutation({
+    mutationFn: () => analyze({ data: { id: doc.id } }),
+    onSuccess: (result) => setAnalysis(result),
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "The check couldn't be completed."),
+  });
+
   const download = (content: string, extension: string, mime: string) => {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${doc.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.${extension}`;
+    a.download = `${title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.${extension}`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const plain = doc.sections.map((s) => `${s.heading}\n\n${s.body}`).join("\n\n");
+  const copyLatex = async () => {
+    try {
+      await navigator.clipboard.writeText(latex);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error("Copying isn't available in this browser.");
+    }
+  };
+
+  const plain = sections.map((s) => `${s.heading}\n\n${s.body}`).join("\n\n");
+  const keywords = doc.meta?.["keywords"];
+
+  const setSection = (index: number, patch: Partial<DocSection>) =>
+    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
 
   return (
     <Dialog open onOpenChange={(v) => (v ? null : onClose())}>
-      <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-4xl">
+      <DialogContent className="max-h-[92vh] overflow-hidden sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="pr-8">{doc.title}</DialogTitle>
+          <DialogTitle className="pr-8">{title}</DialogTitle>
           <DialogDescription>
-            {doc.meta?.['doc_type_label'] ?? doc.doc_type} · {doc.meta?.['format_label'] ?? doc.format}
+            {doc.meta?.["doc_type_label"] ?? doc.doc_type} · {doc.meta?.["format_label"] ?? doc.format}
             {doc.authors.length ? ` · ${doc.authors.map((a) => a.name).join(", ")}` : ""}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="draft" className="flex min-h-0 flex-col">
+        <Tabs defaultValue="paper" className="flex min-h-0 flex-col">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <TabsList>
-              <TabsTrigger value="draft">Draft</TabsTrigger>
-              <TabsTrigger value="latex">LaTeX (Overleaf)</TabsTrigger>
+              <TabsTrigger value="paper">Paper</TabsTrigger>
+              <TabsTrigger value="edit">Edit</TabsTrigger>
+              <TabsTrigger value="latex">LaTeX</TabsTrigger>
+              <TabsTrigger value="score">Score</TabsTrigger>
             </TabsList>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => setAskOpen(true)}>
+                <Wand2 className="mr-1 h-3.5 w-3.5" /> Ask AI to edit
+              </Button>
               <Button size="sm" variant="outline" onClick={() => download(plain, "txt", "text/plain")}>
                 <Download className="mr-1 h-3.5 w-3.5" /> Text
               </Button>
-              <Button
-                size="sm"
-                disabled={!doc.latex}
-                onClick={() => download(doc.latex ?? "", "tex", "application/x-tex")}
-              >
+              <Button size="sm" disabled={!latex} onClick={() => download(latex, "tex", "application/x-tex")}>
                 <Download className="mr-1 h-3.5 w-3.5" /> .tex
               </Button>
             </div>
           </div>
 
-          <TabsContent value="draft" className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-            <article className="space-y-5">
-              {doc.meta?.['keywords'] ? (
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">Keywords: </span>
-                  {doc.meta['keywords']}
+          {/* Rendered paper — read it here, no external editor needed */}
+          <TabsContent value="paper" className="mt-4 max-h-[64vh] overflow-y-auto pr-1">
+            <article className="mx-auto max-w-3xl rounded-xl border border-border bg-card p-8 shadow-panel">
+              <h2 className="text-center font-display text-2xl leading-tight">{title}</h2>
+              {doc.authors.length ? (
+                <div className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-center text-sm">
+                  {doc.authors.map((a, i) => (
+                    <div key={i}>
+                      <p className="font-medium">{a.name}</p>
+                      {a.affiliation ? (
+                        <p className="text-xs text-muted-foreground">{a.affiliation}</p>
+                      ) : null}
+                      {a.email ? <p className="text-xs text-muted-foreground">{a.email}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {keywords ? (
+                <p className="mt-6 text-sm">
+                  <span className="font-semibold">Keywords — </span>
+                  <span className="text-muted-foreground">{keywords}</span>
                 </p>
               ) : null}
-              {doc.sections.map((section, i) => (
-                <section key={i} className="space-y-2">
-                  <h3 className="font-display text-base">{section.heading}</h3>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                    {section.body}
-                  </p>
-                </section>
-              ))}
+              <div className="mt-6 space-y-6">
+                {sections.map((section, i) => (
+                  <section key={i} className="space-y-2">
+                    <h3 className="font-display text-base uppercase tracking-wide">
+                      {i + 1}. {section.heading}
+                    </h3>
+                    <p className="whitespace-pre-wrap text-justify text-[13.5px] leading-7 text-card-foreground">
+                      {section.body}
+                    </p>
+                  </section>
+                ))}
+              </div>
             </article>
           </TabsContent>
 
-          <TabsContent value="latex" className="mt-4 max-h-[60vh] overflow-y-auto">
-            {doc.latex ? (
-              <CodeBlock code={doc.latex} filename="main.tex" language="latex" />
+          {/* Manual editing */}
+          <TabsContent value="edit" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setDirty(true);
+                }}
+              />
+            </div>
+            {sections.map((section, i) => (
+              <div key={i} className="space-y-2">
+                <Input
+                  value={section.heading}
+                  onChange={(e) => {
+                    setSection(i, { heading: e.target.value });
+                    setDirty(true);
+                  }}
+                  className="font-medium"
+                />
+                <Textarea
+                  rows={8}
+                  value={section.body}
+                  onChange={(e) => {
+                    setSection(i, { body: e.target.value });
+                    setDirty(true);
+                  }}
+                />
+              </div>
+            ))}
+            <div className="sticky bottom-0 flex justify-end gap-2 bg-background/90 py-2 backdrop-blur">
+              <Button
+                disabled={!dirty || saveEdits.isPending}
+                onClick={() => saveEdits.mutate()}
+              >
+                {saveEdits.isPending ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Saving…
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-1 h-4 w-4" /> Save changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="latex" className="mt-4 max-h-[64vh] overflow-y-auto">
+            <div className="mb-3 flex justify-end">
+              <Button size="sm" variant="outline" disabled={!latex} onClick={copyLatex}>
+                {copied ? (
+                  <>
+                    <Check className="mr-1 h-3.5 w-3.5 text-success" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-1 h-3.5 w-3.5" /> Copy LaTeX
+                  </>
+                )}
+              </Button>
+            </div>
+            {latex ? (
+              <CodeBlock code={latex} filename="main.tex" language="latex" />
             ) : (
               <p className="text-sm text-muted-foreground">No LaTeX source was generated.</p>
             )}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Download <code>main.tex</code>, then upload it to Overleaf (New Project → Upload Project)
-              to compile the formatted paper.
-            </p>
+          </TabsContent>
+
+          {/* Explicit originality / AI score check */}
+          <TabsContent value="score" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">
+            <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+              <div>
+                <p className="font-medium">AI &amp; plagiarism check</p>
+                <p className="text-xs text-muted-foreground">
+                  Heuristic estimate of AI-likeness, plagiarism risk and how relevant the paper is to
+                  your project.
+                </p>
+              </div>
+              <Button disabled={runScore.isPending} onClick={() => runScore.mutate()}>
+                {runScore.isPending ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Checking…
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="mr-1 h-4 w-4" /> Calculate score
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {analysis ? (
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <ScoreCard label="AI score" value={analysis.ai_score} invert hint="Lower reads more human." />
+                  <ScoreCard
+                    label="Plagiarism risk"
+                    value={analysis.plagiarism_score}
+                    invert
+                    hint="Lower means more original phrasing."
+                  />
+                  <ScoreCard
+                    label="Project relevance"
+                    value={analysis.relevance_score}
+                    hint="Higher means closer to your project."
+                  />
+                </div>
+                <p className="panel p-4 text-sm text-muted-foreground">{analysis.verdict}</p>
+                {[
+                  { title: "Why it reads as AI", items: analysis.ai_reasons },
+                  { title: "Plagiarism risk factors", items: analysis.plagiarism_reasons },
+                  { title: "How to improve", items: analysis.suggestions },
+                ]
+                  .filter((g) => (g.items ?? []).length > 0)
+                  .map((group) => (
+                    <div key={group.title} className="panel p-4">
+                      <p className="text-sm font-medium">{group.title}</p>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                        {group.items.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                <p className="text-xs text-muted-foreground">
+                  Checked {new Date(analysis.checked_at).toLocaleString()}. These scores are an AI
+                  estimate, not an official integrity report.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Run the check when you're ready — it costs credits, so it only runs when you ask.
+              </p>
+            )}
           </TabsContent>
         </Tabs>
+
+        {askOpen ? (
+          <Dialog open onOpenChange={(v) => (v ? null : setAskOpen(false))}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Ask AI to edit</DialogTitle>
+                <DialogDescription>
+                  Describe the change — the AI rewrites the paper and the LaTeX for you.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ai-focus">Focus (optional)</Label>
+                  <select
+                    id="ai-focus"
+                    value={focusSection}
+                    onChange={(e) => setFocusSection(e.target.value)}
+                    className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm"
+                  >
+                    <option value="">Whole document</option>
+                    {sections.map((s) => (
+                      <option key={s.heading} value={s.heading}>
+                        {s.heading}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ai-instructions">What should change?</Label>
+                  <Textarea
+                    id="ai-instructions"
+                    rows={5}
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder="e.g. Expand the results section with the accuracy numbers and make the abstract shorter."
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setAskOpen(false)} disabled={askAi.isPending}>
+                  Cancel
+                </Button>
+                <Button
+                  disabled={askAi.isPending || instructions.trim().length < 3}
+                  onClick={() => askAi.mutate()}
+                >
+                  {askAi.isPending ? (
+                    <>
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Revising…
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="mr-1 h-4 w-4" /> Apply change
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

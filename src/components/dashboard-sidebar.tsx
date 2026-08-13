@@ -128,12 +128,10 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  isActive={active}
                   tooltip={item.title}
                   className={cn(
                     "h-11 rounded-xl px-3 text-[15px] font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                    active &&
-                      "data-[active=true]:bg-primary/15 data-[active=true]:text-primary hover:data-[active=true]:bg-primary/20 hover:data-[active=true]:text-primary",
+                    active && "bg-primary/15 text-primary hover:bg-primary/20 hover:text-primary",
                   )}
                 >
                   {item.url.includes("$") ? (

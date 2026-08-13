@@ -3,8 +3,11 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft,
   ArrowRight,
+  BookOpen,
   Check,
   Database,
+  Download,
+  ExternalLink,
   Loader2,
   RefreshCw,
   Sparkles,
@@ -27,9 +30,11 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   createGuidedProject,
   findDatasets,
+  findResearchPapers,
   isDataDomain,
   suggestProjects,
   type DatasetOption,
+  type ResearchPaper,
   type SuggestedProject,
 } from "@/lib/builder.functions";
 import { DOMAINS } from "@/lib/project-domain";
@@ -56,12 +61,13 @@ export const Route = createFileRoute("/_authenticated/new-project")({
   component: NewProject,
 });
 
-const STEPS = ["Your idea", "Pick a project", "Dataset", "Finalise"];
+const STEPS = ["Your idea", "Pick a project", "Research papers", "Dataset", "Finalise"];
 
 function NewProject() {
   const navigate = useNavigate();
   const suggest = withMeter("suggest_projects", useServerFn(suggestProjects));
   const datasetSearch = withMeter("find_datasets", useServerFn(findDatasets));
+  const paperSearch = withMeter("find_papers", useServerFn(findResearchPapers));
   const create = withMeter("create_project", useServerFn(createGuidedProject));
 
 
@@ -71,6 +77,8 @@ function NewProject() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState<Record<number, SuggestedProject[]>>({});
   const [chosen, setChosen] = useState<SuggestedProject | null>(null);
+  const [papers, setPapers] = useState<ResearchPaper[] | null>(null);
+  const [selectedPapers, setSelectedPapers] = useState<ResearchPaper[]>([]);
   const [datasets, setDatasets] = useState<DatasetOption[] | null>(null);
   const [dataset, setDataset] = useState<DatasetOption | null>(null);
   const [busy, setBusy] = useState(false);
@@ -106,16 +114,42 @@ function NewProject() {
 
   const pickProject = async (project: SuggestedProject) => {
     setChosen(project);
+    setStep(2);
+    setPapers(null);
+    setSelectedPapers([]);
+    setBusy(true);
+    try {
+      const found = await paperSearch({
+        data: { title: project.title, description: project.description, domain },
+      });
+      setPapers(found);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't find research papers.");
+      setPapers([]);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const togglePaper = (paper: ResearchPaper) =>
+    setSelectedPapers((current) =>
+      current.some((p) => p.url === paper.url && p.title === paper.title)
+        ? current.filter((p) => !(p.url === paper.url && p.title === paper.title))
+        : [...current, paper],
+    );
+
+  const afterPapers = async () => {
+    if (!chosen) return;
     if (!needsDataset) {
-      setStep(3);
+      setStep(4);
       return;
     }
-    setStep(2);
-    setDatasets(null);
+    setStep(3);
+    if (datasets) return;
     setBusy(true);
     try {
       const found = await datasetSearch({
-        data: { title: project.title, description: project.description, domain },
+        data: { title: chosen.title, description: chosen.description, domain },
       });
       setDatasets(found);
     } catch (error) {
@@ -138,6 +172,7 @@ function NewProject() {
           description: chosen.description,
           techStack: chosen.tech_stack,
           dataset: needsDataset ? dataset : null,
+          papers: selectedPapers,
         },
       });
       toast.success("Project created with its implementation plan.");
@@ -281,6 +316,97 @@ function NewProject() {
           <div className="space-y-4">
             <div className="panel p-5">
               <h2 className="flex items-center gap-2 font-display text-lg">
+                <BookOpen className="h-4 w-4 text-primary" /> Research papers for {chosen.title}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Read a couple of these before you build. Pick the ones you want saved to your
+                project's research section — open-access papers can be downloaded straight away.
+              </p>
+            </div>
+
+            {busy ? (
+              <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Searching for relevant papers…
+              </div>
+            ) : null}
+
+            {(papers ?? []).map((paper) => {
+              const picked = selectedPapers.some((p) => p.url === paper.url && p.title === paper.title);
+              return (
+                <button
+                  key={paper.url + paper.title}
+                  type="button"
+                  onClick={() => togglePaper(paper)}
+                  className={cn(
+                    "panel w-full space-y-3 p-5 text-left transition-colors",
+                    picked ? "border-primary bg-primary/5" : "hover:bg-muted/40",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-medium">{paper.title}</h3>
+                    {picked ? <Check className="h-4 w-4 shrink-0 text-primary" /> : null}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-xs">
+                    {[paper.authors, paper.year, paper.venue].filter(Boolean).map((meta) => (
+                      <span key={meta} className="rounded border border-border px-2 py-0.5">
+                        {meta}
+                      </span>
+                    ))}
+                    <span
+                      className={cn(
+                        "rounded px-2 py-0.5",
+                        paper.downloadable
+                          ? "bg-success/10 text-success"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {paper.downloadable ? "Open access" : "Paywalled / view only"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{paper.summary}</p>
+                  <p className="rounded-md bg-primary/5 p-2 text-xs">Why it helps: {paper.relevance}</p>
+                  <div className="flex flex-wrap gap-3 text-xs">
+                    <a
+                      href={paper.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-1 text-primary underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="h-3 w-3" /> Open paper
+                    </a>
+                    {paper.downloadable && paper.pdf_url ? (
+                      <a
+                        href={paper.pdf_url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        download
+                        className="inline-flex items-center gap-1 text-primary underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Download className="h-3 w-3" /> Download PDF
+                      </a>
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })}
+
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => setStep(1)} disabled={busy}>
+                Back to suggestions
+              </Button>
+              <Button onClick={() => void afterPapers()} disabled={busy}>
+                {needsDataset ? "Continue to dataset" : "Continue"} <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        {step === 3 && chosen ? (
+          <div className="space-y-4">
+            <div className="panel p-5">
+              <h2 className="flex items-center gap-2 font-display text-lg">
                 <Database className="h-4 w-4 text-primary" /> Select a dataset for {chosen.title}
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -330,17 +456,17 @@ function NewProject() {
             ))}
 
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setStep(1)}>
-                Back to suggestions
+              <Button variant="ghost" onClick={() => setStep(2)}>
+                Back to papers
               </Button>
-              <Button disabled={!dataset} onClick={() => setStep(3)}>
+              <Button disabled={!dataset} onClick={() => setStep(4)}>
                 Continue <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
         ) : null}
 
-        {step === 3 && chosen ? (
+        {step === 4 && chosen ? (
           <div className="panel space-y-4 p-6">
             <h2 className="flex items-center gap-2 font-display text-lg">
               <Target className="h-4 w-4 text-primary" /> Finalise your project
@@ -350,12 +476,20 @@ function NewProject() {
             <Row label="Tech stack" value={chosen.tech_stack.join(", ")} />
             <Row label="Domain" value={DOMAINS.find((d) => d.value === domain)?.label ?? domain} />
             {needsDataset ? <Row label="Dataset" value={dataset?.name ?? "Not selected"} /> : null}
+            <Row
+              label="Research papers"
+              value={
+                selectedPapers.length
+                  ? selectedPapers.map((p) => p.title).join("; ")
+                  : "None selected"
+              }
+            />
             <p className="text-xs text-muted-foreground">
               Creating the project builds a 7–8 section implementation plan for this domain. Each
               section stays locked until you choose to generate it.
             </p>
             <div className="flex justify-between border-t border-border pt-4">
-              <Button variant="ghost" onClick={() => setStep(needsDataset ? 2 : 1)} disabled={busy}>
+              <Button variant="ghost" onClick={() => setStep(needsDataset ? 3 : 2)} disabled={busy}>
                 Back
               </Button>
               <Button onClick={() => void finalise()} disabled={busy}>

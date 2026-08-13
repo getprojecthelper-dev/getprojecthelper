@@ -22,7 +22,20 @@ export interface DatasetOption {
   common_mistakes: string;
 }
 
+export interface ResearchPaper {
+  title: string;
+  authors: string;
+  year: string;
+  venue: string;
+  url: string;
+  pdf_url: string | null;
+  downloadable: boolean;
+  summary: string;
+  relevance: string;
+}
+
 export interface SectionPlan {
+
   title: string;
   question: string;
   objective: string;
@@ -91,8 +104,51 @@ export const suggestProjects = createServerFn({ method: "POST" })
   });
 
 /* ------------------------------------------------------------------ */
+/* 1b. Find research papers for the chosen project                     */
+/* ------------------------------------------------------------------ */
+
+export const findResearchPapers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        title: z.string().trim().min(2).max(200),
+        description: z.string().trim().max(2000),
+        domain: z.string().max(40),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const result = await generateJson<{ papers: ResearchPaper[] }>({
+      usage: { userId: context.userId, feature: "find_papers" },
+      name: "research_papers",
+      instructions:
+        "You find real, well-known academic papers from arXiv, IEEE, ACM, Springer, ScienceDirect, PubMed and similar venues. Only list papers you are confident exist, with their canonical landing page URL. If the paper is open access (arXiv, PMC, open-access journals), set downloadable true and give the direct PDF URL; otherwise set downloadable false and pdf_url null. Never invent URLs.",
+      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\n\nReturn 4-6 relevant papers, newest and most-cited first, each with a 2-sentence takeaway written for a student and how it helps this project.`,
+      schema: obj({
+        papers: {
+          type: "array",
+          items: obj({
+            title: str,
+            authors: str,
+            year: str,
+            venue: str,
+            url: str,
+            pdf_url: nullableStr,
+            downloadable: { type: "boolean" },
+            summary: str,
+            relevance: str,
+          }),
+        },
+      }),
+    });
+    return result.papers;
+  });
+
+/* ------------------------------------------------------------------ */
 /* 2. Find datasets for a data-oriented project                        */
 /* ------------------------------------------------------------------ */
+
 
 export const findDatasets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -157,6 +213,23 @@ export const createGuidedProject = createServerFn({ method: "POST" })
             common_mistakes: z.string(),
           })
           .nullable(),
+        papers: z
+          .array(
+            z.object({
+              title: z.string(),
+              authors: z.string(),
+              year: z.string(),
+              venue: z.string(),
+              url: z.string(),
+              pdf_url: z.string().nullable(),
+              downloadable: z.boolean(),
+              summary: z.string(),
+              relevance: z.string(),
+            }),
+          )
+          .max(10)
+          .default([]),
+
       })
       .parse(input),
   )
@@ -216,7 +289,23 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const { error: sectionError } = await supabase.from("build_sections").insert(rows);
     if (sectionError) throw new Error("The implementation sections could not be saved.");
 
+    if (data.papers.length > 0) {
+      await supabase.from("research_sources").insert(
+        data.papers.map((p) => ({
+          user_id: userId,
+          project_id: project.id,
+          title: p.title,
+          authors: p.authors || null,
+          year: Number.parseInt(p.year, 10) || null,
+          source_type: "paper",
+          url: p.pdf_url ?? p.url,
+          notes: [p.summary, p.relevance].filter(Boolean).join("\n\n") || null,
+        })),
+      );
+    }
+
     return { projectId: project.id };
+
   });
 
 /* ------------------------------------------------------------------ */

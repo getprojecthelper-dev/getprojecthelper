@@ -7,6 +7,7 @@
 export type CreditAction =
   | "suggest_projects"
   | "find_datasets"
+  | "find_papers"
   | "plan_sections"
   | "section_overview"
   | "section_draft"
@@ -18,6 +19,7 @@ export type CreditAction =
 export const CREDIT_HOLDS: Record<CreditAction, number> = {
   suggest_projects: 2,
   find_datasets: 2,
+  find_papers: 2,
   plan_sections: 4,
   section_overview: 5,
   section_draft: 6,
@@ -30,6 +32,7 @@ export const CREDIT_HOLDS: Record<CreditAction, number> = {
 export const ACTION_LABELS: Record<string, { label: string; estimate: number }> = {
   suggest_projects: { label: "Finding project ideas", estimate: 2 },
   find_datasets: { label: "Searching datasets", estimate: 2 },
+  find_papers: { label: "Finding research papers", estimate: 2 },
   create_project: { label: "Planning your build", estimate: 4 },
   generate_section: { label: "Writing this step", estimate: 10 },
   fix_section: { label: "Fixing your error", estimate: 5 },

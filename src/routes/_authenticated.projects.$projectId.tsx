@@ -20,9 +20,9 @@ function WorkspaceLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // Viva (review) and Documentation have their own page headers, so the shared
-  // project breadcrumb bar is hidden there.
-  const showHeader = !/(\/review|\/documents)$/.test(pathname);
+  // Viva (review), Documentation and AI Mentor have their own page headers, so
+  // the shared project breadcrumb bar is removed there.
+  const showHeader = !/(\/review|\/documents|\/mentor)(\/[^/]+)*$/.test(pathname);
 
   return (
     <div className="min-h-full">

@@ -148,12 +148,12 @@ export function CreditMeter() {
 
   useEffect(() => {
     if (meter.active || meter.finishedAt) setVisible(true);
-    if (!meter.active && meter.finishedAt) {
+    if (!meter.active && !meter.settling && meter.finishedAt) {
       const id = window.setTimeout(() => setVisible(false), 4000);
       return () => window.clearTimeout(id);
     }
     return undefined;
-  }, [meter.active, meter.finishedAt]);
+  }, [meter.active, meter.settling, meter.finishedAt]);
 
 
   if (!visible) return null;

@@ -57,14 +57,22 @@ function Dashboard() {
   const { remove } = useProjectMutations();
   const [pendingDelete, setPendingDelete] = useState<ProjectOverview | null>(null);
 
+  const latestProjectId = overviews?.[0]?.project.id;
+
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-secondary/30">
+      <DashboardSidebar projectId={latestProjectId} />
+      <SidebarInset className="min-w-0 flex-1 bg-secondary/30">
       <header className="border-b border-border bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link to="/dashboard" className="flex items-center gap-2 font-display">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            Project Helper
-          </Link>
+        <div className="flex h-16 items-center justify-between gap-2 px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <Link to="/dashboard" className="flex items-center gap-2 font-display">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              <span className="hidden sm:inline">Project Helper</span>
+            </Link>
+          </div>
           <div className="flex items-center gap-1">
             <CreditChip />
             <ThemeToggle />

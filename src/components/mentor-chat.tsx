@@ -60,13 +60,13 @@ function toUIMessages(rows: MentorMessage[]): UIMessage[] {
 
 export function MentorChat({
   projectId,
+  threadId,
   className,
-  fresh = false,
 }: {
   projectId: string;
+  /** The saved conversation this chat reads from and writes to. */
+  threadId: string;
   className?: string;
-  /** Fresh session: start with an empty view and don't save this conversation. */
-  fresh?: boolean;
 }) {
   const queryClient = useQueryClient();
   const fetchHistory = useServerFn(getMentorHistory);
@@ -78,28 +78,27 @@ export function MentorChat({
   const projects = useProjects();
 
   const history = useQuery({
-    queryKey: ["mentor-history", projectId],
-    queryFn: () => fetchHistory({ data: { projectId } }),
+    queryKey: ["mentor-history", threadId],
+    queryFn: () => fetchHistory({ data: { threadId } }),
     staleTime: 60_000,
-    enabled: !fresh,
   });
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { projectId, importedProjectIds: importedIds, persist: !fresh },
+        body: { projectId, threadId, importedProjectIds: importedIds },
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           const token = data.session?.access_token;
           return token ? { Authorization: `Bearer ${token}` } : {};
         },
       }),
-    [projectId, importedIds, fresh],
+    [projectId, threadId, importedIds],
   );
 
   const { messages, sendMessage, status, stop, setMessages } = useChat({
-    id: fresh ? `${projectId}:fresh` : projectId,
+    id: threadId,
     transport,
     onError: (error) => {
       creditMeter.cancel();
@@ -108,23 +107,24 @@ export function MentorChat({
     onFinish: () => {
       creditMeter.finish();
       void queryClient.invalidateQueries({ queryKey: ["credits"] });
-      void queryClient.invalidateQueries({ queryKey: ["mentor-history", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["mentor-history", threadId] });
+      void queryClient.invalidateQueries({ queryKey: ["mentor-threads", projectId] });
     },
   });
 
   // Seed the conversation from saved history once it arrives.
   const seeded = useRef<string | null>(null);
   useEffect(() => {
-    if (fresh || !history.data || seeded.current === projectId) return;
-    seeded.current = projectId;
+    if (!history.data || seeded.current === threadId) return;
+    seeded.current = threadId;
     if (history.data.length) setMessages(toUIMessages(history.data));
-  }, [fresh, history.data, projectId, setMessages]);
+  }, [history.data, threadId, setMessages]);
 
   const busy = status === "submitted" || status === "streaming";
 
   useEffect(() => {
     if (!busy) textareaRef.current?.focus();
-  }, [busy, projectId]);
+  }, [busy, threadId]);
 
   const ask = (text: string) => {
     const trimmed = text.trim();
@@ -134,13 +134,10 @@ export function MentorChat({
   };
 
   const reset = useMutation({
-    mutationFn: async () => {
-      if (fresh) return;
-      await clearChat({ data: { projectId } });
-    },
+    mutationFn: () => clearChat({ data: { threadId } }),
     onSuccess: () => {
       setMessages([]);
-      void queryClient.invalidateQueries({ queryKey: ["mentor-history", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["mentor-history", threadId] });
       toast.success("Conversation cleared.");
     },
     onError: () => toast.error("We couldn't clear the conversation."),
@@ -295,7 +292,7 @@ export function MentorChat({
               className="text-xs text-muted-foreground"
             >
               <Eraser className="mr-1.5 h-3.5 w-3.5" />
-              {fresh ? "Clear view" : "Clear conversation"}
+              Clear conversation
             </Button>
           </div>
         ) : null}

@@ -1,4 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
+
+import { MentorThreadList } from "@/components/mentor-thread-list";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor")({
   head: () => ({
@@ -22,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor
 });
 
 function MentorLayout() {
+  const { projectId } = useParams({ from: "/_authenticated/projects/$projectId/mentor" });
+
   return (
     <section className="flex h-[calc(100vh-14rem)] min-h-[32rem] flex-col">
       <header className="mb-4 shrink-0">
@@ -30,6 +34,7 @@ function MentorLayout() {
           Every conversation is saved, so you can come back to it later.
         </p>
       </header>
+      <MentorThreadList projectId={projectId} className="mb-4 max-h-56 shrink-0 lg:hidden" />
       <div className="flex min-h-0 flex-1">
         <Outlet />
       </div>

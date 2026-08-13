@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { PaperSheet } from "@/components/paper-sheet";
 import { useProjects } from "@/lib/db";
 import { DOC_TYPES, type DocFormat, type DocType } from "@/lib/doc-templates";
 import {

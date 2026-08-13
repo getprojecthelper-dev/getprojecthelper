@@ -19,7 +19,6 @@ import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   component: WorkspaceLayout,

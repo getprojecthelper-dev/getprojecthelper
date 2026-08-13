@@ -198,7 +198,7 @@ function DocumentsPage() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Wizard: format → details & members → import projects → generate      */
+/* Wizard: format → import projects → details & members → generate      */
 /* ------------------------------------------------------------------ */
 
 function DocumentWizard({
@@ -215,6 +215,7 @@ function DocumentWizard({
   const [step, setStep] = useState(0);
   const [format, setFormat] = useState<DocFormat | null>(type.formats[0] ?? null);
   const [title, setTitle] = useState("");
+  const [titleTouched, setTitleTouched] = useState(false);
   const [venue, setVenue] = useState("");
   const [keywords, setKeywords] = useState("");
   const [notes, setNotes] = useState("");
@@ -223,6 +224,25 @@ function DocumentWizard({
 
   const projects = useProjects();
   const generate = useServerFn(generateDocument);
+
+  const current = (projects.data ?? []).find((p) => p.id === projectId) ?? null;
+
+  /** Entering the details step pre-fills what we already know about the project. */
+  const goToDetails = () => {
+    if (!titleTouched) {
+      const base = current?.name?.trim();
+      if (base) setTitle(base);
+    }
+    if (!keywords.trim()) {
+      const domain = (current as { domain?: string | null } | null)?.domain;
+      const stack = (current as { tech_stack?: string[] | null } | null)?.tech_stack;
+      const seed = [domain?.replaceAll("_", " "), ...(Array.isArray(stack) ? stack.slice(0, 4) : [])]
+        .filter(Boolean)
+        .join(", ");
+      if (seed) setKeywords(seed);
+    }
+    setStep(2);
+  };
 
   const run = useMutation({
     mutationFn: () =>
@@ -252,8 +272,8 @@ function DocumentWizard({
       toast.error(error instanceof Error ? error.message : "The document couldn't be generated."),
   });
 
-  const canContinue =
-    step === 0 ? Boolean(format) : step === 1 ? title.trim().length > 2 && authors.some((a) => a.name.trim()) : true;
+  const canContinue = step === 0 ? Boolean(format) : true;
+  const canGenerate = title.trim().length > 2 && authors.some((a) => a.name.trim());
 
   const setAuthor = (index: number, patch: Partial<DocAuthor>) =>
     setAuthors((prev) => prev.map((a, i) => (i === index ? { ...a, ...patch } : a)));
@@ -264,12 +284,12 @@ function DocumentWizard({
         <DialogHeader>
           <DialogTitle>{type.label}</DialogTitle>
           <DialogDescription>
-            {["Choose a format", "Paper details & members", "Import project data"][step]}
+            {["Choose a format", "Import project data", "Paper details & members"][step]}
           </DialogDescription>
         </DialogHeader>
 
         <ol className="flex items-center gap-2 text-xs text-muted-foreground">
-          {["Format", "Details", "Import"].map((label, i) => (
+          {["Format", "Import", "Details"].map((label, i) => (
             <li key={label} className="flex items-center gap-2">
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
@@ -304,6 +324,7 @@ function DocumentWizard({
             ))}
           </div>
         ) : null}
+
 
         {step === 1 ? (
           <div className="space-y-5">

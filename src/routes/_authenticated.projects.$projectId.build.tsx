@@ -396,11 +396,15 @@ function SectionCard({
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const guidance = playbook.buildsCode
+              ? null
+              : getFileGuidance(block.title, section.title, block.code ?? "");
             return (
               <div key={`${block.title}-${i}`} className="space-y-2">
                 <p className="text-sm font-semibold">
                   {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                 </p>
+                {guidance ? <FileGuidanceBar guidance={guidance} /> : null}
                 {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
                 {block.explanation?.length ? (
                   hasCode ? (
@@ -426,6 +430,7 @@ function SectionCard({
               </div>
             );
           })}
+
 
           {section.insights.length ? (
             <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">

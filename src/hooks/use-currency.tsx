@@ -1,13 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
-import {
-  CURRENCIES,
-  DEFAULT_CURRENCY,
-  currencyForCountry,
-  detectCurrency,
-  type CurrencyCode,
-} from "@/lib/pricing";
+import { CURRENCIES, DEFAULT_CURRENCY, detectCurrency, type CurrencyCode } from "@/lib/pricing";
 import { getVisitorRegion } from "@/lib/region.functions";
 
 const CURRENCY_KEY = "ph-currency";
@@ -18,15 +12,14 @@ const isCurrency = (value: unknown): value is CurrencyCode =>
 /**
  * Currency preference for the price list.
  *
- * Order of precedence: a locked currency the student picked, then a country
- * override they picked, then the country detected from the CDN geo header,
- * then a time-zone guess, then USD. Detection runs after hydration so server
- * and client render the same markup.
+ * The country is always detected (CDN geo header, then a time-zone guess) and
+ * only *suggests* a currency. The student can lock a different currency for
+ * every price; detection never overrides that. Detection runs after hydration
+ * so server and client render the same markup.
  */
 export function useCurrency() {
   const [currency, setCurrencyState] = useState<CurrencyCode>(DEFAULT_CURRENCY);
   const [locked, setLocked] = useState(false);
-  const [countryOverride, setCountryOverride] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   const region = useQuery({
@@ -36,25 +29,20 @@ export function useCurrency() {
   });
 
   useEffect(() => {
-    const storedCountry = window.localStorage.getItem(COUNTRY_KEY);
-    const storedCurrency = window.localStorage.getItem(CURRENCY_KEY);
-    if (storedCountry) setCountryOverride(storedCountry);
-    if (isCurrency(storedCurrency)) {
+    const stored = window.localStorage.getItem(CURRENCY_KEY);
+    if (isCurrency(stored)) {
       setLocked(true);
-      setCurrencyState(storedCurrency);
-    } else if (storedCountry) {
-      setCurrencyState(currencyForCountry(storedCountry));
+      setCurrencyState(stored);
     } else {
       setCurrencyState(detectCurrency());
     }
     setHydrated(true);
   }, []);
 
-  // Geo result only matters when nothing is pinned by the student.
   useEffect(() => {
-    if (!hydrated || locked || countryOverride) return;
+    if (!hydrated || locked) return;
     if (region.data?.country) setCurrencyState(region.data.currency);
-  }, [hydrated, locked, countryOverride, region.data]);
+  }, [hydrated, locked, region.data]);
 
   /** Pin a currency for every price in the app. */
   const setCurrency = useCallback((next: CurrencyCode) => {
@@ -63,23 +51,10 @@ export function useCurrency() {
     window.localStorage.setItem(CURRENCY_KEY, next);
   }, []);
 
-  /** Override the detected country; currency follows unless one is locked. */
-  const setCountry = useCallback(
-    (next: string) => {
-      const code = next.trim().toUpperCase();
-      setCountryOverride(code);
-      window.localStorage.setItem(COUNTRY_KEY, code);
-      if (!locked) setCurrencyState(currencyForCountry(code));
-    },
-    [locked],
-  );
-
-  /** Drop both overrides and go back to detection. */
+  /** Drop the manual choice and follow the detected region again. */
   const resetRegion = useCallback(() => {
     setLocked(false);
-    setCountryOverride(null);
     window.localStorage.removeItem(CURRENCY_KEY);
-    window.localStorage.removeItem(COUNTRY_KEY);
     setCurrencyState(region.data?.country ? region.data.currency : detectCurrency());
   }, [region.data]);
 
@@ -88,13 +63,13 @@ export function useCurrency() {
   return {
     currency,
     setCurrency,
-    country: countryOverride ?? detectedCountry,
-    detectedCountry,
-    countryOverride,
-    setCountry,
     resetRegion,
     locked,
-    /** True while nothing is pinned by the student. */
-    autoDetected: !locked && !countryOverride,
+    /** Country detected for this visitor — informational only. */
+    country: detectedCountry,
+    detectedCountry,
+    /** Currency suggested by the detected region. */
+    suggestedCurrency: region.data?.currency ?? detectCurrency(),
+    autoDetected: !locked,
   };
 }

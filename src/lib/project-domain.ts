@@ -16,6 +16,7 @@ export const DOMAINS = [
   { value: "web", label: "Web Development" },
   { value: "iot", label: "IoT" },
   { value: "engineering", label: "Engineering" },
+  { value: "project_management", label: "Project Management" },
   { value: "custom", label: "Custom Project" },
 ] as const;
 

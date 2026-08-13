@@ -213,6 +213,23 @@ export const createGuidedProject = createServerFn({ method: "POST" })
             common_mistakes: z.string(),
           })
           .nullable(),
+        papers: z
+          .array(
+            z.object({
+              title: z.string(),
+              authors: z.string(),
+              year: z.string(),
+              venue: z.string(),
+              url: z.string(),
+              pdf_url: z.string().nullable(),
+              downloadable: z.boolean(),
+              summary: z.string(),
+              relevance: z.string(),
+            }),
+          )
+          .max(10)
+          .default([]),
+
       })
       .parse(input),
   )

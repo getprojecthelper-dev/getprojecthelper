@@ -79,6 +79,8 @@ function NewProject() {
   const [chosen, setChosen] = useState<SuggestedProject | null>(null);
   const [papers, setPapers] = useState<ResearchPaper[] | null>(null);
   const [selectedPapers, setSelectedPapers] = useState<ResearchPaper[]>([]);
+  const [paperPage, setPaperPage] = useState(0);
+
   const [datasets, setDatasets] = useState<DatasetOption[] | null>(null);
   const [dataset, setDataset] = useState<DatasetOption | null>(null);
   const [busy, setBusy] = useState(false);

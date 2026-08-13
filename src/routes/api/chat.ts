@@ -33,17 +33,26 @@ export const Route = createFileRoute("/api/chat")({
           messages?: UIMessage[];
           projectId?: string;
           importedProjectIds?: string[];
-          persist?: boolean;
+          threadId?: string;
         };
         const messages = body.messages;
         const projectId = body.projectId;
-        const persist = body.persist !== false;
+        const threadId = body.threadId;
         const importedProjectIds = Array.isArray(body.importedProjectIds)
           ? body.importedProjectIds.filter((id) => typeof id === "string" && id !== projectId).slice(0, 3)
           : [];
-        if (!Array.isArray(messages) || !projectId) {
-          return new Response("messages and projectId are required", { status: 400 });
+        if (!Array.isArray(messages) || !projectId || !threadId) {
+          return new Response("messages, projectId and threadId are required", { status: 400 });
         }
+
+        // The conversation must belong to the caller before anything is saved.
+        const { data: thread } = await auth.supabase
+          .from("mentor_threads")
+          .select("id,title")
+          .eq("id", threadId)
+          .eq("user_id", auth.userId)
+          .maybeSingle();
+        if (!thread) return new Response("Conversation not found", { status: 404 });
 
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return new Response("AI is not configured.", { status: 500 });
@@ -70,15 +79,30 @@ export const Route = createFileRoute("/api/chat")({
 
         // Persist the student's newest message before the model runs.
         const last = messages[messages.length - 1];
-        if (persist && last?.role === "user") {
+        if (last?.role === "user") {
+          const text = textOf(last);
           const { error } = await auth.supabase.from("ai_messages").insert({
             user_id: auth.userId,
             project_id: projectId,
             thread: "mentor",
+            mentor_thread_id: threadId,
             role: "user",
-            content: textOf(last),
+            content: text,
           });
           if (error) console.error("mentor: failed to save user message", error);
+
+          // Name the conversation after the student's first question.
+          const title =
+            thread.title === "New conversation" && text
+              ? text.length > 60
+                ? `${text.slice(0, 60)}…`
+                : text
+              : thread.title;
+          const { error: touchError } = await auth.supabase
+            .from("mentor_threads")
+            .update({ title, updated_at: new Date().toISOString() })
+            .eq("id", threadId);
+          if (touchError) console.error("mentor: failed to update thread", touchError);
         }
 
         const lovable = createOpenAI({
@@ -147,11 +171,12 @@ export const Route = createFileRoute("/api/chat")({
                 console.error("mentor: usage accounting failed", error);
               }
 
-              if (persist && text.trim()) {
+              if (text.trim()) {
                 const { error } = await auth.supabase.from("ai_messages").insert({
                   user_id: auth.userId,
                   project_id: projectId,
                   thread: "mentor",
+                  mentor_thread_id: threadId,
                   role: "assistant",
                   content: text,
                 });

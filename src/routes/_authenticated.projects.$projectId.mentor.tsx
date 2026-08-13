@@ -1,6 +1,6 @@
-import { createFileRoute, useParams, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 
-import { MentorChat } from "@/components/mentor-chat";
+import { MentorThreadList } from "@/components/mentor-thread-list";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor")({
   head: () => ({
@@ -20,27 +20,24 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    fresh: search['fresh'] === true || search['fresh'] === "1" || search['fresh'] === "true",
-  }),
-  component: MentorPage,
+  component: MentorLayout,
 });
 
-function MentorPage() {
+function MentorLayout() {
   const { projectId } = useParams({ from: "/_authenticated/projects/$projectId/mentor" });
-  const { fresh } = useSearch({ from: "/_authenticated/projects/$projectId/mentor" });
 
   return (
     <section className="flex h-[calc(100vh-14rem)] min-h-[32rem] flex-col">
       <header className="mb-4 shrink-0">
         <h1 className="font-display text-2xl">AI Mentor</h1>
         <p className="text-sm text-muted-foreground">
-          {fresh
-            ? "New session — nothing saved is shown. Import other projects to ask about them."
-            : "Grounded in this project's plan, requirements, tests and results."}
+          Every conversation is saved, so you can come back to it later.
         </p>
       </header>
-      <MentorChat projectId={projectId} fresh={fresh} />
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[16rem_1fr]">
+        <MentorThreadList projectId={projectId} className="hidden lg:flex" />
+        <Outlet />
+      </div>
     </section>
   );
 }

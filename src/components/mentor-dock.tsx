@@ -2,16 +2,38 @@
  * Floating AI Mentor launcher available on every project page.
  */
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import mentorMark from "@/assets/mentor-mark.png";
 import { MentorChat } from "@/components/mentor-chat";
+import { mentorThreadsKey, useMentorThreads } from "@/components/mentor-thread-list";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { createMentorThread } from "@/lib/mentor.functions";
 import { cn } from "@/lib/utils";
 
 export function MentorDock({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const threads = useMentorThreads(projectId);
+  const create = useServerFn(createMentorThread);
+
+  // The dock continues the most recent saved conversation, creating one the
+  // first time the student opens it.
+  const start = useMutation({
+    mutationFn: () => create({ data: { projectId } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: mentorThreadsKey(projectId) }),
+  });
+
+  const threadId = threads.data?.[0]?.id ?? null;
+
+  useEffect(() => {
+    if (!open || threads.isLoading || threadId || start.isPending || start.isSuccess) return;
+    start.mutate();
+  }, [open, threads.isLoading, threadId, start]);
 
   return (
     <>
@@ -29,7 +51,13 @@ export function MentorDock({ projectId }: { projectId: string }) {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <MentorChat projectId={projectId} className="px-1" />
+          {threadId ? (
+            <MentorChat key={threadId} projectId={projectId} threadId={threadId} className="px-1" />
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <Spinner className="h-5 w-5 text-muted-foreground" />
+            </div>
+          )}
         </div>
       ) : null}
 

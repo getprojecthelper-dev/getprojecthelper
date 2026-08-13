@@ -19,6 +19,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          mentor_thread_id: string | null
           project_id: string
           role: string
           thread: string
@@ -28,6 +29,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          mentor_thread_id?: string | null
           project_id: string
           role: string
           thread?: string
@@ -37,12 +39,20 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          mentor_thread_id?: string | null
           project_id?: string
           role?: string
           thread?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_messages_mentor_thread_id_fkey"
+            columns: ["mentor_thread_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_threads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ai_messages_project_id_fkey"
             columns: ["project_id"]
@@ -347,6 +357,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "experiments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_threads: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_threads_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"

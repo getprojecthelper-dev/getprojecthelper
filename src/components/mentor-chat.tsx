@@ -146,7 +146,7 @@ export function MentorChat({
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="mx-auto w-full max-w-3xl gap-6">
+        <ConversationContent className="mx-auto w-full max-w-5xl gap-6">
           {messages.length === 0 ? (
             <ConversationEmptyState className="gap-5">
               <img
@@ -203,7 +203,7 @@ export function MentorChat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="mx-auto w-full max-w-3xl shrink-0 px-1 pb-2">
+      <div className="mx-auto w-full max-w-5xl shrink-0 px-1 pb-2">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Dialog open={importOpen} onOpenChange={setImportOpen}>
             <DialogTrigger asChild>

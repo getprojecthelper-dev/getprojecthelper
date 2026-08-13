@@ -480,11 +480,14 @@ function DocumentWizard({
             )}
           </Button>
           {step < 2 ? (
-            <Button disabled={!canContinue} onClick={() => setStep((s) => s + 1)}>
+            <Button
+              disabled={!canContinue}
+              onClick={() => (step === 1 ? goToDetails() : setStep((s) => s + 1))}
+            >
               Continue <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           ) : (
-            <Button disabled={run.isPending} onClick={() => run.mutate()}>
+            <Button disabled={run.isPending || !canGenerate} onClick={() => run.mutate()}>
               {run.isPending ? (
                 <>
                   <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Writing your document…

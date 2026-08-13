@@ -22,6 +22,7 @@ function WorkspaceLayout() {
 
   // Viva (review), Documentation and AI Mentor have their own page headers, so
   // the shared project breadcrumb bar is removed there.
+  const isMentor = /\/mentor(\/[^/]+)*$/.test(pathname);
   const showHeader = !/(\/review|\/documents|\/mentor)(\/[^/]+)*$/.test(pathname);
 
   return (

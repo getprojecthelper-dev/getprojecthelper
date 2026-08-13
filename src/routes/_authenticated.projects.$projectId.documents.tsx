@@ -782,43 +782,11 @@ function DocumentViewer({
             </div>
           </div>
 
-          {/* Rendered paper — read it here, no external editor needed */}
+          {/* Rendered paper — typeset like the real template */}
           <TabsContent value="paper" className="mt-4 max-h-[64vh] overflow-y-auto pr-1">
-            <article className="mx-auto max-w-3xl rounded-xl border border-border bg-card p-8 shadow-panel">
-              <h2 className="text-center font-display text-2xl leading-tight">{title}</h2>
-              {doc.authors.length ? (
-                <div className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-center text-sm">
-                  {doc.authors.map((a, i) => (
-                    <div key={i}>
-                      <p className="font-medium">{a.name}</p>
-                      {a.affiliation ? (
-                        <p className="text-xs text-muted-foreground">{a.affiliation}</p>
-                      ) : null}
-                      {a.email ? <p className="text-xs text-muted-foreground">{a.email}</p> : null}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-              {keywords ? (
-                <p className="mt-6 text-sm">
-                  <span className="font-semibold">Keywords — </span>
-                  <span className="text-muted-foreground">{keywords}</span>
-                </p>
-              ) : null}
-              <div className="mt-6 space-y-6">
-                {sections.map((section, i) => (
-                  <section key={i} className="space-y-2">
-                    <h3 className="font-display text-base uppercase tracking-wide">
-                      {i + 1}. {section.heading}
-                    </h3>
-                    <p className="whitespace-pre-wrap text-justify text-[13.5px] leading-7 text-card-foreground">
-                      {section.body}
-                    </p>
-                  </section>
-                ))}
-              </div>
-            </article>
+            <PaperSheet title={title} authors={doc.authors} keywords={keywords} sections={sections} />
           </TabsContent>
+
 
           {/* Manual editing */}
           <TabsContent value="edit" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">

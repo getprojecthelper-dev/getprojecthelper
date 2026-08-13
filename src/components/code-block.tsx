@@ -1,8 +1,21 @@
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { highlightLine, isPlainLanguage, type TokenKind } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
+
+const TOKEN_CLASS: Record<TokenKind, string> = {
+  keyword: "tok-keyword",
+  string: "tok-string",
+  number: "tok-number",
+  comment: "tok-comment",
+  function: "tok-function",
+  builtin: "tok-builtin",
+  punct: "tok-punct",
+  plain: "",
+};
+
 
 export function CodeBlock({
   code,

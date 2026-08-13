@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useProjects } from "@/lib/db";
-import { DOC_TYPES, findDocType, type DocFormat, type DocType } from "@/lib/doc-templates";
+import { DOC_TYPES, type DocFormat, type DocType } from "@/lib/doc-templates";
 import {
   deleteDocument,
   generateDocument,
@@ -558,5 +558,3 @@ function DocumentViewer({ doc, onClose }: { doc: GeneratedDocument; onClose: () 
     </Dialog>
   );
 }
-
-export { findDocType };

@@ -17,7 +17,7 @@ export function HeroShowcase() {
             AI-powered project assistant
           </span>
 
-          <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] text-hero-ink sm:text-6xl">
+          <h1 className="mt-6 font-display text-5xl leading-[1.05] text-hero-ink sm:text-6xl">
             Create smarter
             <br />
             projects, <span className="text-primary">faster</span>

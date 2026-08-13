@@ -112,7 +112,7 @@ function AdminDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <section className="panel p-5">
-          <h2 className="font-display text-lg font-semibold">AI credits — last 14 days</h2>
+          <h2 className="font-display text-lg">AI credits — last 14 days</h2>
           <div className="mt-6 flex h-40 items-end gap-1.5">
             {data.ai.daily.map((d) => (
               <div key={d.day} className="group flex flex-1 flex-col items-center gap-2">
@@ -128,7 +128,7 @@ function AdminDashboard() {
         </section>
 
         <section className="panel p-5">
-          <h2 className="font-display text-lg font-semibold">Credits by feature</h2>
+          <h2 className="font-display text-lg">Credits by feature</h2>
           {data.ai.byFeature.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">No AI usage recorded yet.</p>
           ) : (
@@ -151,7 +151,7 @@ function AdminDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <section className="panel p-5">
-          <h2 className="font-display text-lg font-semibold">Newest registrations</h2>
+          <h2 className="font-display text-lg">Newest registrations</h2>
           {data.recentUsers.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">No users yet.</p>
           ) : (
@@ -179,7 +179,7 @@ function AdminDashboard() {
         </section>
 
         <section className="panel p-5">
-          <h2 className="font-display text-lg font-semibold">Plans</h2>
+          <h2 className="font-display text-lg">Plans</h2>
           {data.subscriptions.byPlan.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">
               No paid subscriptions yet. Once billing is live, active plans appear here.

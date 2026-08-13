@@ -119,7 +119,7 @@ function ShowcasePage() {
       </div>
 
       <div>
-        <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+        <h2 className="flex items-center gap-2 font-display text-lg">
           <Presentation className="h-4 w-4" /> Slide outline
         </h2>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -138,7 +138,7 @@ function ShowcasePage() {
       </div>
 
       <div>
-        <h2 className="font-display text-lg font-semibold">Viva questions to rehearse</h2>
+        <h2 className="font-display text-lg">Viva questions to rehearse</h2>
         <div className="mt-3 space-y-3">
           {vivaQuestions.map((v) => (
             <div key={v.q} className="panel p-4">

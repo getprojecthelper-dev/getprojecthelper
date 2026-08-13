@@ -42,7 +42,7 @@ function Stat({ value, label }: { value: number; label: string }) {
   const shown = useCountUp(value);
   return (
     <div>
-      <p className="font-display text-4xl font-semibold text-hero-ink">{shown}</p>
+      <p className="font-display text-4xl text-hero-ink">{shown}</p>
       <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-hero-ink-muted">
         {label}
       </p>
@@ -113,7 +113,7 @@ export function KineticHero() {
             </span>
           </div>
 
-          <h1 className="mt-8 max-w-2xl font-display text-5xl font-semibold leading-[0.92] tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 className="mt-8 max-w-2xl font-display text-5xl leading-[0.92] tracking-tight sm:text-6xl lg:text-7xl">
             From messy <span className="text-primary">ideas</span> to a polished{" "}
             <span className="font-light italic text-warning">viva</span>.
           </h1>
@@ -184,7 +184,7 @@ export function KineticHero() {
                     >
                       <span
                         className={cn(
-                          "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-lg font-semibold transition-colors",
+                          "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-lg transition-colors",
                           current
                             ? "border-2 border-primary bg-background/20 text-primary"
                             : done
@@ -195,7 +195,7 @@ export function KineticHero() {
                         {phase.num}
                       </span>
                       <span className="min-w-0">
-                        <span className="block font-display text-lg font-semibold text-hero-ink">
+                        <span className="block font-display text-lg text-hero-ink">
                           {phase.label}
                         </span>
                         <span

@@ -249,7 +249,7 @@ function NewProject() {
               {(pages[page] ?? []).map((project) => (
                 <div key={project.title} className="panel flex flex-col gap-3 p-5">
                   <div>
-                    <h2 className="font-display text-lg font-semibold">{project.title}</h2>
+                    <h2 className="font-display text-lg">{project.title}</h2>
                     <p className="text-xs text-muted-foreground">{project.difficulty}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">{project.description}</p>
@@ -280,7 +280,7 @@ function NewProject() {
         {step === 2 && chosen ? (
           <div className="space-y-4">
             <div className="panel p-5">
-              <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+              <h2 className="flex items-center gap-2 font-display text-lg">
                 <Database className="h-4 w-4 text-primary" /> Select a dataset for {chosen.title}
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -342,7 +342,7 @@ function NewProject() {
 
         {step === 3 && chosen ? (
           <div className="panel space-y-4 p-6">
-            <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+            <h2 className="flex items-center gap-2 font-display text-lg">
               <Target className="h-4 w-4 text-primary" /> Finalise your project
             </h2>
             <Row label="Title" value={chosen.title} />

@@ -56,7 +56,7 @@ export function MentorDialogue() {
     <div className="mx-auto grid max-w-6xl gap-8 px-5 py-16 lg:grid-cols-2 lg:items-center">
       <div>
         <ShieldCheck className="h-6 w-6 text-accent" />
-        <h2 className="mt-3 font-display text-2xl font-semibold">
+        <h2 className="mt-3 font-display text-2xl">
           An AI that won't just agree with you
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">

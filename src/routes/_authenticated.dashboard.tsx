@@ -61,7 +61,7 @@ function Dashboard() {
     <div className="min-h-screen bg-secondary/30">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link to="/dashboard" className="flex items-center gap-2 font-display font-semibold">
+          <Link to="/dashboard" className="flex items-center gap-2 font-display">
             <GraduationCap className="h-5 w-5 text-primary" />
             Project Helper
           </Link>
@@ -91,7 +91,7 @@ function Dashboard() {
       <main className="mx-auto max-w-6xl px-5 py-10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-display text-2xl font-semibold">Your projects</h1>
+            <h1 className="font-display text-2xl">Your projects</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Signed in as {user?.email}. Resume where you left off, or start something new.
             </p>
@@ -177,7 +177,7 @@ function ProjectCard({
           <Link
             to="/projects/$projectId"
             params={{ projectId: p.id }}
-            className="font-display text-lg font-semibold hover:text-primary"
+            className="font-display text-lg hover:text-primary"
           >
             {p.name}
           </Link>
@@ -285,7 +285,7 @@ function Kpi({
         {icon}
         <span className="leading-tight">{label}</span>
       </div>
-      <p className={cn("mt-1 truncate font-display text-lg font-semibold", toneClass)}>{value}</p>
+      <p className={cn("mt-1 truncate font-display text-lg", toneClass)}>{value}</p>
       {children}
     </div>
   );

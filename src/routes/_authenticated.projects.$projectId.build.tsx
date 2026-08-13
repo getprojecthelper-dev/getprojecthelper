@@ -278,7 +278,7 @@ function SectionCard({
             {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
           </span>
           <span className="space-y-1">
-            <span className="flex items-center gap-2 font-display text-base font-semibold">
+            <span className="flex items-center gap-2 font-display text-base">
               {section.title}
               {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
             </span>

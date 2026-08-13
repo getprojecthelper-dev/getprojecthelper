@@ -34,7 +34,7 @@ export function MetricCard({
         </p>
         {icon ? <span className="text-muted-foreground">{icon}</span> : null}
       </div>
-      <p className={cn("mt-3 font-display text-3xl font-semibold", toneClass)}>{value}</p>
+      <p className={cn("mt-3 font-display text-3xl", toneClass)}>{value}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
       {children ? <div className="mt-3">{children}</div> : null}
     </div>

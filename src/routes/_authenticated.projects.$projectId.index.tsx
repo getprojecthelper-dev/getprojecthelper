@@ -85,7 +85,7 @@ function Overview() {
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <Target className="h-4 w-4" /> Next recommended action
           </div>
-          <h2 className="mt-3 font-display text-xl font-semibold">{metrics.nextAction.title}</h2>
+          <h2 className="mt-3 font-display text-xl">{metrics.nextAction.title}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{metrics.nextAction.reason}</p>
           <Button asChild className="mt-4">
             <Link to={NEXT_TO[metrics.nextAction.to] ?? "/projects/$projectId"} params={{ projectId }}>

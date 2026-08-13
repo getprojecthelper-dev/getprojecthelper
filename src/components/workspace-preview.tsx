@@ -57,7 +57,7 @@ export function WorkspacePreview() {
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 AI credits
               </p>
-              <p className="font-display text-lg font-semibold tabular-nums">
+              <p className="font-display text-lg tabular-nums">
                 120 <span className="text-xs text-muted-foreground">/ 300</span>
               </p>
               <span className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary">
@@ -87,7 +87,7 @@ export function WorkspacePreview() {
               {STATS.map((stat) => (
                 <div key={stat.label} className="rounded-lg bg-secondary/60 p-2.5">
                   <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-                  <p className="font-display text-base font-semibold tabular-nums">{stat.value}</p>
+                  <p className="font-display text-base tabular-nums">{stat.value}</p>
                 </div>
               ))}
             </div>

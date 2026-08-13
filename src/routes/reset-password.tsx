@@ -47,7 +47,7 @@ function ResetPassword() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5">
       <div className="panel w-full max-w-md space-y-4 p-6">
-        <h1 className="font-display text-xl font-semibold">Set a new password</h1>
+        <h1 className="font-display text-xl">Set a new password</h1>
         <div className="space-y-2">
           <Label htmlFor="new-password">New password</Label>
           <Input

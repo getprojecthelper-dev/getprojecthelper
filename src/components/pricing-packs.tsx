@@ -111,10 +111,10 @@ export function PricingPacks({ action, className }: PricingPacksProps) {
               </span>
             ) : null}
 
-            <p className="font-display text-base font-semibold">{pack.name}</p>
+            <p className="font-display text-base">{pack.name}</p>
             <p className="mt-1 text-sm text-muted-foreground">{pack.blurb}</p>
 
-            <p className="mt-5 font-display text-4xl font-semibold tabular-nums">
+            <p className="mt-5 font-display text-4xl tabular-nums">
               {formatMoney(packPrice(pack, currency), currency)}
             </p>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">

@@ -71,7 +71,7 @@ function PricingPage() {
       <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Pricing</p>
-          <h1 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl">
             Pay only for the AI you actually use
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -84,7 +84,7 @@ function PricingPage() {
         <PricingPacks className="mt-12" />
 
         <section className="mt-12 rounded-2xl border border-border bg-card p-6 text-center">
-          <p className="flex items-center justify-center gap-2 font-display text-lg font-semibold">
+          <p className="flex items-center justify-center gap-2 font-display text-lg">
             <Gift className="h-4 w-4 text-primary" />
             {STARTER_CREDITS} free credits on signup
           </p>
@@ -100,7 +100,7 @@ function PricingPage() {
         </section>
 
         <section className="mx-auto mt-16 max-w-3xl">
-          <h2 className="text-center font-display text-2xl font-semibold">Questions</h2>
+          <h2 className="text-center font-display text-2xl">Questions</h2>
           <dl className="mt-8 grid gap-6 sm:grid-cols-2">
             {FAQ.map((item) => (
               <div key={item.q} className="rounded-xl border border-border bg-card p-5">

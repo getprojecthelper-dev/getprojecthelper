@@ -38,7 +38,7 @@ function Landing() {
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
           <Link
             to="/"
-            className="flex items-center gap-2 font-display text-lg font-semibold text-hero-ink"
+            className="flex items-center gap-2 font-display text-lg text-hero-ink"
           >
             <GraduationCap className="h-5 w-5 text-primary" />
             Project Helper
@@ -103,7 +103,7 @@ function Landing() {
               <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
                 How it works
               </span>
-              <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">
+              <h2 className="mt-3 font-display text-3xl sm:text-4xl">
                 From idea to project in a few simple steps
               </h2>
               <p className="mt-3 text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ function Landing() {
         <section id="domains" className="mx-auto max-w-6xl px-5 py-20">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="font-display text-3xl font-semibold">Popular domains</h2>
+              <h2 className="font-display text-3xl">Popular domains</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Start your project in any of these domains — each one opens the right sections.
               </p>
@@ -138,7 +138,7 @@ function Landing() {
         <section className="border-t border-border bg-secondary/40">
           <div className="mx-auto max-w-6xl px-5 py-20">
             <div className="mx-auto mb-10 max-w-2xl text-center">
-              <h2 className="font-display text-3xl font-semibold">
+              <h2 className="font-display text-3xl">
                 Loved by students &amp; developers
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">

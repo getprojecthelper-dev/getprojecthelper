@@ -1,19 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Banknote,
-  Bot,
-  Calendar,
-  FileText,
-  Home,
-  LayoutDashboard,
-  MessagesSquare,
-  Settings,
-  ShieldAlert,
-  Users,
-  Zap,
-} from "lucide-react";
+import { Bot, FileText, Home, LayoutDashboard, MessagesSquare, Settings, Zap } from "lucide-react";
 
 import {
   Sidebar,
@@ -25,10 +13,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getMyCredits } from "@/lib/credits.functions";
 import { formatCredits } from "@/lib/credit-costs";
+
 
 const ICON_CLASS = "h-5 w-5 shrink-0";
 

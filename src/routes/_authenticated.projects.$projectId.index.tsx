@@ -1,9 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, CalendarClock, Target } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { MeterBar, MetricCard, healthTone, meterTone } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
-import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   DOMAINS,
@@ -11,7 +10,6 @@ import {
   STAGE_LABELS,
   daysUntil,
   getTemplate,
-  isOverdue,
   labelOf,
   type Stage,
 } from "@/lib/project-domain";
@@ -21,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   head: () => ({
     meta: [
       { title: "Project overview — Project Helper" },
-      { name: "description", content: "Stage, progress, health and next action for your project." },
+      { name: "description", content: "Stage, progress, health and project details." },
       { property: "og:title", content: "Project overview — Project Helper" },
-      { property: "og:description", content: "Stage, progress, health and next action." },
+      { property: "og:description", content: "Stage, progress, health and project details." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -31,23 +29,13 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   component: Overview,
 });
 
-const NEXT_TO: Record<string, "/projects/$projectId/tasks" | "/projects/$projectId/requirements" | "/projects/$projectId/testing" | "/projects/$projectId/documents" | "/projects/$projectId/review"> = {
-  tasks: "/projects/$projectId/tasks",
-  requirements: "/projects/$projectId/requirements",
-  testing: "/projects/$projectId/testing",
-  documents: "/projects/$projectId/documents",
-  review: "/projects/$projectId/review",
-};
-
 function Overview() {
   const { projectId, data, metrics } = useWorkspace();
   if (!data || !metrics) return null;
 
-  const { project, tasks, risks } = data;
+  const { project } = data;
   const template = getTemplate(project.template);
   const days = daysUntil(project.deadline);
-  const overdue = tasks.filter((t) => isOverdue(t.due_date, t.status));
-  const openRisks = risks.filter((r) => r.status !== "closed");
   const tone = healthTone(metrics.health.score);
 
   return (

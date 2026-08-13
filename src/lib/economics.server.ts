@@ -98,12 +98,14 @@ export async function computeUnitEconomics(
 
   let creditsSold = 0;
   let creditsGrantedFree = 0;
+  let paidChargeCount = 0;
   const weekRevenue = new Map<string, number>();
   for (const tx of txRows) {
     const delta = Number(tx.delta ?? 0);
     if (delta <= 0) continue;
     if (PAID_KINDS.has(tx.kind)) {
       creditsSold += delta;
+      paidChargeCount += 1;
       const wk = weekKey(tx.created_at);
       weekRevenue.set(wk, (weekRevenue.get(wk) ?? 0) + delta * avgPricePerCreditUsd);
     } else if (FREE_KINDS.has(tx.kind)) {
@@ -122,10 +124,15 @@ export async function computeUnitEconomics(
   const revenueUsd = creditSalesUsd + subscriptionMrrUsd;
   const grossMarginUsd = revenueUsd - aiCostUsd;
 
+  // What the payment processor keeps out of that revenue.
+  const paymentFeesUsd = paymentFeeUsd(revenueUsd, paidChargeCount);
+  const netMarginUsd = grossMarginUsd - paymentFeesUsd;
+
   // Share of consumption funded by credits we gave away.
   const totalIssued = creditsSold + creditsGrantedFree;
   const freeShare = totalIssued > 0 ? creditsGrantedFree / totalIssued : 1;
   const freeCreditBurnUsd = aiCostUsd * freeShare;
+
 
   const signups = (profiles.data ?? []).length;
   const activeUsers = perUser.size;

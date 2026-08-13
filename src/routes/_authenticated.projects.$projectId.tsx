@@ -43,7 +43,7 @@ function WorkspaceLayout() {
         </header>
       ) : null}
 
-      <div className="mx-auto w-full max-w-none px-5 py-6">
+      <div className={isMentor ? "w-full" : "mx-auto w-full max-w-none px-5 py-6"}>
         {isPending ? (
           <LoadingState label="Loading workspace…" />
         ) : isError ? (

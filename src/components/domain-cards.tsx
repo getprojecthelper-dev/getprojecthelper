@@ -28,12 +28,19 @@ const DOMAINS = [
     meta: "Screens · Builds",
   },
   {
+    icon: ClipboardList,
+    name: "Project Management",
+    body: "Charter, WBS, schedule, budget and risk register.",
+    meta: "Plan · Track · Close",
+  },
+  {
     icon: GraduationCap,
     name: "Academic Projects",
     body: "Research, documentation and viva preparation.",
     meta: "Report · Defence",
   },
 ];
+
 
 /** Domain picker teaser used on the landing page. */
 export function DomainCards() {

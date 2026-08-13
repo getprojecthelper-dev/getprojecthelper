@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 
 import { formatCredits } from "@/lib/credit-costs";
 import { getMyCredits } from "@/lib/credits.functions";
+import { cheapestPack, formatMoney } from "@/lib/pricing";
 
 /** Credits at or below this are considered "running low". */
 export const LOW_CREDIT_THRESHOLD = 15;
@@ -22,6 +23,7 @@ export function LowCreditsBanner() {
   if (!data || data.balance > LOW_CREDIT_THRESHOLD) return null;
 
   const empty = data.balance <= 0;
+  const cheapest = cheapestPack();
 
   return (
     <div

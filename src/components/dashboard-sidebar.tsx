@@ -26,7 +26,7 @@ import {
  * Project-scoped links resolve against the most recent project when one exists,
  * otherwise they send the student to the project creation flow.
  */
-export function DashboardSidebar({ projectId }: { projectId?: string }) {
+export function DashboardSidebar({ projectId }: { projectId?: string | undefined }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (path: string) => pathname === path;
 

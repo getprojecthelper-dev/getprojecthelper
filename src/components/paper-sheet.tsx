@@ -42,7 +42,7 @@ export function PaperSheet({
 }: {
   title: string;
   authors: DocAuthor[];
-  keywords?: string;
+  keywords?: string | undefined;
   sections: DocSection[];
 }) {
   const front = sections.filter((s) => isFrontMatter(s.heading));

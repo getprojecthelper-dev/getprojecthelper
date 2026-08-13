@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Activity,
   CalendarClock,
@@ -16,7 +16,6 @@ import { useState } from "react";
 import { MeterBar, healthTone, meterTone } from "@/components/metrics";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { StatusBadge } from "@/components/status-badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -28,13 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CreditChip } from "@/components/credit-chip";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectMutations, useProjectsOverview, type ProjectOverview } from "@/lib/db";
-import { signOutAndRedirect } from "@/lib/sign-out";
 import { DOMAINS, STAGE_LABELS, daysUntil, labelOf, type Stage } from "@/lib/project-domain";
 import { cn } from "@/lib/utils";
 
@@ -55,11 +49,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const { data: overviews, isPending, isError, refetch } = useProjectsOverview();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { remove } = useProjectMutations();
   const [pendingDelete, setPendingDelete] = useState<ProjectOverview | null>(null);
-
-  const latestProjectId = overviews?.[0]?.project.id;
 
   return (
     <>

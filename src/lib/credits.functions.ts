@@ -54,21 +54,25 @@ export const redeemCode = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ code: z.string().trim().min(3).max(40) }).parse(input),
   )
-  .handler(async ({ data, context }) => {
-    const { data: granted, error } = await context.supabase.rpc("redeem_referral_code", {
-      _code: data.code.toUpperCase(),
-    });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ ok: true; credits: number } | { ok: false; message: string }> => {
+      const { data: granted, error } = await context.supabase.rpc("redeem_referral_code", {
+        _code: data.code.toUpperCase(),
+      });
 
-    if (error) {
-      // The database function raises a clear, user-facing reason — show it
-      // instead of a generic "not valid" that hides why redemption failed.
-      const message = (error.message ?? "").trim();
-      throw new Error(message || "That code is not valid.");
-    }
+      if (error) {
+        // Expected, user-facing rejections (inactive/expired/already used) are
+        // returned as data — throwing here surfaces a runtime error overlay.
+        const message = (error.message ?? "").trim();
+        return { ok: false, message: message || "That code is not valid." };
+      }
 
-
-    return { credits: Number(granted ?? 0) };
-  });
+      return { ok: true, credits: Number(granted ?? 0) };
+    },
+  );
 
 /**
  * The real amount the ledger charged for the most recent run started after

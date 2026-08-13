@@ -96,7 +96,7 @@ function MentorLayout() {
   }, [setOpen]);
 
   return (
-    <section className="flex h-[calc(100svh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">
+    <section className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">
       {/* Desktop conversation history — resizable so users can choose how much room it takes. */}
       <div
         className="relative hidden shrink-0 border-r border-border/60 bg-card/30 md:block"

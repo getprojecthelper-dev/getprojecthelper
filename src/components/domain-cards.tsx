@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { BrainCircuit, Database, GraduationCap, Globe, Smartphone } from "lucide-react";
+import { BrainCircuit, ClipboardList, Database, GraduationCap, Globe, Smartphone } from "lucide-react";
+
 
 const DOMAINS = [
   {
@@ -27,6 +28,12 @@ const DOMAINS = [
     meta: "Screens · Builds",
   },
   {
+    icon: ClipboardList,
+    name: "Project Management",
+    body: "Charter, WBS, schedule, budget and risk register.",
+    meta: "Plan · Track · Close",
+  },
+  {
     icon: GraduationCap,
     name: "Academic Projects",
     body: "Research, documentation and viva preparation.",
@@ -34,10 +41,11 @@ const DOMAINS = [
   },
 ];
 
+
 /** Domain picker teaser used on the landing page. */
 export function DomainCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {DOMAINS.map((domain) => (
         <Link
           key={domain.name}

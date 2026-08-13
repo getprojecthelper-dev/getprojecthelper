@@ -33,6 +33,7 @@ import { Route as AuthenticatedProjectsProjectIdReviewRouteImport } from './rout
 import { Route as AuthenticatedProjectsProjectIdShowcaseRouteImport } from './routes/_authenticated.projects.$projectId.showcase'
 import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
 import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
+import { Route as AuthenticatedProjectsProjectIdMentorIndexRouteImport } from './routes/_authenticated.projects.$projectId.mentor.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -165,6 +166,12 @@ const AuthenticatedProjectsProjectIdTestingRoute =
     path: '/testing',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const AuthenticatedProjectsProjectIdMentorIndexRoute =
+  AuthenticatedProjectsProjectIdMentorIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProjectsProjectIdMentorRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -182,7 +189,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
-  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
+  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRouteWithChildren
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -206,7 +214,6 @@ export interface FileRoutesByTo {
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
-  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
   '/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -233,7 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/_authenticated/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
-  '/_authenticated/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRoute
+  '/_authenticated/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorRouteWithChildren
   '/_authenticated/projects/$projectId/requirements': typeof AuthenticatedProjectsProjectIdRequirementsRoute
   '/_authenticated/projects/$projectId/research': typeof AuthenticatedProjectsProjectIdResearchRoute
   '/_authenticated/projects/$projectId/review': typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
+  '/_authenticated/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId/'
+    | '/projects/$projectId/mentor/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -284,7 +294,6 @@ export interface FileRouteTypes {
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
-    | '/projects/$projectId/mentor'
     | '/projects/$projectId/requirements'
     | '/projects/$projectId/research'
     | '/projects/$projectId/review'
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
     | '/projects/$projectId'
+    | '/projects/$projectId/mentor'
   id:
     | '__root__'
     | '/'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/tasks'
     | '/_authenticated/projects/$projectId/testing'
     | '/_authenticated/projects/$projectId/'
+    | '/_authenticated/projects/$projectId/mentor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -500,14 +511,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdTestingRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/_authenticated/projects/$projectId/mentor/': {
+      id: '/_authenticated/projects/$projectId/mentor/'
+      path: '/'
+      fullPath: '/projects/$projectId/mentor/'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdMentorIndexRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdMentorRoute
+    }
   }
 }
+
+interface AuthenticatedProjectsProjectIdMentorRouteChildren {
+  AuthenticatedProjectsProjectIdMentorIndexRoute: typeof AuthenticatedProjectsProjectIdMentorIndexRoute
+}
+
+const AuthenticatedProjectsProjectIdMentorRouteChildren: AuthenticatedProjectsProjectIdMentorRouteChildren =
+  {
+    AuthenticatedProjectsProjectIdMentorIndexRoute:
+      AuthenticatedProjectsProjectIdMentorIndexRoute,
+  }
+
+const AuthenticatedProjectsProjectIdMentorRouteWithChildren =
+  AuthenticatedProjectsProjectIdMentorRoute._addFileChildren(
+    AuthenticatedProjectsProjectIdMentorRouteChildren,
+  )
 
 interface AuthenticatedProjectsProjectIdRouteChildren {
   AuthenticatedProjectsProjectIdBuildRoute: typeof AuthenticatedProjectsProjectIdBuildRoute
   AuthenticatedProjectsProjectIdDocumentsRoute: typeof AuthenticatedProjectsProjectIdDocumentsRoute
   AuthenticatedProjectsProjectIdExperimentsRoute: typeof AuthenticatedProjectsProjectIdExperimentsRoute
-  AuthenticatedProjectsProjectIdMentorRoute: typeof AuthenticatedProjectsProjectIdMentorRoute
+  AuthenticatedProjectsProjectIdMentorRoute: typeof AuthenticatedProjectsProjectIdMentorRouteWithChildren
   AuthenticatedProjectsProjectIdRequirementsRoute: typeof AuthenticatedProjectsProjectIdRequirementsRoute
   AuthenticatedProjectsProjectIdResearchRoute: typeof AuthenticatedProjectsProjectIdResearchRoute
   AuthenticatedProjectsProjectIdReviewRoute: typeof AuthenticatedProjectsProjectIdReviewRoute
@@ -526,7 +559,7 @@ const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectI
     AuthenticatedProjectsProjectIdExperimentsRoute:
       AuthenticatedProjectsProjectIdExperimentsRoute,
     AuthenticatedProjectsProjectIdMentorRoute:
-      AuthenticatedProjectsProjectIdMentorRoute,
+      AuthenticatedProjectsProjectIdMentorRouteWithChildren,
     AuthenticatedProjectsProjectIdRequirementsRoute:
       AuthenticatedProjectsProjectIdRequirementsRoute,
     AuthenticatedProjectsProjectIdResearchRoute:

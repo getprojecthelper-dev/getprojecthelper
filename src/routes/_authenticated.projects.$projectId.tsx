@@ -10,9 +10,11 @@ import {
   LayoutDashboard,
   ListChecks,
   Presentation,
+  MessagesSquare,
   ScrollText,
 } from "lucide-react";
 
+import { MentorDock } from "@/components/mentor-dock";
 import { ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
 const NAV = [
   { to: "/projects/$projectId", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/projects/$projectId/build", label: "Implementation", icon: Code2 },
+  { to: "/projects/$projectId/mentor", label: "AI Mentor", icon: MessagesSquare },
   { to: "/projects/$projectId/tasks", label: "Plan & tasks", icon: ListChecks },
   { to: "/projects/$projectId/requirements", label: "Requirements", icon: ClipboardList },
   { to: "/projects/$projectId/testing", label: "Testing", icon: CheckSquare },
@@ -85,6 +88,8 @@ function WorkspaceLayout() {
           )}
         </div>
       </div>
+
+      <MentorDock projectId={projectId} />
     </div>
   );
 }

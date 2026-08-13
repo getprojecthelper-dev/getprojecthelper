@@ -20,6 +20,7 @@ import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedNewProjectRouteImport } from './routes/_authenticated.new-project'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
 import { Route as AuthenticatedProjectsProjectIdBuildRouteImport } from './routes/_authenticated.projects.$projectId.build'
@@ -85,6 +86,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProjectsProjectIdRoute =
   AuthenticatedProjectsProjectIdRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/chat': typeof ApiChatRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/chat': typeof ApiChatRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
   '/projects/$projectId/experiments': typeof AuthenticatedProjectsProjectIdExperimentsRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/api/chat': typeof ApiChatRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/new-project'
     | '/settings'
+    | '/api/chat'
     | '/projects/$projectId'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/new-project'
     | '/settings'
+    | '/api/chat'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/experiments'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/new-project'
     | '/_authenticated/settings'
+    | '/api/chat'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/projects/$projectId': {
       id: '/_authenticated/projects/$projectId'
@@ -535,6 +555,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -86,12 +86,16 @@ export const suggestProjects = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const wanted = data.difficulty ?? "any";
+    const buildsCode = getPlaybook(data.domain).buildsCode;
+    const stackRule = buildsCode
+      ? "Tech stack: 5-8 concrete tools/libraries."
+      : "This domain involves NO programming. Never propose apps, websites, dashboards to code, ML models, or any software to be built, and never list programming languages, frameworks or libraries. Propose real-world projects that are planned, coordinated and delivered by a manager (events, construction/site works, product launches, process improvement, migrations, campaigns, community or campus initiatives). The `tech_stack` field must instead list 5-8 methods, artefacts and standard PM tools (e.g. WBS, Gantt schedule, RACI matrix, risk register, earned value, stakeholder plan, MS Project, Trello).";
     const result = await generateJson<{ projects: SuggestedProject[] }>({
       usage: { userId: context.userId, feature: "suggest_projects" },
       name: "project_suggestions",
-      instructions:
-        "You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. Tech stack: 5-8 concrete tools/libraries. The difficulty field must be exactly one of: Easy, Intermediate, Hard.",
+      instructions: `You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. ${stackRule} The difficulty field must be exactly one of: Easy, Intermediate, Hard.`,
       input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\nRequested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
+
       schema: obj({
         projects: {
           type: "array",

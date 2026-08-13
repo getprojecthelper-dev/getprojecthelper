@@ -134,50 +134,6 @@ function Landing() {
           <DomainCards />
         </section>
 
-        <section id="features" className="border-y border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-5 py-20">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                Why Project Helper
-              </span>
-              <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">
-                Everything you need to build amazing projects
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                One workspace for planning, research, code, evidence and the final defence.
-              </p>
-            </div>
-            <FeatureGrid />
-
-            <div className="panel mt-10 grid gap-6 p-6 sm:grid-cols-3">
-              {[
-                {
-                  icon: GraduationCap,
-                  title: "Designed for academic success",
-                  body: "Built around how projects are actually marked.",
-                },
-                {
-                  icon: Lock,
-                  title: "Your data is yours",
-                  body: "Your work stays private to your account.",
-                },
-                {
-                  icon: Sparkles,
-                  title: "AI that understands your project",
-                  body: "Context-aware, honest, and never inventing results.",
-                },
-              ].map((item) => (
-                <div key={item.title} className="flex items-start gap-3">
-                  <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <div>
-                    <p className="text-sm font-semibold">{item.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{item.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <section id="mentor">
           <MentorDialogue />

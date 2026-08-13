@@ -29,6 +29,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CreditChip } from "@/components/credit-chip";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectMutations, useProjectsOverview, type ProjectOverview } from "@/lib/db";

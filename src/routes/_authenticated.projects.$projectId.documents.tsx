@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+
+import { withMeter } from "@/components/credit-meter";
 import {
   ArrowLeft,
   ArrowRight,
@@ -223,7 +225,7 @@ function DocumentWizard({
   const [imported, setImported] = useState<string[]>([]);
 
   const projects = useProjects();
-  const generate = useServerFn(generateDocument);
+  const generate = withMeter("generate_document", useServerFn(generateDocument));
 
   const current = (projects.data ?? []).find((p) => p.id === projectId) ?? null;
 

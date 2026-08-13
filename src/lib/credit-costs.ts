@@ -14,6 +14,7 @@ export type CreditAction =
   | "section_review"
   | "section_fix"
   | "mentor_chat"
+  | "generate_document"
   | "general";
 
 /** Estimated credits reserved before an AI run starts. */
@@ -27,6 +28,7 @@ export const CREDIT_HOLDS: Record<CreditAction, number> = {
   section_review: 4,
   section_fix: 5,
   mentor_chat: 3,
+  generate_document: 12,
   general: 3,
 };
 
@@ -39,6 +41,7 @@ export const ACTION_LABELS: Record<string, { label: string; estimate: number }> 
   generate_section: { label: "Writing this step", estimate: 10 },
   fix_section: { label: "Fixing your error", estimate: 5 },
   mentor_chat: { label: "Mentor is thinking", estimate: 3 },
+  generate_document: { label: "Writing your document", estimate: 12 },
 };
 
 export const holdFor = (feature: string) =>

@@ -10,18 +10,13 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  // Dark is the default experience; only an explicit stored choice overrides it.
+  const [theme, setTheme] = useState<Theme>("dark");
 
   // Read the stored preference after hydration so SSR and client markup match.
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    const initial: Theme =
-      stored === "dark" || stored === "light"
-        ? stored
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-    setTheme(initial);
+    setTheme(stored === "light" ? "light" : "dark");
   }, []);
 
   useEffect(() => {

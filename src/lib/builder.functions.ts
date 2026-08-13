@@ -477,26 +477,30 @@ export const generateSection = createServerFn({ method: "POST" })
       return { blocks, insights: overview.insights ?? [], language: "text" };
     }
 
-    const isStructure = section.kind === "structure";
+    const isStructure = section.kind === "structure" && playbook.buildsCode;
     const task = isStructure
       ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, AND fill `files` with EVERY file of that structure: a relative path (e.g. 'src/data/loader.py', 'requirements.txt', 'README.md') and sensible starter content for each (config files and READMEs should be real, code files can be short stubs with comments). Folders are implied by the paths. `blocks` should contain 1-3 small parts, e.g. the folder tree creation commands, then the config file. Do not dump the whole project into one block."
-      : "Produce runnable code for THIS section only, split into SMALL PARTS. Each block is one small logical part (e.g. 'Install the libraries', then 'Import them', then 'Load the data'), with a short simple title and 2-4 plain-language bullets explaining just that part. NEVER put installation commands and the rest of the code in one block. Keep every block short (typically under 20 lines) and continue directly from the previous sections' code (same variable names, same file conventions). Write BEGINNER-FRIENDLY code: simple, readable, straight-line steps with clear descriptive variable names and a short comment above each important line. Prefer the simplest efficient approach (vectorised/standard library helpers) over clever one-liners, custom classes, decorators, deep nesting, metaprogramming or heavy abstractions. No unnecessary try/except, no premature optimisation.";
+      : playbook.sectionTask;
 
     const draft = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
-      instructions: `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`,
+      instructions: playbook.buildsCode
+        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
+        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. Return 2-5 blocks.`,
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
     });
 
-    // Second, independent review pass — the code is checked twice before the
+    // Second, independent review pass — content is checked twice before the
     // student ever sees it.
     const reviewed = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
-      instructions:
-        "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient.",
+      instructions: playbook.buildsCode
+        ? "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient."
+        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project.",
+
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
       schema: sectionSchema,
     });

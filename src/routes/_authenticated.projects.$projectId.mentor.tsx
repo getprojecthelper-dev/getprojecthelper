@@ -34,8 +34,8 @@ function MentorLayout() {
           Every conversation is saved, so you can come back to it later.
         </p>
       </header>
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[16rem_1fr]">
-        <MentorThreadList projectId={projectId} className="hidden lg:flex" />
+      <MentorThreadList projectId={projectId} className="mb-4 max-h-56 shrink-0 lg:hidden" />
+      <div className="flex min-h-0 flex-1">
         <Outlet />
       </div>
     </section>

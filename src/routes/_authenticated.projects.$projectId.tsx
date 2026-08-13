@@ -1,4 +1,4 @@
-import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   BookMarked,
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { MentorDock } from "@/components/mentor-dock";
+import { MentorThreadList } from "@/components/mentor-thread-list";
 import { ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/use-workspace";
@@ -40,6 +41,9 @@ const NAV = [
 function WorkspaceLayout() {
   const { projectId, data, isPending, isError, error, refetch } = useWorkspace();
   const navigate = useNavigate();
+  const matchRoute = useMatchRoute();
+  // On the mentor pages the side column becomes the saved conversation history.
+  const onMentor = Boolean(matchRoute({ to: "/projects/$projectId/mentor", fuzzy: true }));
 
   return (
     <div className="min-h-full">
@@ -59,6 +63,11 @@ function WorkspaceLayout() {
 
       <div className="mx-auto flex max-w-7xl gap-6 px-5 py-6">
         <nav className="hidden w-56 shrink-0 lg:block">
+          {onMentor ? (
+            <div className="sticky top-24 flex h-[calc(100vh-9rem)]">
+              <MentorThreadList projectId={projectId} className="flex-1" />
+            </div>
+          ) : (
           <div className="sticky top-24 space-y-1">
             {NAV.map((item) => (
               <Link
@@ -73,6 +82,7 @@ function WorkspaceLayout() {
               </Link>
             ))}
           </div>
+          )}
         </nav>
 
         <div className="min-w-0 flex-1">

@@ -404,6 +404,35 @@ function NewProject() {
               );
             })}
 
+            {(papers?.length ?? 0) > 4 ? (
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paperPage === 0}
+                  onClick={() => setPaperPage((p) => Math.max(0, p - 1))}
+                >
+                  Previous
+                </Button>
+                <span className="text-muted-foreground">
+                  Page {paperPage + 1} of {Math.ceil((papers?.length ?? 0) / 4)} ·{" "}
+                  {selectedPapers.length} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={paperPage >= Math.ceil((papers?.length ?? 0) / 4) - 1}
+                  onClick={() =>
+                    setPaperPage((p) => Math.min(Math.ceil((papers?.length ?? 0) / 4) - 1, p + 1))
+                  }
+                >
+                  Next
+                </Button>
+              </div>
+            ) : null}
+
+
+
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep(1)} disabled={busy}>
                 Back to suggestions

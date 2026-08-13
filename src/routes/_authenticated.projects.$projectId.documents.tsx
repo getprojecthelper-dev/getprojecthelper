@@ -54,6 +54,7 @@ import {
   type DocumentAnalysis,
   type GeneratedDocument,
 } from "@/lib/documents.functions";
+import { CREDIT_HOLDS, formatCredits } from "@/lib/credit-costs";
 import { useProjectId } from "@/lib/use-workspace";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/documents")({
@@ -219,6 +220,61 @@ function DocumentsPage() {
 
 /* ------------------------------------------------------------------ */
 /* Wizard: format → import projects → details & members → generate      */
+/* ------------------------------------------------------------------ */
+
+function CreditBreakdown({ importedCount }: { importedCount: number }) {
+  const draft = CREDIT_HOLDS.generate_document + Math.min(importedCount, 3);
+  const rows: { step: string; note: string; cost: number }[] = [
+    { step: "Format selection", note: "Choosing a template layout", cost: 0 },
+    {
+      step: "Import project data",
+      note: importedCount
+        ? `${importedCount} extra project${importedCount > 1 ? "s" : ""} added as context`
+        : "This project is always included",
+      cost: importedCount ? Math.min(importedCount, 3) : 0,
+    },
+    { step: "AI draft", note: "Writing and formatting the document", cost: CREDIT_HOLDS.generate_document },
+    { step: "Export (LaTeX / text)", note: "Copy and download are free", cost: 0 },
+  ];
+
+  return (
+    <div className="panel space-y-3 p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Credit breakdown
+        </p>
+        <Badge variant="secondary" className="text-[11px]">
+          Estimate
+        </Badge>
+      </div>
+      <ul className="space-y-2">
+        {rows.map((row) => (
+          <li key={row.step} className="flex items-start justify-between gap-3 text-sm">
+            <span className="min-w-0">
+              <span className="block">{row.step}</span>
+              <span className="block text-xs text-muted-foreground">{row.note}</span>
+            </span>
+            <span
+              className={`shrink-0 tabular-nums ${row.cost ? "font-medium" : "text-muted-foreground"}`}
+            >
+              {row.cost ? `${formatCredits(row.cost)} cr` : "Free"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-center justify-between border-t border-border pt-3 text-sm">
+        <span className="font-medium">Reserved before you confirm</span>
+        <span className="font-display text-base">{formatCredits(draft)} credits</span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Credits are held up front and settled to your real usage once the document is ready — you
+        are only charged for what the AI actually uses.
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 
 function DocumentWizard({

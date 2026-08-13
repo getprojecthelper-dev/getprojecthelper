@@ -2,12 +2,16 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  Banknote,
   Bot,
+  Calendar,
   FileText,
   Home,
   LayoutDashboard,
   MessagesSquare,
   Settings,
+  ShieldAlert,
+  Users,
   Zap,
 } from "lucide-react";
 
@@ -21,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getMyCredits } from "@/lib/credits.functions";
 import { formatCredits } from "@/lib/credit-costs";
@@ -68,6 +73,20 @@ function CreditCard() {
   );
 }
 
+function useProjectDomain(projectId?: string) {
+  return useQuery({
+    queryKey: ["project-domain", projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const { data, error } = await supabase.from("projects").select("domain").eq("id", projectId).maybeSingle();
+      if (error) return null;
+      return (data?.domain as string | undefined) ?? null;
+    },
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+}
+
 /**
  * Workspace navigation for the dashboard shell.
  */
@@ -75,6 +94,7 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const domain = useProjectDomain(projectId).data;
 
   const isActive = (path: string) => pathname === path;
 
@@ -101,8 +121,18 @@ export function DashboardSidebar({ projectId }: { projectId?: string | undefined
       icon: Bot,
       active: pathname.startsWith("/projects/") && pathname.includes("/mentor"),
     },
-    { title: "Settings", url: "/settings", icon: Settings, active: isActive("/settings") },
   ];
+
+  if (domain === "project_management" && projectId) {
+    items.push(
+      { title: "Schedule", url: "/projects/$projectId/schedule", icon: Calendar, active: pathname.includes("/schedule") },
+      { title: "Stakeholders", url: "/projects/$projectId/stakeholders", icon: Users, active: pathname.includes("/stakeholders") },
+      { title: "Budget", url: "/projects/$projectId/budget", icon: Banknote, active: pathname.includes("/budget") },
+      { title: "Risks", url: "/projects/$projectId/risks", icon: ShieldAlert, active: pathname.includes("/risks") },
+    );
+  }
+
+  items.push({ title: "Settings", url: "/settings", icon: Settings, active: isActive("/settings") });
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">

@@ -17,6 +17,12 @@ export type CreditAction =
   | "generate_document"
   | "revise_document"
   | "analyze_document"
+  | "pm_schedule"
+  | "pm_raci"
+  | "pm_budget"
+  | "pm_risks"
+  | "pm_status_report"
+  | "pm_report_pdf"
   | "general";
 
 /** Estimated credits reserved before an AI run starts. */
@@ -33,6 +39,12 @@ export const CREDIT_HOLDS: Record<CreditAction, number> = {
   generate_document: 12,
   revise_document: 8,
   analyze_document: 5,
+  pm_schedule: 6,
+  pm_raci: 5,
+  pm_budget: 5,
+  pm_risks: 5,
+  pm_status_report: 6,
+  pm_report_pdf: 4,
   general: 3,
 };
 
@@ -48,6 +60,12 @@ export const ACTION_LABELS: Record<string, { label: string; estimate: number }> 
   generate_document: { label: "Writing your document", estimate: 12 },
   revise_document: { label: "Revising your paper", estimate: 8 },
   analyze_document: { label: "Checking originality", estimate: 5 },
+  pm_schedule: { label: "Building your schedule", estimate: 6 },
+  pm_raci: { label: "Mapping stakeholders", estimate: 5 },
+  pm_budget: { label: "Estimating budget", estimate: 5 },
+  pm_risks: { label: "Creating risk register", estimate: 5 },
+  pm_status_report: { label: "Writing status report", estimate: 6 },
+  pm_report_pdf: { label: "Exporting PDF report", estimate: 4 },
 };
 
 export const holdFor = (feature: string) =>

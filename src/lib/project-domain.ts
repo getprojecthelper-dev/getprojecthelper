@@ -348,6 +348,22 @@ export interface ProjectSignals {
   docSections: { status: string }[];
   risks: { status: string; severity: string }[];
   deadline: string | null;
+  /** Project-management structured signals (optional). */
+  pmSchedule?: {
+    name?: string;
+    task_name?: string;
+    status: string;
+    start_date: string | null;
+    end_date: string | null;
+  }[];
+  pmBudget?: { planned: number; actual: number }[];
+  pmRisks?: {
+    title?: string;
+    status: string;
+    severity: string;
+    likelihood?: string | undefined;
+    impact?: string | undefined;
+  }[];
 }
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
@@ -424,6 +440,18 @@ export function computeHealth(s: ProjectSignals, progress: number): HealthResult
       penalty: Math.min(25, openRisks.length * 5 + highRisks * 5),
     });
 
+  const pmOpenRisks = (s.pmRisks ?? []).filter((r) => r.status === "open");
+  const pmHighRisks = pmOpenRisks.filter(
+    (r) =>
+      (r.impact === "high" || r.severity === "high") &&
+      (r.likelihood === "high" || r.likelihood === "almost_certain"),
+  ).length;
+  if (pmOpenRisks.length > 0)
+    factors.push({
+      label: `${pmOpenRisks.length} open PM risk(s)`,
+      penalty: Math.min(20, pmOpenRisks.length * 4 + pmHighRisks * 6),
+    });
+
   const failed = s.tests.filter((t) => t.status === "failed").length;
   if (failed > 0) factors.push({ label: `${failed} failing test(s)`, penalty: Math.min(20, failed * 7) });
 
@@ -432,6 +460,25 @@ export function computeHealth(s: ProjectSignals, progress: number): HealthResult
 
   if (s.docSections.filter((d) => d.status === "complete").length === 0 && progress > 50)
     factors.push({ label: "Documentation not started", penalty: 10 });
+
+  const lateSchedule = (s.pmSchedule ?? []).filter(
+    (t) => t.end_date && t.status !== "completed" && daysUntil(t.end_date)! < 0,
+  ).length;
+  if (lateSchedule > 0)
+    factors.push({
+      label: `${lateSchedule} late schedule task(s)`,
+      penalty: Math.min(25, lateSchedule * 7),
+    });
+
+  const budget = s.pmBudget ?? [];
+  const totalPlanned = budget.reduce((a, b) => a + (Number(b.planned) || 0), 0);
+  const totalActual = budget.reduce((a, b) => a + (Number(b.actual) || 0), 0);
+  if (totalPlanned > 0 && totalActual > totalPlanned * 1.1) {
+    factors.push({
+      label: "Budget overrun",
+      penalty: Math.min(20, Math.round(((totalActual - totalPlanned) / totalPlanned) * 20)),
+    });
+  }
 
   const days = daysUntil(s.deadline);
   if (days !== null && days <= 21) {
@@ -461,6 +508,39 @@ export function computeNextAction(s: ProjectSignals, progress: number): NextActi
       title: `Clear overdue task: ${overdue[0]!.title ?? "overdue work"}`,
       reason: "Overdue work drags every downstream stage and damages project health.",
       to: "tasks",
+    };
+
+  const pmLate = (s.pmSchedule ?? []).filter(
+    (t) => t.end_date && t.status !== "completed" && daysUntil(t.end_date)! < 0,
+  );
+  if (pmLate.length > 0)
+    return {
+      title: `Catch up schedule: ${pmLate[0]!.name ?? pmLate[0]!.task_name ?? "late task"}`,
+      reason: "Late schedule tasks push milestones and threaten the project deadline.",
+      to: "schedule",
+    };
+
+  const pmHighRisk = (s.pmRisks ?? []).find(
+    (r) =>
+      r.status === "open" &&
+      (r.impact === "high" || r.severity === "high") &&
+      (r.likelihood === "high" || r.likelihood === "almost_certain"),
+  );
+  if (pmHighRisk)
+    return {
+      title: `Mitigate high risk: ${pmHighRisk.title ?? "open risk"}`,
+      reason: "High-likelihood, high-impact risks need an owner and a mitigation plan now.",
+      to: "risks",
+    };
+
+  const budget = s.pmBudget ?? [];
+  const totalPlanned = budget.reduce((a, b) => a + (Number(b.planned) || 0), 0);
+  const totalActual = budget.reduce((a, b) => a + (Number(b.actual) || 0), 0);
+  if (totalPlanned > 0 && totalActual > totalPlanned * 1.1)
+    return {
+      title: "Review budget overrun",
+      reason: "Actual spend has passed the planned budget; re-baseline or cut scope.",
+      to: "budget",
     };
 
   if (s.requirements.length === 0)
@@ -542,7 +622,7 @@ export interface ReviewArea {
 
 export function computeReview(s: ProjectSignals): ReviewArea[] {
   const pct = (d: number, t: number) => (t === 0 ? 0 : Math.round((d / t) * 100));
-  const grade = (value: number, total: number, emptyMsg: string, unit: string): ReviewArea["state"] => {
+  const grade = (value: number, total: number, emptyMsg: string, unit: string): ReviewState => {
     if (total === 0) return "empty";
     const p = pct(value, total);
     void emptyMsg;
@@ -554,8 +634,14 @@ export function computeReview(s: ProjectSignals): ReviewArea[] {
   const reqDone = s.requirements.filter((r) => r.status === "completed").length;
   const testsPassed = s.tests.filter((t) => t.status === "passed").length;
   const docsDone = s.docSections.filter((d) => d.status === "complete").length;
+  const scheduleDone = (s.pmSchedule ?? []).filter((t) => t.status === "completed").length;
+  const budget = s.pmBudget ?? [];
+  const budgetOk =
+    budget.length === 0 ||
+    budget.reduce((a, b) => a + (Number(b.actual) || 0), 0) <=
+      budget.reduce((a, b) => a + (Number(b.planned) || 0), 0) * 1.1;
 
-  return [
+  const base: ReviewArea[] = [
     {
       area: "Planning",
       state: s.tasks.length === 0 ? "empty" : s.tasks.length >= 4 ? "complete" : "attention",
@@ -592,4 +678,22 @@ export function computeReview(s: ProjectSignals): ReviewArea[] {
       detail: "Prepare slides and viva answers in Showcase",
     },
   ];
+
+  if ((s.pmSchedule ?? []).length > 0) {
+    base.push({
+      area: "Schedule",
+      state: grade(scheduleDone, s.pmSchedule!.length, "", ""),
+      detail: `${scheduleDone}/${s.pmSchedule!.length} schedule tasks done`,
+    });
+  }
+
+  if (budget.length > 0) {
+    base.push({
+      area: "Budget",
+      state: budgetOk ? "complete" : "at_risk",
+      detail: budgetOk ? "Within planned budget" : "Budget overrun detected",
+    });
+  }
+
+  return base;
 }

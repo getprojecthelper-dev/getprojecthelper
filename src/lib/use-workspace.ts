@@ -38,6 +38,20 @@ export function deriveMetrics(bundle: ProjectBundle): WorkspaceMetrics {
     docSections: bundle.docSections.map((d) => ({ status: d.status })),
     risks: bundle.risks.map((r) => ({ status: r.status, severity: r.severity })),
     deadline: bundle.project.deadline,
+    pmSchedule: bundle.schedule.map((t) => ({
+      name: t.name,
+      status: t.status,
+      start_date: t.start_date,
+      end_date: t.end_date,
+    })),
+    pmBudget: bundle.budget.map((b) => ({ planned: Number(b.planned), actual: Number(b.actual) })),
+    pmRisks: bundle.risks.map((r) => ({
+      title: r.title,
+      status: r.status,
+      severity: r.severity,
+      likelihood: r.likelihood ?? undefined,
+      impact: r.impact ?? undefined,
+    })),
   };
   const progress = computeProgress(signals);
   return {

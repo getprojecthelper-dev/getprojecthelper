@@ -333,9 +333,15 @@ function DocumentWizard({
               <Input
                 id="doc-title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitleTouched(true);
+                  setTitle(e.target.value);
+                }}
                 placeholder="e.g. A Deep Learning Approach to Crop Disease Detection"
               />
+              <p className="text-xs text-muted-foreground">
+                Pre-filled from your project — edit it to the final paper title.
+              </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

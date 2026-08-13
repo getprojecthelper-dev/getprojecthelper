@@ -423,8 +423,10 @@ export const generateSection = createServerFn({ method: "POST" })
       const overview = await generateJson<OverviewContent>({
         usage: { userId: context.userId, projectId: section.project_id, feature: "section_overview" },
         name: "section_overview",
-        instructions:
-          "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters, 2-4 short paragraphs worth of bullet-free prose), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler.",
+        instructions: playbook.buildsCode
+          ? "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler."
+          : "You are a mentor introducing a student project that is managed, not programmed. Write NO CODE AT ALL and never mention programming languages or libraries. Explain in simple plain language: the problem statement (what needs to happen and why it matters, who it is for, what is in and out of scope), the approach for delivering it, the tools, methods and roles involved (each with a one-line reason — e.g. Gantt chart, RACI matrix, risk register, weekly status review, stakeholders), and 3-5 concrete measurable success criteria.",
+
         input: `${brief}\n\nCURRENT SECTION: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
         schema: obj({
           problem_statement: str,

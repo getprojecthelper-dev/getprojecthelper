@@ -236,3 +236,37 @@
   color: var(--hero-ink);
 }
 
+
+/* ---- Academic paper preview (IEEE-style printed sheet) ---- */
+@utility paper-sheet {
+  background: #ffffff;
+  color: #111111;
+  font-family: "Times New Roman", Times, "Nimbus Roman", serif;
+  font-size: 9.6pt;
+  line-height: 1.28;
+  text-align: justify;
+  hyphens: auto;
+}
+
+@utility paper-columns {
+  column-count: 2;
+  column-gap: 0.28in;
+  column-fill: balance;
+}
+
+@utility paper-heading {
+  font-variant: small-caps;
+  font-size: 10pt;
+  font-weight: 400;
+  text-align: center;
+  margin: 12pt 0 6pt;
+  break-after: avoid;
+}
+
+@utility paper-subheading {
+  font-style: italic;
+  font-size: 10pt;
+  font-weight: 400;
+  margin: 8pt 0 4pt;
+  break-after: avoid;
+}

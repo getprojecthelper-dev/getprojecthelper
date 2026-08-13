@@ -295,9 +295,10 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       kind:
         index === 0 || s.kind === "overview"
           ? "overview"
-          : s.kind === "structure"
+          : s.kind === "structure" && playbook.buildsCode
             ? "structure"
             : "step",
+
       status: "pending",
     }));
 

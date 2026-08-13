@@ -96,7 +96,7 @@ function MentorLayout() {
   }, [setOpen]);
 
   return (
-    <section className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">
+    <section className="flex h-[calc(100dvh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">
       {/* Desktop conversation history — resizable so users can choose how much room it takes. */}
       <div
         className="relative hidden shrink-0 border-r border-border/60 bg-card/30 md:block"
@@ -110,7 +110,7 @@ function MentorLayout() {
           type="button"
           aria-label="Resize conversation history"
           onMouseDown={startResize}
-          className="absolute inset-y-0 right-0 z-10 w-1.5 translate-x-1/2 cursor-col-resize bg-transparent transition-colors hover:bg-primary/40 active:bg-primary/60"
+          className="absolute inset-y-0 right-0 z-10 w-1.5 translate-x-1/2 cursor-col-resize bg-transparent active:bg-primary/60"
         />
       </div>
       {/* Mobile conversation history — compact horizontal strip. */}

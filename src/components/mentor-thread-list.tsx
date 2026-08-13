@@ -96,7 +96,7 @@ export function MentorThreadList({
             <div
               key={thread.id}
               className={cn(
-                "group flex items-center gap-1 rounded-lg px-1 transition-colors hover:bg-accent",
+                "flex items-center gap-1 rounded-lg px-1",
                 thread.id === activeId && "bg-accent",
               )}
             >
@@ -112,7 +112,7 @@ export function MentorThreadList({
                 type="button"
                 aria-label={`Delete ${thread.title}`}
                 onClick={() => drop.mutate(thread.id)}
-                className="shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                className="shrink-0 rounded p-1 text-muted-foreground opacity-60"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

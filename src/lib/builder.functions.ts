@@ -22,7 +22,20 @@ export interface DatasetOption {
   common_mistakes: string;
 }
 
+export interface ResearchPaper {
+  title: string;
+  authors: string;
+  year: string;
+  venue: string;
+  url: string;
+  pdf_url: string | null;
+  downloadable: boolean;
+  summary: string;
+  relevance: string;
+}
+
 export interface SectionPlan {
+
   title: string;
   question: string;
   objective: string;

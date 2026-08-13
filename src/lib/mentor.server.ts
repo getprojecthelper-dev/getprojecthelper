@@ -79,7 +79,7 @@ export async function buildProjectContext(supabase: Db, projectId: string): Prom
       .order("position"),
     supabase.from("tasks").select("title,status,priority,due_date").eq("project_id", projectId),
     supabase.from("requirements").select("code,title,status,priority").eq("project_id", projectId),
-    supabase.from("test_cases").select("title,status,expected,actual").eq("project_id", projectId),
+    supabase.from("test_cases").select("title,status,expected_result,actual_result").eq("project_id", projectId),
     supabase
       .from("experiments")
       .select("name,model,metrics,results")
@@ -123,8 +123,8 @@ export async function buildProjectContext(supabase: Db, projectId: string): Prom
       "Test cases",
       (tests.data ?? []).map(
         (t) =>
-          `${t.title} [${t.status}]${t.expected ? ` expected: ${cut(t.expected, 80)}` : ""}${
-            t.actual ? ` actual: ${cut(t.actual, 80)}` : ""
+          `${t.title} [${t.status}]${t.expected_result ? ` expected: ${cut(t.expected_result, 80)}` : ""}${
+            t.actual_result ? ` actual: ${cut(t.actual_result, 80)}` : ""
           }`,
       ),
     ),

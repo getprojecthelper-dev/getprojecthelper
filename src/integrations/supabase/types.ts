@@ -314,6 +314,62 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          authors: Json
+          created_at: string
+          doc_type: string
+          format: string
+          id: string
+          latex: string | null
+          meta: Json
+          project_id: string | null
+          sections: Json
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          authors?: Json
+          created_at?: string
+          doc_type: string
+          format: string
+          id?: string
+          latex?: string | null
+          meta?: Json
+          project_id?: string | null
+          sections?: Json
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          authors?: Json
+          created_at?: string
+          doc_type?: string
+          format?: string
+          id?: string
+          latex?: string | null
+          meta?: Json
+          project_id?: string | null
+          sections?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiments: {
         Row: {
           created_at: string

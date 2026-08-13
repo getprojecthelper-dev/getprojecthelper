@@ -412,7 +412,8 @@ export const generateSection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ sectionId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief } = await loadContext(supabase as never, data.sectionId);
+    const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
+
 
     const isOverview =
       section.kind === "overview" ||

@@ -11,7 +11,6 @@ import {
 import { getVisitorRegion } from "@/lib/region.functions";
 
 const CURRENCY_KEY = "ph-currency";
-const COUNTRY_KEY = "ph-country";
 
 const isCurrency = (value: unknown): value is CurrencyCode =>
   typeof value === "string" && value in CURRENCIES;

@@ -43,9 +43,9 @@ export const Route = createFileRoute("/api/chat")({
         if (!context) return new Response("Project not found", { status: 404 });
 
         const { holdCredits, releaseCredits, settleCredits } = await import("@/lib/credits.server");
-        let holdId: string | null = null;
+        const hold: { id: string | null; settled: boolean } = { id: null, settled: false };
         try {
-          holdId = await holdCredits(auth.userId, "mentor_chat");
+          hold.id = await holdCredits(auth.userId, "mentor_chat");
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "You are out of AI credits.";
@@ -89,12 +89,28 @@ export const Route = createFileRoute("/api/chat")({
                 include: ["reasoning.encrypted_content"],
               },
             },
+            // The stream can end three ways; each must close out the hold
+            // exactly once, or reserved credits stay locked forever.
+            onError: async () => {
+              if (!hold.id || hold.settled) return;
+              hold.settled = true;
+              await releaseCredits(hold.id);
+            },
+            onAbort: async () => {
+              if (!hold.id || hold.settled) return;
+              hold.settled = true;
+              await releaseCredits(hold.id);
+            },
             onFinish: async ({ text, usage }) => {
               const total =
                 usage?.totalTokens ??
                 (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
               try {
-                if (holdId) await settleCredits(holdId, total);
+                let charged = 0;
+                if (hold.id && !hold.settled) {
+                  hold.settled = true;
+                  charged = await settleCredits(hold.id, total);
+                }
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
                 await supabaseAdmin.from("ai_usage_events").insert({
                   user_id: auth.userId,
@@ -104,7 +120,8 @@ export const Route = createFileRoute("/api/chat")({
                   input_tokens: usage?.inputTokens ?? 0,
                   output_tokens: usage?.outputTokens ?? 0,
                   total_tokens: total,
-                  credits: Number((total / 1000).toFixed(4)),
+                  // Log exactly what the ledger charged, not a second estimate.
+                  credits: charged,
                 });
               } catch (error) {
                 console.error("mentor: usage accounting failed", error);
@@ -121,6 +138,7 @@ export const Route = createFileRoute("/api/chat")({
                 if (error) console.error("mentor: failed to save reply", error);
               }
             },
+
           });
 
           return result.toUIMessageStreamResponse({
@@ -128,7 +146,10 @@ export const Route = createFileRoute("/api/chat")({
             sendReasoning: true,
           });
         } catch (error) {
-          if (holdId) await releaseCredits(holdId);
+          if (hold.id && !hold.settled) {
+            hold.settled = true;
+            await releaseCredits(hold.id);
+          }
           if (error instanceof Error && error.name === "AbortError") {
             return new Response("Cancelled", { status: 499 });
           }

@@ -82,7 +82,9 @@ export const generateDocument = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<GeneratedDocument> => {
-    const supabase = context.supabase as unknown as { from: (t: string) => ReturnType<typeof context.supabase.from> };
+    const supabase = context.supabase as unknown as {
+      from: (t: string) => ReturnType<typeof context.supabase.from>;
+    };
 
     const primary = await projectSource(supabase, data.projectId);
     if (!primary) throw new Error("Project not found.");
@@ -228,7 +230,9 @@ export const reviseDocument = createServerFn({ method: "POST" })
     const current = doc as unknown as GeneratedDocument;
     const source = current.project_id
       ? await projectSource(
-          context.supabase as unknown as { from: (t: string) => ReturnType<typeof context.supabase.from> },
+          context.supabase as unknown as {
+            from: (t: string) => ReturnType<typeof context.supabase.from>;
+          },
           current.project_id,
         )
       : null;
@@ -301,7 +305,9 @@ export const analyzeDocument = createServerFn({ method: "POST" })
     const current = doc as unknown as GeneratedDocument;
     const source = current.project_id
       ? await projectSource(
-          context.supabase as unknown as { from: (t: string) => ReturnType<typeof context.supabase.from> },
+          context.supabase as unknown as {
+            from: (t: string) => ReturnType<typeof context.supabase.from>;
+          },
           current.project_id,
         )
       : null;

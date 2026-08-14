@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, nullableStr, obj, str, strArray } from "@/lib/ai.server";
-import { getPlaybook } from "@/lib/domain-playbooks";
+import { getPlaybook, PM_ARTIFACT_PLAN, type PmProfile } from "@/lib/domain-playbooks";
 
 
 export interface SuggestedProject {

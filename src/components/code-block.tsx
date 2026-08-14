@@ -12,9 +12,14 @@ const TOKEN_CLASS: Record<TokenKind, string> = {
   comment: "tok-comment",
   function: "tok-function",
   builtin: "tok-builtin",
+  variable: "tok-variable",
+  property: "tok-property",
+  type: "tok-type",
+  operator: "tok-operator",
   punct: "tok-punct",
   plain: "",
 };
+
 
 
 export function CodeBlock({
@@ -24,9 +29,9 @@ export function CodeBlock({
   className,
 }: {
   code: string;
-  language?: string;
-  filename?: string;
-  className?: string;
+  language?: string | undefined;
+  filename?: string | undefined;
+  className?: string | undefined;
 }) {
   const [copied, setCopied] = useState(false);
 

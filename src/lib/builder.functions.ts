@@ -48,7 +48,12 @@ export interface CodeBlock {
   title: string;
   code: string;
   explanation: string[];
+  /** Which file this part belongs in, e.g. "src/app.py" or "requirements.txt". */
+  file?: string;
+  /** "create" | "modify" | "run" — what the student does with it. */
+  action?: string;
 }
+
 
 export interface StructureFile {
   path: string;
@@ -347,7 +352,7 @@ const sectionSchema = obj({
   language: str,
   blocks: {
     type: "array",
-    items: obj({ title: str, code: str, explanation: strArray }),
+    items: obj({ title: str, code: str, explanation: strArray, file: str, action: str }),
   },
   insights: strArray,
   business_connection: str,
@@ -501,8 +506,9 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
-        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. Return 2-5 blocks.`,
+        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. EVERY block MUST set \`file\` to the exact relative path the code belongs in (e.g. "src/app.py", "requirements.txt", or "terminal" for commands to run) and \`action\` to exactly one of "create", "modify" or "run". Keep file paths consistent with earlier sections — reuse the same path when extending a file. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
+        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. EVERY block MUST set \`file\` to the everyday office file it belongs in (e.g. "Project Charter.docx", "Schedule.xlsx — sheet: Gantt", "Kickoff.pptx") and \`action\` to exactly one of "create" or "modify". Never mention terminals, repositories or code files. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. Return 2-5 blocks.`,
+
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
     });

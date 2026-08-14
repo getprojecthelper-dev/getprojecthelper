@@ -6,7 +6,9 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileCode2,
   FileSpreadsheet,
+
   FileText,
   FileType,
   FolderTree,
@@ -14,6 +16,7 @@ import {
   Lock,
   Presentation,
   Sparkles,
+  Terminal,
   Wrench,
 } from "lucide-react";
 import { useState } from "react";
@@ -39,7 +42,10 @@ interface Block {
   title: string;
   code: string;
   explanation: string[];
+  file?: string;
+  action?: string;
 }
+
 
 interface StructureFile {
   path: string;
@@ -308,7 +314,13 @@ function toolApp(label: string): OfficeApp {
   return "word";
 }
 
-function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
+function FileGuidanceBar({
+  guidance,
+  target,
+}: {
+  guidance: FileGuidance;
+  target?: string | undefined;
+}) {
   const meta = metaOf(guidance.app);
   const Icon = meta.icon;
   return (
@@ -318,12 +330,40 @@ function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
       </span>
       <span className="text-muted-foreground">{guidance.action}</span>
       <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-        {guidance.target}
+        {target || guidance.target}
       </span>
       <span className="text-muted-foreground">· use {guidance.appLabel}</span>
     </div>
   );
 }
+
+/** "Where does this go?" bar for coding projects — file path + what to do. */
+function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {
+  const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(file.trim());
+  const verb = isTerminal
+    ? "Run these commands in your terminal"
+    : action === "modify"
+      ? "Open this existing file and update it"
+      : action === "run"
+        ? "Run this file"
+        : "Create this file (if it doesn't exist yet) and paste the code in";
+  const Icon = isTerminal ? Terminal : FileCode2;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
+      <span className="flex items-center gap-1.5 rounded-md bg-info/15 px-2 py-1 font-semibold text-info">
+        <Icon className="h-3.5 w-3.5" /> {isTerminal ? "Terminal" : "File"}
+      </span>
+      <span className="text-muted-foreground">{verb}</span>
+      {isTerminal ? null : (
+        <span className="rounded-md bg-muted px-2 py-1 font-mono font-medium text-foreground">
+          {file}
+        </span>
+      )}
+    </div>
+  );
+}
+
+
 
 
 
@@ -475,16 +515,30 @@ function SectionCard({
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const blockFile = block.file?.trim();
             const guidance = playbook.buildsCode
               ? null
-              : getFileGuidance(block.title, section.title, block.code ?? "");
+              : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
             return (
               <div key={`${block.title}-${i}`} className="space-y-2">
                 <p className="text-sm font-semibold">
                   {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                 </p>
-                {guidance ? <FileGuidanceBar guidance={guidance} /> : null}
-                {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
+                {playbook.buildsCode
+                  ? blockFile && hasCode
+                    ? <CodeFileBar file={blockFile} action={block.action} />
+                    : null
+                  : guidance
+                    ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                    : null}
+                {hasCode ? (
+                  <CodeBlock
+                    code={block.code}
+                    language={section.language}
+                    filename={playbook.buildsCode ? blockFile : undefined}
+                  />
+                ) : null}
+
                 {block.explanation?.length ? (
                   hasCode ? (
                     <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">

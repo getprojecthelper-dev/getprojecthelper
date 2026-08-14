@@ -352,7 +352,7 @@ const sectionSchema = obj({
   language: str,
   blocks: {
     type: "array",
-    items: obj({ title: str, code: str, explanation: strArray }),
+    items: obj({ title: str, code: str, explanation: strArray, file: str, action: str }),
   },
   insights: strArray,
   business_connection: str,

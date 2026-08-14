@@ -185,6 +185,25 @@ function BuildPage() {
         </p>
       </div>
 
+      {meta?.pm ? (
+        <div className="panel p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Project profile</p>
+          <p className="mt-1 text-base font-semibold text-foreground">{meta.name}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Industry", value: meta.pm.industry },
+              { label: "Methodology", value: meta.pm.methodology },
+              { label: "Duration", value: meta.pm.duration },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg border border-border bg-muted/40 p-3">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{item.label}</p>
+                <p className="mt-0.5 text-sm font-medium text-foreground">{item.value ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
 
       {sections.map((section, index) => {

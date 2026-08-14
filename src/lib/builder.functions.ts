@@ -441,7 +441,8 @@ async function loadContext(
 
   const playbook = getPlaybook(project.domain as string | null);
 
-  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+  const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;
+  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
 
   return { section: section as SectionRow & { project_id: string }, brief, playbook, supabase };
 

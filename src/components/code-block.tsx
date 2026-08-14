@@ -29,9 +29,9 @@ export function CodeBlock({
   className,
 }: {
   code: string;
-  language?: string;
-  filename?: string;
-  className?: string;
+  language?: string | undefined;
+  filename?: string | undefined;
+  className?: string | undefined;
 }) {
   const [copied, setCopied] = useState(false);
 

@@ -314,7 +314,13 @@ function toolApp(label: string): OfficeApp {
   return "word";
 }
 
-function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
+function FileGuidanceBar({
+  guidance,
+  target,
+}: {
+  guidance: FileGuidance;
+  target?: string | undefined;
+}) {
   const meta = metaOf(guidance.app);
   const Icon = meta.icon;
   return (
@@ -324,7 +330,7 @@ function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
       </span>
       <span className="text-muted-foreground">{guidance.action}</span>
       <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-        {guidance.target}
+        {target || guidance.target}
       </span>
       <span className="text-muted-foreground">· use {guidance.appLabel}</span>
     </div>
@@ -332,7 +338,7 @@ function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
 }
 
 /** "Where does this go?" bar for coding projects — file path + what to do. */
-function CodeFileBar({ file, action }: { file: string; action?: string }) {
+function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {
   const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(file.trim());
   const verb = isTerminal
     ? "Run these commands in your terminal"

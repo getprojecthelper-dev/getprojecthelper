@@ -318,7 +318,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     // structure-ish section is downgraded to a normal step so the folder tree
     // is never produced twice.
     let structureUsed = false;
-    const rows = plan.sections.slice(0, 12).map((s, index) => {
+    const rows = plan.sections.slice(0, isPm ? PM_ARTIFACT_PLAN.length : 12).map((s, index) => {
       let kind: string;
       if (index === 0 || s.kind === "overview") {
         kind = "overview";

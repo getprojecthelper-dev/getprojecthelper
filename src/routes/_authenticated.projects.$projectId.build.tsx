@@ -150,7 +150,7 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
-  const activeIndex = sections.findIndex((s) => s.status !== "confirmed");
+  
 
   if (isPending) {
     return (
@@ -179,7 +179,7 @@ function BuildPage() {
       {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
 
       {sections.map((section, index) => {
-        const locked = activeIndex !== -1 && index > activeIndex;
+        const locked = false;
         return (
           <SectionCard
             key={section.id}

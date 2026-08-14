@@ -307,7 +307,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
         template: data.domain,
         purpose: "academic",
         current_stage: "development",
-        pm_profile: pmProfile,
+        pm_profile: pmProfile ? { ...pmProfile } : null,
       })
       .select("id")
       .single();

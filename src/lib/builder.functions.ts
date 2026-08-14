@@ -48,7 +48,12 @@ export interface CodeBlock {
   title: string;
   code: string;
   explanation: string[];
+  /** Which file this part belongs in, e.g. "src/app.py" or "requirements.txt". */
+  file?: string;
+  /** "create" | "modify" | "run" — what the student does with it. */
+  action?: string;
 }
+
 
 export interface StructureFile {
   path: string;

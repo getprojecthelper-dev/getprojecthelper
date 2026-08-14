@@ -277,25 +277,38 @@
   --syntax-string: oklch(0.5 0.13 150);
   --syntax-number: oklch(0.55 0.15 45);
   --syntax-comment: oklch(0.62 0.02 285);
-  --syntax-function: oklch(0.52 0.14 250);
+  --syntax-function: oklch(0.5 0.21 300);
   --syntax-builtin: oklch(0.55 0.14 200);
+  --syntax-variable: oklch(0.5 0.16 255);
+  --syntax-property: oklch(0.55 0.11 235);
+  --syntax-type: oklch(0.52 0.11 190);
+  --syntax-operator: oklch(0.55 0.12 20);
   --syntax-punct: oklch(0.5 0.01 285);
 }
 
 .dark {
-  --syntax-keyword: oklch(0.78 0.15 305);
-  --syntax-string: oklch(0.8 0.14 150);
-  --syntax-number: oklch(0.82 0.14 60);
-  --syntax-comment: oklch(0.6 0.015 285);
-  --syntax-function: oklch(0.78 0.13 245);
-  --syntax-builtin: oklch(0.8 0.11 195);
-  --syntax-punct: oklch(0.7 0.01 285);
+  --syntax-keyword: oklch(0.78 0.16 305);
+  --syntax-string: oklch(0.82 0.13 145);
+  --syntax-number: oklch(0.84 0.13 95);
+  --syntax-comment: oklch(0.62 0.015 285);
+  --syntax-function: oklch(0.76 0.16 300);
+  --syntax-builtin: oklch(0.82 0.1 195);
+  --syntax-variable: oklch(0.78 0.11 250);
+  --syntax-property: oklch(0.85 0.07 235);
+  --syntax-type: oklch(0.82 0.11 185);
+  --syntax-operator: oklch(0.82 0.1 25);
+  --syntax-punct: oklch(0.72 0.01 285);
 }
 
 .tok-keyword { color: var(--syntax-keyword); font-weight: 600; }
 .tok-string { color: var(--syntax-string); }
 .tok-number { color: var(--syntax-number); }
 .tok-comment { color: var(--syntax-comment); font-style: italic; }
-.tok-function { color: var(--syntax-function); }
+.tok-function { color: var(--syntax-function); font-weight: 600; }
 .tok-builtin { color: var(--syntax-builtin); }
+.tok-variable { color: var(--syntax-variable); }
+.tok-property { color: var(--syntax-property); }
+.tok-type { color: var(--syntax-type); }
+.tok-operator { color: var(--syntax-operator); }
 .tok-punct { color: var(--syntax-punct); }
+

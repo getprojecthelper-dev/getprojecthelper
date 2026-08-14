@@ -150,7 +150,7 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
-  const activeIndex = sections.findIndex((s) => s.status !== "confirmed");
+  
 
   if (isPending) {
     return (

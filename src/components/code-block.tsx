@@ -12,9 +12,14 @@ const TOKEN_CLASS: Record<TokenKind, string> = {
   comment: "tok-comment",
   function: "tok-function",
   builtin: "tok-builtin",
+  variable: "tok-variable",
+  property: "tok-property",
+  type: "tok-type",
+  operator: "tok-operator",
   punct: "tok-punct",
   plain: "",
 };
+
 
 
 export function CodeBlock({

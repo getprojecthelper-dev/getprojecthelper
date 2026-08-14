@@ -328,6 +328,34 @@ function FileGuidanceBar({ guidance }: { guidance: FileGuidance }) {
   );
 }
 
+/** "Where does this go?" bar for coding projects — file path + what to do. */
+function CodeFileBar({ file, action }: { file: string; action?: string }) {
+  const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(file.trim());
+  const verb = isTerminal
+    ? "Run these commands in your terminal"
+    : action === "modify"
+      ? "Open this existing file and update it"
+      : action === "run"
+        ? "Run this file"
+        : "Create this file (if it doesn't exist yet) and paste the code in";
+  const Icon = isTerminal ? Terminal : FileCode2;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
+      <span className="flex items-center gap-1.5 rounded-md bg-info/15 px-2 py-1 font-semibold text-info">
+        <Icon className="h-3.5 w-3.5" /> {isTerminal ? "Terminal" : "File"}
+      </span>
+      <span className="text-muted-foreground">{verb}</span>
+      {isTerminal ? null : (
+        <span className="rounded-md bg-muted px-2 py-1 font-mono font-medium text-foreground">
+          {file}
+        </span>
+      )}
+    </div>
+  );
+}
+
+
+
 
 
 

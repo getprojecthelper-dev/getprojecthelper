@@ -180,3 +180,47 @@ export function getPlaybook(domain: string | null | undefined): DomainPlaybook {
 
 export const domainBuildsCode = (domain: string | null | undefined) =>
   getPlaybook(domain).buildsCode;
+
+/* ------------------------------------------------------------------ */
+/* Project Management: fixed artifact sequence                         */
+/* ------------------------------------------------------------------ */
+
+export interface PmProfile {
+  industry: string;
+  methodology: string;
+  duration: string;
+}
+
+export interface FixedSection {
+  title: string;
+  question: string;
+  objective: string;
+  kind: "overview" | "step";
+}
+
+/** Every PM project produces exactly these artifacts, in this order. */
+export const PM_ARTIFACT_PLAN: FixedSection[] = [
+  {
+    title: "Problem Statement",
+    question: "What problem does this project solve and what does success look like?",
+    objective:
+      "Explain the problem, the proposed solution, the business objectives and the success criteria — no tables yet.",
+    kind: "overview",
+  },
+  { title: "Project Charter", question: "Why does this project exist and who authorises it?", objective: "Write the charter: purpose, objectives, high-level scope, sponsor, project manager, budget envelope and milestones.", kind: "step" },
+  { title: "Stakeholder Register", question: "Who is involved and what do they care about?", objective: "List every stakeholder with role, interest, influence and engagement approach.", kind: "step" },
+  { title: "Requirements", question: "What exactly must the project deliver?", objective: "Capture numbered functional and non-functional requirements with priority and acceptance criteria.", kind: "step" },
+  { title: "Scope Statement", question: "What is in scope and what is not?", objective: "Define deliverables, boundaries, assumptions, constraints and explicit exclusions.", kind: "step" },
+  { title: "Work Breakdown Structure (WBS)", question: "How does the work break into manageable pieces?", objective: "Produce a numbered WBS down to work-package level.", kind: "step" },
+  { title: "Task Breakdown", question: "What are the actual tasks under each work package?", objective: "List tasks with IDs, owners, effort estimates and deliverable produced.", kind: "step" },
+  { title: "Dependencies", question: "Which tasks depend on which?", objective: "Map predecessor/successor relationships, dependency type and the critical path.", kind: "step" },
+  { title: "Gantt / Schedule", question: "When does each task happen?", objective: "Build a week-by-week schedule table with start, finish, duration, dependency and milestone markers.", kind: "step" },
+  { title: "Resource Plan", question: "Who and what is needed, and when?", objective: "Allocate people, roles, effort and other resources across the schedule, and estimate cost.", kind: "step" },
+  { title: "Risk Register", question: "What could go wrong and how will you handle it?", objective: "List risks with likelihood, impact, score, response strategy and owner.", kind: "step" },
+  { title: "Communication Plan", question: "Who gets told what, how often?", objective: "Define audiences, messages, channels, frequency and owners for reporting.", kind: "step" },
+  { title: "Quality Plan", question: "How will you prove the work is good enough?", objective: "Define quality standards, review/testing activities, metrics and acceptance sign-off.", kind: "step" },
+  { title: "Change Management", question: "How are changes requested and approved?", objective: "Define the change control process, change request form fields, approval authority and change log.", kind: "step" },
+  { title: "Progress / KPI Tracking", question: "How do you know if the project is on track?", objective: "Define KPIs and produce a status report format with % complete, schedule and budget variance and blockers.", kind: "step" },
+  { title: "Final Project Report", question: "What was delivered and how did it perform?", objective: "Write the closure report: outcomes vs objectives, schedule and budget performance, sign-off.", kind: "step" },
+  { title: "Lessons Learned", question: "What would you do differently next time?", objective: "Capture what went well, what did not, root causes and recommendations for future projects.", kind: "step" },
+];

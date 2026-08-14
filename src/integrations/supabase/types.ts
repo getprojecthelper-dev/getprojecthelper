@@ -539,6 +539,7 @@ export type Database = {
           id: string
           idea: string | null
           name: string
+          pm_profile: Json | null
           project_type: string | null
           purpose: string
           repo_url: string | null
@@ -560,6 +561,7 @@ export type Database = {
           id?: string
           idea?: string | null
           name: string
+          pm_profile?: Json | null
           project_type?: string | null
           purpose?: string
           repo_url?: string | null
@@ -581,6 +583,7 @@ export type Database = {
           id?: string
           idea?: string | null
           name?: string
+          pm_profile?: Json | null
           project_type?: string | null
           purpose?: string
           repo_url?: string | null

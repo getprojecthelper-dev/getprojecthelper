@@ -99,13 +99,22 @@ function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
   const { data: sections = [], isPending } = useSections(projectId);
-  const { data: domain } = useQuery({
+  const { data: meta } = useQuery({
     queryKey: ["project-domain", projectId],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("domain").eq("id", projectId).maybeSingle();
-      return (data?.domain as string | null) ?? null;
+      const { data } = await supabase
+        .from("projects")
+        .select("domain,name,pm_profile")
+        .eq("id", projectId)
+        .maybeSingle();
+      return {
+        domain: (data?.domain as string | null) ?? null,
+        name: (data?.name as string | null) ?? null,
+        pm: (data?.pm_profile as { industry?: string; methodology?: string; duration?: string } | null) ?? null,
+      };
     },
   });
+  const domain = meta?.domain ?? null;
   const playbook = getPlaybook(domain);
   const generate = withMeter("generate_section", useServerFn(generateSection));
   const fix = withMeter("fix_section", useServerFn(fixSectionError));
@@ -175,6 +184,25 @@ function BuildPage() {
           {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"} completed
         </p>
       </div>
+
+      {meta?.pm ? (
+        <div className="panel p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Project profile</p>
+          <p className="mt-1 text-base font-semibold text-foreground">{meta.name}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Industry", value: meta.pm.industry },
+              { label: "Methodology", value: meta.pm.methodology },
+              { label: "Duration", value: meta.pm.duration },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg border border-border bg-muted/40 p-3">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{item.label}</p>
+                <p className="mt-0.5 text-sm font-medium text-foreground">{item.value ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
 

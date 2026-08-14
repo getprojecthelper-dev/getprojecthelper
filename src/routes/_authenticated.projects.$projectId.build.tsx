@@ -509,16 +509,30 @@ function SectionCard({
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const blockFile = block.file?.trim();
             const guidance = playbook.buildsCode
               ? null
-              : getFileGuidance(block.title, section.title, block.code ?? "");
+              : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
             return (
               <div key={`${block.title}-${i}`} className="space-y-2">
                 <p className="text-sm font-semibold">
                   {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                 </p>
-                {guidance ? <FileGuidanceBar guidance={guidance} /> : null}
-                {hasCode ? <CodeBlock code={block.code} language={section.language} /> : null}
+                {playbook.buildsCode
+                  ? blockFile && hasCode
+                    ? <CodeFileBar file={blockFile} action={block.action} />
+                    : null
+                  : guidance
+                    ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                    : null}
+                {hasCode ? (
+                  <CodeBlock
+                    code={block.code}
+                    language={section.language}
+                    filename={playbook.buildsCode ? blockFile : undefined}
+                  />
+                ) : null}
+
                 {block.explanation?.length ? (
                   hasCode ? (
                     <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">

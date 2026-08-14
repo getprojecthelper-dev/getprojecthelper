@@ -258,8 +258,26 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
 
     const playbook = getPlaybook(data.domain);
+    const isPm = data.domain === "project_management";
 
-    const plan = await generateJson<{ sections: SectionPlan[] }>({
+    // Project Management projects always follow the same professional artifact
+    // sequence (charter → ... → lessons learned), so the plan is fixed and the
+    // AI only classifies the project profile.
+    let pmProfile: PmProfile | null = null;
+    let plan: { sections: SectionPlan[] };
+
+    if (isPm) {
+      pmProfile = await generateJson<PmProfile>({
+        usage: { userId, feature: "plan_sections" },
+        name: "pm_profile",
+        instructions:
+          "You are a PMP-certified project manager. Classify the student's project. `industry` is the real-world industry it belongs to (e.g. Cybersecurity, Construction, Healthcare, Education, Retail). `methodology` is the best-fit delivery methodology (Agile, Scrum, Waterfall, Hybrid, Kanban, PRINCE2) — name it and nothing else. `duration` is a realistic student-project duration in weeks, written like '12 weeks'. No code, no software talk.",
+        input: `Project: ${data.title}\nDescription: ${data.description}\nTools & methods: ${data.techStack.join(", ")}`,
+        schema: obj({ industry: str, methodology: str, duration: str }),
+      });
+      plan = { sections: PM_ARTIFACT_PLAN as unknown as SectionPlan[] };
+    } else {
+      plan = await generateJson<{ sections: SectionPlan[] }>({
       usage: { userId, feature: "plan_sections" },
       name: "implementation_plan",
       instructions:
@@ -272,7 +290,8 @@ export const createGuidedProject = createServerFn({ method: "POST" })
           items: obj({ title: str, question: str, objective: str, kind: str }),
         },
       }),
-    });
+      });
+    }
 
     const { data: project, error } = await supabase
       .from("projects")

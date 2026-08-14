@@ -39,7 +39,10 @@ interface Block {
   title: string;
   code: string;
   explanation: string[];
+  file?: string;
+  action?: string;
 }
+
 
 interface StructureFile {
   path: string;

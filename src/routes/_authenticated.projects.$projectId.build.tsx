@@ -179,7 +179,7 @@ function BuildPage() {
       {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
 
       {sections.map((section, index) => {
-        const locked = activeIndex !== -1 && index > activeIndex;
+        const locked = false;
         return (
           <SectionCard
             key={section.id}

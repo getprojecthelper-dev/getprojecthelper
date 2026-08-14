@@ -99,13 +99,22 @@ function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
   const { data: sections = [], isPending } = useSections(projectId);
-  const { data: domain } = useQuery({
+  const { data: meta } = useQuery({
     queryKey: ["project-domain", projectId],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("domain").eq("id", projectId).maybeSingle();
-      return (data?.domain as string | null) ?? null;
+      const { data } = await supabase
+        .from("projects")
+        .select("domain,name,pm_profile")
+        .eq("id", projectId)
+        .maybeSingle();
+      return {
+        domain: (data?.domain as string | null) ?? null,
+        name: (data?.name as string | null) ?? null,
+        pm: (data?.pm_profile as { industry?: string; methodology?: string; duration?: string } | null) ?? null,
+      };
     },
   });
+  const domain = meta?.domain ?? null;
   const playbook = getPlaybook(domain);
   const generate = withMeter("generate_section", useServerFn(generateSection));
   const fix = withMeter("fix_section", useServerFn(fixSectionError));

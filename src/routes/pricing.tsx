@@ -5,6 +5,11 @@ import { PricingPacks } from "@/components/pricing-packs";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { STARTER_CREDITS } from "@/lib/credit-costs";
+import { cheapestPack, formatMoney, packPrice } from "@/lib/pricing";
+
+const cheapest = cheapestPack();
+const fromUsd = formatMoney(packPrice(cheapest, "USD"), "USD");
+const fromInr = formatMoney(packPrice(cheapest, "INR"), "INR");
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -12,13 +17,12 @@ export const Route = createFileRoute("/pricing")({
       { title: "Pricing — AI credits for student projects | Project Helper" },
       {
         name: "description",
-        content:
-          "Simple pay-as-you-go credit packs for Project Helper. Start with 50 free credits, then top up from $5 or ₹149. No subscription.",
+        content: `Simple pay-as-you-go credit packs for Project Helper. Start with ${STARTER_CREDITS} free credits, then top up from ${fromUsd} or ${fromInr}. No subscription.`,
       },
       { property: "og:title", content: "Pricing — AI credits for student projects" },
       {
         property: "og:description",
-        content: "Credit packs from $5 / ₹149. 50 free credits on every new account, no subscription.",
+        content: `Credit packs from ${fromUsd} / ${fromInr}. ${STARTER_CREDITS} free credits on every new account, no subscription.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

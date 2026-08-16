@@ -53,6 +53,7 @@ interface StructureFile {
 }
 
 interface FixChange {
+  file?: string;
   part: string;
   what_changed: string;
   why: string;

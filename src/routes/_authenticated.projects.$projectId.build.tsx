@@ -156,10 +156,12 @@ function BuildPage() {
 
   const fixMutation = useMutation({
     mutationFn: (vars: { sectionId: string; errorText: string }) => fix({ data: vars }),
-    onSuccess: () => {
+    onSuccess: (_r, vars) => {
       void invalidate();
-      toast.success("Code updated with a fix.");
+      setOpenId(vars.sectionId);
+      toast.success("Updated — see “What was fixed” in this step.");
     },
+
     onError: (error: unknown) =>
       toast.error(error instanceof Error ? error.message : "Couldn't fix the code."),
   });

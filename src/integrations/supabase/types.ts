@@ -170,6 +170,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          walkthrough: Json | null
         }
         Insert: {
           blocks?: Json
@@ -192,6 +193,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id?: string
+          walkthrough?: Json | null
         }
         Update: {
           blocks?: Json
@@ -214,6 +216,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          walkthrough?: Json | null
         }
         Relationships: [
           {

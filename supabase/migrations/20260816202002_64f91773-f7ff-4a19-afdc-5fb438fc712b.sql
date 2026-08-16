@@ -1,0 +1,1 @@
+ALTER TABLE public.build_sections ADD COLUMN IF NOT EXISTS walkthrough jsonb;

@@ -708,31 +708,69 @@ function SectionCard({
 
 
           {section.fix_notes &&
-          (section.fix_notes.diagnosis || (section.fix_notes.changes?.length ?? 0) > 0) ? (
+          (section.fix_notes.diagnosis ||
+            section.fix_notes.error_explained ||
+            (section.fix_notes.changes?.length ?? 0) > 0) ? (
             (() => {
-              const changes = section.fix_notes?.changes ?? [];
+              const notes = section.fix_notes as FixNotes;
+              const changes = notes.changes ?? [];
               const touchedFiles = Array.from(
-                new Set(
-                  changes
-                    .map((c) => (c.file ?? "").trim())
-                    .filter((f) => f.length > 0),
-                ),
+                new Set(changes.map((c) => (c.file ?? "").trim()).filter(Boolean)),
               );
+              const addedCount = changes.reduce((n, c) => n + (c.added?.length ?? 0), 0);
+              const removedCount = changes.reduce((n, c) => n + (c.removed?.length ?? 0), 0);
               return (
-                <div className="overflow-hidden rounded-xl border border-info/40 bg-info/5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-info/30 bg-info/10 px-4 py-2.5">
+                <div className="overflow-hidden rounded-xl border border-info/40 bg-gradient-to-b from-info/10 to-transparent">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-info/25 px-4 py-3">
                     <p className="flex items-center gap-2 text-sm font-semibold">
-                      <Wrench className="h-4 w-4 text-info" /> What was fixed
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-info/15">
+                        <Wrench className="h-4 w-4 text-info" />
+                      </span>
+                      Fix report
                     </p>
-                    <span className="rounded-full bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
-                      {changes.length} {changes.length === 1 ? "change" : "changes"}
-                      {touchedFiles.length
-                        ? ` · ${touchedFiles.length} ${touchedFiles.length === 1 ? "file" : "files"}`
-                        : ""}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="rounded-full border border-border bg-card px-2.5 py-0.5 text-muted-foreground">
+                        {changes.length} {changes.length === 1 ? "change" : "changes"}
+                      </span>
+                      {addedCount ? (
+                        <span className="rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 font-mono text-success">
+                          +{addedCount}
+                        </span>
+                      ) : null}
+                      {removedCount ? (
+                        <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 font-mono text-destructive">
+                          −{removedCount}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div className="space-y-3 p-4">
+                    {notes.error_explained || notes.reported ? (
+                      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-destructive">
+                          <AlertTriangle className="h-3.5 w-3.5" /> The error
+                        </p>
+                        {notes.reported ? (
+                          <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap rounded-md bg-card/70 p-2 font-mono text-[11.5px] text-muted-foreground">
+                            {notes.reported}
+                          </pre>
+                        ) : null}
+                        {notes.error_explained ? (
+                          <p className="mt-2 text-sm leading-relaxed">{notes.error_explained}</p>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {notes.diagnosis ? (
+                      <div className="rounded-lg border border-border bg-card p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Why it happened
+                        </p>
+                        <p className="mt-1 text-sm leading-relaxed">{notes.diagnosis}</p>
+                      </div>
+                    ) : null}
+
                     {touchedFiles.length ? (
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-xs font-medium text-muted-foreground">
@@ -741,7 +779,7 @@ function SectionCard({
                         {touchedFiles.map((f) => (
                           <span
                             key={f}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-0.5 font-mono text-xs text-foreground"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-0.5 font-mono text-xs"
                           >
                             <FileCode2 className="h-3.5 w-3.5 text-info" />
                             {f}
@@ -750,48 +788,86 @@ function SectionCard({
                       </div>
                     ) : null}
 
-                    {section.fix_notes.diagnosis ? (
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {section.fix_notes.diagnosis}
-                      </p>
-                    ) : null}
-
                     {changes.length ? (
-                      <ul className="space-y-2">
-                        {changes.map((change, i) => (
-                          <li
-                            key={`${i}-${change.part}`}
-                            className="rounded-lg border border-border bg-card p-3 text-sm"
-                          >
-                            <div className="flex flex-wrap items-center gap-2">
-                              {change.file ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-md bg-info/10 px-2 py-0.5 font-mono text-xs text-info">
-                                  <FileCode2 className="h-3.5 w-3.5" />
-                                  {change.file}
+                      <ul className="space-y-2.5">
+                        {changes.map((change, i) => {
+                          const removed = (change.removed ?? []).filter((l) => l.trim().length);
+                          const added = (change.added ?? []).filter((l) => l.trim().length);
+                          return (
+                            <li
+                              key={`${i}-${change.part}`}
+                              className="overflow-hidden rounded-lg border border-border bg-card text-sm"
+                            >
+                              <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/50 px-3 py-2">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-info/15 font-mono text-[11px] text-info">
+                                  {i + 1}
                                 </span>
-                              ) : null}
-                              {change.part ? (
-                                <span className="text-sm font-medium text-foreground">
-                                  {change.part}
+                                {change.file ? (
+                                  <span className="inline-flex items-center gap-1.5 font-mono text-xs text-info">
+                                    <FileCode2 className="h-3.5 w-3.5" />
+                                    {change.file}
+                                  </span>
+                                ) : null}
+                                {change.part ? (
+                                  <span className="text-xs font-medium text-muted-foreground">
+                                    {change.part}
+                                  </span>
+                                ) : null}
+                                <span className="ml-auto flex items-center gap-1 font-mono text-[11px]">
+                                  {added.length ? (
+                                    <span className="text-success">+{added.length}</span>
+                                  ) : null}
+                                  {removed.length ? (
+                                    <span className="text-destructive">−{removed.length}</span>
+                                  ) : null}
                                 </span>
-                              ) : null}
-                            </div>
-                            <p className="mt-1.5 text-muted-foreground">{change.what_changed}</p>
-                            {change.why ? (
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                <span className="font-medium text-foreground">Why:</span>{" "}
-                                {change.why}
-                              </p>
-                            ) : null}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
+                              </div>
 
-                    {section.fix_notes.reported ? (
-                      <p className="text-xs text-muted-foreground">
-                        You reported: “{section.fix_notes.reported}”
-                      </p>
+                              <div className="p-3">
+                                <p className="text-muted-foreground">{change.what_changed}</p>
+                                {change.why ? (
+                                  <p className="mt-1 text-xs text-muted-foreground">
+                                    <span className="font-medium text-foreground">Why:</span>{" "}
+                                    {change.why}
+                                  </p>
+                                ) : null}
+
+                                {removed.length || added.length ? (
+                                  <div className="mt-2.5 overflow-hidden rounded-md border border-border font-mono text-[12px] leading-relaxed">
+                                    {removed.map((line, li) => (
+                                      <div
+                                        key={`r-${li}`}
+                                        className="flex gap-2 bg-destructive/10 px-2 py-0.5 text-destructive"
+                                      >
+                                        <span className="select-none opacity-70">−</span>
+                                        <span className="whitespace-pre-wrap break-all">{line}</span>
+                                      </div>
+                                    ))}
+                                    {added.map((line, li) => (
+                                      <div
+                                        key={`a-${li}`}
+                                        className="flex gap-2 bg-success/10 px-2 py-0.5 text-success"
+                                      >
+                                        <span className="select-none opacity-70">+</span>
+                                        <span className="whitespace-pre-wrap break-all">{line}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : null}
+
+                                {removed.length ? (
+                                  <p className="mt-2 text-xs text-muted-foreground">
+                                    <span className="font-medium text-destructive">Removed:</span>{" "}
+                                    the {removed.length === 1 ? "line" : `${removed.length} lines`}{" "}
+                                    marked − above {added.length ? "were replaced by" : "were deleted"}
+                                    {added.length ? " the lines marked +." : "."}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     ) : null}
                   </div>
                 </div>

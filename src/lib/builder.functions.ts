@@ -587,6 +587,9 @@ export const generateSection = createServerFn({ method: "POST" })
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: isStructure ? reviewed.structure : null,
+        walkthrough: reviewed.walkthrough
+          ? JSON.parse(JSON.stringify(reviewed.walkthrough))
+          : null,
         fix_notes: null,
         status: "generated",
       })

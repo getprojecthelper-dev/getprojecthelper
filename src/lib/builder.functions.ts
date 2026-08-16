@@ -60,6 +60,14 @@ export interface StructureFile {
   content: string;
 }
 
+/** Plain-language recap shown under a finished step. */
+export interface Walkthrough {
+  where_am_i: string;
+  completed: string[];
+  whats_next: string[];
+  analogy: string;
+}
+
 export interface SectionContent {
   language: string;
   blocks: CodeBlock[];
@@ -67,6 +75,7 @@ export interface SectionContent {
   business_connection: string;
   structure: string | null;
   files: StructureFile[];
+  walkthrough: Walkthrough;
 }
 
 const DATA_DOMAINS = ["data_science", "analytics", "ml_ai", "research"];
@@ -381,6 +390,12 @@ const sectionFields = {
     type: "array",
     items: obj({ path: str, content: str }),
   },
+  walkthrough: obj({
+    where_am_i: str,
+    completed: strArray,
+    whats_next: strArray,
+    analogy: str,
+  }),
 };
 
 const sectionSchema = obj(sectionFields);
@@ -523,6 +538,7 @@ export const generateSection = createServerFn({ method: "POST" })
           insights: overview.insights ?? [],
           business_connection: overview.business_connection,
           structure: null,
+          walkthrough: null,
           status: "generated",
         })
         .eq("id", section.id);
@@ -540,8 +556,9 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. EVERY block MUST set \`file\` to the exact relative path the code belongs in (e.g. "src/app.py", "requirements.txt", or "terminal" for commands to run) and \`action\` to exactly one of "create", "modify" or "run". Keep file paths consistent with earlier sections — reuse the same path when extending a file. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
-        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. EVERY block MUST set \`file\` to the everyday office file it belongs in (e.g. "Project Charter.docx", "Schedule.xlsx — sheet: Gantt", "Kickoff.pptx") and \`action\` to exactly one of "create" or "modify". Never mention terminals, repositories or code files. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. Return 2-5 blocks.`,
+        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. ALWAYS choose the SIMPLEST logic that achieves the result: plain loops and clear variable names over clever one-liners, comprehensions-in-comprehensions, regex tricks, heavy abstractions or unnecessary classes/design patterns. Short, obvious code beats short, clever code. WRITE INLINE COMMENTS INSIDE THE CODE: a one-line comment above every meaningful line or small group of lines explaining WHY it exists and what it does in plain words (not restating syntax). Use descriptive names so the code reads like English. EVERY block MUST set \`file\` to the exact relative path the code belongs in (e.g. "src/app.py", "requirements.txt", or "terminal" for commands to run) and \`action\` to exactly one of "create", "modify" or "run". Keep file paths consistent with earlier sections — reuse the same path when extending a file. \`explanation\`: 2-5 short bullet points, one idea each, plain English, no jargon. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. \`walkthrough\` (REQUIRED): where_am_i = one short sentence on where the student is in the overall project; completed = 2-4 short bullets on what this step just accomplished; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences) that makes this step's logic click. When the section is not a structure section, return an empty \`files\` array. Return 2-6 blocks.`
+        : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language. EVERY block MUST set \`file\` to the everyday office file it belongs in (e.g. "Project Charter.docx", "Schedule.xlsx — sheet: Gantt", "Kickoff.pptx") and \`action\` to exactly one of "create" or "modify". Never mention terminals, repositories or code files. \`explanation\`: 2-5 short bullet points in plain English. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. \`walkthrough\` (REQUIRED): where_am_i = one short sentence on where the student is in the overall project; completed = 2-4 short bullets on what this deliverable just achieved; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences). Return 2-5 blocks.`,
+
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
@@ -553,8 +570,8 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? "You are a strict code reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Return the corrected, final version in the same shape. Keep everything that was already correct. Also simplify anything unnecessarily complex so a beginner can follow it, while keeping it efficient."
-        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project.",
+        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure EVERY meaningful line or small group of lines has an inline comment explaining the logic in plain words — add missing comments yourself. Ensure `explanation` is short plain-English bullets and `walkthrough` is filled (where_am_i, completed, whats_next, analogy) with a simple everyday analogy. Return the corrected, final version in the same shape, keeping everything already correct."
+        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project. Ensure `explanation` is short plain-English bullets and `walkthrough` is filled (where_am_i, completed, whats_next, analogy).",
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
       schema: sectionSchema,
@@ -571,6 +588,9 @@ export const generateSection = createServerFn({ method: "POST" })
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: isStructure ? reviewed.structure : null,
+        walkthrough: reviewed.walkthrough
+          ? JSON.parse(JSON.stringify(reviewed.walkthrough))
+          : null,
         fix_notes: null,
         status: "generated",
       })
@@ -622,6 +642,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
         business_connection: fixed.business_connection,
         structure:
           section.kind === "structure" && playbook.buildsCode ? fixed.structure : null,
+        walkthrough: fixed.walkthrough ? JSON.parse(JSON.stringify(fixed.walkthrough)) : null,
         fix_notes: JSON.parse(
           JSON.stringify({
             diagnosis: fixed.diagnosis ?? "",

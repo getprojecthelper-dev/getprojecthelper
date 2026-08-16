@@ -175,12 +175,16 @@ function BuildPage() {
       toast.error(error instanceof Error ? error.message : "Generation failed."),
   });
 
+  // Bumped per section when a fix succeeds, so the card can clear its input.
+  const [fixTokens, setFixTokens] = useState<Record<string, number>>({});
+
   const fixMutation = useMutation({
     mutationFn: (vars: { sectionId: string; errorText: string }) => fix({ data: vars }),
     onSuccess: (_r, vars) => {
       void invalidate();
       setOpenId(vars.sectionId);
-      toast.success("Updated — see “What was fixed” in this step.");
+      setFixTokens((prev) => ({ ...prev, [vars.sectionId]: (prev[vars.sectionId] ?? 0) + 1 }));
+      toast.success("Fixed — see the fix report in this step.");
     },
 
     onError: (error: unknown) =>

@@ -631,7 +631,43 @@ function SectionCard({
             </div>
           ) : null}
 
+          {section.fix_notes &&
+          (section.fix_notes.diagnosis || (section.fix_notes.changes?.length ?? 0) > 0) ? (
+            <div className="rounded-lg border border-info/40 bg-info/10 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Wrench className="h-4 w-4 text-info" /> What was fixed
+              </p>
+              {section.fix_notes.diagnosis ? (
+                <p className="mt-1 text-sm text-muted-foreground">{section.fix_notes.diagnosis}</p>
+              ) : null}
+              {section.fix_notes.changes?.length ? (
+                <ul className="mt-3 space-y-2">
+                  {section.fix_notes.changes.map((change, i) => (
+                    <li
+                      key={`${i}-${change.part}`}
+                      className="rounded-lg border border-border bg-card p-3 text-sm"
+                    >
+                      {change.part ? (
+                        <p className="font-medium text-foreground">{change.part}</p>
+                      ) : null}
+                      <p className="text-muted-foreground">{change.what_changed}</p>
+                      {change.why ? (
+                        <p className="mt-1 text-xs text-muted-foreground">Why: {change.why}</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {section.fix_notes.reported ? (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  You reported: “{section.fix_notes.reported}”
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {generated && !isOverview ? (
+
             <div className="rounded-lg border border-border bg-card p-3">
               <button
                 type="button"

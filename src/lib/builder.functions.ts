@@ -404,9 +404,17 @@ const sectionSchema = obj(sectionFields);
 const fixSchema = obj({
   ...sectionFields,
   diagnosis: str,
+  error_explained: str,
   changes: {
     type: "array",
-    items: obj({ file: str, part: str, what_changed: str, why: str }),
+    items: obj({
+      file: str,
+      part: str,
+      what_changed: str,
+      why: str,
+      removed: strArray,
+      added: strArray,
+    }),
   },
 });
 
@@ -570,7 +578,7 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Review the draft for logic errors, undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure EVERY meaningful line or small group of lines has an inline comment explaining the logic in plain words — add missing comments yourself. Ensure EVERY block's `explanation` is 2-5 short plain-English bullets summarising what that part did, and `walkthrough` is filled (where_am_i, completed, whats_next, analogy) with a simple everyday analogy. Return the corrected, final version in the same shape, keeping everything already correct."
+        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Before returning anything, mentally RUN the draft line by line and verify the logic actually produces the intended result: check control flow and conditions, variable definition order, function signatures and argument order, imports, indentation/syntax validity, file paths, edge cases (empty input, missing file, division by zero) and that every variable used is defined earlier. Fix anything that would not run or would give a wrong result. Also review for undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure EVERY meaningful line or small group of lines has an inline comment explaining the logic in plain words — add missing comments yourself. Ensure EVERY block's `explanation` is 2-5 short plain-English bullets summarising what that part did, and `walkthrough` is filled (where_am_i, completed, whats_next, analogy) with a simple everyday analogy. Return the corrected, final version in the same shape, keeping everything already correct."
         : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project. Ensure EVERY block's `explanation` is 2-5 short plain-English bullets summarising what that part did, and `walkthrough` is filled (where_am_i, completed, whats_next, analogy).",
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
@@ -617,14 +625,22 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const fixed = await generateJson<
       SectionContent & {
         diagnosis: string;
-        changes: { file: string; part: string; what_changed: string; why: string }[];
+        error_explained: string;
+        changes: {
+          file: string;
+          part: string;
+          what_changed: string;
+          why: string;
+          removed: string[];
+          added: string[];
+        }[];
       }
     >({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). Keep `files` unchanged unless the fix requires new files. ALSO fill `diagnosis` with one or two plain sentences on what caused the error, and `changes` with one entry per edit you made: `file` = the exact file name/path the student must edit (e.g. `app/main.py`) — always fill this, copy it from the block's `file` field when unsure; `part` = the block title, function or line you touched; `what_changed` = the concrete edit (old → new) in plain language; `why` = why it fixes the problem. Never leave `changes` empty when you edited anything."
-        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. Write no programming code. ALSO fill `diagnosis` with one or two plain sentences on what was wrong, and `changes` with one entry per edit: `file` = the document/sheet the student must update (e.g. `Risk Register.xlsx`) — always fill this; `part` = the deliverable section or table you touched; `what_changed` = the concrete edit in plain language; `why` = why it is better. Never leave `changes` empty when you edited anything.",
+        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). Keep `files` unchanged unless the fix requires new files. Before returning, re-check the whole fixed code for logic errors, undefined names, wrong argument order and broken continuity with earlier sections. ALSO fill: `error_explained` = 1-2 plain sentences explaining the error message itself in student language (what the computer was complaining about); `diagnosis` = 1-2 plain sentences on the root cause; and `changes` with one entry per edit you made: `file` = the exact file name/path the student must edit (e.g. `app/main.py`) — always fill this, copy it from the block's `file` field when unsure; `part` = the block title, function or line you touched; `what_changed` = the concrete edit in plain language; `why` = why it fixes the problem; `removed` = the EXACT old code lines you deleted or replaced (one array item per line, no leading - sign, empty array when you only added code); `added` = the EXACT new code lines you added or replaced them with (one array item per line, no leading + sign, empty array when you only deleted code). Each added line should carry a short inline comment where useful. Only fill `removed`/`added` when the code actually changed. Never leave `changes` empty when you edited anything."
+        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. Write no programming code. ALSO fill `error_explained` with 1-2 plain sentences restating the problem the student reported, `diagnosis` with 1-2 plain sentences on what was wrong, and `changes` with one entry per edit: `file` = the document/sheet the student must update (e.g. `Risk Register.xlsx`) — always fill this; `part` = the deliverable section or table you touched; `what_changed` = the concrete edit in plain language; `why` = why it is better; `removed` = the exact old lines/rows you deleted (empty array if none); `added` = the exact new lines/rows you added (empty array if none). Never leave `changes` empty when you edited anything.",
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CONTENT:\n${section.code ?? ""}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: fixSchema,
     });
@@ -646,6 +662,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
         fix_notes: JSON.parse(
           JSON.stringify({
             diagnosis: fixed.diagnosis ?? "",
+            error_explained: fixed.error_explained ?? "",
             changes: fixed.changes ?? [],
             reported: data.errorText,
             at: new Date().toISOString(),

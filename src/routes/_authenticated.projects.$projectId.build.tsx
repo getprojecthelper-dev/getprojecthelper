@@ -636,37 +636,94 @@ function SectionCard({
 
           {section.fix_notes &&
           (section.fix_notes.diagnosis || (section.fix_notes.changes?.length ?? 0) > 0) ? (
-            <div className="rounded-lg border border-info/40 bg-info/10 p-4">
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <Wrench className="h-4 w-4 text-info" /> What was fixed
-              </p>
-              {section.fix_notes.diagnosis ? (
-                <p className="mt-1 text-sm text-muted-foreground">{section.fix_notes.diagnosis}</p>
-              ) : null}
-              {section.fix_notes.changes?.length ? (
-                <ul className="mt-3 space-y-2">
-                  {section.fix_notes.changes.map((change, i) => (
-                    <li
-                      key={`${i}-${change.part}`}
-                      className="rounded-lg border border-border bg-card p-3 text-sm"
-                    >
-                      {change.part ? (
-                        <p className="font-medium text-foreground">{change.part}</p>
-                      ) : null}
-                      <p className="text-muted-foreground">{change.what_changed}</p>
-                      {change.why ? (
-                        <p className="mt-1 text-xs text-muted-foreground">Why: {change.why}</p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              {section.fix_notes.reported ? (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  You reported: “{section.fix_notes.reported}”
-                </p>
-              ) : null}
-            </div>
+            (() => {
+              const changes = section.fix_notes?.changes ?? [];
+              const touchedFiles = Array.from(
+                new Set(
+                  changes
+                    .map((c) => (c.file ?? "").trim())
+                    .filter((f) => f.length > 0),
+                ),
+              );
+              return (
+                <div className="overflow-hidden rounded-xl border border-info/40 bg-info/5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-info/30 bg-info/10 px-4 py-2.5">
+                    <p className="flex items-center gap-2 text-sm font-semibold">
+                      <Wrench className="h-4 w-4 text-info" /> What was fixed
+                    </p>
+                    <span className="rounded-full bg-card px-2.5 py-0.5 text-xs text-muted-foreground">
+                      {changes.length} {changes.length === 1 ? "change" : "changes"}
+                      {touchedFiles.length
+                        ? ` · ${touchedFiles.length} ${touchedFiles.length === 1 ? "file" : "files"}`
+                        : ""}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 p-4">
+                    {touchedFiles.length ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Files updated:
+                        </span>
+                        {touchedFiles.map((f) => (
+                          <span
+                            key={f}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-0.5 font-mono text-xs text-foreground"
+                          >
+                            <FileCode2 className="h-3.5 w-3.5 text-info" />
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {section.fix_notes.diagnosis ? (
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {section.fix_notes.diagnosis}
+                      </p>
+                    ) : null}
+
+                    {changes.length ? (
+                      <ul className="space-y-2">
+                        {changes.map((change, i) => (
+                          <li
+                            key={`${i}-${change.part}`}
+                            className="rounded-lg border border-border bg-card p-3 text-sm"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              {change.file ? (
+                                <span className="inline-flex items-center gap-1.5 rounded-md bg-info/10 px-2 py-0.5 font-mono text-xs text-info">
+                                  <FileCode2 className="h-3.5 w-3.5" />
+                                  {change.file}
+                                </span>
+                              ) : null}
+                              {change.part ? (
+                                <span className="text-sm font-medium text-foreground">
+                                  {change.part}
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="mt-1.5 text-muted-foreground">{change.what_changed}</p>
+                            {change.why ? (
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                <span className="font-medium text-foreground">Why:</span>{" "}
+                                {change.why}
+                              </p>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+
+                    {section.fix_notes.reported ? (
+                      <p className="text-xs text-muted-foreground">
+                        You reported: “{section.fix_notes.reported}”
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })()
           ) : null}
 
           {generated && !isOverview ? (

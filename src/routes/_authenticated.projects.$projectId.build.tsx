@@ -92,6 +92,7 @@ interface BuildSection {
   structure: string | null;
   status: string;
   fix_notes: FixNotes | null;
+  walkthrough: Walkthrough | null;
 }
 
 

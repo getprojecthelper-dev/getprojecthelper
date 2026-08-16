@@ -52,6 +52,19 @@ interface StructureFile {
   content: string;
 }
 
+interface FixChange {
+  part: string;
+  what_changed: string;
+  why: string;
+}
+
+interface FixNotes {
+  diagnosis?: string;
+  changes?: FixChange[];
+  reported?: string;
+  at?: string;
+}
+
 interface BuildSection {
   id: string;
   position: number;
@@ -68,7 +81,9 @@ interface BuildSection {
   business_connection: string | null;
   structure: string | null;
   status: string;
+  fix_notes: FixNotes | null;
 }
+
 
 const sectionsKey = (projectId: string) => ["build-sections", projectId] as const;
 

@@ -390,6 +390,12 @@ const sectionFields = {
     type: "array",
     items: obj({ path: str, content: str }),
   },
+  walkthrough: obj({
+    where_am_i: str,
+    completed: strArray,
+    whats_next: strArray,
+    analogy: str,
+  }),
 };
 
 const sectionSchema = obj(sectionFields);

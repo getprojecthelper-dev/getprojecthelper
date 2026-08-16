@@ -404,9 +404,17 @@ const sectionSchema = obj(sectionFields);
 const fixSchema = obj({
   ...sectionFields,
   diagnosis: str,
+  error_explained: str,
   changes: {
     type: "array",
-    items: obj({ file: str, part: str, what_changed: str, why: str }),
+    items: obj({
+      file: str,
+      part: str,
+      what_changed: str,
+      why: str,
+      removed: strArray,
+      added: strArray,
+    }),
   },
 });
 

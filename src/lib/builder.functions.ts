@@ -662,6 +662,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
         fix_notes: JSON.parse(
           JSON.stringify({
             diagnosis: fixed.diagnosis ?? "",
+            error_explained: fixed.error_explained ?? "",
             changes: fixed.changes ?? [],
             reported: data.errorText,
             at: new Date().toISOString(),

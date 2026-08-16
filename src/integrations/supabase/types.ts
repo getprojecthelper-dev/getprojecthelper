@@ -156,6 +156,7 @@ export type Database = {
           created_at: string
           explanation: Json
           files: Json
+          fix_notes: Json | null
           id: string
           insights: Json
           kind: string
@@ -177,6 +178,7 @@ export type Database = {
           created_at?: string
           explanation?: Json
           files?: Json
+          fix_notes?: Json | null
           id?: string
           insights?: Json
           kind?: string
@@ -198,6 +200,7 @@ export type Database = {
           created_at?: string
           explanation?: Json
           files?: Json
+          fix_notes?: Json | null
           id?: string
           insights?: Json
           kind?: string

@@ -538,6 +538,7 @@ export const generateSection = createServerFn({ method: "POST" })
           insights: overview.insights ?? [],
           business_connection: overview.business_connection,
           structure: null,
+          walkthrough: null,
           status: "generated",
         })
         .eq("id", section.id);

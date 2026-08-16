@@ -632,6 +632,68 @@ function SectionCard({
           })}
 
 
+          {section.walkthrough &&
+          (section.walkthrough.where_am_i ||
+            section.walkthrough.completed?.length ||
+            section.walkthrough.whats_next?.length ||
+            section.walkthrough.analogy) ? (
+            <div className="space-y-3 rounded-xl border border-accent/30 bg-accent/5 p-4">
+              <p className="text-sm font-semibold">In simple words</p>
+
+              {section.walkthrough.where_am_i ? (
+                <div className="flex items-start gap-2 text-sm">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                  <p>
+                    <span className="font-medium">Where am I? </span>
+                    <span className="text-muted-foreground">
+                      {section.walkthrough.where_am_i}
+                    </span>
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {section.walkthrough.completed?.length ? (
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <p className="flex items-center gap-1.5 text-sm font-medium">
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                      What I completed
+                    </p>
+                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                      {section.walkthrough.completed.map((line, i) => (
+                        <li key={`done-${i}-${line.slice(0, 10)}`}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {section.walkthrough.whats_next?.length ? (
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <p className="flex items-center gap-1.5 text-sm font-medium">
+                      <Sparkles className="h-4 w-4 text-accent" />
+                      What&apos;s next
+                    </p>
+                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                      {section.walkthrough.whats_next.map((line, i) => (
+                        <li key={`next-${i}-${line.slice(0, 10)}`}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+
+              {section.walkthrough.analogy ? (
+                <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+                  <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                  <p>
+                    <span className="font-medium">Think of it like: </span>
+                    <span className="text-muted-foreground">{section.walkthrough.analogy}</span>
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {section.insights.length ? (
             <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
               <p className="text-sm font-medium">Watch out for</p>

@@ -22,7 +22,7 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
@@ -268,6 +268,7 @@ function BuildPage() {
             fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
             onGenerate={() => generateMutation.mutate(section.id)}
             onFix={(errorText) => fixMutation.mutate({ sectionId: section.id, errorText })}
+            fixToken={fixTokens[section.id] ?? 0}
             onConfirm={() => confirmMutation.mutate(section.id)}
           />
         );
@@ -452,6 +453,7 @@ function SectionCard({
   onToggle,
   generating,
   fixing,
+  fixToken,
   onGenerate,
   onFix,
   onConfirm,
@@ -464,12 +466,21 @@ function SectionCard({
   onToggle: () => void;
   generating: boolean;
   fixing: boolean;
+  fixToken: number;
   onGenerate: () => void;
   onFix: (errorText: string) => void;
   onConfirm: () => void;
 }) {
   const [showFix, setShowFix] = useState(false);
   const [errorText, setErrorText] = useState("");
+
+  // A successful fix wipes the box so the next error starts from a clean slate.
+  useEffect(() => {
+    if (fixToken > 0) {
+      setErrorText("");
+      setShowFix(false);
+    }
+  }, [fixToken]);
   const [zipping, setZipping] = useState(false);
   const confirmed = section.status === "confirmed";
   const isOverview =

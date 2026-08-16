@@ -593,14 +593,19 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
 
-    const fixed = await generateJson<SectionContent>({
+    const fixed = await generateJson<
+      SectionContent & {
+        diagnosis: string;
+        changes: { part: string; what_changed: string; why: string }[];
+      }
+    >({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). The first block's explanation must start with what caused the error and what you changed. Keep `files` unchanged unless the fix requires new files."
-        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. The first block's explanation must start with what was wrong and what you changed. Write no programming code.",
+        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). Keep `files` unchanged unless the fix requires new files. ALSO fill `diagnosis` with one or two plain sentences on what caused the error, and `changes` with one entry per edit you made: `part` = the block title, file name or line/function you touched, `what_changed` = the concrete edit (old → new) in plain language, `why` = why it fixes the problem. Never leave `changes` empty when you edited anything."
+        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. Write no programming code. ALSO fill `diagnosis` with one or two plain sentences on what was wrong, and `changes` with one entry per edit: `part` = the deliverable section or table you touched, `what_changed` = the concrete edit in plain language, `why` = why it is better. Never leave `changes` empty when you edited anything.",
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CONTENT:\n${section.code ?? ""}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
-      schema: sectionSchema,
+      schema: fixSchema,
     });
 
     const { error } = await supabase
@@ -616,10 +621,19 @@ export const fixSectionError = createServerFn({ method: "POST" })
         business_connection: fixed.business_connection,
         structure:
           section.kind === "structure" && playbook.buildsCode ? fixed.structure : null,
+        fix_notes: JSON.parse(
+          JSON.stringify({
+            diagnosis: fixed.diagnosis ?? "",
+            changes: fixed.changes ?? [],
+            reported: data.errorText,
+            at: new Date().toISOString(),
+          }),
+        ),
         status: "generated",
       })
       .eq("id", section.id);
     if (error) throw new Error("The fixed section could not be saved.");
+
 
     return fixed;
   });

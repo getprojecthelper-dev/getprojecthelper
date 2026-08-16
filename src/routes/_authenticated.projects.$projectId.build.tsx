@@ -64,13 +64,30 @@ interface FixChange {
   added?: string[];
 }
 
-interface FixNotes {
+interface FixedBlock {
+  part_number?: number;
+  title?: string;
+  code?: string;
+  explanation?: string[];
+  file?: string;
+  action?: string;
+}
+
+interface FixRound {
+  round?: number;
   diagnosis?: string;
   error_explained?: string;
   changes?: FixChange[];
+  fixed_blocks?: FixedBlock[];
+  language?: string;
   reported?: string;
   at?: string;
 }
+
+interface FixNotes extends FixRound {
+  rounds?: FixRound[];
+}
+
 
 interface Walkthrough {
   where_am_i?: string;

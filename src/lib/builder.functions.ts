@@ -60,6 +60,14 @@ export interface StructureFile {
   content: string;
 }
 
+/** Plain-language recap shown under a finished step. */
+export interface Walkthrough {
+  where_am_i: string;
+  completed: string[];
+  whats_next: string[];
+  analogy: string;
+}
+
 export interface SectionContent {
   language: string;
   blocks: CodeBlock[];
@@ -67,6 +75,7 @@ export interface SectionContent {
   business_connection: string;
   structure: string | null;
   files: StructureFile[];
+  walkthrough: Walkthrough;
 }
 
 const DATA_DOMAINS = ["data_science", "analytics", "ml_ai", "research"];

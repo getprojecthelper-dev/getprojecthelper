@@ -120,6 +120,12 @@ function useSections(projectId: string) {
           row.fix_notes && typeof row.fix_notes === "object" && !Array.isArray(row.fix_notes)
             ? (row.fix_notes as FixNotes)
             : null,
+        walkthrough: (() => {
+          const value = (row as Record<string, unknown>)["walkthrough"];
+          return value && typeof value === "object" && !Array.isArray(value)
+            ? (value as Walkthrough)
+            : null;
+        })(),
 
       }));
     },

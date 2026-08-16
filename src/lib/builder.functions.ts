@@ -642,6 +642,7 @@ export const fixSectionError = createServerFn({ method: "POST" })
         business_connection: fixed.business_connection,
         structure:
           section.kind === "structure" && playbook.buildsCode ? fixed.structure : null,
+        walkthrough: fixed.walkthrough ? JSON.parse(JSON.stringify(fixed.walkthrough)) : null,
         fix_notes: JSON.parse(
           JSON.stringify({
             diagnosis: fixed.diagnosis ?? "",

@@ -60,10 +60,13 @@ interface FixChange {
   part: string;
   what_changed: string;
   why: string;
+  removed?: string[];
+  added?: string[];
 }
 
 interface FixNotes {
   diagnosis?: string;
+  error_explained?: string;
   changes?: FixChange[];
   reported?: string;
   at?: string;

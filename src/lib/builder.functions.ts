@@ -400,11 +400,25 @@ const sectionFields = {
 
 const sectionSchema = obj(sectionFields);
 
-/** Same as a section, plus a plain-language record of what was wrong and what changed. */
+/**
+ * A fix never rewrites the original section. It returns only the parts that had
+ * a problem, re-issued as new "fixed" parts that keep their original part number.
+ */
 const fixSchema = obj({
-  ...sectionFields,
+  language: str,
   diagnosis: str,
   error_explained: str,
+  fixed_blocks: {
+    type: "array",
+    items: obj({
+      part_number: { type: "number" },
+      title: str,
+      code: str,
+      explanation: strArray,
+      file: str,
+      action: str,
+    }),
+  },
   changes: {
     type: "array",
     items: obj({
@@ -417,6 +431,7 @@ const fixSchema = obj({
     }),
   },
 });
+
 
 
 interface OverviewContent {

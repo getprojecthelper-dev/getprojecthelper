@@ -608,11 +608,17 @@ function SectionCard({
 
                 {block.explanation?.length ? (
                   hasCode ? (
-                    <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">
-                      {block.explanation.map((line, li) => (
-                        <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                      ))}
-                    </ul>
+                    <div className="rounded-lg border border-border bg-card p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        What we did in {partLabel} {i + 1}
+                      </p>
+                      <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                        {block.explanation.map((line, li) => (
+                          <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+
                   ) : (
                     <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
                       {block.explanation.length === 1 ? (
@@ -694,23 +700,8 @@ function SectionCard({
             </div>
           ) : null}
 
-          {section.insights.length ? (
-            <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
-              <p className="text-sm font-medium">Watch out for</p>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
-                {section.insights.map((line, i) => (
-                  <li key={`${i}-${line.slice(0, 10)}`}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
 
-          {section.business_connection ? (
-            <div className="rounded-lg bg-accent/10 p-3 text-sm">
-              <p className="font-medium">Why this matters</p>
-              <p className="text-muted-foreground">{section.business_connection}</p>
-            </div>
-          ) : null}
+
 
           {section.fix_notes &&
           (section.fix_notes.diagnosis || (section.fix_notes.changes?.length ?? 0) > 0) ? (

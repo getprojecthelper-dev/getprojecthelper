@@ -391,7 +391,7 @@ const fixSchema = obj({
   diagnosis: str,
   changes: {
     type: "array",
-    items: obj({ part: str, what_changed: str, why: str }),
+    items: obj({ file: str, part: str, what_changed: str, why: str }),
   },
 });
 

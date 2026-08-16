@@ -5,19 +5,8 @@
 
 export const DOMAINS = [
   { value: "software", label: "Software Development" },
-  { value: "data_science", label: "Data Science" },
-  { value: "ml_ai", label: "Machine Learning / AI" },
-  { value: "analytics", label: "Data Analytics" },
-  { value: "cybersecurity", label: "Cybersecurity" },
-  { value: "cloud", label: "Cloud Computing" },
-  { value: "research", label: "Research" },
-  { value: "business", label: "Business / Management" },
-  { value: "mobile", label: "Mobile Development" },
-  { value: "web", label: "Web Development" },
-  { value: "iot", label: "IoT" },
-  { value: "engineering", label: "Engineering" },
   { value: "project_management", label: "Project Management" },
-  { value: "custom", label: "Custom Project" },
+  { value: "data_science", label: "Data Science" },
 ] as const;
 
 export const PURPOSES = [

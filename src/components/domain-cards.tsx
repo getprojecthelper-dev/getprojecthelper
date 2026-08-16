@@ -1,31 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { BrainCircuit, ClipboardList, Database, GraduationCap, Globe, Smartphone } from "lucide-react";
+import { ClipboardList, Code2, Database } from "lucide-react";
 
 
 const DOMAINS = [
   {
-    icon: Globe,
-    name: "Web Development",
-    body: "Build modern websites and full-stack web apps.",
+    icon: Code2,
+    name: "Software Development",
+    body: "Build full-stack apps from requirements to deployment.",
     meta: "Plan · Code · Deploy",
-  },
-  {
-    icon: Database,
-    name: "Data Science",
-    body: "Analyse datasets and train ML models end to end.",
-    meta: "Dataset · Model · Report",
-  },
-  {
-    icon: BrainCircuit,
-    name: "Artificial Intelligence",
-    body: "Design AI systems with honest evaluation.",
-    meta: "Experiments · Metrics",
-  },
-  {
-    icon: Smartphone,
-    name: "Mobile Development",
-    body: "Ship Android and iOS project apps.",
-    meta: "Screens · Builds",
   },
   {
     icon: ClipboardList,
@@ -34,10 +16,10 @@ const DOMAINS = [
     meta: "Plan · Track · Close",
   },
   {
-    icon: GraduationCap,
-    name: "Academic Projects",
-    body: "Research, documentation and viva preparation.",
-    meta: "Report · Defence",
+    icon: Database,
+    name: "Data Science",
+    body: "Analyse datasets and train ML models end to end.",
+    meta: "Dataset · Model · Report",
   },
 ];
 

@@ -608,11 +608,17 @@ function SectionCard({
 
                 {block.explanation?.length ? (
                   hasCode ? (
-                    <ul className="list-disc space-y-1 rounded-lg border border-border bg-card p-3 pl-7 text-sm text-muted-foreground">
-                      {block.explanation.map((line, li) => (
-                        <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                      ))}
-                    </ul>
+                    <div className="rounded-lg border border-border bg-card p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        What we did in {partLabel} {i + 1}
+                      </p>
+                      <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                        {block.explanation.map((line, li) => (
+                          <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+
                   ) : (
                     <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
                       {block.explanation.length === 1 ? (

@@ -105,6 +105,11 @@ function useSections(projectId: string) {
         files: asArray<StructureFile>((row as Record<string, unknown>)["files"]),
         explanation: asArray<string>(row.explanation),
         insights: asArray<string>(row.insights),
+        fix_notes:
+          row.fix_notes && typeof row.fix_notes === "object" && !Array.isArray(row.fix_notes)
+            ? (row.fix_notes as FixNotes)
+            : null,
+
       }));
     },
   });

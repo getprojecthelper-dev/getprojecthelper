@@ -637,57 +637,73 @@ export const fixSectionError = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
 
-    const fixed = await generateJson<
-      SectionContent & {
-        diagnosis: string;
-        error_explained: string;
-        changes: {
-          file: string;
-          part: string;
-          what_changed: string;
-          why: string;
-          removed: string[];
-          added: string[];
-        }[];
-      }
-    >({
+    const previousRounds: unknown[] = Array.isArray(
+      (section as Record<string, any>)["fix_notes"]?.rounds,
+    )
+      ? (section as Record<string, any>)["fix_notes"].rounds
+      : (section as Record<string, any>)["fix_notes"]?.diagnosis
+        ? [(section as Record<string, any>)["fix_notes"]]
+        : [];
+
+    const currentBlocks = Array.isArray((section as Record<string, any>)["blocks"])
+      ? ((section as Record<string, any>)["blocks"] as CodeBlock[])
+      : [];
+
+    const partsList = currentBlocks
+      .map((b, i) => `Part ${i + 1}: ${b.title}${b.file ? ` (${b.file})` : ""}\n${b.code ?? ""}`)
+      .join("\n\n");
+
+    const fixed = await generateJson<{
+      language: string;
+      diagnosis: string;
+      error_explained: string;
+      fixed_blocks: {
+        part_number: number;
+        title: string;
+        code: string;
+        explanation: string[];
+        file: string;
+        action: string;
+      }[];
+      changes: {
+        file: string;
+        part: string;
+        what_changed: string;
+        why: string;
+        removed: string[];
+        added: string[];
+      }[];
+    }>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_fix" },
-      name: "section_content",
+      name: "section_fix",
       instructions: playbook.buildsCode
-        ? "The student hit an error running this section's code. Diagnose the cause, fix the code, and return the updated full section in the same block-by-block shape (small parts, each with a simple title and plain-language bullets). Keep `files` unchanged unless the fix requires new files. Before returning, re-check the whole fixed code for logic errors, undefined names, wrong argument order and broken continuity with earlier sections. IMPORTANT — MARK THE FIX IN THE CODE: in every block's `code`, put a short inline comment on (or directly above) each line you changed or added, written in the language's comment syntax and starting with `FIX:` and written in the student's own first-person voice — e.g. `# FIX: i convert this to int so the comparison works` or `// FIX: check the list is not empty first`. Where you deleted a line, keep a one-line comment in its place such as `# FIX: removed <old line> because it crashed`. Keep the existing teaching comments too; do not mark unchanged lines with FIX. ALSO fill: `error_explained` = 1-2 plain sentences explaining the error message itself in student language (what the computer was complaining about); `diagnosis` = 1-2 plain sentences on the root cause; and `changes` with one entry per edit you made: `file` = the exact file name/path the student must edit (e.g. `app/main.py`) — always fill this, copy it from the block's `file` field when unsure; `part` = the block title, function or line you touched; `what_changed` = the concrete edit in plain language; `why` = why it fixes the problem; `removed` = the EXACT old code lines you deleted or replaced (one array item per line, no leading - sign, empty array when you only added code); `added` = the EXACT new code lines you added or replaced them with, including their `FIX:` comments (one array item per line, no leading + sign, empty array when you only deleted code). Only fill `removed`/`added` when the code actually changed. Never leave `changes` empty when you edited anything."
-        : "The student reported a problem with this deliverable (wrong, unrealistic, missing or unclear content). Diagnose it, correct the deliverable and return the updated full section in the same block-by-block shape, keeping tables in `code` as markdown and plain-language bullets in `explanation`. Write no programming code. Mark what you changed inside the content itself: add a short `(Updated: ...)` note next to each row, bullet or paragraph you edited, and a `(Removed: ...)` note where you deleted something. ALSO fill `error_explained` with 1-2 plain sentences restating the problem the student reported, `diagnosis` with 1-2 plain sentences on what was wrong, and `changes` with one entry per edit: `file` = the document/sheet the student must update (e.g. `Risk Register.xlsx`) — always fill this; `part` = the deliverable section or table you touched; `what_changed` = the concrete edit in plain language; `why` = why it is better; `removed` = the exact old lines/rows you deleted (empty array if none); `added` = the exact new lines/rows you added (empty array if none). Never leave `changes` empty when you edited anything.",
-      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nCURRENT CONTENT:\n${section.code ?? ""}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
+        ? "The student hit an error running this section's code. NEVER rewrite or replace the whole section: the original parts stay exactly as they are. Instead, identify ONLY the parts that actually caused the problem and return a corrected copy of each one in `fixed_blocks`, one entry per affected part, with `part_number` = that part's original number (1-based) and `title` = its original title. If more than one part is affected, return one entry per affected part. Do not include parts you did not change. Each fixed part must contain the COMPLETE corrected code for that part (not a diff), with `file` and `action` copied from the original part, plus `explanation` = 2-4 short plain bullets on what changed in that part. Before returning, mentally run the corrected code and check logic, variable order, imports and continuity with the other parts. MARK THE FIX IN THE CODE: put a short inline comment on (or directly above) each changed or added line, in the language's comment syntax, starting with `FIX:` and written in the student's own first-person voice — e.g. `# FIX: i convert this to int so the comparison works`. Where a line was deleted, leave a one-line comment in its place such as `# FIX: removed <old line> because it crashed`. Keep the existing teaching comments; do not mark unchanged lines. ALSO fill: `error_explained` = 1-2 plain sentences explaining the error message in student language; `diagnosis` = 1-2 plain sentences on the root cause; and `changes` with one entry per edit: `file` = the exact file the student must edit (always fill it); `part` = the part title or function you touched; `what_changed`; `why`; `removed` = the EXACT old lines you deleted or replaced (one per array item, no leading - sign, empty when you only added); `added` = the EXACT new lines including their `FIX:` comments (no leading + sign, empty when you only deleted). Never leave `changes` empty when you edited anything."
+        : "The student reported a problem with this deliverable. NEVER rewrite the whole deliverable: the original parts stay as they are. Identify ONLY the parts that were wrong and return a corrected copy of each in `fixed_blocks`, with `part_number` = the original part number (1-based), the original `title`, the COMPLETE corrected content in `code` (markdown tables where relevant), `file` and `action` copied from the original part, and `explanation` = 2-4 short plain bullets on what changed. Write no programming code. Mark edits inside the content with short `(Updated: ...)` and `(Removed: ...)` notes. ALSO fill `error_explained` (1-2 plain sentences restating the reported problem), `diagnosis` (1-2 plain sentences on what was wrong) and `changes` with one entry per edit: `file` = the document/sheet to update (always fill it); `part`; `what_changed`; `why`; `removed` = exact old lines/rows removed (empty if none); `added` = exact new lines/rows (empty if none). Never leave `changes` empty when you edited anything.",
+      input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\n\nEXISTING PARTS (do not rewrite these — only return corrected copies of the broken ones):\n${partsList || section.code || ""}\n\nPREVIOUS FIX ROUNDS ALREADY APPLIED: ${previousRounds.length}\n\nPROBLEM REPORTED BY THE STUDENT:\n${data.errorText}`,
       schema: fixSchema,
     });
+
+    const round = {
+      round: previousRounds.length + 1,
+      reported: data.errorText,
+      at: new Date().toISOString(),
+      language: fixed.language || (playbook.buildsCode ? "python" : "markdown"),
+      diagnosis: fixed.diagnosis ?? "",
+      error_explained: fixed.error_explained ?? "",
+      fixed_blocks: fixed.fixed_blocks ?? [],
+      changes: fixed.changes ?? [],
+    };
 
     const { error } = await supabase
       .from("build_sections")
       .update({
-        code: joinBlocks(fixed.blocks),
-        blocks: JSON.parse(JSON.stringify(fixed.blocks ?? [])),
-        files: JSON.parse(JSON.stringify(fixed.files ?? [])),
-        language: fixed.language || (playbook.buildsCode ? "python" : "markdown"),
-
-        explanation: (fixed.blocks ?? []).flatMap((b) => b.explanation ?? []),
-        insights: fixed.insights,
-        business_connection: fixed.business_connection,
-        structure:
-          section.kind === "structure" && playbook.buildsCode ? fixed.structure : null,
-        walkthrough: fixed.walkthrough ? JSON.parse(JSON.stringify(fixed.walkthrough)) : null,
-        fix_notes: JSON.parse(
-          JSON.stringify({
-            diagnosis: fixed.diagnosis ?? "",
-            error_explained: fixed.error_explained ?? "",
-            changes: fixed.changes ?? [],
-            reported: data.errorText,
-            at: new Date().toISOString(),
-          }),
-        ),
-        status: "generated",
+        // The original code is intentionally left untouched — each fix is
+        // appended as a new round below it.
+        fix_notes: JSON.parse(JSON.stringify({ rounds: [...previousRounds, round] })),
       })
       .eq("id", section.id);
-    if (error) throw new Error("The fixed section could not be saved.");
-
+    if (error) throw new Error("The fix could not be saved.");
 
     return fixed;
   });
+

@@ -694,23 +694,8 @@ function SectionCard({
             </div>
           ) : null}
 
-          {section.insights.length ? (
-            <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
-              <p className="text-sm font-medium">Watch out for</p>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
-                {section.insights.map((line, i) => (
-                  <li key={`${i}-${line.slice(0, 10)}`}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
 
-          {section.business_connection ? (
-            <div className="rounded-lg bg-accent/10 p-3 text-sm">
-              <p className="font-medium">Why this matters</p>
-              <p className="text-muted-foreground">{section.business_connection}</p>
-            </div>
-          ) : null}
+
 
           {section.fix_notes &&
           (section.fix_notes.diagnosis || (section.fix_notes.changes?.length ?? 0) > 0) ? (

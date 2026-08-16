@@ -368,7 +368,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
 /* 4. Generate / fix a single section                                  */
 /* ------------------------------------------------------------------ */
 
-const sectionSchema = obj({
+const sectionFields = {
   language: str,
   blocks: {
     type: "array",
@@ -381,7 +381,20 @@ const sectionSchema = obj({
     type: "array",
     items: obj({ path: str, content: str }),
   },
+};
+
+const sectionSchema = obj(sectionFields);
+
+/** Same as a section, plus a plain-language record of what was wrong and what changed. */
+const fixSchema = obj({
+  ...sectionFields,
+  diagnosis: str,
+  changes: {
+    type: "array",
+    items: obj({ part: str, what_changed: str, why: str }),
+  },
 });
+
 
 interface OverviewContent {
   problem_statement: string;

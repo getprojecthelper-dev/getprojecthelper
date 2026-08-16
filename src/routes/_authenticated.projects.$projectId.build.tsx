@@ -891,36 +891,82 @@ function SectionCard({
           ) : null}
 
           {generated && !isOverview ? (
-
-            <div className="rounded-lg border border-border bg-card p-3">
+            <div
+              className={cn(
+                "overflow-hidden rounded-xl border transition-colors",
+                showFix ? "border-warning/50 bg-warning/5" : "border-border bg-card",
+              )}
+            >
               <button
                 type="button"
-                className="flex items-center gap-2 text-sm font-medium"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left"
                 onClick={() => setShowFix((v) => !v)}
               >
-                <Wrench className="h-4 w-4" /> {playbook.buildsCode ? "Fix error" : "Ask for a revision"}
-                {showFix ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15">
+                  <Wrench className="h-4 w-4 text-warning" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">
+                    {playbook.buildsCode ? "Something not working?" : "Ask for a revision"}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    {playbook.buildsCode
+                      ? "Paste the error and we'll fix this step and show you exactly what changed."
+                      : "Tell us what's off and we'll rewrite this deliverable."}
+                  </span>
+                </span>
+                {showFix ? (
+                  <ChevronUp className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
               </button>
+
               {showFix ? (
-                <div className="mt-3 space-y-2">
+                <div className="space-y-3 border-t border-warning/30 p-4">
                   <Textarea
-                    rows={4}
+                    rows={5}
                     value={errorText}
                     onChange={(e) => setErrorText(e.target.value)}
+                    disabled={fixing}
+                    className="resize-y bg-card font-mono text-[12.5px]"
                     placeholder={
                       playbook.buildsCode
-                        ? "Paste the error you got when running this code…"
+                        ? "Paste the full error message here, e.g.\nTraceback (most recent call last):\n  File \"app.py\", line 12, in <module>\nNameError: name 'data' is not defined"
                         : "Tell us what's wrong or unrealistic in this deliverable…"
                     }
                   />
-                  <Button
-                    size="sm"
-                    disabled={fixing || errorText.trim().length < 3}
-                    onClick={() => onFix(errorText)}
-                  >
-                    {fixing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
-                    {fixing ? "Fixing…" : playbook.buildsCode ? "Fix my code" : "Revise this deliverable"}
-                  </Button>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={fixing || errorText.trim().length < 3}
+                      onClick={() => onFix(errorText)}
+                    >
+                      {fixing ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Wrench className="h-4 w-4" />
+                      )}
+                      {fixing
+                        ? "Fixing…"
+                        : playbook.buildsCode
+                          ? "Fix my code"
+                          : "Revise this deliverable"}
+                    </Button>
+                    {errorText.trim().length && !fixing ? (
+                      <Button size="sm" variant="ghost" onClick={() => setErrorText("")}>
+                        Clear
+                      </Button>
+                    ) : null}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {fixing
+                        ? "Reading your error and rewriting this step…"
+                        : errorText.trim().length < 3
+                          ? "Paste the whole message — more detail means a better fix."
+                          : `${errorText.trim().length} characters`}
+                    </span>
+                  </div>
                 </div>
               ) : null}
             </div>

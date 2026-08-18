@@ -94,6 +94,7 @@ function NewProject() {
   const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [skills, setSkills] = useState("");
   const [domain, setDomain] = useState("data_science");
 
   const [page, setPage] = useState(1);

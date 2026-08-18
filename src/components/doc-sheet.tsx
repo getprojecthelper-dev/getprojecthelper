@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { copyDocToClipboard } from "@/lib/doc-html";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,10 +17,15 @@ export function DocSheet({ content, label }: { content: string; label?: string |
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(content);
-    setCopied(true);
-    toast.success("Copied — now paste it into your file");
-    setTimeout(() => setCopied(false), 1600);
+    try {
+      // Copies rich HTML so Word / Google Docs keep headings, bold and tables.
+      await copyDocToClipboard(content);
+      setCopied(true);
+      toast.success("Copied with formatting — paste straight into Word");
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error("Couldn't copy — select the text and copy manually");
+    }
   };
 
   return (
@@ -30,9 +36,10 @@ export function DocSheet({ content, label }: { content: string; label?: string |
         </p>
         <Button size="sm" variant="ghost" onClick={copy} className="h-7 gap-1.5 text-xs">
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? "Copied" : "Copy for Word"}
         </Button>
       </div>
+
 
       {/* the page itself */}
       <div className="px-6 py-6 sm:px-10 sm:py-8">

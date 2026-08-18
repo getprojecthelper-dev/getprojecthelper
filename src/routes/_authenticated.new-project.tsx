@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Sparkles,
   Target,
+  TrendingUp,
+  Trophy,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

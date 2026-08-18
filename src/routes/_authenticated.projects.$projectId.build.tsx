@@ -885,7 +885,10 @@ function SectionCard({
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
 
-          {blocks.map((block, i) => {
+          {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
+
+          {isOverview ? null : blocks.map((block, i) => {
+
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Step";
             const blockFile = block.file?.trim();

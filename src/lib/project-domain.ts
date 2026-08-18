@@ -7,6 +7,7 @@ export const DOMAINS = [
   { value: "software", label: "Software Development" },
   { value: "project_management", label: "Project Management" },
   { value: "data_science", label: "Data Science" },
+  { value: "it", label: "IT (Systems, Networks & Support)" },
 ] as const;
 
 export const PURPOSES = [

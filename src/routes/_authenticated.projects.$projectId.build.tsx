@@ -914,7 +914,14 @@ function SectionCard({
                       ? <CodeFileBar file={blockFile} action={block.action} />
                       : null
                     : spec && hasCode
-                      ? <DocFileBar spec={spec} isNew={specIsNew(spec)} />
+                      ? (
+                        <>
+                          <DocFileBar spec={spec} isNew={specIsNew(spec)} />
+                          {spec.kind === "excel" ? (
+                            <SpreadsheetActions spec={spec} content={block.code ?? ""} />
+                          ) : null}
+                        </>
+                      )
                       : null}
                   {hasCode ? (
                     playbook.buildsCode ? (

@@ -44,6 +44,7 @@ function kindFor(raw: string, tableLike: boolean): OfficeKind {
     return "excel";
   if (/\.(pptx|ppt)\b/.test(l) || /(slide|presentation|deck|powerpoint)/.test(l))
     return "powerpoint";
+  if (/(register|log\b|matrix|budget|tracker|gantt|wbs|schedule|estimate|raci)/.test(l)) return "excel";
   if (/\.(docx|doc)\b/.test(l) || /(word|document|doc\b|report|charter|plan|memo)/.test(l))
     return "word";
   return tableLike ? "excel" : "word";
@@ -148,6 +149,11 @@ function xlsx(sheetName: string): JSZip {
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData/></worksheet>`,
   );
   return zip;
+}
+
+/** Builds the empty package for a spec (exported for tests). */
+export function buildEmptyOfficeZip(spec: FileSpec): JSZip {
+  return spec.kind === "excel" ? xlsx(spec.part ?? spec.baseName) : docx();
 }
 
 /** Builds an empty file for the spec and triggers a browser download. */

@@ -42,7 +42,9 @@ import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
 import { type OfficeApp } from "@/lib/file-guidance";
 import {
   downloadEmptyOfficeFile,
+  downloadFilledSpreadsheet,
   parseFileSpec,
+  parseMarkdownTables,
   type FileSpec,
 } from "@/lib/office-files";
 import { useProjectId } from "@/lib/use-workspace";

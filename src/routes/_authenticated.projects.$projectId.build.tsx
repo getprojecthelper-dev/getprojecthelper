@@ -26,11 +26,12 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
+import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -38,9 +39,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
-import { getFileGuidance, type FileGuidance, type OfficeApp } from "@/lib/file-guidance";
+import { type OfficeApp } from "@/lib/file-guidance";
+import {
+  downloadEmptyOfficeFile,
+  parseFileSpec,
+  type FileSpec,
+} from "@/lib/office-files";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/build")({
   component: BuildPage,

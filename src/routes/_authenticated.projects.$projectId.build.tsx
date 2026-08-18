@@ -448,7 +448,70 @@ function toolApp(label: string): OfficeApp {
   return "word";
 }
 
+/** Icon + accent for the four parts of a project brief. */
+function briefTone(title: string) {
+  const t = title.toLowerCase();
+  if (/problem|challenge|pain/.test(t))
+    return { icon: HelpCircle, ring: "border-warning/40", tint: "bg-warning/10", text: "text-warning" };
+  if (/solution|approach|idea/.test(t))
+    return { icon: Lightbulb, ring: "border-primary/40", tint: "bg-primary/10", text: "text-primary" };
+  if (/tech|stack|tool|method/.test(t))
+    return { icon: SlidersHorizontal, ring: "border-accent/40", tint: "bg-accent/10", text: "text-accent" };
+  if (/objective|goal|outcome|scope/.test(t))
+    return { icon: ListChecks, ring: "border-success/40", tint: "bg-success/10", text: "text-success" };
+  return { icon: MapPin, ring: "border-border", tint: "bg-muted", text: "text-muted-foreground" };
+}
+
+/** The project brief (problem, solution, tools, objectives) as readable cards. */
+function OverviewBrief({ blocks }: { blocks: Block[] }) {
+  if (!blocks.length) return null;
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {blocks.map((block, i) => {
+        const tone = briefTone(block.title);
+        const Icon = tone.icon;
+        const body = (block.code ?? "").trim();
+        const bullets = block.explanation ?? [];
+        return (
+          <div
+            key={`${block.title}-${i}`}
+            className={cn(
+              "space-y-3 rounded-xl border bg-card p-5 shadow-sm",
+              tone.ring,
+              blocks.length % 2 === 1 && i === blocks.length - 1 ? "md:col-span-2" : "",
+            )}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
+                <Icon className={cn("h-4 w-4", tone.text)} />
+              </span>
+              <p className="font-display text-base font-semibold tracking-tight">{block.title}</p>
+            </div>
+
+            {body ? (
+              <div className="space-y-2 text-[15px] leading-7 text-foreground/90">
+                {body.split(/\n{2,}/).map((para, p) => (
+                  <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
+                ))}
+              </div>
+            ) : null}
+
+            {bullets.length ? (
+              <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
+                {bullets.map((line, li) => (
+                  <li key={`b-${li}-${line.slice(0, 10)}`}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Three-part plain-English recap shown under each part: what, why, and the choices made. */
+
 function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }) {
   const what = block.explanation ?? [];
   const why = block.why ?? [];
@@ -885,7 +948,10 @@ function SectionCard({
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
 
-          {blocks.map((block, i) => {
+          {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
+
+          {isOverview ? null : blocks.map((block, i) => {
+
             const hasCode = Boolean(block.code?.trim());
             const partLabel = playbook.buildsCode ? "Part" : "Step";
             const blockFile = block.file?.trim();

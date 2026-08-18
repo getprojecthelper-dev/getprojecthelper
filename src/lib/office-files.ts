@@ -3,8 +3,11 @@
  *
  * The AI tells the student which file a deliverable belongs in (e.g.
  * "Schedule.xlsx — sheet: Gantt"). We parse that, de-duplicate it per project
- * and can hand the student a real, EMPTY Word / Excel / PowerPoint file to
- * start from, so nobody has to touch a terminal or guess file names.
+ * and hand the student a real Word / Excel file — empty to start from, or
+ * already filled with the step's table data.
+ *
+ * Spreadsheets are written with SheetJS so Excel never shows the
+ * "we found a problem with some content" repair prompt.
  */
 
 import JSZip from "jszip";
@@ -36,7 +39,7 @@ const PART_LABEL: Record<OfficeKind, string> = {
 };
 
 const clean = (v: string) =>
-  v.replace(/[\\/:*?"<>|]/g, " ").replace(/\s+/g, " ").trim();
+  v.replace(/[\\/:*?"<>|[\]]/g, " ").replace(/\s+/g, " ").trim();
 
 function kindFor(raw: string, tableLike: boolean): OfficeKind {
   const l = raw.toLowerCase();
@@ -78,7 +81,7 @@ export function parseFileSpec(raw: string, content = ""): FileSpec {
 }
 
 /* ------------------------------------------------------------------ */
-/* Empty file builders (pure JS, no server needed)                     */
+/* Empty Word file (small hand-built package)                          */
 /* ------------------------------------------------------------------ */
 
 const CT_BASE = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -114,210 +117,153 @@ function docx(): JSZip {
   return zip;
 }
 
-function xlsx(sheetName: string): JSZip {
-  const zip = new JSZip();
-  const name = clean(sheetName).slice(0, 31) || "Sheet1";
-  zip.file(
-    "[Content_Types].xml",
-    `${CT_BASE}
-<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-</Types>`,
-  );
-  zip.file(
-    "_rels/.rels",
-    rels(
-      "xl/workbook.xml",
-      "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument",
-    ),
-  );
-  zip.file(
-    "xl/workbook.xml",
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${name.replace(/&/g, "&amp;").replace(/</g, "&lt;")}" sheetId="1" r:id="rId1"/></sheets></workbook>`,
-  );
-  zip.file(
-    "xl/_rels/workbook.xml.rels",
-    rels(
-      "worksheets/sheet1.xml",
-      "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet",
-    ),
-  );
-  zip.file(
-    "xl/worksheets/sheet1.xml",
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData/></worksheet>`,
-  );
-  return zip;
-}
-
 /* ------------------------------------------------------------------ */
 /* Tables → a real spreadsheet with the data already filled in         */
 /* ------------------------------------------------------------------ */
 
 export interface DataTable {
+  /** Optional caption/heading that appeared just above the table. */
+  title?: string;
   headers: string[];
   rows: string[][];
 }
 
-/** Pulls every markdown-ish table out of a deliverable's text. */
+const stripInline = (v: string) =>
+  v
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .replace(/^\s*\*(.+)\*\s*$/, "$1")
+    .replace(/<br\s*\/?>/gi, " ")
+    .trim();
+
+/**
+ * Pulls every markdown-ish table out of a deliverable's text.
+ *
+ * Anything that looks like a pipe row counts, so nothing is silently dropped:
+ * a table only needs a header row to be included.
+ */
 export function parseMarkdownTables(content: string): DataTable[] {
   const tables: DataTable[] = [];
   let current: string[][] = [];
+  let heading = "";
+  let lastText = "";
 
   const flush = () => {
-    if (current.length >= 1) {
+    if (current.length) {
       const [headers, ...rows] = current;
-      tables.push({ headers: headers ?? [], rows });
+      const width = Math.max(...current.map((r) => r.length));
+      const pad = (r: string[]) => Array.from({ length: width }, (_, i) => r[i] ?? "");
+      tables.push({
+        ...(heading ? { title: heading } : {}),
+        headers: pad(headers ?? []),
+        rows: rows.map(pad),
+      });
     }
     current = [];
+    heading = "";
   };
 
   for (const line of (content || "").replace(/\r/g, "").split("\n")) {
     const t = line.trim();
     if (t.startsWith("|") && t.includes("|")) {
-      const cells = t.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+      if (!current.length) heading = lastText;
+      const cells = t.replace(/^\||\|$/g, "").split("|").map((c) => stripInline(c));
       if (cells.every((c) => /^:?-{2,}:?$/.test(c))) continue; // separator row
-      current.push(cells.map((c) => c.replace(/\*\*/g, "").replace(/`/g, "")));
-    } else if (current.length) {
-      flush();
+      current.push(cells);
+    } else {
+      if (current.length) flush();
+      if (t) lastText = t.replace(/^#{1,6}\s*/, "").replace(/\*\*/g, "").replace(/:$/, "");
     }
   }
   flush();
-  return tables.filter((t) => t.headers.length > 1 && t.rows.length > 0);
+
+  // Keep everything with a header row — a one-row table is still real data.
+  return tables.filter((t) => t.headers.filter(Boolean).length > 0);
 }
 
-const esc = (v: string) =>
-  v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-const colLetter = (index: number) => {
-  let n = index;
-  let out = "";
-  do {
-    out = String.fromCharCode(65 + (n % 26)) + out;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return out;
+const sheetTitle = (raw: string, used: Set<string>) => {
+  let name = (clean(raw) || "Sheet1").slice(0, 31);
+  let n = 2;
+  while (used.has(name.toLowerCase())) {
+    const suffix = ` ${n++}`;
+    name = `${name.slice(0, 31 - suffix.length)}${suffix}`;
+  }
+  used.add(name.toLowerCase());
+  return name;
 };
 
-function sheetXml(rows: string[][]) {
-  const body = rows
-    .map((row, r) => {
-      const cells = row
-        .map((value, c) => {
-          const ref = `${colLetter(c)}${r + 1}`;
-          const num = value !== "" && !Number.isNaN(Number(value.replace(/,/g, "")));
-          if (num) return `<c r="${ref}"><v>${Number(value.replace(/,/g, ""))}</v></c>`;
-          const style = r === 0 ? ' s="1"' : "";
-          return `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${esc(value)}</t></is></c>`;
-        })
-        .join("");
-      return `<row r="${r + 1}">${cells}</row>`;
-    })
-    .join("");
+/** Builds a workbook whose sheets already contain every row of the step. */
+export async function buildFilledWorkbook(
+  sheetName: string,
+  tables: DataTable[],
+): Promise<ArrayBuffer> {
+  const XLSX = await import("xlsx");
+  const book = XLSX.utils.book_new();
+  const used = new Set<string>();
 
-  const widths = (rows[0] ?? [])
-    .map((_, c) => {
-      const width = Math.min(
-        44,
-        Math.max(12, ...rows.map((r) => (r[c] ?? "").length + 4)),
-      );
-      return `<col min="${c + 1}" max="${c + 1}" width="${width}" customWidth="1"/>`;
-    })
-    .join("");
+  tables.forEach((table, i) => {
+    const aoa: (string | number)[][] = [table.headers, ...table.rows].map((row) =>
+      row.map((cell) => {
+        const raw = (cell ?? "").trim();
+        const asNumber = Number(raw.replace(/,/g, ""));
+        return raw !== "" && !Number.isNaN(asNumber) && /^[-+]?[\d,]*\.?\d+$/.test(raw)
+          ? asNumber
+          : raw;
+      }),
+    );
+    const sheet = XLSX.utils.aoa_to_sheet(aoa);
+    sheet["!cols"] = (table.headers ?? []).map((_, c) => ({
+      wch: Math.min(48, Math.max(12, ...aoa.map((r) => String(r[c] ?? "").length + 2))),
+    }));
+    sheet["!freeze"] = { xSplit: 0, ySplit: 1 };
+    const label =
+      tables.length > 1 ? table.title || `${sheetName} ${i + 1}` : table.title || sheetName;
+    XLSX.utils.book_append_sheet(book, sheet, sheetTitle(label, used));
+  });
 
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>${widths}</cols><sheetData>${body}</sheetData></worksheet>`;
-}
-
-const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<fonts count="2"><font><sz val="11"/><name val="Arial"/></font><font><b/><sz val="11"/><name val="Arial"/></font></fonts>
-<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEFEFEF"/><bgColor indexed="64"/></patternFill></fill></fills>
-<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
-<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>
-</styleSheet>`;
-
-/** Builds a workbook whose sheets already contain the step's table data. */
-export function buildFilledXlsx(sheetName: string, tables: DataTable[]): JSZip {
-  const zip = new JSZip();
-  const sheets = tables.map((table, i) => ({
-    name:
-      (clean(tables.length > 1 ? `${sheetName} ${i + 1}` : sheetName) || "Sheet1").slice(0, 31),
-    rows: [table.headers, ...table.rows],
-  }));
-
-  zip.file(
-    "[Content_Types].xml",
-    `${CT_BASE}
-<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-${sheets
-  .map(
-    (_, i) =>
-      `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
-  )
-  .join("\n")}
-</Types>`,
-  );
-  zip.file(
-    "_rels/.rels",
-    rels(
-      "xl/workbook.xml",
-      "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument",
-    ),
-  );
-  zip.file(
-    "xl/workbook.xml",
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets
-      .map(
-        (s, i) => `<sheet name="${esc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`,
-      )
-      .join("")}</sheets></workbook>`,
-  );
-  zip.file(
-    "xl/_rels/workbook.xml.rels",
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-${sheets
-  .map(
-    (_, i) =>
-      `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`,
-  )
-  .join("\n")}
-<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>`,
-  );
-  zip.file("xl/styles.xml", STYLES);
-  sheets.forEach((s, i) => zip.file(`xl/worksheets/sheet${i + 1}.xml`, sheetXml(s.rows)));
-  return zip;
+  return XLSX.write(book, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
 }
 
 /** Downloads a spreadsheet pre-filled with the step's table data. */
 export async function downloadFilledSpreadsheet(spec: FileSpec, tables: DataTable[]) {
-  const zip = buildFilledXlsx(spec.part ?? spec.baseName, tables);
-  const blob = await zip.generateAsync({ type: "blob" });
-  triggerDownload(blob, `${spec.baseName}.xlsx`);
-}
-
-/** Builds the empty package for a spec (exported for tests). */
-export function buildEmptyOfficeZip(spec: FileSpec): JSZip {
-  return spec.kind === "excel" ? xlsx(spec.part ?? spec.baseName) : docx();
+  const buffer = await buildFilledWorkbook(spec.part ?? spec.baseName, tables);
+  triggerDownload(
+    new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    `${spec.baseName}.xlsx`,
+  );
 }
 
 /** Builds an empty file for the spec and triggers a browser download. */
 export async function downloadEmptyOfficeFile(spec: FileSpec) {
-  if (spec.kind === "powerpoint") {
-    // PowerPoint packages are heavy; a blank Word outline is more useful here.
-    const blob = await docx().generateAsync({ type: "blob" });
-    triggerDownload(blob, `${spec.baseName} — slide notes.docx`);
+  if (spec.kind === "excel") {
+    const XLSX = await import("xlsx");
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      book,
+      XLSX.utils.aoa_to_sheet([[]]),
+      sheetTitle(spec.part ?? spec.baseName, new Set()),
+    );
+    const buffer = XLSX.write(book, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+    triggerDownload(
+      new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      spec.fileName,
+    );
     return;
   }
-  const zip = spec.kind === "excel" ? xlsx(spec.part ?? spec.baseName) : docx();
-  const blob = await zip.generateAsync({ type: "blob" });
-  triggerDownload(blob, spec.fileName);
+
+  // PowerPoint packages are heavy; a blank Word outline is more useful there.
+  const blob = await docx().generateAsync({
+    type: "blob",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+  triggerDownload(
+    blob,
+    spec.kind === "powerpoint" ? `${spec.baseName} — slide notes.docx` : spec.fileName,
+  );
 }
 
 function triggerDownload(blob: Blob, fileName: string) {

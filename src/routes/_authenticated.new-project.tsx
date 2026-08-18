@@ -120,6 +120,7 @@ function NewProject() {
       const projects = await suggest({
         data: {
           idea: mode === "idea" ? idea : "",
+          jobDescription: mode === "job" ? jobDescription : "",
           domain,
           page: target,
           exclude: seen,
@@ -140,9 +141,15 @@ function NewProject() {
       toast.error("Tell us a little about the project you want to build.");
       return;
     }
+    if (mode === "job" && jobDescription.trim().length < 40) {
+      toast.error("Paste the full job description so we can match projects to it.");
+      return;
+    }
     setStep(1);
     await loadPage(1, true);
   };
+
+
 
 
   const pickProject = (project: SuggestedProject) => {

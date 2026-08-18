@@ -90,10 +90,12 @@ function NewProject() {
 
 
   const [step, setStep] = useState(0);
-  const [mode, setMode] = useState<"idea" | "suggest">("idea");
+  const [mode, setMode] = useState<"idea" | "suggest" | "job">("idea");
   const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [domain, setDomain] = useState("data_science");
+
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState<Record<number, SuggestedProject[]>>({});
   const [chosen, setChosen] = useState<SuggestedProject | null>(null);
@@ -118,6 +120,7 @@ function NewProject() {
       const projects = await suggest({
         data: {
           idea: mode === "idea" ? idea : "",
+          jobDescription: mode === "job" ? jobDescription : "",
           domain,
           page: target,
           exclude: seen,
@@ -138,9 +141,15 @@ function NewProject() {
       toast.error("Tell us a little about the project you want to build.");
       return;
     }
+    if (mode === "job" && jobDescription.trim().length < 40) {
+      toast.error("Paste the full job description so we can match projects to it.");
+      return;
+    }
     setStep(1);
     await loadPage(1, true);
   };
+
+
 
 
   const pickProject = (project: SuggestedProject) => {
@@ -203,7 +212,8 @@ function NewProject() {
     try {
       const { projectId } = await create({
         data: {
-          idea,
+          idea: mode === "job" ? jobDescription.slice(0, 600) : idea,
+
           domain,
           title: chosen.title,
           description: chosen.description,
@@ -256,11 +266,12 @@ function NewProject() {
 
         {step === 0 ? (
           <div className="panel space-y-5 p-6">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {(
                 [
                   ["idea", "I have an idea"],
                   ["suggest", "Suggest a project"],
+                  ["job", "From a job description"],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -278,6 +289,25 @@ function NewProject() {
                 </button>
               ))}
             </div>
+
+            {mode === "job" ? (
+              <div className="space-y-2">
+                <Label htmlFor="jd">Paste the job description</Label>
+                <Textarea
+                  id="jd"
+                  rows={9}
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste the full job posting — responsibilities, required skills and tools. We'll suggest projects that prove those skills."
+                  className="max-h-72"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {jobDescription.trim().length} characters — the more of the posting you paste, the
+                  closer the project matches.
+                </p>
+              </div>
+            ) : null}
+
 
             {mode === "idea" ? (
               <div className="space-y-2">

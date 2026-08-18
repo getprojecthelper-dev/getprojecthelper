@@ -125,6 +125,7 @@ function NewProject() {
           domain,
           page: target,
           exclude: seen,
+          skills: mode === "suggest" ? skills : "",
           ...(mode === "suggest" ? { difficulty } : {}),
         },
       });

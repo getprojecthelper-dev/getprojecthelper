@@ -212,7 +212,8 @@ function NewProject() {
     try {
       const { projectId } = await create({
         data: {
-          idea,
+          idea: mode === "job" ? jobDescription.slice(0, 600) : idea,
+
           domain,
           title: chosen.title,
           description: chosen.description,

@@ -98,6 +98,7 @@ export const suggestProjects = createServerFn({ method: "POST" })
       .object({
         idea: z.string().trim().max(600).default(""),
         jobDescription: z.string().trim().max(6000).default(""),
+        skills: z.string().trim().max(600).default(""),
         domain: z.string().min(1).max(40),
         difficulty: z.enum(["easy", "intermediate", "hard"]).optional(),
         page: z.number().int().min(1).max(20),

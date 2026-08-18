@@ -15,6 +15,10 @@ import {
   FolderTree,
   Loader2,
   Lightbulb,
+  ListChecks,
+  HelpCircle,
+  SlidersHorizontal,
+
   Lock,
   MapPin,
   Presentation,
@@ -29,6 +33,7 @@ import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
@@ -45,9 +50,12 @@ interface Block {
   title: string;
   code: string;
   explanation: string[];
+  why?: string[];
+  parameters?: { name?: string; value?: string; why?: string }[];
   file?: string;
   action?: string;
 }
+
 
 
 interface StructureFile {
@@ -156,7 +164,14 @@ function useSections(projectId: string) {
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
+  const { setOpen } = useSidebar();
+  // Implementation needs the width: collapse the workspace sidebar while here.
+  useEffect(() => {
+    setOpen(false);
+    return () => setOpen(true);
+  }, [setOpen]);
   const { data: sections = [], isPending } = useSections(projectId);
+
   const { data: meta } = useQuery({
     queryKey: ["project-domain", projectId],
     queryFn: async () => {
@@ -407,7 +422,99 @@ function toolApp(label: string): OfficeApp {
   return "word";
 }
 
+/** Three-part plain-English recap shown under each part: what, why, and the choices made. */
+function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }) {
+  const what = block.explanation ?? [];
+  const why = block.why ?? [];
+  const params = (block.parameters ?? []).filter((p) => p?.name || p?.value || p?.why);
+  if (what.length === 0 && why.length === 0 && params.length === 0) return null;
+
+  if (!hasCode && why.length === 0 && params.length === 0) {
+    return (
+      <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
+        {what.length === 1 ? (
+          <p>{what[0]}</p>
+        ) : (
+          <ul className="list-disc space-y-1 pl-5">
+            {what.map((line, li) => (
+              <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      {what.length ? (
+        <ExplainCard icon={<ListChecks className="h-4 w-4 text-primary" />} title="What we did">
+          <ul className="list-disc space-y-1 pl-5">
+            {what.map((line, li) => (
+              <li key={`w-${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        </ExplainCard>
+      ) : null}
+
+      {why.length ? (
+        <ExplainCard icon={<HelpCircle className="h-4 w-4 text-accent" />} title="Why we did it">
+          <ul className="list-disc space-y-1 pl-5">
+            {why.map((line, li) => (
+              <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        </ExplainCard>
+      ) : null}
+
+      {params.length ? (
+        <div className="md:col-span-2">
+          <ExplainCard
+            icon={<SlidersHorizontal className="h-4 w-4 text-warning" />}
+            title="Why we chose these settings"
+          >
+            <ul className="space-y-2">
+              {params.map((p, pi) => (
+                <li key={`p-${pi}-${p.name ?? ""}`} className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-medium text-foreground">{p.name}</span>
+                  {p.value ? (
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+                      {p.value}
+                    </code>
+                  ) : null}
+                  {p.why ? <span className="basis-full sm:basis-auto">— {p.why}</span> : null}
+                </li>
+              ))}
+            </ul>
+          </ExplainCard>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ExplainCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3">
+      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {title}
+      </p>
+      <div className="mt-2 text-sm leading-relaxed text-muted-foreground">{children}</div>
+    </div>
+  );
+}
+
 function FileGuidanceBar({
+
   guidance,
   target,
 }: {
@@ -623,55 +730,43 @@ function SectionCard({
               ? null
               : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
             return (
-              <div key={`${block.title}-${i}`} className="space-y-2">
-                <p className="text-sm font-semibold">
-                  {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
-                </p>
-                {playbook.buildsCode
-                  ? blockFile && hasCode
-                    ? <CodeFileBar file={blockFile} action={block.action} />
-                    : null
-                  : guidance
-                    ? <FileGuidanceBar guidance={guidance} target={blockFile} />
-                    : null}
-                {hasCode ? (
-                  <CodeBlock
-                    code={block.code}
-                    language={section.language}
-                    filename={playbook.buildsCode ? blockFile : undefined}
-                  />
-                ) : null}
+              <div
+                key={`${block.title}-${i}`}
+                className="overflow-hidden rounded-xl border border-border bg-card/60"
+              >
+                <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-2.5">
+                  {hasCode ? (
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-semibold text-primary">
+                      {i + 1}
+                    </span>
+                  ) : null}
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                    {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
+                  </p>
+                </div>
 
-                {block.explanation?.length ? (
-                  hasCode ? (
-                    <div className="rounded-lg border border-border bg-card p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        What we did in {partLabel} {i + 1}
-                      </p>
-                      <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                        {block.explanation.map((line, li) => (
-                          <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
+                <div className="space-y-3 p-4">
+                  {playbook.buildsCode
+                    ? blockFile && hasCode
+                      ? <CodeFileBar file={blockFile} action={block.action} />
+                      : null
+                    : guidance
+                      ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                      : null}
+                  {hasCode ? (
+                    <CodeBlock
+                      code={block.code}
+                      language={section.language}
+                      filename={playbook.buildsCode ? blockFile : undefined}
+                    />
+                  ) : null}
 
-                  ) : (
-                    <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
-                      {block.explanation.length === 1 ? (
-                        <p>{block.explanation[0]}</p>
-                      ) : (
-                        <ul className="list-disc space-y-1 pl-5">
-                          {block.explanation.map((line, li) => (
-                            <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )
-                ) : null}
+                  <BlockExplanation block={block} hasCode={hasCode} />
+                </div>
               </div>
             );
           })}
+
 
 
           {section.walkthrough &&

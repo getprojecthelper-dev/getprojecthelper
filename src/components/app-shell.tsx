@@ -1,7 +1,8 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { GraduationCap, LogOut, Settings } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
+import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
@@ -30,7 +31,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger className="shrink-0" />
                 <Link to="/dashboard" className="flex min-w-0 items-center gap-2 font-display">
-                  <GraduationCap className="h-5 w-5 shrink-0 text-primary" />
+                  <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6 shrink-0" />
                   <span className="hidden truncate sm:inline">Project Helper</span>
                 </Link>
               </div>

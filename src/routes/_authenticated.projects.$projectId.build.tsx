@@ -15,6 +15,10 @@ import {
   FolderTree,
   Loader2,
   Lightbulb,
+  ListChecks,
+  HelpCircle,
+  SlidersHorizontal,
+
   Lock,
   MapPin,
   Presentation,

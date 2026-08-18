@@ -69,7 +69,7 @@ export function useCurrency() {
     country: detectedCountry,
     detectedCountry,
     /** Currency suggested by the detected region. */
-    suggestedCurrency: region.data?.currency ?? detectCurrency(),
+    suggestedCurrency: hydrated ? (region.data?.currency ?? detectCurrency()) : DEFAULT_CURRENCY,
     autoDetected: !locked,
   };
 }

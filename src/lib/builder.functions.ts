@@ -115,11 +115,14 @@ export const suggestProjects = createServerFn({ method: "POST" })
     const jobRule = data.jobDescription
       ? " The student pasted a job description: every project must be a portfolio piece that proves the exact skills, tools and responsibilities that job asks for. In the description, say plainly which requirement from the job each project demonstrates."
       : "";
+    const skillsRule = data.skills
+      ? " The student listed skills they already have or want to practise: every project must genuinely exercise those skills, and the description should name which of them it uses. Do not propose projects that ignore the listed skills."
+      : "";
     const result = await generateJson<{ projects: SuggestedProject[] }>({
       usage: { userId: context.userId, feature: "suggest_projects" },
       name: "project_suggestions",
-      instructions: `You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. ${stackRule}${jobRule} The difficulty field must be exactly one of: Easy, Intermediate, Hard.`,
-      input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\n${data.jobDescription ? `Job description to target:\n"""\n${data.jobDescription}\n"""\n` : ""}Requested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
+      instructions: `You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. ${stackRule}${jobRule}${skillsRule} The difficulty field must be exactly one of: Easy, Intermediate, Hard.`,
+      input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\n${data.skills ? `Student's skills: ${data.skills}\n` : ""}${data.jobDescription ? `Job description to target:\n"""\n${data.jobDescription}\n"""\n` : ""}Requested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
 
 
       schema: obj({

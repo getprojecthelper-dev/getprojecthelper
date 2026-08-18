@@ -144,11 +144,18 @@ Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it 
             description: str,
             tech_stack: strArray,
             difficulty: str,
+            market_score: { type: "integer" },
+            market_reason: str,
+            market_signals: strArray,
           }),
         },
       }),
     });
-    return result.projects.slice(0, 4);
+    return result.projects.slice(0, 4).map((p) => ({
+      ...p,
+      market_score: Math.max(0, Math.min(100, Math.round(Number(p.market_score) || 0))),
+      market_signals: (p.market_signals ?? []).slice(0, 4),
+    }));
   });
 
 

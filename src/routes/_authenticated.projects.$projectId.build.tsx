@@ -630,55 +630,43 @@ function SectionCard({
               ? null
               : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
             return (
-              <div key={`${block.title}-${i}`} className="space-y-2">
-                <p className="text-sm font-semibold">
-                  {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
-                </p>
-                {playbook.buildsCode
-                  ? blockFile && hasCode
-                    ? <CodeFileBar file={blockFile} action={block.action} />
-                    : null
-                  : guidance
-                    ? <FileGuidanceBar guidance={guidance} target={blockFile} />
-                    : null}
-                {hasCode ? (
-                  <CodeBlock
-                    code={block.code}
-                    language={section.language}
-                    filename={playbook.buildsCode ? blockFile : undefined}
-                  />
-                ) : null}
+              <div
+                key={`${block.title}-${i}`}
+                className="overflow-hidden rounded-xl border border-border bg-card/60"
+              >
+                <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-2.5">
+                  {hasCode ? (
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-semibold text-primary">
+                      {i + 1}
+                    </span>
+                  ) : null}
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                    {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
+                  </p>
+                </div>
 
-                {block.explanation?.length ? (
-                  hasCode ? (
-                    <div className="rounded-lg border border-border bg-card p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        What we did in {partLabel} {i + 1}
-                      </p>
-                      <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                        {block.explanation.map((line, li) => (
-                          <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
+                <div className="space-y-3 p-4">
+                  {playbook.buildsCode
+                    ? blockFile && hasCode
+                      ? <CodeFileBar file={blockFile} action={block.action} />
+                      : null
+                    : guidance
+                      ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                      : null}
+                  {hasCode ? (
+                    <CodeBlock
+                      code={block.code}
+                      language={section.language}
+                      filename={playbook.buildsCode ? blockFile : undefined}
+                    />
+                  ) : null}
 
-                  ) : (
-                    <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
-                      {block.explanation.length === 1 ? (
-                        <p>{block.explanation[0]}</p>
-                      ) : (
-                        <ul className="list-disc space-y-1 pl-5">
-                          {block.explanation.map((line, li) => (
-                            <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )
-                ) : null}
+                  <BlockExplanation block={block} hasCode={hasCode} />
+                </div>
               </div>
             );
           })}
+
 
 
           {section.walkthrough &&

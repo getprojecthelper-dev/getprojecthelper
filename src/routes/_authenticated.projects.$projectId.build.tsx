@@ -821,13 +821,17 @@ function SectionCard({
             </div>
           ) : null}
 
+          {!playbook.buildsCode && stepSpecs.length ? (
+            <StepFiles specs={stepSpecs} isNew={specIsNew} />
+          ) : null}
+
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
-            const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const partLabel = playbook.buildsCode ? "Part" : "Step";
             const blockFile = block.file?.trim();
-            const guidance = playbook.buildsCode
+            const spec = playbook.buildsCode
               ? null
-              : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
+              : parseFileSpec(blockFile || block.title, block.code ?? "");
             return (
               <div
                 key={`${block.title}-${i}`}
@@ -849,16 +853,30 @@ function SectionCard({
                     ? blockFile && hasCode
                       ? <CodeFileBar file={blockFile} action={block.action} />
                       : null
-                    : guidance
-                      ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                    : spec && hasCode
+                      ? <DocFileBar spec={spec} isNew={specIsNew(spec)} />
                       : null}
                   {hasCode ? (
-                    <CodeBlock
-                      code={block.code}
-                      language={section.language}
-                      filename={playbook.buildsCode ? blockFile : undefined}
-                    />
+                    playbook.buildsCode ? (
+                      <CodeBlock
+                        code={block.code}
+                        language={section.language}
+                        filename={blockFile}
+                      />
+                    ) : (
+                      <DocSheet
+                        content={block.code}
+                        label={
+                          spec
+                            ? spec.part
+                              ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
+                              : spec.fileName
+                            : undefined
+                        }
+                      />
+                    )
                   ) : null}
+
 
                   <BlockExplanation block={block} hasCode={hasCode} />
                 </div>

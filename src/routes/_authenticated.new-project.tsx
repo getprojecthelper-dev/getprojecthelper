@@ -265,11 +265,12 @@ function NewProject() {
 
         {step === 0 ? (
           <div className="panel space-y-5 p-6">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {(
                 [
                   ["idea", "I have an idea"],
                   ["suggest", "Suggest a project"],
+                  ["job", "From a job description"],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -287,6 +288,25 @@ function NewProject() {
                 </button>
               ))}
             </div>
+
+            {mode === "job" ? (
+              <div className="space-y-2">
+                <Label htmlFor="jd">Paste the job description</Label>
+                <Textarea
+                  id="jd"
+                  rows={9}
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste the full job posting — responsibilities, required skills and tools. We'll suggest projects that prove those skills."
+                  className="max-h-72"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {jobDescription.trim().length} characters — the more of the posting you paste, the
+                  closer the project matches.
+                </p>
+              </div>
+            ) : null}
+
 
             {mode === "idea" ? (
               <div className="space-y-2">

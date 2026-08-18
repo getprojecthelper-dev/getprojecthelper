@@ -163,7 +163,14 @@ function useSections(projectId: string) {
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
+  const { setOpen } = useSidebar();
+  // Implementation needs the width: collapse the workspace sidebar while here.
+  useEffect(() => {
+    setOpen(false);
+    return () => setOpen(true);
+  }, [setOpen]);
   const { data: sections = [], isPending } = useSections(projectId);
+
   const { data: meta } = useQuery({
     queryKey: ["project-domain", projectId],
     queryFn: async () => {

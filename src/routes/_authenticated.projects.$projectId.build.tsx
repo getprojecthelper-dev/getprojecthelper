@@ -414,7 +414,99 @@ function toolApp(label: string): OfficeApp {
   return "word";
 }
 
+/** Three-part plain-English recap shown under each part: what, why, and the choices made. */
+function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }) {
+  const what = block.explanation ?? [];
+  const why = block.why ?? [];
+  const params = (block.parameters ?? []).filter((p) => p?.name || p?.value || p?.why);
+  if (what.length === 0 && why.length === 0 && params.length === 0) return null;
+
+  if (!hasCode && why.length === 0 && params.length === 0) {
+    return (
+      <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
+        {what.length === 1 ? (
+          <p>{what[0]}</p>
+        ) : (
+          <ul className="list-disc space-y-1 pl-5">
+            {what.map((line, li) => (
+              <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      {what.length ? (
+        <ExplainCard icon={<ListChecks className="h-4 w-4 text-primary" />} title="What we did">
+          <ul className="list-disc space-y-1 pl-5">
+            {what.map((line, li) => (
+              <li key={`w-${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        </ExplainCard>
+      ) : null}
+
+      {why.length ? (
+        <ExplainCard icon={<HelpCircle className="h-4 w-4 text-accent" />} title="Why we did it">
+          <ul className="list-disc space-y-1 pl-5">
+            {why.map((line, li) => (
+              <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
+            ))}
+          </ul>
+        </ExplainCard>
+      ) : null}
+
+      {params.length ? (
+        <div className="md:col-span-2">
+          <ExplainCard
+            icon={<SlidersHorizontal className="h-4 w-4 text-warning" />}
+            title="Why we chose these settings"
+          >
+            <ul className="space-y-2">
+              {params.map((p, pi) => (
+                <li key={`p-${pi}-${p.name ?? ""}`} className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-medium text-foreground">{p.name}</span>
+                  {p.value ? (
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+                      {p.value}
+                    </code>
+                  ) : null}
+                  {p.why ? <span className="basis-full sm:basis-auto">— {p.why}</span> : null}
+                </li>
+              ))}
+            </ul>
+          </ExplainCard>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ExplainCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3">
+      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {title}
+      </p>
+      <div className="mt-2 text-sm leading-relaxed text-muted-foreground">{children}</div>
+    </div>
+  );
+}
+
 function FileGuidanceBar({
+
   guidance,
   target,
 }: {

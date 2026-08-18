@@ -1196,11 +1196,15 @@ function FixRoundCard({
                   <CodeFileBar file={block.file} action={block.action ?? "modify"} />
                 ) : null}
                 {block.code?.trim() ? (
-                  <CodeBlock
-                    code={block.code}
-                    language={language}
-                    filename={buildsCode ? block.file : undefined}
-                  />
+                  buildsCode ? (
+                    <CodeBlock
+                      code={block.code}
+                      language={language}
+                      filename={block.file}
+                    />
+                  ) : (
+                    <DocSheet content={block.code} label={block.file ?? undefined} />
+                  )
                 ) : null}
                 {block.explanation?.length ? (
                   <div className="rounded-lg border border-border bg-card p-3">

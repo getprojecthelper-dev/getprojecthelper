@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, Code2, Database } from "lucide-react";
+import { ClipboardList, Code2, Database, Server } from "lucide-react";
 
 
 const DOMAINS = [

@@ -90,10 +90,12 @@ function NewProject() {
 
 
   const [step, setStep] = useState(0);
-  const [mode, setMode] = useState<"idea" | "suggest">("idea");
+  const [mode, setMode] = useState<"idea" | "suggest" | "job">("idea");
   const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [domain, setDomain] = useState("data_science");
+
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState<Record<number, SuggestedProject[]>>({});
   const [chosen, setChosen] = useState<SuggestedProject | null>(null);

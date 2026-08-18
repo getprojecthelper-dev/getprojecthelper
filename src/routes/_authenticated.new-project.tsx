@@ -94,6 +94,7 @@ function NewProject() {
   const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
   const [idea, setIdea] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [skills, setSkills] = useState("");
   const [domain, setDomain] = useState("data_science");
 
   const [page, setPage] = useState(1);
@@ -124,6 +125,7 @@ function NewProject() {
           domain,
           page: target,
           exclude: seen,
+          skills: mode === "suggest" ? skills : "",
           ...(mode === "suggest" ? { difficulty } : {}),
         },
       });
@@ -362,6 +364,23 @@ function NewProject() {
                       {d.label}
                     </button>
                   ))}
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <Label htmlFor="skills">
+                    Your skills <span className="text-muted-foreground">(optional)</span>
+                  </Label>
+                  <Textarea
+                    id="skills"
+                    value={skills}
+                    onChange={(e) => setSkills(e.target.value)}
+                    rows={2}
+                    placeholder="e.g. Python, SQL, Excel, networking basics, stakeholder communication"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Add tools or skills you already know (or want to learn) and we'll match the
+                    suggestions to them.
+                  </p>
                 </div>
               </div>
             ) : null}

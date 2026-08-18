@@ -7,6 +7,7 @@ export const DOMAINS = [
   { value: "software", label: "Software Development" },
   { value: "project_management", label: "Project Management" },
   { value: "data_science", label: "Data Science" },
+  { value: "it", label: "IT (Systems, Networks & Support)" },
 ] as const;
 
 export const PURPOSES = [
@@ -215,6 +216,31 @@ export const TEMPLATES: ProjectTemplate[] = [
       { title: "Provision environment", stage: "development" },
       { title: "Load and failure testing", stage: "testing" },
       { title: "Document architecture decisions", stage: "documentation" },
+    ],
+  },
+  {
+    value: "it",
+    label: "IT (Systems, Networks & Support)",
+    description:
+      "Infrastructure, networking, automation and support systems — set up, secure, automate and document.",
+    workflow: [
+      "Requirements",
+      "Network / System Design",
+      "Setup & Configuration",
+      "Automation & Scripting",
+      "Security Hardening",
+      "Testing",
+      "Documentation",
+    ],
+    documentSections: DEFAULT_DOC_SECTIONS,
+    starterTasks: [
+      { title: "Define the IT need and success criteria", stage: "planning" },
+      { title: "Document current setup and requirements", stage: "requirements" },
+      { title: "Design the network / system topology", stage: "development" },
+      { title: "Configure servers, services and access control", stage: "development" },
+      { title: "Automate routine tasks with scripts", stage: "development" },
+      { title: "Test connectivity, backups and recovery", stage: "testing" },
+      { title: "Write the runbook and support documentation", stage: "documentation" },
     ],
   },
   {

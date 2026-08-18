@@ -161,6 +161,7 @@ const PLAYBOOKS: Record<string, DomainPlaybook> = {
   research: RESEARCH,
   business: BUSINESS,
   software: codePlaybook(["Architecture", "Features", "Tests", "Deployment"]),
+  it: codePlaybook(["Requirements", "Setup & configuration", "Automation", "Testing & runbook"]),
   web: codePlaybook(["Pages", "API", "Database", "Deployment"]),
   mobile: codePlaybook(["Screens", "State", "Device APIs", "Builds"]),
   data_science: codePlaybook(["Dataset", "EDA", "Model", "Evaluation"]),

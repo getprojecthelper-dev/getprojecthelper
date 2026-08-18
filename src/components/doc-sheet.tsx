@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * Renders markdown-ish text (headings, bullets, tables) as a clean page
  * instead of a terminal-looking code block.
  */
-export function DocSheet({ content, label }: { content: string; label?: string }) {
+export function DocSheet({ content, label }: { content: string; label?: string | undefined }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {

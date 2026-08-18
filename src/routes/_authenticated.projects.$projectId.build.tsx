@@ -324,6 +324,7 @@ function BuildPage() {
             onGenerate={() => generateMutation.mutate(section.id)}
             onFix={(errorText) => fixMutation.mutate({ sectionId: section.id, errorText })}
             fixToken={fixTokens[section.id] ?? 0}
+            fileOrigins={fileOrigins}
             onConfirm={() => confirmMutation.mutate(section.id)}
           />
         );
@@ -680,10 +681,12 @@ function SectionCard({
   onGenerate,
   onFix,
   onConfirm,
+  fileOrigins,
 }: {
   section: BuildSection;
   playbook: DomainPlaybook;
   index: number;
+  fileOrigins: Map<string, number>;
   locked: boolean;
   open: boolean;
   onToggle: () => void;
@@ -717,6 +720,24 @@ function SectionCard({
       : section.code
         ? [{ title: "Code", code: section.code, explanation: section.explanation }]
         : [];
+
+  // Which office files this step touches (de-duplicated) and whether the
+  // student has to create them here or already has them from an earlier step.
+  const specIsNew = (spec: FileSpec) =>
+    (fileOrigins.get(spec.fileName.toLowerCase()) ?? index) >= index;
+
+  const stepSpecs: FileSpec[] = playbook.buildsCode
+    ? []
+    : Array.from(
+        blocks
+          .filter((b) => b.code?.trim())
+          .reduce((map, b) => {
+            const spec = parseFileSpec(b.file || b.title, b.code ?? "");
+            if (!map.has(spec.fileName.toLowerCase())) map.set(spec.fileName.toLowerCase(), spec);
+            return map;
+          }, new Map<string, FileSpec>())
+          .values(),
+      );
 
   const downloadZip = async () => {
     setZipping(true);

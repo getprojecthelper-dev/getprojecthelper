@@ -45,9 +45,12 @@ interface Block {
   title: string;
   code: string;
   explanation: string[];
+  why?: string[];
+  parameters?: { name?: string; value?: string; why?: string }[];
   file?: string;
   action?: string;
 }
+
 
 
 interface StructureFile {

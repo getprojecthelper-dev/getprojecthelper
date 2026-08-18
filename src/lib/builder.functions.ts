@@ -392,7 +392,19 @@ const sectionFields = {
   language: str,
   blocks: {
     type: "array",
-    items: obj({ title: str, code: str, explanation: strArray, file: str, action: str }),
+    items: obj({
+      title: str,
+      code: str,
+      explanation: strArray,
+      why: strArray,
+      parameters: {
+        type: "array",
+        items: obj({ name: str, value: str, why: str }),
+      },
+      file: str,
+      action: str,
+    }),
+
   },
   insights: strArray,
   business_connection: str,

@@ -21,6 +21,12 @@ const DOMAINS = [
     body: "Analyse datasets and train ML models end to end.",
     meta: "Dataset · Model · Report",
   },
+  {
+    icon: Server,
+    name: "IT",
+    body: "Systems, networks, automation and support runbooks.",
+    meta: "Design · Configure · Document",
+  },
 ];
 
 

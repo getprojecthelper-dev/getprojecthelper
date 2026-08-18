@@ -1,5 +1,5 @@
+import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -112,7 +112,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center gap-2 font-display text-lg">
-          <GraduationCap className="h-5 w-5 text-primary" />
+          <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6" />
           Project Helper
         </Link>
 

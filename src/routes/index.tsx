@@ -1,5 +1,6 @@
+import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, GraduationCap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";
@@ -40,7 +41,7 @@ function Landing() {
             to="/"
             className="flex items-center gap-2 font-display text-lg text-hero-ink"
           >
-            <GraduationCap className="h-5 w-5 text-primary" />
+            <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6" />
             Project Helper
           </Link>
           <nav className="hidden items-center gap-7 text-sm md:flex">

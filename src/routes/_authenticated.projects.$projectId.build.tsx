@@ -26,11 +26,12 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
+import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -38,9 +39,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
-import { getFileGuidance, type FileGuidance, type OfficeApp } from "@/lib/file-guidance";
+import { type OfficeApp } from "@/lib/file-guidance";
+import {
+  downloadEmptyOfficeFile,
+  parseFileSpec,
+  type FileSpec,
+} from "@/lib/office-files";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/build")({
   component: BuildPage,
@@ -238,6 +245,22 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
+
+  // For document domains: which step first asks for each office file, so we
+  // say "create" once and "open the file you already made" afterwards.
+  const fileOrigins = useMemo(() => {
+    const map = new Map<string, number>();
+    if (playbook.buildsCode) return map;
+    sections.forEach((section, i) => {
+      section.blocks.forEach((block) => {
+        const spec = parseFileSpec(block.file || block.title, block.code ?? "");
+        const key = spec.fileName.toLowerCase();
+        if (!map.has(key)) map.set(key, i);
+      });
+    });
+    return map;
+  }, [sections, playbook.buildsCode]);
+
   
 
   if (isPending) {
@@ -301,6 +324,7 @@ function BuildPage() {
             onGenerate={() => generateMutation.mutate(section.id)}
             onFix={(errorText) => fixMutation.mutate({ sectionId: section.id, errorText })}
             fixToken={fixTokens[section.id] ?? 0}
+            fileOrigins={fileOrigins}
             onConfirm={() => confirmMutation.mutate(section.id)}
           />
         );
@@ -513,29 +537,105 @@ function ExplainCard({
   );
 }
 
-function FileGuidanceBar({
+const appOf = (kind: FileSpec["kind"]): OfficeApp => kind;
 
-  guidance,
-  target,
+/** "Files you need for this step" — with a real empty file to download. */
+function StepFiles({
+  specs,
+  isNew,
 }: {
-  guidance: FileGuidance;
-  target?: string | undefined;
+  specs: FileSpec[];
+  isNew: (spec: FileSpec) => boolean;
 }) {
-  const meta = metaOf(guidance.app);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const download = async (spec: FileSpec) => {
+    setBusy(spec.fileName);
+    try {
+      await downloadEmptyOfficeFile(spec);
+      toast.success(`${spec.fileName} downloaded — it's empty and ready to fill.`);
+    } catch {
+      toast.error("Couldn't create that file.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="text-sm font-semibold">Files you need for this step</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        No terminal, no coding. Download the blank file once, then paste each part
+        into the place named below.
+      </p>
+      <ul className="mt-3 space-y-2">
+        {specs.map((spec) => {
+          const meta = metaOf(appOf(spec.kind));
+          const Icon = meta.icon;
+          const fresh = isNew(spec);
+          return (
+            <li
+              key={spec.fileName}
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border/70 bg-muted/20 px-3 py-2"
+            >
+              <span className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}>
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">{spec.fileName}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {fresh
+                    ? `Create this ${meta.short} file once — you'll keep adding to it`
+                    : `You already created this earlier — just open it and add to it`}
+                </span>
+              </span>
+              {fresh ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void download(spec)}
+                  disabled={busy === spec.fileName}
+                >
+                  {busy === spec.fileName ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Download empty file
+                </Button>
+              ) : (
+                <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  Already created
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** Per-part instruction: exactly where this text goes. */
+function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
+  const meta = metaOf(appOf(spec.kind));
   const Icon = meta.icon;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
       <span className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}>
         <Icon className="h-3.5 w-3.5" /> {meta.short}
       </span>
-      <span className="text-muted-foreground">{guidance.action}</span>
+      <span className="text-muted-foreground">{isNew ? "Open your new file" : "Open"}</span>
       <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-        {target || guidance.target}
+        {spec.fileName}
       </span>
-      <span className="text-muted-foreground">· use {guidance.appLabel}</span>
+      <span className="text-muted-foreground">
+        {spec.part ? `→ paste into the ${spec.partLabel} “${spec.part}”` : "→ paste this at the end"}
+      </span>
     </div>
   );
 }
+
 
 /** "Where does this go?" bar for coding projects — file path + what to do. */
 function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {
@@ -581,10 +681,12 @@ function SectionCard({
   onGenerate,
   onFix,
   onConfirm,
+  fileOrigins,
 }: {
   section: BuildSection;
   playbook: DomainPlaybook;
   index: number;
+  fileOrigins: Map<string, number>;
   locked: boolean;
   open: boolean;
   onToggle: () => void;
@@ -618,6 +720,24 @@ function SectionCard({
       : section.code
         ? [{ title: "Code", code: section.code, explanation: section.explanation }]
         : [];
+
+  // Which office files this step touches (de-duplicated) and whether the
+  // student has to create them here or already has them from an earlier step.
+  const specIsNew = (spec: FileSpec) =>
+    (fileOrigins.get(spec.fileName.toLowerCase()) ?? index) >= index;
+
+  const stepSpecs: FileSpec[] = playbook.buildsCode
+    ? []
+    : Array.from(
+        blocks
+          .filter((b) => b.code?.trim())
+          .reduce((map, b) => {
+            const spec = parseFileSpec(b.file || b.title, b.code ?? "");
+            if (!map.has(spec.fileName.toLowerCase())) map.set(spec.fileName.toLowerCase(), spec);
+            return map;
+          }, new Map<string, FileSpec>())
+          .values(),
+      );
 
   const downloadZip = async () => {
     setZipping(true);
@@ -722,13 +842,17 @@ function SectionCard({
             </div>
           ) : null}
 
+          {!playbook.buildsCode && stepSpecs.length ? (
+            <StepFiles specs={stepSpecs} isNew={specIsNew} />
+          ) : null}
+
           {blocks.map((block, i) => {
             const hasCode = Boolean(block.code?.trim());
-            const partLabel = playbook.buildsCode ? "Part" : "Deliverable";
+            const partLabel = playbook.buildsCode ? "Part" : "Step";
             const blockFile = block.file?.trim();
-            const guidance = playbook.buildsCode
+            const spec = playbook.buildsCode
               ? null
-              : getFileGuidance(blockFile || block.title, section.title, block.code ?? "");
+              : parseFileSpec(blockFile || block.title, block.code ?? "");
             return (
               <div
                 key={`${block.title}-${i}`}
@@ -750,16 +874,30 @@ function SectionCard({
                     ? blockFile && hasCode
                       ? <CodeFileBar file={blockFile} action={block.action} />
                       : null
-                    : guidance
-                      ? <FileGuidanceBar guidance={guidance} target={blockFile} />
+                    : spec && hasCode
+                      ? <DocFileBar spec={spec} isNew={specIsNew(spec)} />
                       : null}
                   {hasCode ? (
-                    <CodeBlock
-                      code={block.code}
-                      language={section.language}
-                      filename={playbook.buildsCode ? blockFile : undefined}
-                    />
+                    playbook.buildsCode ? (
+                      <CodeBlock
+                        code={block.code}
+                        language={section.language}
+                        filename={blockFile}
+                      />
+                    ) : (
+                      <DocSheet
+                        content={block.code}
+                        label={
+                          spec
+                            ? spec.part
+                              ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
+                              : spec.fileName
+                            : undefined
+                        }
+                      />
+                    )
                   ) : null}
+
 
                   <BlockExplanation block={block} hasCode={hasCode} />
                 </div>

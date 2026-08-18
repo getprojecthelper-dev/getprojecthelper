@@ -42,7 +42,9 @@ import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
 import { type OfficeApp } from "@/lib/file-guidance";
 import {
   downloadEmptyOfficeFile,
+  downloadFilledSpreadsheet,
   parseFileSpec,
+  parseMarkdownTables,
   type FileSpec,
 } from "@/lib/office-files";
 import { useProjectId } from "@/lib/use-workspace";
@@ -636,8 +638,45 @@ function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
   );
 }
 
+/**
+ * Spreadsheet steps: no manual typing. We show the exact rows and hand the
+ * student an .xlsx that already contains them.
+ */
+function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string }) {
+  const tables = useMemo(() => parseMarkdownTables(content), [content]);
+  const [busy, setBusy] = useState(false);
+  if (!tables.length) return null;
+
+  const rows = tables.reduce((n, t) => n + t.rows.length, 0);
+  const download = async () => {
+    setBusy(true);
+    try {
+      await downloadFilledSpreadsheet(spec, tables);
+      toast.success(`${spec.baseName}.xlsx downloaded with the data already filled in`);
+    } catch {
+      toast.error("Could not build the spreadsheet");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2">
+      <p className="text-xs text-muted-foreground">
+        <span className="font-semibold text-foreground">No typing needed.</span> The table
+        below is ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"}{" "}
+        already filled in.
+      </p>
+      <Button size="sm" variant="outline" onClick={download} disabled={busy} className="gap-1.5">
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        Download filled spreadsheet
+      </Button>
+    </div>
+  );
+}
 
 /** "Where does this go?" bar for coding projects — file path + what to do. */
+
 function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {
   const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(file.trim());
   const verb = isTerminal
@@ -875,7 +914,14 @@ function SectionCard({
                       ? <CodeFileBar file={blockFile} action={block.action} />
                       : null
                     : spec && hasCode
-                      ? <DocFileBar spec={spec} isNew={specIsNew(spec)} />
+                      ? (
+                        <>
+                          <DocFileBar spec={spec} isNew={specIsNew(spec)} />
+                          {spec.kind === "excel" ? (
+                            <SpreadsheetActions spec={spec} content={block.code ?? ""} />
+                          ) : null}
+                        </>
+                      )
                       : null}
                   {hasCode ? (
                     playbook.buildsCode ? (

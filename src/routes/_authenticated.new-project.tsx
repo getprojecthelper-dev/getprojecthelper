@@ -80,6 +80,19 @@ const difficultyTone = (value: string) => {
   return "border-info/30 bg-info/10 text-info";
 };
 
+const marketLabel = (score: number) =>
+  score >= 80 ? "High demand" : score >= 60 ? "Solid demand" : "Niche demand";
+
+const marketTone = (score: number) =>
+  score >= 80
+    ? "border-success/30 bg-success/10 text-success"
+    : score >= 60
+      ? "border-warning/30 bg-warning/10 text-warning"
+      : "border-border bg-muted/50 text-muted-foreground";
+
+const marketBar = (score: number) =>
+  score >= 80 ? "bg-success" : score >= 60 ? "bg-warning" : "bg-muted-foreground/50";
+
 
 function NewProject() {
   const navigate = useNavigate();

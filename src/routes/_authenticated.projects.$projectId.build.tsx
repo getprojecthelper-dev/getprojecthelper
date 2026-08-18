@@ -238,6 +238,22 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
+
+  // For document domains: which step first asks for each office file, so we
+  // say "create" once and "open the file you already made" afterwards.
+  const fileOrigins = useMemo(() => {
+    const map = new Map<string, number>();
+    if (playbook.buildsCode) return map;
+    sections.forEach((section, i) => {
+      section.blocks.forEach((block) => {
+        const spec = parseFileSpec(block.file || block.title, block.code ?? "");
+        const key = spec.fileName.toLowerCase();
+        if (!map.has(key)) map.set(key, i);
+      });
+    });
+    return map;
+  }, [sections, playbook.buildsCode]);
+
   
 
   if (isPending) {

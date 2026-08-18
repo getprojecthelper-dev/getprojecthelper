@@ -11,6 +11,12 @@ export interface SuggestedProject {
   description: string;
   tech_stack: string[];
   difficulty: string;
+  /** 0-100 — how strong this project is against current market/hiring trends. */
+  market_score: number;
+  /** One short sentence: why the market rates it that way. */
+  market_reason: string;
+  /** 2-4 short trend/standard tags, e.g. "AI adoption", "Cloud-first". */
+  market_signals: string[];
 }
 
 export interface DatasetOption {

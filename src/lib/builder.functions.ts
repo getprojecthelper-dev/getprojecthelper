@@ -47,12 +47,18 @@ export interface SectionPlan {
 export interface CodeBlock {
   title: string;
   code: string;
+  /** "What we did" — plain bullets. */
   explanation: string[];
+  /** "Why we did it" — plain bullets. */
+  why?: string[];
+  /** "Why these settings" — the key choices made in this part. */
+  parameters?: { name: string; value: string; why: string }[];
   /** Which file this part belongs in, e.g. "src/app.py" or "requirements.txt". */
   file?: string;
   /** "create" | "modify" | "run" — what the student does with it. */
   action?: string;
 }
+
 
 
 export interface StructureFile {

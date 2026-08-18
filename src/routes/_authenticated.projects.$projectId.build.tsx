@@ -536,29 +536,105 @@ function ExplainCard({
   );
 }
 
-function FileGuidanceBar({
+const appOf = (kind: FileSpec["kind"]): OfficeApp => kind;
 
-  guidance,
-  target,
+/** "Files you need for this step" — with a real empty file to download. */
+function StepFiles({
+  specs,
+  isNew,
 }: {
-  guidance: FileGuidance;
-  target?: string | undefined;
+  specs: FileSpec[];
+  isNew: (spec: FileSpec) => boolean;
 }) {
-  const meta = metaOf(guidance.app);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const download = async (spec: FileSpec) => {
+    setBusy(spec.fileName);
+    try {
+      await downloadEmptyOfficeFile(spec);
+      toast.success(`${spec.fileName} downloaded — it's empty and ready to fill.`);
+    } catch {
+      toast.error("Couldn't create that file.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="text-sm font-semibold">Files you need for this step</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        No terminal, no coding. Download the blank file once, then paste each part
+        into the place named below.
+      </p>
+      <ul className="mt-3 space-y-2">
+        {specs.map((spec) => {
+          const meta = metaOf(appOf(spec.kind));
+          const Icon = meta.icon;
+          const fresh = isNew(spec);
+          return (
+            <li
+              key={spec.fileName}
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border/70 bg-muted/20 px-3 py-2"
+            >
+              <span className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}>
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">{spec.fileName}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {fresh
+                    ? `Create this ${meta.short} file once — you'll keep adding to it`
+                    : `You already created this earlier — just open it and add to it`}
+                </span>
+              </span>
+              {fresh ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void download(spec)}
+                  disabled={busy === spec.fileName}
+                >
+                  {busy === spec.fileName ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Download empty file
+                </Button>
+              ) : (
+                <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  Already created
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** Per-part instruction: exactly where this text goes. */
+function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
+  const meta = metaOf(appOf(spec.kind));
   const Icon = meta.icon;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
       <span className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}>
         <Icon className="h-3.5 w-3.5" /> {meta.short}
       </span>
-      <span className="text-muted-foreground">{guidance.action}</span>
+      <span className="text-muted-foreground">{isNew ? "Open your new file" : "Open"}</span>
       <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-        {target || guidance.target}
+        {spec.fileName}
       </span>
-      <span className="text-muted-foreground">· use {guidance.appLabel}</span>
+      <span className="text-muted-foreground">
+        {spec.part ? `→ paste into the ${spec.partLabel} “${spec.part}”` : "→ paste this at the end"}
+      </span>
     </div>
   );
 }
+
 
 /** "Where does this go?" bar for coding projects — file path + what to do. */
 function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {

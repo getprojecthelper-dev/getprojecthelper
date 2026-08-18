@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Sparkles,
   Target,
+  TrendingUp,
+  Trophy,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -79,6 +81,19 @@ const difficultyTone = (value: string) => {
     return "border-destructive/30 bg-destructive/10 text-destructive";
   return "border-info/30 bg-info/10 text-info";
 };
+
+const marketLabel = (score: number) =>
+  score >= 80 ? "High demand" : score >= 60 ? "Solid demand" : "Niche demand";
+
+const marketTone = (score: number) =>
+  score >= 80
+    ? "border-success/30 bg-success/10 text-success"
+    : score >= 60
+      ? "border-warning/30 bg-warning/10 text-warning"
+      : "border-border bg-muted/50 text-muted-foreground";
+
+const marketBar = (score: number) =>
+  score >= 80 ? "bg-success" : score >= 60 ? "bg-warning" : "bg-muted-foreground/50";
 
 
 function NewProject() {
@@ -418,8 +433,28 @@ function NewProject() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {(pages[page] ?? []).map((project) => (
-                <div key={project.title} className="panel flex flex-col gap-3 p-5">
+              {(() => {
+                const list = pages[page] ?? [];
+                const best = list.reduce(
+                  (top, p) => ((p.market_score ?? 0) > (top?.market_score ?? -1) ? p : top),
+                  null as SuggestedProject | null,
+                );
+                return list.map((project) => {
+                  const score = project.market_score ?? 0;
+                  const isTop = best?.title === project.title && score > 0;
+                  return (
+                <div
+                  key={project.title}
+                  className={cn(
+                    "panel relative flex flex-col gap-3 p-5",
+                    isTop && "border-success/40 ring-1 ring-success/30",
+                  )}
+                >
+                  {isTop ? (
+                    <span className="absolute -top-2.5 left-5 inline-flex items-center gap-1 rounded-full border border-success/40 bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success">
+                      <Trophy className="h-3 w-3" /> Highest market potential
+                    </span>
+                  ) : null}
                   <div>
                     <h2 className="font-display text-lg">{project.title}</h2>
                     <span
@@ -442,11 +477,53 @@ function NewProject() {
                       </span>
                     ))}
                   </div>
+
+                  {score > 0 ? (
+                    <div className="rounded-xl border border-border bg-muted/30 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <TrendingUp className="h-3.5 w-3.5" /> Market potential
+                        </span>
+                        <span
+                          className={cn(
+                            "rounded-full border px-2 py-0.5 text-xs font-medium",
+                            marketTone(score),
+                          )}
+                        >
+                          {marketLabel(score)} · {score}/100
+                        </span>
+                      </div>
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={cn("h-full rounded-full transition-all", marketBar(score))}
+                          style={{ width: `${score}%` }}
+                        />
+                      </div>
+                      {project.market_reason ? (
+                        <p className="mt-2 text-xs text-muted-foreground">{project.market_reason}</p>
+                      ) : null}
+                      {project.market_signals?.length ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {project.market_signals.map((signal) => (
+                            <span
+                              key={signal}
+                              className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] text-primary"
+                            >
+                              {signal}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   <Button className="mt-auto" onClick={() => void pickProject(project)} disabled={busy}>
                     Create this project <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
-              ))}
+                  );
+                });
+              })()}
               {busy && !pages[page] ? (
                 <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" /> Finding projects for your idea…

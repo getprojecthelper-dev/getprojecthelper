@@ -11,6 +11,12 @@ export interface SuggestedProject {
   description: string;
   tech_stack: string[];
   difficulty: string;
+  /** 0-100 — how strong this project is against current market/hiring trends. */
+  market_score: number;
+  /** One short sentence: why the market rates it that way. */
+  market_reason: string;
+  /** 2-4 short trend/standard tags, e.g. "AI adoption", "Cloud-first". */
+  market_signals: string[];
 }
 
 export interface DatasetOption {
@@ -121,7 +127,12 @@ export const suggestProjects = createServerFn({ method: "POST" })
     const result = await generateJson<{ projects: SuggestedProject[] }>({
       usage: { userId: context.userId, feature: "suggest_projects" },
       name: "project_suggestions",
-      instructions: `You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. ${stackRule}${jobRule}${skillsRule} The difficulty field must be exactly one of: Easy, Intermediate, Hard.`,
+      instructions: `You are a senior project mentor for students. Propose realistic, portfolio-worthy projects that match the student's idea (if given) and domain. Keep descriptions to 2-3 sentences. ${stackRule}${jobRule}${skillsRule} The difficulty field must be exactly one of: Easy, Intermediate, Hard.
+
+Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it against what companies are actually hiring for and paying for right now, and against current professional standards in that field:
+- market_score: integer 0-100. Be discriminating — the four projects must have clearly different scores, and at least one should stand out as the strongest. Reserve 85+ for projects that map directly to in-demand roles and modern practice; give 40-60 to generic or dated ideas.
+- market_reason: ONE short sentence (max 22 words) explaining the score in terms of current demand, hiring signals or industry standards. Be concrete, no hype.
+- market_signals: 2-4 very short tags naming the trend or standard it rides (e.g. "AI copilots", "Cloud-native", "Data governance", "Agile delivery", "PMP-aligned"). No dates, no invented statistics.`,
       input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\n${data.skills ? `Student's skills: ${data.skills}\n` : ""}${data.jobDescription ? `Job description to target:\n"""\n${data.jobDescription}\n"""\n` : ""}Requested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
 
 
@@ -133,11 +144,18 @@ export const suggestProjects = createServerFn({ method: "POST" })
             description: str,
             tech_stack: strArray,
             difficulty: str,
+            market_score: { type: "integer" },
+            market_reason: str,
+            market_signals: strArray,
           }),
         },
       }),
     });
-    return result.projects.slice(0, 4);
+    return result.projects.slice(0, 4).map((p) => ({
+      ...p,
+      market_score: Math.max(0, Math.min(100, Math.round(Number(p.market_score) || 0))),
+      market_signals: (p.market_signals ?? []).slice(0, 4),
+    }));
   });
 
 

@@ -688,15 +688,15 @@ function StepFiles({
               </span>
               {fresh ? (
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size="lg"
                   onClick={() => void download(spec)}
                   disabled={busy === spec.fileName}
+                  className="gap-2"
                 >
                   {busy === spec.fileName ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <Download className="h-4 w-4" />
+                    <Download className="h-5 w-5" />
                   )}
                   Download empty file
                 </Button>
@@ -762,8 +762,8 @@ function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string
         below is ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"}{" "}
         already filled in.
       </p>
-      <Button size="sm" variant="outline" onClick={download} disabled={busy} className="gap-1.5">
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+      <Button size="lg" onClick={download} disabled={busy} className="gap-2">
+        {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
         Download filled spreadsheet
       </Button>
     </div>

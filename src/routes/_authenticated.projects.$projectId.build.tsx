@@ -49,6 +49,7 @@ import {
   type FileSpec,
 } from "@/lib/office-files";
 import {
+  buildNotebook,
   downloadNotebook,
   isNotebookFile,
   notebookName,

@@ -107,7 +107,6 @@ interface FixNotes extends FixRound {
 
 
 interface Walkthrough {
-  where_am_i?: string;
   completed?: string[];
   whats_next?: string[];
   analogy?: string;

@@ -23,6 +23,7 @@ import {
   MapPin,
   NotebookPen,
   Presentation,
+  RefreshCw,
   Sparkles,
   Terminal,
   Wrench,

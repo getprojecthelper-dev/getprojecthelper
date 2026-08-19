@@ -47,6 +47,13 @@ import {
   parseMarkdownTables,
   type FileSpec,
 } from "@/lib/office-files";
+import {
+  downloadNotebook,
+  isNotebookFile,
+  notebookName,
+  notebookPath,
+  type NotebookCell,
+} from "@/lib/notebook";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 

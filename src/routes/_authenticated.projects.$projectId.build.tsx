@@ -589,6 +589,49 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
 }
 
 
+/**
+ * Notebook steps: hand the student a real .ipynb with this step's cells inside,
+ * so the notebooks in the project structure actually get used.
+ */
+function NotebookActions({
+  notebooks,
+  language,
+}: {
+  notebooks: { path: string; cells: NotebookCell[] }[];
+  language: string;
+}) {
+  return (
+    <div className="space-y-3 rounded-xl border border-info/30 bg-info/5 p-5">
+      <div>
+        <p className="flex items-center gap-2 font-display text-base">
+          <NotebookPen className="h-4 w-4 text-info" /> Work in your notebook
+        </p>
+        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+          The code below belongs in a Jupyter notebook — one cell per part. Download it
+          ready to run, then open it in Jupyter, VS Code or Colab and run the cells in order.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {notebooks.map((nb) => (
+          <Button
+            key={nb.path}
+            size="lg"
+            className="gap-2"
+            onClick={() => {
+              downloadNotebook(notebookName(nb.path), nb.cells, language || "python");
+              toast.success(`${notebookName(nb.path)} downloaded — open it and run the cells.`);
+            }}
+          >
+            <Download className="h-5 w-5" />
+            Download {notebookName(nb.path)} ({nb.cells.length}{" "}
+            {nb.cells.length === 1 ? "cell" : "cells"})
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const appOf = (kind: FileSpec["kind"]): OfficeApp => kind;
 
 /** "Files you need for this step" — with a real empty file to download. */

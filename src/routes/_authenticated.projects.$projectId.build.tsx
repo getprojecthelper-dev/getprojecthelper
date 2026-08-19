@@ -32,6 +32,7 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
+import { NotebookCell } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -528,7 +529,10 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
   const what = block.explanation ?? [];
   const why = block.why ?? [];
   const params = (block.parameters ?? []).filter((p) => p?.name || p?.value || p?.why);
-  if (what.length === 0 && why.length === 0 && params.length === 0) return null;
+  const example = block.example?.trim();
+  const analogy = block.analogy?.trim();
+  if (what.length === 0 && why.length === 0 && params.length === 0 && !example && !analogy)
+    return null;
 
   return (
     <div className="rounded-xl border border-border bg-card px-5 py-5 sm:px-7 sm:py-6">
@@ -555,6 +559,27 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
               ))}
             </ul>
           </section>
+        ) : null}
+
+        {example || analogy ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {example ? (
+              <section className="rounded-lg border border-border bg-muted/25 p-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Quick example
+                </h4>
+                <p className="mt-1.5 text-sm leading-6 text-foreground/90">{example}</p>
+              </section>
+            ) : null}
+            {analogy ? (
+              <section className="rounded-lg border border-primary/25 bg-primary/5 p-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Think of it like
+                </h4>
+                <p className="mt-1.5 text-sm leading-6 text-foreground/90">{analogy}</p>
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         {params.length ? (
@@ -908,7 +933,7 @@ function SectionCard({
             path,
             isNotebookFile(path)
               ? JSON.stringify(buildNotebook([]), null, 1)
-              : (file.content ?? ""),
+              : "",
           );
         }
         if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
@@ -1068,11 +1093,19 @@ function SectionCard({
                       : null}
                   {hasCode ? (
                     playbook.buildsCode ? (
-                      <CodeBlock
-                        code={block.code}
-                        language={section.language}
-                        filename={blockFile}
-                      />
+                      isNotebookFile(blockFile) ? (
+                        <NotebookCell
+                          code={block.code}
+                          notebook={notebookName(blockFile ?? "")}
+                          index={i + 1}
+                        />
+                      ) : (
+                        <CodeBlock
+                          code={block.code}
+                          language={section.language}
+                          filename={blockFile}
+                        />
+                      )
                     ) : (
                       <DocSheet
                         content={block.code}

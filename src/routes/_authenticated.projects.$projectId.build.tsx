@@ -1025,24 +1025,31 @@ function SectionCard({
           {isOverview ? null : blocks.map((block, i) => {
 
             const hasCode = Boolean(block.code?.trim());
-            const partLabel = playbook.buildsCode ? "Part" : "Step";
             const blockFile = block.file?.trim();
             const spec = playbook.buildsCode
               ? null
               : parseFileSpec(blockFile || block.title, block.code ?? "");
+            // Document domains get one continuous deliverable per step, so the
+            // "Part N" chrome is dropped — the document speaks for itself.
+            const showPartHeader = playbook.buildsCode || blocks.length > 1;
             return (
               <div
                 key={`${block.title}-${i}`}
                 className="overflow-hidden rounded-xl border border-border bg-card/60"
               >
-                <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
-                    {i + 1}
-                  </span>
-                  <p className="min-w-0 flex-1 font-display text-[15px]">
-                    {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
-                  </p>
-                </div>
+                {showPartHeader ? (
+                  <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                      {i + 1}
+                    </span>
+                    <p className="min-w-0 flex-1 font-display text-[15px]">
+                      {playbook.buildsCode && hasCode
+                        ? `Part ${i + 1} — ${block.title}`
+                        : block.title}
+                    </p>
+                  </div>
+                ) : null}
+
 
                 <div className="space-y-4 p-5">
                   {playbook.buildsCode

@@ -821,6 +821,24 @@ function SectionCard({
           .values(),
       );
 
+  // Data projects work inside notebooks: group this step's cells per notebook
+  // so the student can download a ready-to-run .ipynb instead of copying cells.
+  const notebooks = playbook.buildsCode
+    ? Array.from(
+        blocks
+          .filter((b) => isNotebookFile(b.file) && b.code?.trim())
+          .reduce((map, b) => {
+            const path = notebookPath(b.file ?? "");
+            const list = map.get(path) ?? [];
+            list.push({ title: b.title, code: b.code });
+            map.set(path, list);
+            return map;
+          }, new Map<string, NotebookCell[]>())
+          .entries(),
+      ).map(([path, cells]) => ({ path, cells }))
+    : [];
+
+
   const downloadZip = async () => {
     setZipping(true);
     try {

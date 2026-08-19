@@ -900,7 +900,15 @@ function SectionCard({
         zip.file("project-structure.txt", section.structure ?? "");
       } else {
         for (const file of files) {
-          zip.file(file.path.replace(/^\.?\//, ""), file.content ?? "");
+          const path = file.path.replace(/^\.?\//, "");
+          // Files ship empty on purpose; a notebook still needs valid JSON so
+          // Jupyter can open it.
+          zip.file(
+            path,
+            isNotebookFile(path)
+              ? JSON.stringify(buildNotebook([]), null, 1)
+              : (file.content ?? ""),
+          );
         }
         if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
       }

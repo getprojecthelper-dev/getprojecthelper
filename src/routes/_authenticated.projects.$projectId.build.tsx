@@ -21,6 +21,7 @@ import {
 
   Lock,
   MapPin,
+  NotebookPen,
   Presentation,
   Sparkles,
   Terminal,

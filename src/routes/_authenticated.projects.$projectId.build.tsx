@@ -999,6 +999,22 @@ function SectionCard({
               {generating ? "Generating…" : "Generate"}
             </Button>
           ) : null}
+          {!locked && generated ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onGenerate}
+              disabled={generating}
+              title="Generate this step again"
+            >
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {generating ? "Regenerating…" : "Regenerate"}
+            </Button>
+          ) : null}
           <Button size="icon" variant="ghost" onClick={onToggle} aria-label={open ? "Close section" : "Open section"}>
             {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>

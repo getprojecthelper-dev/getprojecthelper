@@ -32,7 +32,7 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
-import { NotebookCell } from "@/components/notebook-cell";
+import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,8 @@ interface Block {
   parameters?: { name?: string; value?: string; why?: string }[];
   file?: string;
   action?: string;
+  example?: string;
+  analogy?: string;
 }
 
 
@@ -1094,7 +1096,7 @@ function SectionCard({
                   {hasCode ? (
                     playbook.buildsCode ? (
                       isNotebookFile(blockFile) ? (
-                        <NotebookCell
+                        <NotebookCellView
                           code={block.code}
                           notebook={notebookName(blockFile ?? "")}
                           index={i + 1}

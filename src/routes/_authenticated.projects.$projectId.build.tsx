@@ -912,21 +912,35 @@ function SectionCard({
           ) : null}
 
           {section.structure && playbook.buildsCode ? (
-            <div className="space-y-2">
-              <p className="flex items-center gap-2 text-sm font-medium">
-                <FolderTree className="h-4 w-4" /> Project structure
-              </p>
+            <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="flex items-center gap-2 font-display text-base">
+                    <FolderTree className="h-4 w-4 text-primary" /> Project structure
+                  </p>
+                  <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                    Only the files this project actually needs. Every file comes down
+                    empty — you fill them in as you work through the steps below.
+                  </p>
+                </div>
+                <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
+                  {zipping ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
+                  {zipping ? "Preparing…" : "Download project folder (.zip)"}
+                </Button>
+              </div>
               <CodeBlock code={section.structure} filename="project structure" />
-              <Button size="sm" variant="outline" onClick={downloadZip} disabled={zipping}>
-                {zipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                {zipping ? "Preparing…" : "Download as .zip"}
-              </Button>
             </div>
           ) : null}
 
           {!playbook.buildsCode && stepSpecs.length ? (
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
+
+          {notebooks.length ? <NotebookActions notebooks={notebooks} language={section.language} /> : null}
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
@@ -943,18 +957,16 @@ function SectionCard({
                 key={`${block.title}-${i}`}
                 className="overflow-hidden rounded-xl border border-border bg-card/60"
               >
-                <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-2.5">
-                  {hasCode ? (
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-semibold text-primary">
-                      {i + 1}
-                    </span>
-                  ) : null}
-                  <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                    {i + 1}
+                  </span>
+                  <p className="min-w-0 flex-1 font-display text-[15px]">
                     {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                   </p>
                 </div>
 
-                <div className="space-y-3 p-4">
+                <div className="space-y-4 p-5">
                   {playbook.buildsCode
                     ? blockFile && hasCode
                       ? <CodeFileBar file={blockFile} action={block.action} />
@@ -996,6 +1008,7 @@ function SectionCard({
               </div>
             );
           })}
+
 
 
 

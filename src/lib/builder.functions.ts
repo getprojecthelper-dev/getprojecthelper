@@ -74,7 +74,6 @@ export interface StructureFile {
 
 /** Plain-language recap shown under a finished step. */
 export interface Walkthrough {
-  where_am_i: string;
   completed: string[];
   whats_next: string[];
   analogy: string;
@@ -436,7 +435,6 @@ const sectionFields = {
     items: obj({ path: str, content: str }),
   },
   walkthrough: obj({
-    where_am_i: str,
     completed: strArray,
     whats_next: strArray,
     analogy: str,
@@ -540,7 +538,13 @@ async function loadContext(
   const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;
   const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
 
-  return { section: section as SectionRow & { project_id: string }, brief, playbook, supabase };
+  return {
+    section: section as SectionRow & { project_id: string },
+    brief,
+    playbook,
+    domain: (project.domain as string | null) ?? null,
+    supabase,
+  };
 
 }
 
@@ -549,7 +553,7 @@ export const generateSection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ sectionId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief, playbook } = await loadContext(supabase as never, data.sectionId);
+    const { section, brief, playbook, domain } = await loadContext(supabase as never, data.sectionId);
 
 
     const isOverview =
@@ -616,9 +620,17 @@ export const generateSection = createServerFn({ method: "POST" })
     }
 
     const isStructure = section.kind === "structure" && playbook.buildsCode;
+    const dataProject = isDataDomain(String(domain ?? ""));
+    const notebookRule = dataProject
+      ? " NOTEBOOKS MATTER IN THIS PROJECT: put the exploration, analysis and every chart inside a Jupyter notebook. When a part belongs in a notebook, set `file` to the notebook path followed by the cell, exactly like \"notebooks/01_explore.ipynb — cell: 2\", set `action` to \"create\" for the first cell of that notebook and \"modify\" afterwards, and keep each cell short enough to run on its own. Every chart you create must actually be looked at and explained: after a plotting cell, say in the bullets what the student should see in the chart and what it means for the project. Never create a notebook or a plotting script that is then ignored — if a file exists in the plan, this project must use it."
+      : "";
     const task = isStructure
-      ? "Produce the complete project folder/file structure as an ASCII tree in `structure`, AND fill `files` with EVERY file of that structure: a relative path (e.g. 'src/data/loader.py', 'requirements.txt', 'README.md') and sensible starter content for each (config files and READMEs should be real, code files can be short stubs with comments). Folders are implied by the paths. `blocks` should contain 1-3 small parts, e.g. the folder tree creation commands, then the config file. Do not dump the whole project into one block."
-      : playbook.sectionTask;
+      ? "Produce the project folder/file structure as an ASCII tree in `structure`, AND list the same files in `files`. ONLY include files this specific project genuinely needs — no speculative folders, no files nothing will ever use. EVERY file in `files` must have an EMPTY string as `content`: the student fills them in during the later steps, so do not write code, config, README text or any data into them." +
+        (dataProject
+          ? " Include the Jupyter notebooks this project will actually work in (e.g. notebooks/01_explore.ipynb, notebooks/02_model.ipynb) — notebooks are where the analysis and charts happen, so the later steps must use them."
+          : "") +
+        " `blocks` should contain 1-3 small parts: the commands that create the folders, then how to open the project. Do not dump the whole project into one block."
+      : playbook.sectionTask + notebookRule;
 
     const draft = await generateJson<SectionContent>({
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
@@ -638,8 +650,8 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Before returning anything, mentally RUN the draft line by line and verify the logic actually produces the intended result: check control flow and conditions, variable definition order, function signatures and argument order, imports, indentation/syntax validity, file paths, edge cases (empty input, missing file, division by zero) and that every variable used is defined earlier. Fix anything that would not run or would give a wrong result. Also review for undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure the meaningful lines or small groups have inline comments written in the STUDENT'S OWN VOICE (first person, e.g. `# i filter out the empty rows here`) — rewrite any formal, instructional or third-person comments into that voice and add missing ones yourself. Then HUMANISE: make the final code look hand-written by a real developer — natural lowercase conversational comments, no mechanical comment-on-every-line, no decorative separators or banner blocks, no boilerplate docstring templates on trivial functions, no repeated formulaic phrasing, varied comment length, natural blank-line grouping, and short practical variable names. Strip anything that smells machine-generated while keeping the code correct and easy to follow. Ensure EVERY block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (where_am_i, completed, whats_next, analogy) with a simple everyday analogy. Return the corrected, final version in the same shape, keeping everything already correct."
-        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project. Ensure EVERY block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (where_am_i, completed, whats_next, analogy).",
+        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Before returning anything, mentally RUN the draft line by line and verify the logic actually produces the intended result: check control flow and conditions, variable definition order, function signatures and argument order, imports, indentation/syntax validity, file paths, edge cases (empty input, missing file, division by zero) and that every variable used is defined earlier. Fix anything that would not run or would give a wrong result. Also review for undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure the meaningful lines or small groups have inline comments written in the STUDENT'S OWN VOICE (first person, e.g. `# i filter out the empty rows here`) — rewrite any formal, instructional or third-person comments into that voice and add missing ones yourself. Then HUMANISE: make the final code look hand-written by a real developer — natural lowercase conversational comments, no mechanical comment-on-every-line, no decorative separators or banner blocks, no boilerplate docstring templates on trivial functions, no repeated formulaic phrasing, varied comment length, natural blank-line grouping, and short practical variable names. Strip anything that smells machine-generated while keeping the code correct and easy to follow. Ensure EVERY block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (completed, whats_next, analogy) with a simple everyday analogy. Return the corrected, final version in the same shape, keeping everything already correct."
+        : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Return the corrected, final version in the same shape, keeping everything already correct. Remove any programming code entirely and make every table concrete and specific to this project. Ensure EVERY block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (completed, whats_next, analogy).",
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
       schema: sectionSchema,

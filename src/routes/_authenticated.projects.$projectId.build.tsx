@@ -21,6 +21,7 @@ import {
 
   Lock,
   MapPin,
+  NotebookPen,
   Presentation,
   Sparkles,
   Terminal,
@@ -47,6 +48,14 @@ import {
   parseMarkdownTables,
   type FileSpec,
 } from "@/lib/office-files";
+import {
+  buildNotebook,
+  downloadNotebook,
+  isNotebookFile,
+  notebookName,
+  notebookPath,
+  type NotebookCell,
+} from "@/lib/notebook";
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
@@ -107,7 +116,6 @@ interface FixNotes extends FixRound {
 
 
 interface Walkthrough {
-  where_am_i?: string;
   completed?: string[];
   whats_next?: string[];
   analogy?: string;
@@ -510,94 +518,118 @@ function OverviewBrief({ blocks }: { blocks: Block[] }) {
   );
 }
 
-/** Three-part plain-English recap shown under each part: what, why, and the choices made. */
-
+/**
+ * Notion-style explanation page shown under the code.
+ *
+ * One calm reading surface instead of three competing cards: a short
+ * "what this does", the reasoning, and a small table of the choices made.
+ */
 function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }) {
   const what = block.explanation ?? [];
   const why = block.why ?? [];
   const params = (block.parameters ?? []).filter((p) => p?.name || p?.value || p?.why);
   if (what.length === 0 && why.length === 0 && params.length === 0) return null;
 
-  if (!hasCode && why.length === 0 && params.length === 0) {
-    return (
-      <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
-        {what.length === 1 ? (
-          <p>{what[0]}</p>
-        ) : (
-          <ul className="list-disc space-y-1 pl-5">
-            {what.map((line, li) => (
-              <li key={`${li}-${line.slice(0, 10)}`}>{line}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      {what.length ? (
-        <ExplainCard icon={<ListChecks className="h-4 w-4 text-primary" />} title="What we did">
-          <ul className="list-disc space-y-1 pl-5">
-            {what.map((line, li) => (
-              <li key={`w-${li}-${line.slice(0, 10)}`}>{line}</li>
-            ))}
-          </ul>
-        </ExplainCard>
-      ) : null}
-
-      {why.length ? (
-        <ExplainCard icon={<HelpCircle className="h-4 w-4 text-accent" />} title="Why we did it">
-          <ul className="list-disc space-y-1 pl-5">
-            {why.map((line, li) => (
-              <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
-            ))}
-          </ul>
-        </ExplainCard>
-      ) : null}
-
-      {params.length ? (
-        <div className="md:col-span-2">
-          <ExplainCard
-            icon={<SlidersHorizontal className="h-4 w-4 text-warning" />}
-            title="Why we chose these settings"
-          >
-            <ul className="space-y-2">
-              {params.map((p, pi) => (
-                <li key={`p-${pi}-${p.name ?? ""}`} className="flex flex-wrap items-baseline gap-x-2">
-                  <span className="font-medium text-foreground">{p.name}</span>
-                  {p.value ? (
-                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-                      {p.value}
-                    </code>
-                  ) : null}
-                  {p.why ? <span className="basis-full sm:basis-auto">— {p.why}</span> : null}
-                </li>
+    <div className="rounded-xl border border-border bg-card px-5 py-5 sm:px-7 sm:py-6">
+      <article className="mx-auto max-w-[46rem] space-y-5 text-[15px] leading-7 text-foreground">
+        {what.length ? (
+          <section className="space-y-2">
+            <h4 className="font-display text-base font-semibold tracking-tight">
+              {hasCode ? "What this code does" : "What this covers"}
+            </h4>
+            <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
+              {what.map((line, li) => (
+                <li key={`w-${li}-${line.slice(0, 10)}`}>{line}</li>
               ))}
             </ul>
-          </ExplainCard>
-        </div>
-      ) : null}
+          </section>
+        ) : null}
+
+        {why.length ? (
+          <section className="space-y-2">
+            <h4 className="font-display text-base font-semibold tracking-tight">Why we do it this way</h4>
+            <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
+              {why.map((line, li) => (
+                <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {params.length ? (
+          <section className="space-y-2">
+            <h4 className="font-display text-base font-semibold tracking-tight">The choices made</h4>
+            <div className="overflow-hidden rounded-lg border border-border">
+              <table className="w-full border-collapse text-sm">
+                <tbody>
+                  {params.map((p, pi) => (
+                    <tr key={`p-${pi}-${p.name ?? ""}`} className="odd:bg-muted/25">
+                      <td className="w-40 border-b border-border/60 px-3 py-2 align-top font-medium">
+                        {p.name}
+                      </td>
+                      <td className="w-32 border-b border-border/60 px-3 py-2 align-top">
+                        {p.value ? (
+                          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                            {p.value}
+                          </code>
+                        ) : null}
+                      </td>
+                      <td className="border-b border-border/60 px-3 py-2 align-top text-muted-foreground">
+                        {p.why}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+      </article>
     </div>
   );
 }
 
-function ExplainCard({
-  icon,
-  title,
-  children,
+
+/**
+ * Notebook steps: hand the student a real .ipynb with this step's cells inside,
+ * so the notebooks in the project structure actually get used.
+ */
+function NotebookActions({
+  notebooks,
+  language,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
+  notebooks: { path: string; cells: NotebookCell[] }[];
+  language: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-3">
-      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {icon}
-        {title}
-      </p>
-      <div className="mt-2 text-sm leading-relaxed text-muted-foreground">{children}</div>
+    <div className="space-y-3 rounded-xl border border-info/30 bg-info/5 p-5">
+      <div>
+        <p className="flex items-center gap-2 font-display text-base">
+          <NotebookPen className="h-4 w-4 text-info" /> Work in your notebook
+        </p>
+        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+          The code below belongs in a Jupyter notebook — one cell per part. Download it
+          ready to run, then open it in Jupyter, VS Code or Colab and run the cells in order.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {notebooks.map((nb) => (
+          <Button
+            key={nb.path}
+            size="lg"
+            className="gap-2"
+            onClick={() => {
+              downloadNotebook(notebookName(nb.path), nb.cells, language || "python");
+              toast.success(`${notebookName(nb.path)} downloaded — open it and run the cells.`);
+            }}
+          >
+            <Download className="h-5 w-5" />
+            Download {notebookName(nb.path)} ({nb.cells.length}{" "}
+            {nb.cells.length === 1 ? "cell" : "cells"})
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -656,15 +688,15 @@ function StepFiles({
               </span>
               {fresh ? (
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size="lg"
                   onClick={() => void download(spec)}
                   disabled={busy === spec.fileName}
+                  className="gap-2"
                 >
                   {busy === spec.fileName ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <Download className="h-4 w-4" />
+                    <Download className="h-5 w-5" />
                   )}
                   Download empty file
                 </Button>
@@ -730,8 +762,8 @@ function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string
         below is ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"}{" "}
         already filled in.
       </p>
-      <Button size="sm" variant="outline" onClick={download} disabled={busy} className="gap-1.5">
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+      <Button size="lg" onClick={download} disabled={busy} className="gap-2">
+        {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
         Download filled spreadsheet
       </Button>
     </div>
@@ -841,6 +873,24 @@ function SectionCard({
           .values(),
       );
 
+  // Data projects work inside notebooks: group this step's cells per notebook
+  // so the student can download a ready-to-run .ipynb instead of copying cells.
+  const notebooks = playbook.buildsCode
+    ? Array.from(
+        blocks
+          .filter((b) => isNotebookFile(b.file) && b.code?.trim())
+          .reduce((map, b) => {
+            const path = notebookPath(b.file ?? "");
+            const list = map.get(path) ?? [];
+            list.push({ title: b.title, code: b.code });
+            map.set(path, list);
+            return map;
+          }, new Map<string, NotebookCell[]>())
+          .entries(),
+      ).map(([path, cells]) => ({ path, cells }))
+    : [];
+
+
   const downloadZip = async () => {
     setZipping(true);
     try {
@@ -851,7 +901,15 @@ function SectionCard({
         zip.file("project-structure.txt", section.structure ?? "");
       } else {
         for (const file of files) {
-          zip.file(file.path.replace(/^\.?\//, ""), file.content ?? "");
+          const path = file.path.replace(/^\.?\//, "");
+          // Files ship empty on purpose; a notebook still needs valid JSON so
+          // Jupyter can open it.
+          zip.file(
+            path,
+            isNotebookFile(path)
+              ? JSON.stringify(buildNotebook([]), null, 1)
+              : (file.content ?? ""),
+          );
         }
         if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
       }
@@ -932,21 +990,35 @@ function SectionCard({
           ) : null}
 
           {section.structure && playbook.buildsCode ? (
-            <div className="space-y-2">
-              <p className="flex items-center gap-2 text-sm font-medium">
-                <FolderTree className="h-4 w-4" /> Project structure
-              </p>
+            <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="flex items-center gap-2 font-display text-base">
+                    <FolderTree className="h-4 w-4 text-primary" /> Project structure
+                  </p>
+                  <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                    Only the files this project actually needs. Every file comes down
+                    empty — you fill them in as you work through the steps below.
+                  </p>
+                </div>
+                <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
+                  {zipping ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
+                  {zipping ? "Preparing…" : "Download project folder (.zip)"}
+                </Button>
+              </div>
               <CodeBlock code={section.structure} filename="project structure" />
-              <Button size="sm" variant="outline" onClick={downloadZip} disabled={zipping}>
-                {zipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                {zipping ? "Preparing…" : "Download as .zip"}
-              </Button>
             </div>
           ) : null}
 
           {!playbook.buildsCode && stepSpecs.length ? (
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
+
+          {notebooks.length ? <NotebookActions notebooks={notebooks} language={section.language} /> : null}
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
@@ -963,18 +1035,16 @@ function SectionCard({
                 key={`${block.title}-${i}`}
                 className="overflow-hidden rounded-xl border border-border bg-card/60"
               >
-                <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-2.5">
-                  {hasCode ? (
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-semibold text-primary">
-                      {i + 1}
-                    </span>
-                  ) : null}
-                  <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                    {i + 1}
+                  </span>
+                  <p className="min-w-0 flex-1 font-display text-[15px]">
                     {hasCode ? `${partLabel} ${i + 1} — ${block.title}` : block.title}
                   </p>
                 </div>
 
-                <div className="space-y-3 p-4">
+                <div className="space-y-4 p-5">
                   {playbook.buildsCode
                     ? blockFile && hasCode
                       ? <CodeFileBar file={blockFile} action={block.action} />
@@ -1019,34 +1089,22 @@ function SectionCard({
 
 
 
+
           {section.walkthrough &&
-          (section.walkthrough.where_am_i ||
-            section.walkthrough.completed?.length ||
+          (section.walkthrough.completed?.length ||
             section.walkthrough.whats_next?.length ||
             section.walkthrough.analogy) ? (
-            <div className="space-y-3 rounded-xl border border-accent/30 bg-accent/5 p-4">
-              <p className="text-sm font-semibold">In simple words</p>
-
-              {section.walkthrough.where_am_i ? (
-                <div className="flex items-start gap-2 text-sm">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  <p>
-                    <span className="font-medium">Where am I? </span>
-                    <span className="text-muted-foreground">
-                      {section.walkthrough.where_am_i}
-                    </span>
-                  </p>
-                </div>
-              ) : null}
+            <div className="space-y-3 rounded-xl border border-accent/30 bg-accent/5 p-5">
+              <p className="font-display text-base">Step recap, in simple words</p>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {section.walkthrough.completed?.length ? (
-                  <div className="rounded-lg border border-border bg-card p-3">
+                  <div className="rounded-lg border border-border bg-card p-4">
                     <p className="flex items-center gap-1.5 text-sm font-medium">
                       <CheckCircle2 className="h-4 w-4 text-success" />
-                      What I completed
+                      What you finished
                     </p>
-                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
                       {section.walkthrough.completed.map((line, i) => (
                         <li key={`done-${i}-${line.slice(0, 10)}`}>{line}</li>
                       ))}
@@ -1055,12 +1113,12 @@ function SectionCard({
                 ) : null}
 
                 {section.walkthrough.whats_next?.length ? (
-                  <div className="rounded-lg border border-border bg-card p-3">
+                  <div className="rounded-lg border border-border bg-card p-4">
                     <p className="flex items-center gap-1.5 text-sm font-medium">
                       <Sparkles className="h-4 w-4 text-accent" />
                       What&apos;s next
                     </p>
-                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
                       {section.walkthrough.whats_next.map((line, i) => (
                         <li key={`next-${i}-${line.slice(0, 10)}`}>{line}</li>
                       ))}
@@ -1080,6 +1138,7 @@ function SectionCard({
               ) : null}
             </div>
           ) : null}
+
 
 
 

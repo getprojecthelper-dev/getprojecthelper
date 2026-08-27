@@ -1,8 +1,9 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { highlightLine, type TokenKind } from "@/lib/highlight";
+import { downloadNotebook } from "@/lib/notebook";
 import { cn } from "@/lib/utils";
 
 const TOKEN_CLASS: Record<TokenKind, string> = {

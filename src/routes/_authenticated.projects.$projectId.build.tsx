@@ -54,6 +54,7 @@ import {
   buildNotebook,
   downloadNotebook,
   isNotebookFile,
+  notebookCellIndex,
   notebookName,
   notebookPath,
   type NotebookCell,
@@ -1116,7 +1117,7 @@ function SectionCard({
                         <NotebookCellView
                           code={block.code}
                           notebook={notebookName(blockFile ?? "")}
-                          index={i + 1}
+                          index={notebookCellIndex(blockFile) ?? i + 1}
                         />
                       ) : (
                         <CodeBlock

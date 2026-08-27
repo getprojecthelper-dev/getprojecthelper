@@ -45,6 +45,18 @@ export function CodeBlock({
     }
   };
 
+  // let the student save this snippet straight to disk instead of copy-pasting
+  const download = () => {
+    const name = (filename ?? "").split("/").pop()?.trim();
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name && /\.[a-z0-9]+$/i.test(name) ? name : `snippet.${language || "txt"}`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const plain = isPlainLanguage(language, filename);
   const lines = useMemo(
     () => code.replace(/\n$/, "").split("\n").map((line) => highlightLine(line, plain)),

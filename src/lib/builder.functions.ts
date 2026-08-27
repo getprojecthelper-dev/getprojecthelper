@@ -105,9 +105,9 @@ export const suggestProjects = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().max(600).default(""),
-        jobDescription: z.string().trim().max(6000).default(""),
-        skills: z.string().trim().max(600).default(""),
+        idea: z.string().trim().default("").transform((v) => v.slice(0, 600)),
+        jobDescription: z.string().trim().default("").transform((v) => v.slice(0, 6000)),
+        skills: z.string().trim().default("").transform((v) => v.slice(0, 600)),
         domain: z.string().min(1).max(40),
         difficulty: z.enum(["easy", "intermediate", "hard"]).optional(),
         page: z.number().int().min(1).max(20),

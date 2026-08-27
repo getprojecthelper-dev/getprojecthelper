@@ -23,6 +23,12 @@ export function notebookPath(file: string): string {
   return (match?.[0] ?? file).trim();
 }
 
+/** "notebooks/01_explore.ipynb — cell: 2" -> 2 (null when the cell isn't tagged). */
+export function notebookCellIndex(file?: string | null): number | null {
+  const match = (file ?? "").match(/cell\s*[:#-]?\s*(\d+)/i);
+  return match?.[1] ? Number(match[1]) : null;
+}
+
 export function notebookName(file: string): string {
   const path = notebookPath(file);
   return path.split("/").pop() ?? path;

@@ -136,7 +136,7 @@ function NewProject() {
       const projects = await suggest({
         data: {
           idea: mode === "idea" ? idea : "",
-          jobDescription: mode === "job" ? jobDescription : "",
+          jobDescription: mode === "job" ? jobDescription.trim().slice(0, 6000) : "",
           domain,
           page: target,
           exclude: seen,

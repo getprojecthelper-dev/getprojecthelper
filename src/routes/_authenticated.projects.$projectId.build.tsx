@@ -802,26 +802,51 @@ function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string
 /** "Where does this go?" bar for coding projects — file path + what to do. */
 
 function CodeFileBar({ file, action }: { file: string; action?: string | undefined }) {
-  const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(file.trim());
+  const name = file.trim();
+  const isTerminal = /^(terminal|shell|bash|cmd|powershell)$/i.test(name);
+  const isEnv = /(^|\/)\.env(\.\w+)?$/i.test(name);
+  const isRequirements = /(^|\/)(requirements\.txt|package\.json)$/i.test(name);
   const verb = isTerminal
     ? "Run these commands in your terminal"
-    : action === "modify"
-      ? "Open this existing file and update it"
-      : action === "run"
-        ? "Run this file"
-        : "Create this file (if it doesn't exist yet) and paste the code in";
+    : isEnv
+      ? "Create this file in your project root and put your own keys in it"
+      : action === "modify"
+        ? "Open this existing file and update it"
+        : action === "run"
+          ? "Run this file"
+          : "Create this file (if it doesn't exist yet) and paste the code in";
   const Icon = isTerminal ? Terminal : FileCode2;
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
-      <span className="flex items-center gap-1.5 rounded-md bg-info/15 px-2 py-1 font-semibold text-info">
-        <Icon className="h-3.5 w-3.5" /> {isTerminal ? "Terminal" : "File"}
-      </span>
-      <span className="text-muted-foreground">{verb}</span>
-      {isTerminal ? null : (
-        <span className="rounded-md bg-muted px-2 py-1 font-mono font-medium text-foreground">
-          {file}
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
+        <span className="flex items-center gap-1.5 rounded-md bg-info/15 px-2 py-1 font-semibold text-info">
+          <Icon className="h-3.5 w-3.5" /> {isTerminal ? "Terminal" : "File"}
         </span>
-      )}
+        <span className="text-muted-foreground">{verb}</span>
+        {isTerminal ? null : (
+          <span className="rounded-md bg-muted px-2 py-1 font-mono font-medium text-foreground">
+            {name}
+          </span>
+        )}
+      </div>
+      {isEnv ? (
+        <div className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Set up your environment variables.</span>{" "}
+          Replace every placeholder with your own value, keep the file in the project root, and add{" "}
+          <span className="font-mono">.env</span> to <span className="font-mono">.gitignore</span> so
+          your keys never get pushed online.
+        </div>
+      ) : null}
+      {isRequirements ? (
+        <div className="rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Install the dependencies.</span> After
+          saving this file run{" "}
+          <span className="font-mono">
+            {/package\.json$/i.test(name) ? "npm install" : "pip install -r requirements.txt"}
+          </span>{" "}
+          in your terminal.
+        </div>
+      ) : null}
     </div>
   );
 }

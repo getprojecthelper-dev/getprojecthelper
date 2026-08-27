@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,18 @@ export function CodeBlock({
     }
   };
 
+  // let the student save this snippet straight to disk instead of copy-pasting
+  const download = () => {
+    const name = (filename ?? "").split("/").pop()?.trim();
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name && /\.[a-z0-9]+$/i.test(name) ? name : `snippet.${language || "txt"}`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const plain = isPlainLanguage(language, filename);
   const lines = useMemo(
     () => code.replace(/\n$/, "").split("\n").map((line) => highlightLine(line, plain)),
@@ -67,10 +79,16 @@ export function CodeBlock({
           </span>
           <span className="font-mono">{filename ?? language ?? "code"}</span>
         </div>
-        <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
-          {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
+            {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={download}>
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </Button>
+        </div>
       </div>
       <div className="max-h-[26rem] overflow-auto bg-card">
         <table className="w-full border-collapse font-mono text-[12.5px] leading-relaxed">

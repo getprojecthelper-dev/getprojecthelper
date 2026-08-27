@@ -1,8 +1,9 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { highlightLine, type TokenKind } from "@/lib/highlight";
+import { downloadNotebook } from "@/lib/notebook";
 import { cn } from "@/lib/utils";
 
 const TOKEN_CLASS: Record<TokenKind, string> = {
@@ -60,14 +61,29 @@ export function NotebookCell({
         <p className="truncate font-mono text-xs text-muted-foreground">
           {notebook ? `${notebook} · ` : ""}notebook cell{index ? ` ${index}` : ""}
         </p>
-        <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
-          {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy cell"}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
+            {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy cell"}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 gap-1.5 px-2 text-xs"
+            onClick={() =>
+              downloadNotebook(notebook ?? "cell.ipynb", [
+                { title: `Cell ${index ?? 1}`, code },
+              ])
+            }
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </Button>
+        </div>
       </div>
       <div className="flex items-stretch">
         <div className="select-none border-r border-border/60 bg-muted/30 px-3 py-3 font-mono text-[11px] text-info">
-          In [ ]:
+          In [{index ?? " "}]:
         </div>
         <div className="min-w-0 flex-1 overflow-auto py-2">
           <pre className="whitespace-pre px-3 font-mono text-[12.5px] leading-relaxed text-card-foreground">

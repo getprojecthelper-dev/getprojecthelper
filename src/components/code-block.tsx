@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -67,10 +67,16 @@ export function CodeBlock({
           </span>
           <span className="font-mono">{filename ?? language ?? "code"}</span>
         </div>
-        <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
-          {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={copy}>
+            {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onClick={download}>
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </Button>
+        </div>
       </div>
       <div className="max-h-[26rem] overflow-auto bg-card">
         <table className="w-full border-collapse font-mono text-[12.5px] leading-relaxed">

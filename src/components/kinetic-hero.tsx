@@ -116,6 +116,9 @@ export function KineticHero() {
           <h1 className="mt-8 max-w-2xl font-display text-5xl leading-[0.92] tracking-tight sm:text-6xl lg:text-7xl">
             From messy <span className="text-primary">ideas</span> to a polished{" "}
             <span className="font-light italic text-warning">viva</span>.
+            <span className="mt-4 block text-base font-medium tracking-normal text-hero-ink-muted sm:text-lg">
+              Project Helper — the AI academic project planner for students.
+            </span>
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-hero-ink-muted">

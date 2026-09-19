@@ -112,17 +112,24 @@ function AuthPage() {
   };
 
   const google = async () => {
+    if (busy) return;
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: { prompt: "select_account" },
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (!data.session) throw new Error("Google did not return a valid session.");
+      // AuthProvider receives the confirmed session and moves the user to the dashboard.
+    } catch (error) {
       setBusy(false);
-      toast.error("Google sign-in didn't work. Try email instead.");
-      return;
+      toast.error(error instanceof Error ? error.message : "Google sign-in didn't work. Try again.");
     }
-    if (result.redirected) return;
-    void navigate({ to: "/dashboard", replace: true });
   };
 
   return (

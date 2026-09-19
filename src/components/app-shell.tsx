@@ -1,73 +1,53 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useProjectsOverview } from "@/lib/db";
 import { signOutAndRedirect } from "@/lib/sign-out";
 
 /**
- * Persistent workspace chrome: sidebar + header shared by every signed-in page.
+ * Compact workspace chrome shared by every signed-in page.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const params = useParams({ strict: false }) as { projectId?: string };
-  const { data: overviews } = useProjectsOverview();
-  const projectId = params.projectId ?? overviews?.[0]?.project.id;
-
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-secondary/30">
-        <DashboardSidebar projectId={projectId} />
-        <SidebarInset className="min-w-0 flex-1 bg-secondary/30">
-          <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-            <div className="flex h-16 items-center justify-between gap-2 px-4">
-              <div className="flex min-w-0 items-center gap-2">
-                <SidebarTrigger className="shrink-0" />
-                <Link to="/dashboard" className="flex min-w-0 items-center gap-2 font-display">
-                  <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6 shrink-0" />
-                  <span className="hidden truncate sm:inline">Project Helper</span>
-                </Link>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <CreditChip />
-                <ThemeToggle />
-                <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-                  <Link to="/settings">
-                    <Settings className="h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hidden sm:flex"
-                  onClick={() =>
-                    void signOutAndRedirect(queryClient, () =>
-                      navigate({ to: "/auth", replace: true }),
-                    )
-                  }
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Log out</span>
-                </Button>
-              </div>
-            </div>
-          </header>
+    <div className="min-h-screen w-full bg-secondary/30">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
+          <Link to="/welcome" className="flex min-w-0 items-center gap-2 font-display font-semibold">
+            <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-7 w-7 shrink-0" />
+            <span className="truncate">Project Helper</span>
+          </Link>
+          <div className="flex shrink-0 items-center gap-1">
+            <CreditChip />
+            <ThemeToggle />
+            <Button asChild variant="ghost" size="icon" aria-label="Settings">
+              <Link to="/settings"><Settings className="h-4 w-4" /></Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Log out"
+              onClick={() =>
+                void signOutAndRedirect(queryClient, () =>
+                  navigate({ to: "/auth", replace: true }),
+                )
+              }
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </header>
 
-          <LowCreditsBanner />
-
-          {children}
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+      <LowCreditsBanner />
+      {children}
+    </div>
   );
 }

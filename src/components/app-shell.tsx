@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Settings } from "lucide-react";
+import { ArrowLeft, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import brandMark from "@/assets/mentor-mark.png";

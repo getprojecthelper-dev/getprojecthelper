@@ -6,6 +6,7 @@ import {
   FileText,
   Hammer,
   History,
+  Home,
   LayoutDashboard,
   MessagesSquare,
   Settings,
@@ -145,7 +146,7 @@ type WorkspaceLink = {
 };
 
 const WORKSPACE_LINKS: WorkspaceLink[] = [
-  { title: "Workspace", description: "Your starting point", icon: LayoutDashboard, to: "/welcome" },
+  { title: "Home", description: "Your starting point", icon: Home, to: "/welcome" },
   { title: "Dashboard", description: "View every project", icon: LayoutDashboard, to: "/dashboard" },
   { title: "Credits", description: "Balance and top-ups", icon: Coins, to: "/credits" },
   { title: "Settings", description: "Profile and preferences", icon: Settings, to: "/settings" },

@@ -39,6 +39,7 @@ import { Route as AuthenticatedProjectsProjectIdShowcaseRouteImport } from './ro
 import { Route as AuthenticatedProjectsProjectIdStakeholdersRouteImport } from './routes/_authenticated.projects.$projectId.stakeholders'
 import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
 import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedProjectsProjectIdMentorIndexRouteImport } from './routes/_authenticated.projects.$projectId.mentor.index'
 import { Route as AuthenticatedProjectsProjectIdMentorThreadIdRouteImport } from './routes/_authenticated.projects.$projectId.mentor.$threadId'
 
@@ -207,6 +208,12 @@ const AuthenticatedProjectsProjectIdTestingRoute =
     path: '/testing',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedProjectsProjectIdMentorIndexRoute =
   AuthenticatedProjectsProjectIdMentorIndexRouteImport.update({
     id: '/',
@@ -249,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -280,6 +288,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -315,6 +324,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/_authenticated/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/_authenticated/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/projects/$projectId/'
     | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor/'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/projects/$projectId'
     | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor'
@@ -415,6 +427,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/stakeholders'
     | '/_authenticated/projects/$projectId/tasks'
     | '/_authenticated/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/_authenticated/projects/$projectId/'
     | '/_authenticated/projects/$projectId/mentor/$threadId'
     | '/_authenticated/projects/$projectId/mentor/'
@@ -428,6 +441,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -642,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdTestingRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/projects/$projectId/mentor/': {
       id: '/_authenticated/projects/$projectId/mentor/'
       path: '/'
@@ -769,6 +790,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

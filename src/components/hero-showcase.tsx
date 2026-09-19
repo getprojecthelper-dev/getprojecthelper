@@ -33,7 +33,7 @@ export function HeroShowcase() {
           <div className="animate-fade-in mt-8 grid gap-3 [animation-delay:200ms] sm:flex sm:flex-wrap sm:items-center">
             <Button asChild size="lg" className="group w-full sm:w-auto">
               {session ? (
-                <Link to="/dashboard">Open your workspace<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
+                <Link to="/welcome">Open your workspace<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
               ) : (
                 <Link to="/auth" search={{ mode: "signup" }}>Start your project<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
               )}

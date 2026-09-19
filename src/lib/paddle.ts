@@ -10,7 +10,7 @@ type PaddleWindow = Window & {
     Initialize: (options: { token: string; eventCallback?: (event: CheckoutEvent) => void }) => void;
     Checkout: { open: (options: Record<string, unknown>) => void };
     PricePreview: (options: Record<string, unknown>) => Promise<{
-      data?: { details?: { lineItems?: Array<{ formattedTotals?: { subtotal?: string } }> } };
+      data?: { details?: { lineItems?: Array<{ formattedTotals?: { total?: string } }> } };
     }>;
   };
 };
@@ -64,7 +64,7 @@ export async function getLocalizedProjectPrice(priceId: string): Promise<string 
   if (!paddle) return null;
   const internalPriceId = await getPaddlePriceId(priceId);
   const preview = await paddle.PricePreview({ items: [{ priceId: internalPriceId, quantity: 1 }] });
-  return preview.data?.details?.lineItems?.[0]?.formattedTotals?.subtotal ?? null;
+  return preview.data?.details?.lineItems?.[0]?.formattedTotals?.total ?? null;
 }
 
 export async function openProjectCheckout(options: {

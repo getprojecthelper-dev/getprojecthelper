@@ -34,7 +34,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
       }
       if (event === "SIGNED_IN") {
-        void router.navigate({ to: "/welcome" });
+        // Only reroute logins landing on public pages; deep links stay put.
+        const path = router.state.location.pathname;
+        if (path === "/" || path === "/auth") {
+          void router.navigate({ to: "/welcome" });
+        }
       }
     });
 

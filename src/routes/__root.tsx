@@ -95,6 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Project Helper" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "google-site-verification", content: "4AeM5-UuNkYo-z5rmQe8tum4__dV7MiX0QwUw_DO14U" },
       { name: "twitter:title", content: "Project Helper — From Idea to Final Submission" },
       { name: "twitter:description", content: "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace." },
     ],

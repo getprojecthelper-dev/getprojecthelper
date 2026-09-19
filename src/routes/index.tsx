@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
+import { HeaderAccountMenu } from "@/components/header-account-menu";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,7 +67,7 @@ function Landing() {
           <div className="flex items-center gap-1">
             <ThemeToggle className="text-hero-ink hover:bg-hero-ink/10" />
             {!loading && session ? (
-              <Button asChild size="sm"><Link to="/dashboard">Dashboard</Link></Button>
+              <HeaderAccountMenu />
             ) : (
               <>
                 <Button asChild variant="ghost" size="sm" className="hidden text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink sm:inline-flex"><Link to="/auth">Log in</Link></Button>
@@ -82,6 +83,12 @@ function Landing() {
                   <SheetClose asChild><Link to="/pricing" className="rounded-md px-3 py-3 font-medium hover:bg-secondary">Pricing</Link></SheetClose>
                 </nav>
                 <div className="mt-8 grid gap-2">
+                  {session ? (
+                    <div className="mb-2 rounded-md border border-border bg-secondary/50 p-3">
+                      <p className="truncate text-sm font-semibold">{String(session.user.user_metadata?.["full_name"] || "Your profile")}</p>
+                      <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>
+                    </div>
+                  ) : null}
                   <Button asChild><Link to={session ? "/dashboard" : "/auth"}>{session ? "Open dashboard" : "Log in"}</Link></Button>
                   {!session ? <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account</Link></Button> : null}
                 </div>
@@ -95,7 +102,7 @@ function Landing() {
         <HeroShowcase />
 
         <section id="how-it-works" className="border-b border-border bg-secondary/50">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
             <div className="mx-auto max-w-2xl text-center">
               <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
                 How it works
@@ -112,7 +119,7 @@ function Landing() {
           </div>
         </section>
 
-        <section id="domains" className="mx-auto max-w-6xl px-5 py-20">
+        <section id="domains" className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="font-display text-3xl">Popular domains</h2>
@@ -131,14 +138,14 @@ function Landing() {
         </section>
 
         <section id="features" className="border-y border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
             <p className="text-xs font-semibold uppercase text-primary">One connected workspace</p>
             <h2 className="mt-3 max-w-2xl font-display text-3xl sm:text-4xl">The work stays connected from first idea to final defence.</h2>
             <FeatureGrid />
           </div>
         </section>
 
-        <section id="mentor" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+        <section id="mentor" className="mx-auto grid max-w-6xl gap-8 px-5 py-14 sm:py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <div>
             <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground"><MessageSquareText className="h-5 w-5" /></span>
             <h2 className="mt-5 font-display text-3xl sm:text-4xl">A mentor that knows your actual project.</h2>
@@ -153,7 +160,7 @@ function Landing() {
           </div>
         </section>
         <section className="border-t border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
             <div className="mx-auto mb-10 max-w-2xl text-center">
               <h2 className="font-display text-3xl">
                 Loved by students &amp; developers

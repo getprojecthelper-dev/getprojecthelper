@@ -24,7 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      if (!active) return;
       setSession(next);
       setLoading(false);
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
@@ -33,12 +35,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+    void supabase.auth.getUser().then(({ data, error }) => {
+      if (!active) return;
+      if (error || !data.user) {
+        setSession(null);
+        setLoading(false);
+        return;
+      }
+      void supabase.auth.getSession().then(({ data: sessionData }) => {
+        if (!active) return;
+        setSession(sessionData.session);
+        setLoading(false);
+      });
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [queryClient, router]);
 
   const value = useMemo(

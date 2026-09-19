@@ -12,7 +12,7 @@ export function HeroShowcase() {
     <section className="hero-surface relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:radial-gradient(var(--hero-ink)_1px,transparent_1px)] [background-size:26px_26px]" />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-32 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:pb-28 lg:pt-36">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-28 sm:pb-16 sm:pt-32 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:pb-20 lg:pt-32">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-hero-line bg-hero-ink/10 px-3 py-1 text-xs font-medium text-hero-ink-muted">
             <Sparkles className="h-3.5 w-3.5 text-primary" />

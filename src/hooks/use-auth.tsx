@@ -33,6 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         void router.invalidate();
         if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
       }
+      if (event === "SIGNED_IN") {
+        // Only reroute logins landing on public pages; deep links stay put.
+        const path = router.state.location.pathname;
+        if (path === "/" || path === "/auth") {
+          void router.navigate({ to: "/welcome" });
+        }
+      }
     });
 
     void supabase.auth.getUser().then(({ data, error }) => {

@@ -67,15 +67,15 @@ function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <header className="absolute inset-x-0 top-0 z-50">
-        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
+        <div className="mx-auto grid h-20 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:px-6 lg:flex lg:justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2 font-display text-lg text-hero-ink"
+            className="flex min-w-0 items-center gap-2 font-display text-lg text-hero-ink"
           >
-            <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6" />
-            Project Helper
+            <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-6 w-6 shrink-0" />
+            <span className="truncate">Project Helper</span>
           </Link>
-          <nav className="hidden items-center gap-7 text-sm md:flex">
+          <nav className="hidden items-center gap-6 text-sm lg:flex xl:gap-8">
             {nav.map(([label, href]) => <a key={href} href={href} className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">{label}</a>)}
             <Link
               to="/pricing"
@@ -95,7 +95,7 @@ function Landing() {
               </>
             )}
             <Sheet>
-              <SheetTrigger asChild><Button size="icon" variant="ghost" className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink md:hidden" aria-label="Open menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
+              <SheetTrigger asChild><Button size="icon" variant="ghost" className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink lg:hidden" aria-label="Open menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
               <SheetContent side="right" className="w-[min(22rem,88vw)]">
                 <SheetTitle>Project Helper</SheetTitle>
                 <nav className="mt-8 flex flex-col gap-1">
@@ -122,7 +122,7 @@ function Landing() {
         <HeroShowcase />
 
         <section id="how-it-works" className="border-b border-border bg-secondary/50">
-          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
+          <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-16">
             <div className="mx-auto max-w-2xl text-center">
               <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
                 How it works
@@ -139,9 +139,9 @@ function Landing() {
           </div>
         </section>
 
-        <section id="domains" className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
+        <section id="domains" className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-16">
+          <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 max-sm:grid-cols-1">
+            <div className="min-w-0">
               <h2 className="font-display text-3xl">Popular domains</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Start your project in any of these domains — each one opens the right sections.
@@ -158,14 +158,14 @@ function Landing() {
         </section>
 
         <section id="features" className="border-y border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
+          <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-16">
             <p className="text-xs font-semibold uppercase text-primary">One connected workspace</p>
             <h2 className="mt-3 max-w-2xl font-display text-3xl sm:text-4xl">The work stays connected from first idea to final defence.</h2>
             <FeatureGrid />
           </div>
         </section>
 
-        <section id="mentor" className="mx-auto grid max-w-6xl gap-8 px-5 py-14 sm:py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+        <section id="mentor" className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <div>
             <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground"><MessageSquareText className="h-5 w-5" /></span>
             <h2 className="mt-5 font-display text-3xl sm:text-4xl">A mentor that knows your actual project.</h2>
@@ -180,7 +180,7 @@ function Landing() {
           </div>
         </section>
         <section className="border-t border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
+          <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-16">
             <div className="mx-auto mb-10 max-w-2xl text-center">
               <h2 className="font-display text-3xl">
                 Loved by students &amp; developers
@@ -196,7 +196,7 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 text-sm text-muted-foreground sm:px-6">
           <span>Project Helper — plan, build, document and showcase your work.</span>
           <Button asChild>
             {session ? (

@@ -21,17 +21,17 @@ const ACTIVITY = [
 /** Stylised in-app preview shown beside the hero copy. */
 export function WorkspacePreview() {
   return (
-    <div className="relative">
-      <div className="absolute -inset-6 rounded-[2rem] bg-hero-ink/5 blur-2xl" aria-hidden />
+    <div className="relative min-w-0">
+      <div className="absolute inset-0 scale-[1.04] rounded-2xl bg-hero-ink/5 blur-2xl" aria-hidden />
       <div
-        className="relative overflow-hidden rounded-2xl border border-hero-line bg-card text-card-foreground shadow-2xl"
+        className="relative w-full min-w-0 overflow-hidden rounded-2xl border border-hero-line bg-card text-card-foreground shadow-2xl"
         aria-hidden
       >
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-          <span className="ml-3 text-xs font-medium text-muted-foreground">
+          <span className="ml-3 min-w-0 truncate text-xs font-medium text-muted-foreground">
             Project Helper — Dashboard
           </span>
         </div>
@@ -66,7 +66,7 @@ export function WorkspacePreview() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="min-w-0 space-y-3">
             <div className="grid gap-2 sm:grid-cols-3">
               {PROJECTS.map((project) => (
                 <div key={project.name} className="rounded-lg border border-border p-2.5">
@@ -98,7 +98,7 @@ export function WorkspacePreview() {
                 {ACTIVITY.map((item) => (
                   <li
                     key={item.text}
-                    className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-[10px] text-muted-foreground"
                   >
                     <span className="truncate">{item.text}</span>
                     <span className="shrink-0">{item.time}</span>

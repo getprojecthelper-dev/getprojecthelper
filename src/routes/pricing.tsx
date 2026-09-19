@@ -41,10 +41,6 @@ const FAQ = [
     a: "No. Credits stay on your account until you use them, and anything reserved for a run that fails comes straight back to your balance.",
   },
   {
-    q: "Why are Indian prices lower?",
-    a: "Project Helper is built for students. Prices are set for local student budgets, so the same packs cost less in India and South Asia.",
-  },
-  {
     q: "Is there a subscription?",
     a: "No. You buy credits when you need them, and nothing renews automatically.",
   },

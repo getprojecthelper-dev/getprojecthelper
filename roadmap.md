@@ -1,0 +1,7 @@
+# Roadmap
+
+- [ ] Remove the “Why are Indian prices lower?” question from the pricing page and its source code.
+- [ ] Rebuild the homepage in the approved editorial product direction.
+- [ ] Fix login, signup, password recovery, sign-out, and profile management.
+- [ ] Add and persist separate Easy, Intermediate, and Advanced code-generation levels.
+- [ ] Verify builds, account flows, project generation settings, and desktop/mobile presentation.

@@ -514,6 +514,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          preferences: Json
           updated_at: string
         }
         Insert: {
@@ -521,6 +522,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          preferences?: Json
           updated_at?: string
         }
         Update: {
@@ -528,6 +530,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          preferences?: Json
           updated_at?: string
         }
         Relationships: []
@@ -536,6 +539,7 @@ export type Database = {
         Row: {
           academic_level: string | null
           builder_step: string
+          code_complexity: string
           created_at: string
           current_stage: string
           dataset: Json | null
@@ -558,6 +562,7 @@ export type Database = {
         Insert: {
           academic_level?: string | null
           builder_step?: string
+          code_complexity?: string
           created_at?: string
           current_stage?: string
           dataset?: Json | null
@@ -580,6 +585,7 @@ export type Database = {
         Update: {
           academic_level?: string | null
           builder_step?: string
+          code_complexity?: string
           created_at?: string
           current_stage?: string
           dataset?: Json | null

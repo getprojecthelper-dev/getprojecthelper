@@ -24,6 +24,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated.welcome'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedCheckoutSuccessRouteImport } from './routes/_authenticated.checkout.success'
+import { Route as AuthenticatedPremadeIndexRouteImport } from './routes/_authenticated.premade.index'
 import { Route as AuthenticatedPremadeProjectIdRouteImport } from './routes/_authenticated.premade.$projectId'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
@@ -119,6 +120,12 @@ const AuthenticatedCheckoutSuccessRoute =
     id: '/checkout/success',
     path: '/checkout/success',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPremadeIndexRoute =
+  AuthenticatedPremadeIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPremadeRoute,
   } as any)
 const AuthenticatedPremadeProjectIdRoute =
   AuthenticatedPremadeProjectIdRouteImport.update({
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
   '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/premade/': typeof AuthenticatedPremadeIndexRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -287,12 +295,12 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
-  '/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
   '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
   '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
+  '/premade': typeof AuthenticatedPremadeIndexRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -330,6 +338,7 @@ export interface FileRoutesById {
   '/_authenticated/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
   '/_authenticated/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/_authenticated/premade/': typeof AuthenticatedPremadeIndexRoute
   '/_authenticated/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/premade/$projectId'
     | '/projects/$projectId'
+    | '/premade/'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -397,12 +407,12 @@ export interface FileRouteTypes {
     | '/credits'
     | '/dashboard'
     | '/new-project'
-    | '/premade'
     | '/settings'
     | '/welcome'
     | '/api/chat'
     | '/checkout/success'
     | '/premade/$projectId'
+    | '/premade'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -439,6 +449,7 @@ export interface FileRouteTypes {
     | '/_authenticated/checkout/success'
     | '/_authenticated/premade/$projectId'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/premade/'
     | '/_authenticated/projects/$projectId/budget'
     | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
@@ -576,6 +587,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/success'
       preLoaderRoute: typeof AuthenticatedCheckoutSuccessRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/premade/': {
+      id: '/_authenticated/premade/'
+      path: '/'
+      fullPath: '/premade/'
+      preLoaderRoute: typeof AuthenticatedPremadeIndexRouteImport
+      parentRoute: typeof AuthenticatedPremadeRoute
     }
     '/_authenticated/premade/$projectId': {
       id: '/_authenticated/premade/$projectId'
@@ -722,10 +740,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedPremadeRouteChildren {
   AuthenticatedPremadeProjectIdRoute: typeof AuthenticatedPremadeProjectIdRoute
+  AuthenticatedPremadeIndexRoute: typeof AuthenticatedPremadeIndexRoute
 }
 
 const AuthenticatedPremadeRouteChildren: AuthenticatedPremadeRouteChildren = {
   AuthenticatedPremadeProjectIdRoute: AuthenticatedPremadeProjectIdRoute,
+  AuthenticatedPremadeIndexRoute: AuthenticatedPremadeIndexRoute,
 }
 
 const AuthenticatedPremadeRouteWithChildren =

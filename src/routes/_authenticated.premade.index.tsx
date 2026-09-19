@@ -9,7 +9,7 @@ import { PREMADE_PROJECTS, type PremadeProject } from "@/lib/premade-projects";
 import { listProjectPurchases } from "@/lib/premade.functions";
 import { getPaddleEnvironment, getLocalizedProjectPrice } from "@/lib/paddle";
 
-export const Route = createFileRoute("/_authenticated/premade")({
+export const Route = createFileRoute("/_authenticated/premade/")({
   head: () => ({
     meta: [
       { title: "Buy Student Projects — Project Helper" },

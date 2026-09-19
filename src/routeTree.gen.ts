@@ -23,6 +23,8 @@ import { Route as AuthenticatedPremadeRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated.welcome'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedCheckoutSuccessRouteImport } from './routes/_authenticated.checkout.success'
+import { Route as AuthenticatedPremadeProjectIdRouteImport } from './routes/_authenticated.premade.$projectId'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
 import { Route as AuthenticatedProjectsProjectIdBudgetRouteImport } from './routes/_authenticated.projects.$projectId.budget'
@@ -112,6 +114,18 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCheckoutSuccessRoute =
+  AuthenticatedCheckoutSuccessRouteImport.update({
+    id: '/checkout/success',
+    path: '/checkout/success',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPremadeProjectIdRoute =
+  AuthenticatedPremadeProjectIdRouteImport.update({
+    id: '/$projectId',
+    path: '/$projectId',
+    getParentRoute: () => AuthenticatedPremadeRoute,
+  } as any)
 const AuthenticatedProjectsProjectIdRoute =
   AuthenticatedProjectsProjectIdRouteImport.update({
     id: '/projects/$projectId',
@@ -237,10 +251,12 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
-  '/premade': typeof AuthenticatedPremadeRoute
+  '/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
@@ -271,10 +287,12 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
-  '/premade': typeof AuthenticatedPremadeRoute
+  '/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -305,10 +323,12 @@ export interface FileRoutesById {
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
-  '/_authenticated/premade': typeof AuthenticatedPremadeRoute
+  '/_authenticated/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/_authenticated/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/_authenticated/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
@@ -345,6 +365,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/welcome'
     | '/api/chat'
+    | '/checkout/success'
+    | '/premade/$projectId'
     | '/projects/$projectId'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
@@ -379,6 +401,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/welcome'
     | '/api/chat'
+    | '/checkout/success'
+    | '/premade/$projectId'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -412,6 +436,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/welcome'
     | '/api/chat'
+    | '/_authenticated/checkout/success'
+    | '/_authenticated/premade/$projectId'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/$projectId/budget'
     | '/_authenticated/projects/$projectId/build'
@@ -543,6 +569,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/checkout/success': {
+      id: '/_authenticated/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof AuthenticatedCheckoutSuccessRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/premade/$projectId': {
+      id: '/_authenticated/premade/$projectId'
+      path: '/$projectId'
+      fullPath: '/premade/$projectId'
+      preLoaderRoute: typeof AuthenticatedPremadeProjectIdRouteImport
+      parentRoute: typeof AuthenticatedPremadeRoute
     }
     '/_authenticated/projects/$projectId': {
       id: '/_authenticated/projects/$projectId'
@@ -680,6 +720,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedPremadeRouteChildren {
+  AuthenticatedPremadeProjectIdRoute: typeof AuthenticatedPremadeProjectIdRoute
+}
+
+const AuthenticatedPremadeRouteChildren: AuthenticatedPremadeRouteChildren = {
+  AuthenticatedPremadeProjectIdRoute: AuthenticatedPremadeProjectIdRoute,
+}
+
+const AuthenticatedPremadeRouteWithChildren =
+  AuthenticatedPremadeRoute._addFileChildren(AuthenticatedPremadeRouteChildren)
+
 interface AuthenticatedProjectsProjectIdMentorRouteChildren {
   AuthenticatedProjectsProjectIdMentorThreadIdRoute: typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   AuthenticatedProjectsProjectIdMentorIndexRoute: typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -760,9 +811,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNewProjectRoute: typeof AuthenticatedNewProjectRoute
-  AuthenticatedPremadeRoute: typeof AuthenticatedPremadeRoute
+  AuthenticatedPremadeRoute: typeof AuthenticatedPremadeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
+  AuthenticatedCheckoutSuccessRoute: typeof AuthenticatedCheckoutSuccessRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRouteWithChildren
 }
 
@@ -771,9 +823,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCreditsRoute: AuthenticatedCreditsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNewProjectRoute: AuthenticatedNewProjectRoute,
-  AuthenticatedPremadeRoute: AuthenticatedPremadeRoute,
+  AuthenticatedPremadeRoute: AuthenticatedPremadeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
+  AuthenticatedCheckoutSuccessRoute: AuthenticatedCheckoutSuccessRoute,
   AuthenticatedProjectsProjectIdRoute:
     AuthenticatedProjectsProjectIdRouteWithChildren,
 }

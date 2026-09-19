@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, FileText, Hammer, ShoppingBag } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, Hammer, History, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -58,6 +58,75 @@ function ProjectPicker({
   );
 }
 
+function ResumeProjects() {
+  const { data: overviews, isLoading } = useProjectsOverview();
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Loading your projects…</p>;
+  }
+  if (!overviews?.length) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          No projects yet — your work-in-progress will show up here.
+        </p>
+        <Button asChild size="sm" variant="outline">
+          <Link to="/new-project">Start your first project</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const inProgress = overviews.filter((o) => o.progress < 100);
+  const completed = overviews.filter((o) => o.progress >= 100);
+  const list = [...inProgress, ...completed].slice(0, 4);
+
+  return (
+    <div className="space-y-1.5">
+      {list.map((o) => {
+        const done = o.progress >= 100;
+        return (
+          <Link
+            key={o.project.id}
+            to="/projects/$projectId/build"
+            params={{ projectId: o.project.id }}
+            className="block rounded-lg border border-border px-3 py-2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="truncate text-sm font-medium">{o.project.name}</span>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                  done ? "bg-emerald-500/15 text-emerald-400" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {done ? "Completed" : `${o.progress}%`}
+              </span>
+            </span>
+            <span className="mt-1.5 block h-1 overflow-hidden rounded-full bg-secondary">
+              <span
+                className={`block h-full rounded-full ${done ? "bg-emerald-400" : "bg-primary"}`}
+                style={{ width: `${Math.max(o.progress, 4)}%` }}
+              />
+            </span>
+            <span className="mt-1 block truncate text-xs text-muted-foreground">
+              {done
+                ? "All steps finished — reopen to review or regenerate."
+                : o.resumeSection
+                  ? `Pick up where you left: ${o.resumeSection.title}`
+                  : "Continue building"}
+            </span>
+          </Link>
+        );
+      })}
+      {overviews.length > 4 ? (
+        <Button asChild size="sm" variant="ghost" className="w-full">
+          <Link to="/dashboard">See all {overviews.length} projects</Link>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 function WelcomePage() {
   const { session } = useAuth();
   const fullName = String(session?.user.user_metadata?.["full_name"] ?? "").trim();
@@ -75,6 +144,22 @@ function WelcomePage() {
       </p>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2">
+        <div className="panel flex flex-col gap-3 p-6 sm:col-span-2">
+          <div className="flex items-start justify-between gap-2">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <History className="h-5 w-5" />
+            </span>
+          </div>
+          <h2 className="font-display text-xl">Resume a project</h2>
+          <p className="text-sm text-muted-foreground">
+            Jump straight back into where you left off — in-progress and finished projects both live
+            here.
+          </p>
+          <div className="mt-auto pt-2">
+            <ResumeProjects />
+          </div>
+        </div>
+
         <Link
           to="/new-project"
           className="group panel flex flex-col gap-3 p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"

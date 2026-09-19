@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DOMAINS } from "@/lib/project-domain";
 import { PREMADE_PROJECTS, type PremadeProject } from "@/lib/premade-projects";
 import { listCatalogPricing, listProjectPurchases, type CatalogPricing } from "@/lib/premade.functions";
-import { getPaddleEnvironment, getLocalizedProjectPrice } from "@/lib/paddle";
+import { getPaddleEnvironment, getLocalizedProjectPricing } from "@/lib/paddle";
 
 export const Route = createFileRoute("/_authenticated/premade/")({
   head: () => ({
@@ -31,15 +31,19 @@ function useLocalizedPrices() {
       const environment = getPaddleEnvironment();
       const pricing = await listCatalogPricing({ data: { environment } });
       const rows = await Promise.all(
-        PREMADE_PROJECTS.map(async (entry) => [entry.id, { localized: await getLocalizedProjectPrice(entry.priceId), config: pricing.find((row) => row.catalogProjectId === entry.id) }] as const),
+        PREMADE_PROJECTS.map(async (entry) => {
+          const config = pricing.find((row) => row.catalogProjectId === entry.id);
+          const localized = await getLocalizedProjectPricing(entry.priceId, config?.discountPercent ?? 0);
+          return [entry.id, { localized, config }] as const;
+        }),
       );
-      return Object.fromEntries(rows) as Record<string, { localized: string | null; config: CatalogPricing | undefined }>;
+      return Object.fromEntries(rows) as Record<string, { localized: { salePrice: string | null; regularPrice: string | null }; config: CatalogPricing | undefined }>;
     },
     staleTime: 30 * 60 * 1000,
   });
 }
 
-function PremadeCard({ entry, pricing, projectId }: { entry: PremadeProject; pricing: { localized: string | null; config: CatalogPricing | undefined } | undefined; projectId: string | null | undefined }) {
+function PremadeCard({ entry, pricing, projectId }: { entry: PremadeProject; pricing: { localized: { salePrice: string | null; regularPrice: string | null }; config: CatalogPricing | undefined } | undefined; projectId: string | null | undefined }) {
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
   return (
     <article className="panel flex min-w-0 flex-col gap-4 p-5 sm:p-6">
@@ -55,8 +59,8 @@ function PremadeCard({ entry, pricing, projectId }: { entry: PremadeProject; pri
       <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Tools:</span> {entry.stack}</p>
       <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
         <div>
-          {pricing?.config && pricing.config.discountPercent > 0 ? <p className="text-xs text-muted-foreground line-through">Regular ₹{(pricing.config.regularPriceMinor / 100).toLocaleString("en-IN")}</p> : null}
-          <p className="text-xl font-semibold">{pricing?.localized ?? "Local price at checkout"}</p>
+          {pricing?.config && pricing.config.discountPercent > 0 ? <p className="text-xs text-muted-foreground line-through">Regular {pricing.localized.regularPrice ?? `₹${(pricing.config.regularPriceMinor / 100).toLocaleString("en-IN")}`}</p> : null}
+          <p className="text-xl font-semibold">{pricing?.localized.salePrice ?? "Local price at checkout"}</p>
           {pricing?.config && pricing.config.discountPercent > 0 ? <p className="text-xs text-success">{pricing.config.discountPercent}% discount</p> : null}
         </div>
         <Button asChild>

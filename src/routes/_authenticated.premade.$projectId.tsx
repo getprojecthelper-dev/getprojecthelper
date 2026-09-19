@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { getPaddleEnvironment, getLocalizedProjectPrice, openProjectCheckout } from "@/lib/paddle";
+import { getPaddleEnvironment, getLocalizedProjectPricing, openProjectCheckout } from "@/lib/paddle";
 import { getPremadeProject } from "@/lib/premade-projects";
 import { getCatalogPricing, getProjectPurchase } from "@/lib/premade.functions";
 import { DOMAINS, getTemplate } from "@/lib/project-domain";
@@ -36,13 +36,14 @@ function ProjectDetails() {
     queryKey: ["project-purchase", projectId, environment],
     queryFn: () => getProjectPurchase({ data: { id: projectId, environment } }),
   });
-  const { data: price } = useQuery({
-    queryKey: ["premade-localized-price", entry.priceId, environment],
-    queryFn: () => getLocalizedProjectPrice(entry.priceId),
-  });
   const { data: pricing } = useQuery({
     queryKey: ["premade-pricing", environment, projectId],
     queryFn: () => getCatalogPricing({ data: { id: projectId, environment } }),
+  });
+  const { data: localizedPrice } = useQuery({
+    queryKey: ["premade-localized-price", entry.priceId, environment, pricing?.discountPercent],
+    queryFn: () => getLocalizedProjectPricing(entry.priceId, pricing?.discountPercent ?? 0),
+    enabled: pricing !== undefined,
   });
   const template = getTemplate(entry.domain);
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
@@ -82,8 +83,8 @@ function ProjectDetails() {
         </div>
         <aside className="panel h-fit p-5 lg:sticky lg:top-24">
           {pricing && pricing.discountPercent > 0 ? <div className="flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />{pricing.discountPercent}% discount</div> : null}
-          {pricing && pricing.discountPercent > 0 ? <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: ₹{(pricing.regularPriceMinor / 100).toLocaleString("en-IN")}</p> : null}
-          <p className="mt-1 text-3xl font-semibold">{price ?? "Local price at checkout"}</p>
+          {pricing && pricing.discountPercent > 0 ? <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: {localizedPrice?.regularPrice ?? `₹${(pricing.regularPriceMinor / 100).toLocaleString("en-IN")}`}</p> : null}
+          <p className="mt-1 text-3xl font-semibold">{localizedPrice?.salePrice ?? "Local price at checkout"}</p>
           <p className="mt-1 text-xs text-muted-foreground">One-time purchase</p>
           {purchase?.owned && purchase.projectId ? (
             <Button className="mt-5 w-full" onClick={() => void navigate({ to: "/projects/$projectId", params: { projectId: purchase.projectId ?? "" } })}>Open your project</Button>

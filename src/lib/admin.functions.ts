@@ -10,9 +10,10 @@ import {
 } from "@/lib/admin-codes";
 import type { UnitEconomics } from "@/lib/economics.server";
 import { PREMADE_PROJECTS } from "@/lib/premade-projects";
-import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
 
 export type { ReferralCodeRow };
+
+type PaddleEnv = "sandbox" | "live";
 
 export interface ProjectPricingRow {
   catalogProjectId: string;
@@ -64,6 +65,7 @@ export const updateAdminProjectPricing = createServerFn({ method: "POST" })
     const salePriceMinor = Math.round(data.regularPriceMinor * (100 - data.discountPercent) / 100);
     if (salePriceMinor < 70) throw new Error("The final price must be at least ₹0.70.");
 
+    const { gatewayFetch } = await import("@/lib/paddle.server");
     const lookup = await gatewayFetch(
       data.environment,
       `/prices?external_id=${encodeURIComponent(project.priceId)}`,

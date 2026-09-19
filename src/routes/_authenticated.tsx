@@ -9,6 +9,17 @@ import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Workspace — Project Helper" },
+      { name: "description", content: "Your private Project Helper workspace." },
+      { property: "og:title", content: "Workspace — Project Helper" },
+      { property: "og:description", content: "Your private Project Helper workspace." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AuthenticatedLayout,
 });
 

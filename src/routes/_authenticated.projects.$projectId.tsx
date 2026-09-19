@@ -13,6 +13,17 @@ import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
+  head: () => ({
+    meta: [
+      { title: "Project workspace — Project Helper" },
+      { name: "description", content: "Manage your private student project workspace." },
+      { property: "og:title", content: "Project workspace — Project Helper" },
+      { property: "og:description", content: "Manage your private student project workspace." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: WorkspaceLayout,
 });
 

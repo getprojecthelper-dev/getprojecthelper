@@ -3,6 +3,17 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createMentorThread, listMentorThreads } from "@/lib/mentor.functions";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/mentor/")({
+  head: () => ({
+    meta: [
+      { title: "AI project mentor — Project Helper" },
+      { name: "description", content: "Open your private project-aware AI mentor." },
+      { property: "og:title", content: "AI project mentor — Project Helper" },
+      { property: "og:description", content: "Open your private project-aware AI mentor." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   // Opening the mentor always lands on a real conversation URL: the newest
   // saved one, or a brand new chat when there is none yet.
   loader: async ({ params }) => {

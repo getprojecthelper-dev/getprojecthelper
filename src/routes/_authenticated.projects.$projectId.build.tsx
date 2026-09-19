@@ -64,6 +64,17 @@ import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/build")({
+  head: () => ({
+    meta: [
+      { title: "Implementation builder — Project Helper" },
+      { name: "description", content: "Build your private project step by step with guided implementation." },
+      { property: "og:title", content: "Implementation builder — Project Helper" },
+      { property: "og:description", content: "Build your private project step by step with guided implementation." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: BuildPage,
 });
 

@@ -47,7 +47,12 @@ function ProjectDetails() {
     if (!user || busy) return;
     setBusy(true);
     try {
-      await openProjectCheckout({ priceId: entry.priceId, catalogProjectId: entry.id, userId: user.id, customerEmail: user.email });
+      await openProjectCheckout({
+        priceId: entry.priceId,
+        catalogProjectId: entry.id,
+        userId: user.id,
+        ...(user.email ? { customerEmail: user.email } : {}),
+      });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Checkout could not be opened.");
     } finally {

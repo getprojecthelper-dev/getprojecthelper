@@ -9,7 +9,9 @@ import { getPremadeProject } from "@/lib/premade-projects";
 import { getProjectPurchase } from "@/lib/premade.functions";
 
 export const Route = createFileRoute("/_authenticated/checkout/success")({
-  validateSearch: (search: Record<string, unknown>) => ({ project: typeof search.project === "string" ? search.project : "" }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    project: typeof search["project"] === "string" ? search["project"] : "",
+  }),
   head: () => ({ meta: [
     { title: "Purchase complete — Project Helper" },
     { name: "description", content: "Your purchased project is being prepared." },

@@ -37,7 +37,7 @@ function useLocalizedPrices() {
   });
 }
 
-function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price?: string | null; projectId?: string | null }) {
+function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price: string | null | undefined; projectId: string | null | undefined }) {
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
   return (
     <article className="panel flex min-w-0 flex-col gap-4 p-5 sm:p-6">
@@ -53,7 +53,7 @@ function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price
       <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Tools:</span> {entry.stack}</p>
       <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
         <div>
-          {price ? <p className="text-xs text-muted-foreground line-through">{price.replace(/[\d.,]+/, (amount) => String(Number(amount.replace(/,/g, "")) * 2))}</p> : null}
+          {price ? <p className="text-xs text-muted-foreground line-through">2 × {price}</p> : null}
           <p className="text-xl font-semibold">{price ?? "Local price at checkout"}</p>
           <p className="text-xs text-success">50% launch discount</p>
         </div>

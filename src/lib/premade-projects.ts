@@ -1,5 +1,5 @@
 /**
- * Static catalogue of premade projects students can unlock with AI credits.
+ * Static catalogue of projects students can buy once.
  * Purchasing creates a real project in their workspace, pre-filled with a
  * detailed brief so the guided builder can take over from there.
  */
@@ -9,8 +9,9 @@ export interface PremadeProject {
   title: string;
   domain: "software" | "data_science" | "project_management";
   level: "Beginner" | "Intermediate" | "Advanced";
-  /** One-time unlock price in AI credits. */
-  priceCredits: number;
+  /** Stable payment-catalog identifiers shared between test and live. */
+  productId: string;
+  priceId: string;
   summary: string;
   /** Seeded into the project as its description — feeds every AI generation. */
   brief: string;
@@ -23,7 +24,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Campus Event Planner",
     domain: "software",
     level: "Beginner",
-    priceCredits: 20,
+    productId: "campus_event_planner",
+    priceId: "campus_event_planner_once",
     summary:
       "A web app where student clubs publish events, students RSVP, and organisers track attendance.",
     brief:
@@ -35,7 +37,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Personal Finance Tracker",
     domain: "software",
     level: "Intermediate",
-    priceCredits: 30,
+    productId: "personal_finance_tracker",
+    priceId: "personal_finance_tracker_once",
     summary:
       "Track income and expenses, set monthly budgets, and visualise spending habits over time.",
     brief:
@@ -47,7 +50,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Flight Delay Predictor",
     domain: "data_science",
     level: "Intermediate",
-    priceCredits: 30,
+    productId: "flight_delay_predictor",
+    priceId: "flight_delay_predictor_once",
     summary:
       "Predict arrival delays from historical flight data and compare classification models.",
     brief:
@@ -59,7 +63,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Student Performance Analysis",
     domain: "data_science",
     level: "Beginner",
-    priceCredits: 20,
+    productId: "student_performance_analysis",
+    priceId: "student_performance_analysis_once",
     summary:
       "Explore which factors influence exam scores and present the findings as a data story.",
     brief:
@@ -71,7 +76,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Website Redesign Project Plan",
     domain: "project_management",
     level: "Beginner",
-    priceCredits: 20,
+    productId: "website_redesign_pm",
+    priceId: "website_redesign_pm_once",
     summary:
       "Manage a small business website redesign from charter to closure with real PM deliverables.",
     brief:
@@ -83,7 +89,8 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
     title: "Office Relocation Project",
     domain: "project_management",
     level: "Advanced",
-    priceCredits: 40,
+    productId: "office_relocation_pm",
+    priceId: "office_relocation_pm_once",
     summary:
       "Plan a 60-person office move: scope, vendors, budget, risks and a week-by-week schedule.",
     brief:

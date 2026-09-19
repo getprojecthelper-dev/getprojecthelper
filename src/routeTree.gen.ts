@@ -23,6 +23,9 @@ import { Route as AuthenticatedPremadeRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated.welcome'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedCheckoutSuccessRouteImport } from './routes/_authenticated.checkout.success'
+import { Route as AuthenticatedPremadeIndexRouteImport } from './routes/_authenticated.premade.index'
+import { Route as AuthenticatedPremadeProjectIdRouteImport } from './routes/_authenticated.premade.$projectId'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
 import { Route as AuthenticatedProjectsProjectIdBudgetRouteImport } from './routes/_authenticated.projects.$projectId.budget'
@@ -39,6 +42,7 @@ import { Route as AuthenticatedProjectsProjectIdShowcaseRouteImport } from './ro
 import { Route as AuthenticatedProjectsProjectIdStakeholdersRouteImport } from './routes/_authenticated.projects.$projectId.stakeholders'
 import { Route as AuthenticatedProjectsProjectIdTasksRouteImport } from './routes/_authenticated.projects.$projectId.tasks'
 import { Route as AuthenticatedProjectsProjectIdTestingRouteImport } from './routes/_authenticated.projects.$projectId.testing'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedProjectsProjectIdMentorIndexRouteImport } from './routes/_authenticated.projects.$projectId.mentor.index'
 import { Route as AuthenticatedProjectsProjectIdMentorThreadIdRouteImport } from './routes/_authenticated.projects.$projectId.mentor.$threadId'
 
@@ -111,6 +115,24 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCheckoutSuccessRoute =
+  AuthenticatedCheckoutSuccessRouteImport.update({
+    id: '/checkout/success',
+    path: '/checkout/success',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPremadeIndexRoute =
+  AuthenticatedPremadeIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPremadeRoute,
+  } as any)
+const AuthenticatedPremadeProjectIdRoute =
+  AuthenticatedPremadeProjectIdRouteImport.update({
+    id: '/$projectId',
+    path: '/$projectId',
+    getParentRoute: () => AuthenticatedPremadeRoute,
+  } as any)
 const AuthenticatedProjectsProjectIdRoute =
   AuthenticatedProjectsProjectIdRouteImport.update({
     id: '/projects/$projectId',
@@ -207,6 +229,12 @@ const AuthenticatedProjectsProjectIdTestingRoute =
     path: '/testing',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedProjectsProjectIdMentorIndexRoute =
   AuthenticatedProjectsProjectIdMentorIndexRouteImport.update({
     id: '/',
@@ -230,11 +258,14 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
-  '/premade': typeof AuthenticatedPremadeRoute
+  '/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/premade/': typeof AuthenticatedPremadeIndexRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -249,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -263,10 +295,12 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
-  '/premade': typeof AuthenticatedPremadeRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
+  '/premade': typeof AuthenticatedPremadeIndexRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -280,6 +314,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/projects/$projectId/mentor': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -296,11 +331,14 @@ export interface FileRoutesById {
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
-  '/_authenticated/premade': typeof AuthenticatedPremadeRoute
+  '/_authenticated/premade': typeof AuthenticatedPremadeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/checkout/success': typeof AuthenticatedCheckoutSuccessRoute
+  '/_authenticated/premade/$projectId': typeof AuthenticatedPremadeProjectIdRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
+  '/_authenticated/premade/': typeof AuthenticatedPremadeIndexRoute
   '/_authenticated/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/_authenticated/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
   '/_authenticated/projects/$projectId/documents': typeof AuthenticatedProjectsProjectIdDocumentsRoute
@@ -315,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/stakeholders': typeof AuthenticatedProjectsProjectIdStakeholdersRoute
   '/_authenticated/projects/$projectId/tasks': typeof AuthenticatedProjectsProjectIdTasksRoute
   '/_authenticated/projects/$projectId/testing': typeof AuthenticatedProjectsProjectIdTestingRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/_authenticated/projects/$projectId/mentor/$threadId': typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
   '/_authenticated/projects/$projectId/mentor/': typeof AuthenticatedProjectsProjectIdMentorIndexRoute
@@ -335,7 +374,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/welcome'
     | '/api/chat'
+    | '/checkout/success'
+    | '/premade/$projectId'
     | '/projects/$projectId'
+    | '/premade/'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -350,6 +392,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/projects/$projectId/'
     | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor/'
@@ -364,10 +407,12 @@ export interface FileRouteTypes {
     | '/credits'
     | '/dashboard'
     | '/new-project'
-    | '/premade'
     | '/settings'
     | '/welcome'
     | '/api/chat'
+    | '/checkout/success'
+    | '/premade/$projectId'
+    | '/premade'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
     | '/projects/$projectId/documents'
@@ -381,6 +426,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/stakeholders'
     | '/projects/$projectId/tasks'
     | '/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/projects/$projectId'
     | '/projects/$projectId/mentor/$threadId'
     | '/projects/$projectId/mentor'
@@ -400,7 +446,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/welcome'
     | '/api/chat'
+    | '/_authenticated/checkout/success'
+    | '/_authenticated/premade/$projectId'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/premade/'
     | '/_authenticated/projects/$projectId/budget'
     | '/_authenticated/projects/$projectId/build'
     | '/_authenticated/projects/$projectId/documents'
@@ -415,6 +464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/stakeholders'
     | '/_authenticated/projects/$projectId/tasks'
     | '/_authenticated/projects/$projectId/testing'
+    | '/api/public/payments/webhook'
     | '/_authenticated/projects/$projectId/'
     | '/_authenticated/projects/$projectId/mentor/$threadId'
     | '/_authenticated/projects/$projectId/mentor/'
@@ -428,6 +478,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -529,6 +580,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/checkout/success': {
+      id: '/_authenticated/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof AuthenticatedCheckoutSuccessRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/premade/': {
+      id: '/_authenticated/premade/'
+      path: '/'
+      fullPath: '/premade/'
+      preLoaderRoute: typeof AuthenticatedPremadeIndexRouteImport
+      parentRoute: typeof AuthenticatedPremadeRoute
+    }
+    '/_authenticated/premade/$projectId': {
+      id: '/_authenticated/premade/$projectId'
+      path: '/$projectId'
+      fullPath: '/premade/$projectId'
+      preLoaderRoute: typeof AuthenticatedPremadeProjectIdRouteImport
+      parentRoute: typeof AuthenticatedPremadeRoute
     }
     '/_authenticated/projects/$projectId': {
       id: '/_authenticated/projects/$projectId'
@@ -642,6 +714,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdTestingRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/projects/$projectId/mentor/': {
       id: '/_authenticated/projects/$projectId/mentor/'
       path: '/'
@@ -658,6 +737,19 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedPremadeRouteChildren {
+  AuthenticatedPremadeProjectIdRoute: typeof AuthenticatedPremadeProjectIdRoute
+  AuthenticatedPremadeIndexRoute: typeof AuthenticatedPremadeIndexRoute
+}
+
+const AuthenticatedPremadeRouteChildren: AuthenticatedPremadeRouteChildren = {
+  AuthenticatedPremadeProjectIdRoute: AuthenticatedPremadeProjectIdRoute,
+  AuthenticatedPremadeIndexRoute: AuthenticatedPremadeIndexRoute,
+}
+
+const AuthenticatedPremadeRouteWithChildren =
+  AuthenticatedPremadeRoute._addFileChildren(AuthenticatedPremadeRouteChildren)
 
 interface AuthenticatedProjectsProjectIdMentorRouteChildren {
   AuthenticatedProjectsProjectIdMentorThreadIdRoute: typeof AuthenticatedProjectsProjectIdMentorThreadIdRoute
@@ -739,9 +831,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNewProjectRoute: typeof AuthenticatedNewProjectRoute
-  AuthenticatedPremadeRoute: typeof AuthenticatedPremadeRoute
+  AuthenticatedPremadeRoute: typeof AuthenticatedPremadeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
+  AuthenticatedCheckoutSuccessRoute: typeof AuthenticatedCheckoutSuccessRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRouteWithChildren
 }
 
@@ -750,9 +843,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCreditsRoute: AuthenticatedCreditsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNewProjectRoute: AuthenticatedNewProjectRoute,
-  AuthenticatedPremadeRoute: AuthenticatedPremadeRoute,
+  AuthenticatedPremadeRoute: AuthenticatedPremadeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
+  AuthenticatedCheckoutSuccessRoute: AuthenticatedCheckoutSuccessRoute,
   AuthenticatedProjectsProjectIdRoute:
     AuthenticatedProjectsProjectIdRouteWithChildren,
 }
@@ -769,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

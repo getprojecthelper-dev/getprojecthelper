@@ -217,10 +217,10 @@ function WelcomePage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <ShoppingBag className="h-5 w-5" />
             </span>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">Paid · credits</span>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">One-time purchase</span>
           </div>
-          <h2 className="font-display text-xl sm:text-2xl">Explore premade projects</h2>
-          <p className="text-sm text-muted-foreground">Unlock a ready-made project and make it your own.</p>
+          <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
+          <p className="text-sm text-muted-foreground">Choose a guided project, review its details, and make it your own.</p>
           <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Browse projects <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
         </Link>
       </section>

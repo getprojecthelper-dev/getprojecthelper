@@ -1,14 +1,17 @@
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Menu, MessageSquareText } from "lucide-react";
 
 import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";
 import { LifecycleStepper } from "@/components/lifecycle-stepper";
 import { Testimonials } from "@/components/testimonials";
+import { FeatureGrid } from "@/components/feature-grid";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,6 +36,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const { session, loading } = useAuth();
+  const nav = [
+    ["How it works", "#how-it-works"],
+    ["Domains", "#domains"],
+    ["Features", "#features"],
+    ["AI Mentor", "#mentor"],
+  ] as const;
   return (
     <div className="min-h-screen bg-background">
       <header className="absolute inset-x-0 top-0 z-50">
@@ -45,52 +55,38 @@ function Landing() {
             Project Helper
           </Link>
           <nav className="hidden items-center gap-7 text-sm md:flex">
-            <a
-              href="#how-it-works"
-              className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink"
-            >
-              How it works
-            </a>
-            <a
-              href="#domains"
-              className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink"
-            >
-              Domains
-            </a>
-            <a
-              href="#features"
-              className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink"
-            >
-              Features
-            </a>
+            {nav.map(([label, href]) => <a key={href} href={href} className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink">{label}</a>)}
             <Link
               to="/pricing"
               className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink"
             >
               Pricing
             </Link>
-            <a
-              href="#mentor"
-              className="story-link text-hero-ink-muted transition-colors hover:text-hero-ink"
-            >
-              AI Mentor
-            </a>
           </nav>
           <div className="flex items-center gap-1">
             <ThemeToggle className="text-hero-ink hover:bg-hero-ink/10" />
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink"
-            >
-              <Link to="/auth">Log in</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                Sign up
-              </Link>
-            </Button>
+            {!loading && session ? (
+              <Button asChild size="sm"><Link to="/dashboard">Dashboard</Link></Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm" className="hidden text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink sm:inline-flex"><Link to="/auth">Log in</Link></Button>
+                <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/auth" search={{ mode: "signup" }}>Sign up</Link></Button>
+              </>
+            )}
+            <Sheet>
+              <SheetTrigger asChild><Button size="icon" variant="ghost" className="text-hero-ink hover:bg-hero-ink/10 hover:text-hero-ink md:hidden" aria-label="Open menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
+              <SheetContent side="right" className="w-[min(22rem,88vw)]">
+                <SheetTitle>Project Helper</SheetTitle>
+                <nav className="mt-8 flex flex-col gap-1">
+                  {nav.map(([label, href]) => <SheetClose key={href} asChild><a href={href} className="rounded-md px-3 py-3 font-medium hover:bg-secondary">{label}</a></SheetClose>)}
+                  <SheetClose asChild><Link to="/pricing" className="rounded-md px-3 py-3 font-medium hover:bg-secondary">Pricing</Link></SheetClose>
+                </nav>
+                <div className="mt-8 grid gap-2">
+                  <Button asChild><Link to={session ? "/dashboard" : "/auth"}>{session ? "Open dashboard" : "Log in"}</Link></Button>
+                  {!session ? <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account</Link></Button> : null}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -134,8 +130,28 @@ function Landing() {
           <DomainCards />
         </section>
 
+        <section id="features" className="border-y border-border bg-secondary/40">
+          <div className="mx-auto max-w-6xl px-5 py-20">
+            <p className="text-xs font-semibold uppercase text-primary">One connected workspace</p>
+            <h2 className="mt-3 max-w-2xl font-display text-3xl sm:text-4xl">The work stays connected from first idea to final defence.</h2>
+            <FeatureGrid />
+          </div>
+        </section>
 
-
+        <section id="mentor" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground"><MessageSquareText className="h-5 w-5" /></span>
+            <h2 className="mt-5 font-display text-3xl sm:text-4xl">A mentor that knows your actual project.</h2>
+            <p className="mt-4 text-muted-foreground">Import a project and ask about its plan, requirements, code, tests, or viva. Every conversation starts fresh and stays grounded in your work.</p>
+          </div>
+          <div className="panel overflow-hidden">
+            <div className="border-b border-border px-5 py-3 text-xs font-semibold uppercase text-muted-foreground">Mentor · Flight delay predictor</div>
+            <div className="space-y-5 p-5 sm:p-7">
+              <div className="ml-auto max-w-[82%] rounded-md bg-primary px-4 py-3 text-sm text-primary-foreground">Why did my validation score drop after I added more features?</div>
+              <div className="max-w-[88%] border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">Your test results show the training score rose while validation fell. That usually means the model memorised noise. Try removing the two weakest features, then compare both scores again.</div>
+            </div>
+          </div>
+        </section>
         <section className="border-t border-border bg-secondary/40">
           <div className="mx-auto max-w-6xl px-5 py-20">
             <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -153,8 +169,9 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-8">
-        <div className="mx-auto max-w-6xl px-5 text-sm text-muted-foreground">
-          Project Helper — plan, build, document and showcase your work.
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 text-sm text-muted-foreground">
+          <span>Project Helper — plan, build, document and showcase your work.</span>
+          <Button asChild><Link to={session ? "/dashboard" : "/auth"} search={session ? undefined : { mode: "signup" }}>{session ? "Continue your project" : "Start free"}<ArrowRight className="h-4 w-4" /></Link></Button>
         </div>
       </footer>
     </div>

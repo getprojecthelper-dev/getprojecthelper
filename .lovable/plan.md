@@ -2,6 +2,7 @@
 
 ## Homepage
 
+- Remove the “Why are Indian prices lower?” question and answer from the pricing page and source.
 - Recompose the landing page as a polished editorial product story using the existing Sora/Manrope typography, warm paper surfaces, terracotta accent, and deep green support color.
 - Replace the current disconnected layout with a clear sequence: product-led opening, guided lifecycle, supported domains, interactive feature grid, AI Mentor conversation, student proof, and a strong closing action.
 - Use the existing workspace preview as the main product visual rather than adding generic decoration.

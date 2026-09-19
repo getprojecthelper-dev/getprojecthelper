@@ -19,7 +19,9 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.
 import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticated.credits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedNewProjectRouteImport } from './routes/_authenticated.new-project'
+import { Route as AuthenticatedPremadeRouteImport } from './routes/_authenticated.premade'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated.welcome'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsProjectIdIndexRouteImport } from './routes/_authenticated.projects.$projectId.index'
@@ -89,9 +91,19 @@ const AuthenticatedNewProjectRoute = AuthenticatedNewProjectRouteImport.update({
   path: '/new-project',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPremadeRoute = AuthenticatedPremadeRouteImport.update({
+  id: '/premade',
+  path: '/premade',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -218,7 +230,9 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
+  '/premade': typeof AuthenticatedPremadeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
@@ -249,7 +263,9 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/new-project': typeof AuthenticatedNewProjectRoute
+  '/premade': typeof AuthenticatedPremadeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
   '/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
   '/projects/$projectId/build': typeof AuthenticatedProjectsProjectIdBuildRoute
@@ -280,7 +296,9 @@ export interface FileRoutesById {
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/new-project': typeof AuthenticatedNewProjectRoute
+  '/_authenticated/premade': typeof AuthenticatedPremadeRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/_authenticated/projects/$projectId/budget': typeof AuthenticatedProjectsProjectIdBudgetRoute
@@ -313,7 +331,9 @@ export interface FileRouteTypes {
     | '/credits'
     | '/dashboard'
     | '/new-project'
+    | '/premade'
     | '/settings'
+    | '/welcome'
     | '/api/chat'
     | '/projects/$projectId'
     | '/projects/$projectId/budget'
@@ -344,7 +364,9 @@ export interface FileRouteTypes {
     | '/credits'
     | '/dashboard'
     | '/new-project'
+    | '/premade'
     | '/settings'
+    | '/welcome'
     | '/api/chat'
     | '/projects/$projectId/budget'
     | '/projects/$projectId/build'
@@ -374,7 +396,9 @@ export interface FileRouteTypes {
     | '/_authenticated/credits'
     | '/_authenticated/dashboard'
     | '/_authenticated/new-project'
+    | '/_authenticated/premade'
     | '/_authenticated/settings'
+    | '/_authenticated/welcome'
     | '/api/chat'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/$projectId/budget'
@@ -478,11 +502,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNewProjectRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/premade': {
+      id: '/_authenticated/premade'
+      path: '/premade'
+      fullPath: '/premade'
+      preLoaderRoute: typeof AuthenticatedPremadeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/api/chat': {
@@ -701,7 +739,9 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNewProjectRoute: typeof AuthenticatedNewProjectRoute
+  AuthenticatedPremadeRoute: typeof AuthenticatedPremadeRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRouteWithChildren
 }
 
@@ -710,7 +750,9 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCreditsRoute: AuthenticatedCreditsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNewProjectRoute: AuthenticatedNewProjectRoute,
+  AuthenticatedPremadeRoute: AuthenticatedPremadeRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedProjectsProjectIdRoute:
     AuthenticatedProjectsProjectIdRouteWithChildren,
 }

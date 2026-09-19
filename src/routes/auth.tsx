@@ -48,7 +48,7 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && session) void navigate({ to: "/dashboard", replace: true });
+    if (!loading && session) void navigate({ to: "/welcome", replace: true });
   }, [loading, session, navigate]);
 
   const submit = async (kind: "login" | "signup") => {

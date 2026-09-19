@@ -535,6 +535,59 @@ export type Database = {
         }
         Relationships: []
       }
+      project_purchases: {
+        Row: {
+          amount_minor: number | null
+          catalog_project_id: string
+          created_at: string
+          currency: string | null
+          environment: string
+          id: string
+          payment_customer_id: string | null
+          payment_transaction_id: string
+          project_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_minor?: number | null
+          catalog_project_id: string
+          created_at?: string
+          currency?: string | null
+          environment?: string
+          id?: string
+          payment_customer_id?: string | null
+          payment_transaction_id: string
+          project_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_minor?: number | null
+          catalog_project_id?: string
+          created_at?: string
+          currency?: string | null
+          environment?: string
+          id?: string
+          payment_customer_id?: string | null
+          payment_transaction_id?: string
+          project_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_purchases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           academic_level: string | null

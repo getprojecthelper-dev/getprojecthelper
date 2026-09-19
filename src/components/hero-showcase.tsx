@@ -3,9 +3,11 @@ import { ArrowRight, Sparkles, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { WorkspacePreview } from "@/components/workspace-preview";
+import { useAuth } from "@/hooks/use-auth";
 
 /** Landing hero: dark editorial surface, product preview on the right. */
 export function HeroShowcase() {
+  const { session } = useAuth();
   return (
     <section className="hero-surface relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:radial-gradient(var(--hero-ink)_1px,transparent_1px)] [background-size:26px_26px]" />
@@ -30,10 +32,11 @@ export function HeroShowcase() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="group">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                Start your project
-                <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              {session ? (
+                <Link to="/dashboard">Open your workspace<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
+              ) : (
+                <Link to="/auth" search={{ mode: "signup" }}>Start your project<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
+              )}
             </Button>
             <Button
               asChild

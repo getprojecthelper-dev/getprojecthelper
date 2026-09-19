@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, Code2, Database, Server } from "lucide-react";
+import { ClipboardList, Code2, Database } from "lucide-react";
 
 
 const DOMAINS = [
@@ -20,12 +20,6 @@ const DOMAINS = [
     name: "Data Science",
     body: "Analyse datasets and train ML models end to end.",
     meta: "Dataset · Model · Report",
-  },
-  {
-    icon: Server,
-    name: "IT",
-    body: "Systems, networks, automation and support runbooks.",
-    meta: "Design · Configure · Document",
   },
 ];
 

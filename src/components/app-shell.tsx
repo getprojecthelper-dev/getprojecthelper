@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -17,6 +18,7 @@ import { signOutAndRedirect } from "@/lib/sign-out";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const params = useParams({ strict: false }) as { projectId?: string };
   const { data: overviews } = useProjectsOverview();
   const projectId = params.projectId ?? overviews?.[0]?.project.id;
@@ -49,7 +51,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   size="sm"
                   className="hidden sm:flex"
                   onClick={() =>
-                    void signOutAndRedirect(() => navigate({ to: "/auth", replace: true }))
+                    void signOutAndRedirect(queryClient, () =>
+                      navigate({ to: "/auth", replace: true }),
+                    )
                   }
                 >
                   <LogOut className="h-4 w-4" />

@@ -73,6 +73,13 @@ const DIFFICULTIES = [
 ] as const;
 
 type Difficulty = (typeof DIFFICULTIES)[number]["value"];
+type CodeComplexity = "easy" | "intermediate" | "advanced";
+
+const CODE_LEVELS: { value: CodeComplexity; label: string; detail: string }[] = [
+  { value: "easy", label: "Easy", detail: "Small explicit steps, extra plain comments, minimal abstraction." },
+  { value: "intermediate", label: "Intermediate", detail: "Functions and modules with standard error handling." },
+  { value: "advanced", label: "Advanced", detail: "Production structure, stronger typing and useful tests." },
+];
 
 const difficultyTone = (value: string) => {
   const key = value.toLowerCase();
@@ -111,6 +118,7 @@ function NewProject() {
   const [jobDescription, setJobDescription] = useState("");
   const [skills, setSkills] = useState("");
   const [domain, setDomain] = useState("data_science");
+  const [codeComplexity, setCodeComplexity] = useState<CodeComplexity>("intermediate");
 
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState<Record<number, SuggestedProject[]>>({});
@@ -237,6 +245,7 @@ function NewProject() {
           techStack: chosen.tech_stack,
           dataset: needsDataset ? dataset : null,
           papers: selectedPapers,
+          codeComplexity,
         },
       });
       toast.success("Project created with its implementation plan.");
@@ -755,6 +764,28 @@ function NewProject() {
               label={domainBuildsCode(domain) ? "Tech stack" : "Tools & methods"}
               value={chosen.tech_stack.join(", ")}
             />
+            {domainBuildsCode(domain) ? (
+              <fieldset className="space-y-3 border-y border-border py-4">
+                <legend className="font-medium">How should your code be written?</legend>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {CODE_LEVELS.map((level) => (
+                    <Button
+                      key={level.value}
+                      type="button"
+                      variant={codeComplexity === level.value ? "default" : "outline"}
+                      className="h-auto min-h-24 flex-col items-start whitespace-normal p-3 text-left"
+                      onClick={() => setCodeComplexity(level.value)}
+                    >
+                      <span className="font-semibold">{level.label}</span>
+                      <span className="mt-1 text-xs font-normal opacity-80">{level.detail}</span>
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This changes how the code is explained and organised, not how challenging the project is.
+                </p>
+              </fieldset>
+            ) : null}
             <Row label="Domain" value={DOMAINS.find((d) => d.value === domain)?.label ?? domain} />
             {needsDataset ? <Row label="Dataset" value={dataset?.name ?? "Not selected"} /> : null}
             <Row

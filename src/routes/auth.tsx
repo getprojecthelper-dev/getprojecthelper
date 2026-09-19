@@ -43,6 +43,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,10 +60,17 @@ function AuthPage() {
     setNotice(null);
     try {
       if (kind === "signup") {
+        if (fullName.trim().length < 2) {
+          toast.error("Enter the name you want shown in Project Helper.");
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { full_name: fullName.trim() },
+          },
         });
         if (error) throw error;
         if (!data.session) {
@@ -82,16 +90,24 @@ function AuthPage() {
   };
 
   const forgotPassword = async () => {
+    if (busy) return;
     const parsed = z.string().trim().email().safeParse(email);
     if (!parsed.success) {
       toast.error("Enter your email address first, then choose Forgot password.");
       return;
     }
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) toast.error(error.message);
-    else setNotice("If that address has an account, a reset link is on its way.");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setNotice("If that address has an account, a reset link is on its way.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "We couldn't send the reset link.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const google = async () => {
@@ -129,6 +145,19 @@ function AuthPage() {
             </TabsList>
 
             <div className="mt-6 space-y-4">
+              {mode === "signup" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="full-name">Display name</Label>
+                  <Input
+                    id="full-name"
+                    autoComplete="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Your name"
+                    disabled={busy}
+                  />
+                </div>
+              ) : null}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -138,6 +167,7 @@ function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu"
+                  disabled={busy}
                 />
               </div>
               <div className="space-y-2">
@@ -149,6 +179,7 @@ function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
+                  disabled={busy}
                 />
               </div>
 
@@ -163,6 +194,7 @@ function AuthPage() {
                 <button
                   type="button"
                   onClick={() => void forgotPassword()}
+                  disabled={busy}
                   className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
                 >
                   Forgot password?

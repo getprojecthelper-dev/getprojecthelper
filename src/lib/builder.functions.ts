@@ -262,7 +262,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().max(600),
+        idea: z.string().trim().transform((value) => value.slice(0, 600)),
         domain: z.string().max(40),
         title: z.string().trim().min(2).max(200),
         description: z.string().trim().max(3000),
@@ -295,6 +295,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
           )
           .max(10)
           .default([]),
+        codeComplexity: z.enum(["easy", "intermediate", "advanced"]).default("intermediate"),
 
       })
       .parse(input),
@@ -353,6 +354,7 @@ export const createGuidedProject = createServerFn({ method: "POST" })
         purpose: "academic",
         current_stage: "development",
         pm_profile: pmProfile ? { ...pmProfile } : null,
+        code_complexity: playbook.buildsCode ? data.codeComplexity : "intermediate",
       })
       .select("id")
       .single();
@@ -542,13 +544,20 @@ async function loadContext(
   const playbook = getPlaybook(project.domain as string | null);
 
   const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;
-  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code.\n"}\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+  const codeComplexity = (project.code_complexity as "easy" | "intermediate" | "advanced" | null) ?? "intermediate";
+  const complexityInstruction = codeComplexity === "easy"
+    ? "CODE LEVEL: EASY. Use small explicit steps, plain loops and if/else, minimal abstraction, and frequent short first-person comments."
+    : codeComplexity === "advanced"
+      ? "CODE LEVEL: ADVANCED. Use production-ready organization, strong typing, focused tests, robust error handling, and appropriate abstractions without needless complexity."
+      : "CODE LEVEL: INTERMEDIATE. Use clear functions and modules, standard error handling, and moderate first-person comments.";
+  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? complexityInstruction : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code."}\n\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
 
   return {
     section: section as SectionRow & { project_id: string },
     brief,
     playbook,
     domain: (project.domain as string | null) ?? null,
+    codeComplexity,
     supabase,
   };
 

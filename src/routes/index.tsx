@@ -109,7 +109,7 @@ function Landing() {
                       <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>
                     </div>
                   ) : null}
-                  <Button asChild><Link to={session ? "/dashboard" : "/auth"}>{session ? "Open dashboard" : "Log in"}</Link></Button>
+                  <Button asChild><Link to={session ? "/welcome" : "/auth"}>{session ? "Open workspace" : "Log in"}</Link></Button>
                   {!session ? <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account</Link></Button> : null}
                 </div>
               </SheetContent>
@@ -203,9 +203,9 @@ function Landing() {
             <Link to="/refund-policy" className="hover:text-foreground">Refund policy</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
           </div>
-          <Button asChild>
+            <Button asChild>
             {session ? (
-              <Link to="/dashboard">Continue your project<ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/welcome">Open workspace<ArrowRight className="h-4 w-4" /></Link>
             ) : (
               <Link to="/auth" search={{ mode: "signup" }}>Start free<ArrowRight className="h-4 w-4" /></Link>
             )}

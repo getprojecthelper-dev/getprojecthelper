@@ -140,7 +140,15 @@ function AuthPage() {
           Project Helper
         </Link>
 
+        <h1 className="mb-1 font-display text-2xl tracking-tight text-foreground">
+          Sign in to Project Helper
+        </h1>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Log in or create an account to plan, build and document your projects.
+        </p>
+
         <div className="panel p-6">
+
           <Tabs
             defaultValue={mode}
             onValueChange={(v) =>

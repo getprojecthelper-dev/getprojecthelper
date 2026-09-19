@@ -122,6 +122,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           logo: "https://getprojecthelper.com/favicon.png",
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Project Helper",
+          url: "https://getprojecthelper.com",
+          description:
+            "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace.",
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,

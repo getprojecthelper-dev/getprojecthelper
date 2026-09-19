@@ -17,20 +17,40 @@ import { HeaderAccountMenu } from "@/components/header-account-menu";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Project Helper — Create Smarter Projects, Faster" },
+      { title: "AI Project Builder for Students | Project Helper" },
       {
         name: "description",
         content:
-          "Plan, structure and build high-quality student projects with AI guidance — from idea and dataset to code, documentation and viva prep.",
+          "Build student projects from idea to portfolio with guided planning, code, datasets, documentation, testing, AI mentoring and viva preparation.",
       },
-      { property: "og:title", content: "Project Helper — Create Smarter Projects, Faster" },
+      { property: "og:title", content: "AI Project Builder for Students | Project Helper" },
       {
         property: "og:description",
         content:
-          "Plan, structure and build high-quality student projects with AI guidance — from idea and dataset to code, documentation and viva prep.",
+          "Build student projects from idea to portfolio with guided planning, code, datasets, documentation, testing, AI mentoring and viva preparation.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://getprojecthelper.com/" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "AI Project Builder for Students | Project Helper" },
+      { name: "twitter:description", content: "Build student projects from idea to portfolio with guided planning, code, documentation, testing and AI mentoring." },
+    ],
+    links: [{ rel: "canonical", href: "https://getprojecthelper.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Project Helper",
+          url: "https://getprojecthelper.com/",
+          applicationCategory: "EducationalApplication",
+          operatingSystem: "Web",
+          description: "An AI-guided project builder for students, covering planning, implementation, testing, documentation, viva preparation and portfolio creation.",
+          audience: { "@type": "EducationalAudience", educationalRole: "student" },
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "New accounts include starter credits." },
+        }),
+      },
     ],
   }),
   component: Landing,

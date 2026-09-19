@@ -93,12 +93,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Project Helper" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Project Helper — From Idea to Final Submission" },
       { name: "twitter:description", content: "Plan, build, analyse, document and showcase your academic or personal projects in one intelligent workspace." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/02cb8f22f81ed6d06f7be855f32a8bc7/id-preview-e609873a--340a8cfe-0ebb-47c8-8fe1-b3be45e9420d.lovable.app-1786549573899.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/02cb8f22f81ed6d06f7be855f32a8bc7/id-preview-e609873a--340a8cfe-0ebb-47c8-8fe1-b3be45e9420d.lovable.app-1786549573899.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -112,6 +110,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Project Helper",
+          url: "https://getprojecthelper.com",
+          logo: "https://getprojecthelper.com/favicon.png",
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,

@@ -9,7 +9,6 @@ import { cheapestPack, formatMoney, packPrice } from "@/lib/pricing";
 
 const cheapest = cheapestPack();
 const fromUsd = formatMoney(packPrice(cheapest, "USD"), "USD");
-const fromInr = formatMoney(packPrice(cheapest, "INR"), "INR");
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -17,16 +16,20 @@ export const Route = createFileRoute("/pricing")({
       { title: "Pricing — AI credits for student projects | Project Helper" },
       {
         name: "description",
-        content: `Simple pay-as-you-go credit packs for Project Helper. Start with ${STARTER_CREDITS} free credits, then top up from ${fromUsd} or ${fromInr}. No subscription.`,
+        content: `Simple pay-as-you-go AI credits for student projects. Start with ${STARTER_CREDITS} free credits, then top up from ${fromUsd}. No subscription.`,
       },
       { property: "og:title", content: "Pricing — AI credits for student projects" },
       {
         property: "og:description",
-        content: `Credit packs from ${fromUsd} / ${fromInr}. ${STARTER_CREDITS} free credits on every new account, no subscription.`,
+        content: `AI credit packs from ${fromUsd}. ${STARTER_CREDITS} free credits on every new account, with no subscription.`,
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://getprojecthelper.com/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "AI Project Builder Pricing | Project Helper" },
+      { name: "twitter:description", content: `Pay-as-you-go AI credits from ${fromUsd}, with ${STARTER_CREDITS} free credits for new accounts.` },
     ],
+    links: [{ rel: "canonical", href: "https://getprojecthelper.com/pricing" }],
   }),
   component: PricingPage,
 });

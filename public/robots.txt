@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://smart-project-workspace.lovable.app/sitemap.xml
+Sitemap: https://getprojecthelper.com/sitemap.xml

@@ -9,8 +9,98 @@ import {
   type ReferralCodeRow,
 } from "@/lib/admin-codes";
 import type { UnitEconomics } from "@/lib/economics.server";
+import { PREMADE_PROJECTS } from "@/lib/premade-projects";
+import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
 
 export type { ReferralCodeRow };
+
+export interface ProjectPricingRow {
+  catalogProjectId: string;
+  title: string;
+  priceExternalId: string;
+  environment: PaddleEnv;
+  regularPriceMinor: number;
+  discountPercent: number;
+  salePriceMinor: number;
+}
+
+const projectPricingInput = z.object({
+  catalogProjectId: z.string().min(1),
+  environment: z.enum(["sandbox", "live"]),
+  regularPriceMinor: z.number().int().min(70).max(10_000_000),
+  discountPercent: z.number().int().min(0).max(90),
+});
+
+export const listAdminProjectPricing = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ environment: z.enum(["sandbox", "live"]) }).parse(input))
+  .handler(async ({ data, context }): Promise<ProjectPricingRow[]> => {
+    await assertAdmin(context);
+    const { data: rows, error } = await context.supabase
+      .from("project_catalog_pricing")
+      .select("catalog_project_id,price_external_id,environment,regular_price_minor,discount_percent")
+      .eq("environment", data.environment)
+      .order("catalog_project_id");
+    if (error) throw new Error("Project prices could not be loaded.");
+    return (rows ?? []).map((row) => ({
+      catalogProjectId: row.catalog_project_id,
+      title: PREMADE_PROJECTS.find((project) => project.id === row.catalog_project_id)?.title ?? row.catalog_project_id,
+      priceExternalId: row.price_external_id,
+      environment: row.environment as PaddleEnv,
+      regularPriceMinor: row.regular_price_minor,
+      discountPercent: row.discount_percent,
+      salePriceMinor: Math.round(row.regular_price_minor * (100 - row.discount_percent) / 100),
+    }));
+  });
+
+export const updateAdminProjectPricing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => projectPricingInput.parse(input))
+  .handler(async ({ data, context }): Promise<ProjectPricingRow> => {
+    await assertAdmin(context);
+    const project = PREMADE_PROJECTS.find((entry) => entry.id === data.catalogProjectId);
+    if (!project) throw new Error("That project is not in the catalogue.");
+
+    const salePriceMinor = Math.round(data.regularPriceMinor * (100 - data.discountPercent) / 100);
+    if (salePriceMinor < 70) throw new Error("The final price must be at least ₹0.70.");
+
+    const lookup = await gatewayFetch(
+      data.environment,
+      `/prices?external_id=${encodeURIComponent(project.priceId)}`,
+    );
+    if (!lookup.ok) throw new Error("The payment price could not be found.");
+    const result = (await lookup.json()) as { data?: Array<{ id: string }> };
+    const providerPrice = result.data?.[0];
+    if (!providerPrice) throw new Error("The payment price could not be found.");
+
+    const paymentUpdate = await gatewayFetch(data.environment, `/prices/${providerPrice.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ unit_price: { amount: String(salePriceMinor), currency_code: "INR" } }),
+    });
+    if (!paymentUpdate.ok) throw new Error("The checkout price could not be updated.");
+
+    const { data: row, error } = await context.supabase
+      .from("project_catalog_pricing")
+      .update({
+        regular_price_minor: data.regularPriceMinor,
+        discount_percent: data.discountPercent,
+      })
+      .eq("catalog_project_id", data.catalogProjectId)
+      .eq("environment", data.environment)
+      .select("catalog_project_id,price_external_id,environment,regular_price_minor,discount_percent")
+      .single();
+    if (error) throw new Error("Checkout was updated, but the displayed pricing could not be saved.");
+
+    return {
+      catalogProjectId: row.catalog_project_id,
+      title: project.title,
+      priceExternalId: row.price_external_id,
+      environment: row.environment as PaddleEnv,
+      regularPriceMinor: row.regular_price_minor,
+      discountPercent: row.discount_percent,
+      salePriceMinor,
+    };
+  });
 
 export interface AdminStats {
   users: { total: number; last7d: number; last30d: number };

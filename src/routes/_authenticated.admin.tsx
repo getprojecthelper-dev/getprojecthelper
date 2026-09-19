@@ -5,6 +5,7 @@ import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide
 
 import { AdminEconomics } from "@/components/admin-economics";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
+import { AdminProjectPricing } from "@/components/admin-project-pricing";
 import { MeterBar, MetricCard } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
@@ -202,6 +203,8 @@ function AdminDashboard() {
       </div>
 
       <AdminEconomics />
+
+      <AdminProjectPricing />
 
       <AdminReferralCodes />
     </div>

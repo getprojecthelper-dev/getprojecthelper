@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { DOMAINS } from "@/lib/project-domain";
 import { PREMADE_PROJECTS, type PremadeProject } from "@/lib/premade-projects";
-import { listProjectPurchases } from "@/lib/premade.functions";
+import { listCatalogPricing, listProjectPurchases, type CatalogPricing } from "@/lib/premade.functions";
 import { getPaddleEnvironment, getLocalizedProjectPrice } from "@/lib/paddle";
 
 export const Route = createFileRoute("/_authenticated/premade/")({
@@ -26,18 +26,20 @@ export const Route = createFileRoute("/_authenticated/premade/")({
 
 function useLocalizedPrices() {
   return useQuery({
-    queryKey: ["premade-localized-prices", getPaddleEnvironment()],
+    queryKey: ["premade-pricing", getPaddleEnvironment()],
     queryFn: async () => {
+      const environment = getPaddleEnvironment();
+      const pricing = await listCatalogPricing({ data: { environment } });
       const rows = await Promise.all(
-        PREMADE_PROJECTS.map(async (entry) => [entry.id, await getLocalizedProjectPrice(entry.priceId)] as const),
+        PREMADE_PROJECTS.map(async (entry) => [entry.id, { localized: await getLocalizedProjectPrice(entry.priceId), config: pricing.find((row) => row.catalogProjectId === entry.id) }] as const),
       );
-      return Object.fromEntries(rows) as Record<string, string | null>;
+      return Object.fromEntries(rows) as Record<string, { localized: string | null; config: CatalogPricing | undefined }>;
     },
     staleTime: 30 * 60 * 1000,
   });
 }
 
-function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price: string | null | undefined; projectId: string | null | undefined }) {
+function PremadeCard({ entry, pricing, projectId }: { entry: PremadeProject; pricing: { localized: string | null; config: CatalogPricing | undefined } | undefined; projectId: string | null | undefined }) {
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
   return (
     <article className="panel flex min-w-0 flex-col gap-4 p-5 sm:p-6">
@@ -53,9 +55,9 @@ function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price
       <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Tools:</span> {entry.stack}</p>
       <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
         <div>
-          {price ? <p className="text-xs text-muted-foreground line-through">2 × {price}</p> : null}
-          <p className="text-xl font-semibold">{price ?? "Local price at checkout"}</p>
-          <p className="text-xs text-success">50% launch discount</p>
+          {pricing?.config && pricing.config.discountPercent > 0 ? <p className="text-xs text-muted-foreground line-through">Regular ₹{(pricing.config.regularPriceMinor / 100).toLocaleString("en-IN")}</p> : null}
+          <p className="text-xl font-semibold">{pricing?.localized ?? "Local price at checkout"}</p>
+          {pricing?.config && pricing.config.discountPercent > 0 ? <p className="text-xs text-success">{pricing.config.discountPercent}% discount</p> : null}
         </div>
         <Button asChild>
           <Link to={projectId ? "/projects/$projectId" : "/premade/$projectId"} params={{ projectId: projectId ?? entry.id }}>
@@ -79,7 +81,7 @@ function PremadePage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8">
       <PageHeader title="Buy projects" description="Review a complete project brief before buying. Pay once, then build, document, and prepare your viva in your workspace." />
       <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {PREMADE_PROJECTS.map((entry) => <PremadeCard key={entry.id} entry={entry} price={prices?.[entry.id]} projectId={owned.get(entry.id)} />)}
+        {PREMADE_PROJECTS.map((entry) => <PremadeCard key={entry.id} entry={entry} pricing={prices?.[entry.id]} projectId={owned.get(entry.id)} />)}
       </div>
       <p className="mt-8 text-xs text-muted-foreground">Prices are shown in your local currency where available. Building with AI after purchase uses your normal AI credits.</p>
     </main>

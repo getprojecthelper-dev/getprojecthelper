@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { getPaddleEnvironment, getLocalizedProjectPrice, openProjectCheckout } from "@/lib/paddle";
 import { getPremadeProject } from "@/lib/premade-projects";
-import { getProjectPurchase } from "@/lib/premade.functions";
+import { getCatalogPricing, getProjectPurchase } from "@/lib/premade.functions";
 import { DOMAINS, getTemplate } from "@/lib/project-domain";
 
 export const Route = createFileRoute("/_authenticated/premade/$projectId")({
@@ -39,6 +39,10 @@ function ProjectDetails() {
   const { data: price } = useQuery({
     queryKey: ["premade-localized-price", entry.priceId, environment],
     queryFn: () => getLocalizedProjectPrice(entry.priceId),
+  });
+  const { data: pricing } = useQuery({
+    queryKey: ["premade-pricing", environment, projectId],
+    queryFn: () => getCatalogPricing({ data: { id: projectId, environment } }),
   });
   const template = getTemplate(entry.domain);
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
@@ -77,8 +81,8 @@ function ProjectDetails() {
           <section className="mt-8 border-t border-border pt-6"><h2 className="font-display text-xl">Tools you will use</h2><p className="mt-2 text-sm text-muted-foreground">{entry.stack}</p></section>
         </div>
         <aside className="panel h-fit p-5 lg:sticky lg:top-24">
-          <div className="flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />50% launch discount</div>
-          <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: 2× local sale price</p>
+          {pricing && pricing.discountPercent > 0 ? <div className="flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />{pricing.discountPercent}% discount</div> : null}
+          {pricing && pricing.discountPercent > 0 ? <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: ₹{(pricing.regularPriceMinor / 100).toLocaleString("en-IN")}</p> : null}
           <p className="mt-1 text-3xl font-semibold">{price ?? "Local price at checkout"}</p>
           <p className="mt-1 text-xs text-muted-foreground">One-time purchase</p>
           {purchase?.owned && purchase.projectId ? (

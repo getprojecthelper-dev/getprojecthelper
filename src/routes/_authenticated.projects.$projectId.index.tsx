@@ -73,8 +73,8 @@ function Overview() {
       : [];
     return lines.join(" ").trim() || block.code?.trim() || null;
   };
-  const problem = blockText(/problem|challenge/) ?? project.idea ?? project.description;
-  const solution = blockText(/solution|approach/) ?? project.description;
+  const problem = blockText(/problem|challenge/) || project.idea?.trim() || project.description;
+  const solution = blockText(/solution|approach/) || project.description;
   const dataset = asDataset(project.dataset);
 
   return (

@@ -16,15 +16,26 @@ import { signOutAndRedirect } from "@/lib/sign-out";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   return (
     <div className="min-h-screen w-full bg-secondary/30">
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
-          <Link to="/welcome" className="flex min-w-0 items-center gap-2 font-display font-semibold">
-            <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-7 w-7 shrink-0" />
-            <span className="truncate">Project Helper</span>
-          </Link>
+          <div className="flex min-w-0 items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Back"
+              onClick={() => router.history.back()}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Link to="/welcome" className="flex min-w-0 items-center gap-2 font-display font-semibold">
+              <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-7 w-7 shrink-0" />
+              <span className="truncate">Project Helper</span>
+            </Link>
+          </div>
           <div className="flex shrink-0 items-center gap-1">
             <CreditChip />
             <ThemeToggle />

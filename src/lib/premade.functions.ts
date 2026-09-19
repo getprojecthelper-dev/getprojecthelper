@@ -38,3 +38,18 @@ export const getProjectPurchase = createServerFn({ method: "GET" })
     if (error) throw new Error("We couldn't check this purchase.");
     return { owned: Boolean(purchase), projectId: purchase?.project_id ?? null };
   });
+
+export const listProjectPurchases = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ environment: z.enum(["sandbox", "live"]) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: purchases, error } = await context.supabase
+      .from("project_purchases")
+      .select("catalog_project_id,project_id")
+      .eq("environment", data.environment)
+      .eq("status", "completed");
+    if (error) throw new Error("We couldn't load your purchased projects.");
+    return purchases ?? [];
+  });

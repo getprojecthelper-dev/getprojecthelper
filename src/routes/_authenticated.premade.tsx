@@ -1,24 +1,21 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Zap } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { CREDIT_PACKS, formatCredits } from "@/lib/credit-costs";
 import { DOMAINS } from "@/lib/project-domain";
 import { PREMADE_PROJECTS, type PremadeProject } from "@/lib/premade-projects";
-import { purchasePremadeProject } from "@/lib/premade.functions";
+import { listProjectPurchases } from "@/lib/premade.functions";
+import { getPaddleEnvironment, getLocalizedProjectPrice } from "@/lib/paddle";
 
 export const Route = createFileRoute("/_authenticated/premade")({
   head: () => ({
     meta: [
-      { title: "Premade Projects — Project Helper" },
-      { name: "description", content: "Unlock ready-made project briefs with AI credits." },
-      { property: "og:title", content: "Premade Projects — Project Helper" },
-      { property: "og:description", content: "Unlock ready-made project briefs with AI credits." },
+      { title: "Buy Student Projects — Project Helper" },
+      { name: "description", content: "Explore guided student projects available as one-time purchases." },
+      { property: "og:title", content: "Buy Student Projects — Project Helper" },
+      { property: "og:description", content: "Explore guided student projects available as one-time purchases." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -27,87 +24,64 @@ export const Route = createFileRoute("/_authenticated/premade")({
   component: PremadePage,
 });
 
-const CREDIT_USD = 0.9;
+function useLocalizedPrices() {
+  return useQuery({
+    queryKey: ["premade-localized-prices", getPaddleEnvironment()],
+    queryFn: async () => {
+      const rows = await Promise.all(
+        PREMADE_PROJECTS.map(async (entry) => [entry.id, await getLocalizedProjectPrice(entry.priceId)] as const),
+      );
+      return Object.fromEntries(rows) as Record<string, string | null>;
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+}
 
-function PremadeCard({ entry }: { entry: PremadeProject }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const purchase = useServerFn(purchasePremadeProject);
-  const [busy, setBusy] = useState(false);
-
-  const domainLabel = DOMAINS.find((d) => d.value === entry.domain)?.label ?? entry.domain;
-  const usd = (entry.priceCredits * CREDIT_USD).toFixed(2);
-
-  const buy = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const result = await purchase({ data: { id: entry.id } });
-      if (!result.ok) {
-        toast.error(result.message, {
-          action: { label: "Top up", onClick: () => void navigate({ to: "/credits" }) },
-        });
-        return;
-      }
-      toast.success(`"${entry.title}" is now in your workspace.`);
-      void queryClient.invalidateQueries();
-      void navigate({ to: "/projects/$projectId", params: { projectId: result.projectId } });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "The purchase didn't go through.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
+function PremadeCard({ entry, price, projectId }: { entry: PremadeProject; price?: string | null; projectId?: string | null }) {
+  const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
   return (
-    <div className="panel flex flex-col gap-3 p-6">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider">
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground">
-          {domainLabel}
-        </span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground">
-          {entry.level}
-        </span>
+    <article className="panel flex min-w-0 flex-col gap-4 p-5 sm:p-6">
+      <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase">
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground">{domainLabel}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-muted-foreground">{entry.level}</span>
+        {projectId ? <span className="flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-success"><CheckCircle2 className="h-3 w-3" /> Owned</span> : null}
       </div>
-      <h2 className="font-display text-xl">{entry.title}</h2>
-      <p className="text-sm text-muted-foreground">{entry.summary}</p>
-      <p className="text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">Stack:</span> {entry.stack}
-      </p>
-      <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-4">
+      <div>
+        <h2 className="font-display text-xl">{entry.title}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{entry.summary}</p>
+      </div>
+      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Tools:</span> {entry.stack}</p>
+      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
         <div>
-          <p className="flex items-center gap-1 text-lg font-semibold">
-            <Zap className="h-4 w-4 text-primary" />
-            {formatCredits(entry.priceCredits)} credits
-          </p>
-          <p className="text-xs text-muted-foreground">≈ ${usd} one-time</p>
+          {price ? <p className="text-xs text-muted-foreground line-through">{price.replace(/[\d.,]+/, (amount) => String(Number(amount.replace(/,/g, "")) * 2))}</p> : null}
+          <p className="text-xl font-semibold">{price ?? "Local price at checkout"}</p>
+          <p className="text-xs text-success">50% launch discount</p>
         </div>
-        <Button onClick={() => void buy()} disabled={busy}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {busy ? "Unlocking…" : "Unlock project"}
+        <Button asChild>
+          <Link to={projectId ? "/projects/$projectId" : "/premade/$projectId"} params={{ projectId: projectId ?? entry.id }}>
+            {projectId ? "Open project" : "Explore"}<ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
-    </div>
+    </article>
   );
 }
 
 function PremadePage() {
+  const environment = getPaddleEnvironment();
+  const { data: prices } = useLocalizedPrices();
+  const { data: purchases = [] } = useQuery({
+    queryKey: ["project-purchases", environment],
+    queryFn: () => listProjectPurchases({ data: { environment } }),
+  });
+  const owned = new Map(purchases.map((purchase) => [purchase.catalog_project_id, purchase.project_id]));
   return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
-      <PageHeader
-        title="Premade projects"
-        description="Ready-made, tutor-friendly project briefs. Pay once with AI credits and the project appears in your workspace, ready to build, document and present."
-      />
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {PREMADE_PROJECTS.map((entry) => (
-          <PremadeCard key={entry.id} entry={entry} />
-        ))}
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8">
+      <PageHeader title="Buy projects" description="Review a complete project brief before buying. Pay once, then build, document, and prepare your viva in your workspace." />
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {PREMADE_PROJECTS.map((entry) => <PremadeCard key={entry.id} entry={entry} price={prices?.[entry.id]} projectId={owned.get(entry.id)} />)}
       </div>
-      <p className="mt-8 text-xs text-muted-foreground">
-        Prices in AI credits (1 credit ≈ $0.90). Unlocking only creates the project — building it
-        uses credits like any other project. Packs from {CREDIT_PACKS[0]?.credits ?? 0} credits are
-        available on the Credits page.
-      </p>
-    </div>
+      <p className="mt-8 text-xs text-muted-foreground">Prices are shown in your local currency where available. Building with AI after purchase uses your normal AI credits.</p>
+    </main>
   );
 }

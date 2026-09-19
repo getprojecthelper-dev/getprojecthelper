@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
+import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
@@ -46,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      <PaymentTestModeBanner />
       <LowCreditsBanner />
       {children}
     </div>

@@ -10,6 +10,7 @@ export interface NewProjectInput {
   purpose: string;
   template: string;
   deadline?: string | null;
+  code_complexity?: "easy" | "intermediate" | "advanced";
 }
 
 /**
@@ -31,6 +32,7 @@ export async function createProjectWithTemplate(input: NewProjectInput): Promise
       template: input.template,
       deadline: input.deadline || null,
       current_stage: "planning",
+      code_complexity: input.code_complexity ?? "intermediate",
     })
     .select("id")
     .single();

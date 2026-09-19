@@ -164,7 +164,7 @@ function ProjectTool({
   target: "documents" | "review" | "mentor";
 }) {
   return (
-    <div className="panel p-4">
+    <div className="panel min-w-0 p-4">
       <div className="flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
           <Icon className="h-4 w-4" />
@@ -174,7 +174,7 @@ function ProjectTool({
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
-      <div className="mt-3 border-t border-border pt-2"><ProjectPicker target={target} /></div>
+      <div className="min-w-0 mt-3 border-t border-border pt-2"><ProjectPicker target={target} /></div>
     </div>
   );
 }
@@ -232,7 +232,7 @@ function WelcomePage() {
 
       <section aria-labelledby="tools-title" className="mt-6">
         <h2 id="tools-title" className="font-display text-lg">Project tools</h2>
-        <div className="mt-3 grid gap-3 lg:grid-cols-3">
+        <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
           <ProjectTool title="Documentation" description="Write your project report" icon={FileText} target="documents" />
           <ProjectTool title="Viva" description="Prepare questions and answers" icon={MessagesSquare} target="review" />
           <ProjectTool title="AI Mentor" description="Ask questions about your project" icon={Bot} target="mentor" />

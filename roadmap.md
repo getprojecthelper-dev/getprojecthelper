@@ -5,4 +5,4 @@
 - [ ] Fix login, signup, password recovery, sign-out, and profile management.
 - [ ] Add and persist separate Easy, Intermediate, and Advanced code-generation levels.
 - [ ] Verify builds, account flows, project generation settings, and desktop/mobile presentation.
-- [ ] Refresh project overview cards, remove deadline and health factors, and add conditional continue-building, problem/solution, and dataset content.
+- [x] Refresh project overview cards, remove deadline and health factors, and add conditional continue-building, problem/solution, and dataset content.

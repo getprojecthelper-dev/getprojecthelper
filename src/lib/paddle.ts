@@ -10,7 +10,10 @@ type PaddleWindow = Window & {
     Initialize: (options: { token: string; eventCallback?: (event: CheckoutEvent) => void }) => void;
     Checkout: { open: (options: Record<string, unknown>) => void };
     PricePreview: (options: Record<string, unknown>) => Promise<{
-      data?: { details?: { lineItems?: Array<{ formattedTotals?: { total?: string } }> } };
+      data?: {
+        currencyCode?: string;
+        details?: { lineItems?: Array<{ totals?: { total?: string }; formattedTotals?: { total?: string } }> };
+      };
     }>;
   };
 };
@@ -59,12 +62,27 @@ export async function getPaddlePriceId(priceId: string): Promise<string> {
 }
 
 export async function getLocalizedProjectPrice(priceId: string): Promise<string | null> {
+  return (await getLocalizedProjectPricing(priceId, 0)).salePrice;
+}
+
+export async function getLocalizedProjectPricing(
+  priceId: string,
+  discountPercent: number,
+): Promise<{ salePrice: string | null; regularPrice: string | null }> {
   await initializePaddle();
   const paddle = (window as PaddleWindow).Paddle;
-  if (!paddle) return null;
+  if (!paddle) return { salePrice: null, regularPrice: null };
   const internalPriceId = await getPaddlePriceId(priceId);
   const preview = await paddle.PricePreview({ items: [{ priceId: internalPriceId, quantity: 1 }] });
-  return preview.data?.details?.lineItems?.[0]?.formattedTotals?.total ?? null;
+  const lineItem = preview.data?.details?.lineItems?.[0];
+  const salePrice = lineItem?.formattedTotals?.total ?? null;
+  const amount = Number(lineItem?.totals?.total);
+  const currency = preview.data?.currencyCode;
+  const fraction = (100 - discountPercent) / 100;
+  const regularPrice = amount > 0 && currency && fraction > 0
+    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(amount / 100 / fraction)
+    : null;
+  return { salePrice, regularPrice };
 }
 
 export async function openProjectCheckout(options: {

@@ -535,6 +535,42 @@ export type Database = {
         }
         Relationships: []
       }
+      project_catalog_pricing: {
+        Row: {
+          catalog_project_id: string
+          created_at: string
+          discount_percent: number
+          environment: string
+          id: string
+          is_active: boolean
+          price_external_id: string
+          regular_price_minor: number
+          updated_at: string
+        }
+        Insert: {
+          catalog_project_id: string
+          created_at?: string
+          discount_percent?: number
+          environment?: string
+          id?: string
+          is_active?: boolean
+          price_external_id: string
+          regular_price_minor: number
+          updated_at?: string
+        }
+        Update: {
+          catalog_project_id?: string
+          created_at?: string
+          discount_percent?: number
+          environment?: string
+          id?: string
+          is_active?: boolean
+          price_external_id?: string
+          regular_price_minor?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       project_purchases: {
         Row: {
           amount_minor: number | null

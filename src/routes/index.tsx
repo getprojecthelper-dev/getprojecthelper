@@ -171,7 +171,13 @@ function Landing() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 text-sm text-muted-foreground">
           <span>Project Helper — plan, build, document and showcase your work.</span>
-          <Button asChild><Link to={session ? "/dashboard" : "/auth"} search={session ? undefined : { mode: "signup" }}>{session ? "Continue your project" : "Start free"}<ArrowRight className="h-4 w-4" /></Link></Button>
+          <Button asChild>
+            {session ? (
+              <Link to="/dashboard">Continue your project<ArrowRight className="h-4 w-4" /></Link>
+            ) : (
+              <Link to="/auth" search={{ mode: "signup" }}>Start free<ArrowRight className="h-4 w-4" /></Link>
+            )}
+          </Button>
         </div>
       </footer>
     </div>

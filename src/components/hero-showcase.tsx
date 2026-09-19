@@ -32,10 +32,11 @@ export function HeroShowcase() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="group">
-              <Link to={session ? "/dashboard" : "/auth"} search={session ? undefined : { mode: "signup" }}>
-                {session ? "Open your workspace" : "Start your project"}
-                <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              {session ? (
+                <Link to="/dashboard">Open your workspace<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
+              ) : (
+                <Link to="/auth" search={{ mode: "signup" }}>Start your project<ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" /></Link>
+              )}
             </Button>
             <Button
               asChild

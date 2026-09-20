@@ -2,7 +2,6 @@ import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { MentorThreadList } from "@/components/mentor-thread-list";
-import { useSidebar } from "@/components/ui/sidebar";
 
 const MIN_HISTORY_WIDTH = 200;
 const MAX_HISTORY_WIDTH = 520;
@@ -86,14 +85,8 @@ function useResizableHistoryWidth() {
 
 function MentorLayout() {
   const { projectId } = useParams({ from: "/_authenticated/projects/$projectId/mentor" });
-  const { setOpen } = useSidebar();
   const { width, startResize } = useResizableHistoryWidth();
 
-  // The mentor gets the full width: collapse the workspace sidebar while here.
-  useEffect(() => {
-    setOpen(false);
-    return () => setOpen(true);
-  }, [setOpen]);
 
   return (
     <section className="flex h-[calc(100dvh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">

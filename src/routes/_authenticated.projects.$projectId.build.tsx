@@ -37,7 +37,6 @@ import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
@@ -197,12 +196,6 @@ function useSections(projectId: string) {
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
-  const { setOpen } = useSidebar();
-  // Implementation needs the width: collapse the workspace sidebar while here.
-  useEffect(() => {
-    setOpen(false);
-    return () => setOpen(true);
-  }, [setOpen]);
   const { data: sections = [], isPending } = useSections(projectId);
 
   const { data: meta } = useQuery({

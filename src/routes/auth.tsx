@@ -243,10 +243,19 @@ function AuthPage() {
               </TabsContent>
 
               <TabsContent value="signup" className="m-0">
-                <Button className="w-full" disabled={busy} onClick={() => void submit("signup")}>
-                  {busy ? "Creating account…" : "Create account"}
+                <Button
+                  className="w-full"
+                  disabled={busy || cooldown > 0}
+                  onClick={() => void submit("signup")}
+                >
+                  {busy
+                    ? "Creating account…"
+                    : cooldown > 0
+                      ? `Try again in ${cooldown}s`
+                      : "Create account"}
                 </Button>
               </TabsContent>
+
 
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="h-px flex-1 bg-border" />

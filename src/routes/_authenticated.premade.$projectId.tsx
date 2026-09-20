@@ -82,7 +82,10 @@ function ProjectDetails() {
           <section className="mt-8 border-t border-border pt-6"><h2 className="font-display text-xl">Tools you will use</h2><p className="mt-2 text-sm text-muted-foreground">{entry.stack}</p></section>
         </div>
         <aside className="panel h-fit p-5 lg:sticky lg:top-24">
-          {pricing && pricing.discountPercent > 0 ? <div className="flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />{pricing.discountPercent}% discount</div> : null}
+          <div className="rounded-md border border-border/60 bg-secondary/40 px-3 py-2 text-xs leading-5 text-muted-foreground">
+            <strong className="text-foreground">Personal &amp; academic use only.</strong> This project is for your own learning or coursework. It may not be resold, redistributed, or used to operate a business or commercial service.
+          </div>
+          {pricing && pricing.discountPercent > 0 ? <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />{pricing.discountPercent}% discount</div> : null}
           {pricing && pricing.discountPercent > 0 ? <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: {localizedPrice?.regularPrice ?? `₹${(pricing.regularPriceMinor / 100).toLocaleString("en-IN")}`}</p> : null}
           <p className="mt-1 text-3xl font-semibold">{localizedPrice?.salePrice ?? "Local price at checkout"}</p>
           <p className="mt-1 text-xs text-muted-foreground">One-time purchase</p>

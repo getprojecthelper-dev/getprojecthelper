@@ -26,7 +26,8 @@ function TermsPage() {
       </section>
       <section>
         <h2>2. The service and your licence</h2>
-        <p>Project Helper is an educational project workspace that helps users plan, build, document, test and present projects. We grant you a limited, non-exclusive, non-transferable licence to use the service and purchased project materials for your own lawful educational or professional work. You may not resell, redistribute, reverse engineer or bypass technical limits of the service.</p>
+        <p>Project Helper is an educational project workspace that helps users plan, build, document, test and present projects. We grant you a limited, non-exclusive, non-transferable licence to use the service and purchased project materials for your own personal, academic, or portfolio use only.</p>
+        <p>You may not resell, redistribute, sublicense, repackage, or otherwise commercially exploit any project, code, document, template, or material obtained from Project Helper. You may not use purchased project materials to operate a business, provide a service to others for consideration, or pass them off as original work where academic or professional rules require independent authorship. You may not reverse engineer or bypass technical limits of the service.</p>
       </section>
       <section>
         <h2>3. Accounts and acceptable use</h2>

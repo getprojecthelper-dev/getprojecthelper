@@ -84,6 +84,9 @@ function PremadePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8">
       <PageHeader title="Buy projects" description="Review a complete project brief before buying. Pay once, then build, document, and prepare your viva in your workspace." />
+      <div className="mt-5 rounded-lg border border-border/60 bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
+        <strong className="text-foreground">Personal &amp; academic use only.</strong> These guided projects are meant for your own learning, coursework, or portfolio. They may not be resold, repackaged, or used to run a business or commercial service.
+      </div>
       <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {PREMADE_PROJECTS.map((entry) => <PremadeCard key={entry.id} entry={entry} pricing={prices?.[entry.id]} projectId={owned.get(entry.id)} />)}
       </div>

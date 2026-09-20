@@ -46,12 +46,21 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
     if (!loading && session) void navigate({ to: "/welcome", replace: true });
   }, [loading, session, navigate]);
 
+  // Count the sign-up cooldown down once per second so the button re-enables itself.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
+
   const submit = async (kind: "login" | "signup") => {
+    if (kind === "signup" && cooldown > 0) return;
     const parsed = credentials.safeParse({ email, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check your details");
@@ -83,12 +92,28 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(message);
+      const raw = error instanceof Error ? error.message : "Authentication failed";
+      const status = (error as { status?: number } | null)?.status;
+      const seconds = Number(/after (\d+) seconds/.exec(raw)?.[1] ?? 0);
+
+      if (kind === "signup" && (status === 429 || /only request this after|rate limit/i.test(raw))) {
+        // The confirmation email was already sent moments ago; stop the retry loop.
+        setCooldown(seconds > 0 ? seconds : 60);
+        setNotice(
+          "We already sent your confirmation email — please check your inbox (and spam folder). You can try again in a moment if it doesn't arrive.",
+        );
+      } else if (/weak|pwned|known to be/i.test(raw)) {
+        setNotice(
+          "That password is too easy to guess. Use at least 8 characters and mix in numbers or symbols — avoid common words.",
+        );
+      } else {
+        toast.error(raw);
+      }
     } finally {
       setBusy(false);
     }
   };
+
 
   const forgotPassword = async () => {
     if (busy) return;

@@ -87,10 +87,6 @@ function MentorLayout() {
   const { projectId } = useParams({ from: "/_authenticated/projects/$projectId/mentor" });
   const { width, startResize } = useResizableHistoryWidth();
 
-  useEffect(() => {
-    setOpen(false);
-    return () => setOpen(true);
-  }, [setOpen]);
 
   return (
     <section className="flex h-[calc(100dvh-4rem)] min-h-0 w-full flex-col overflow-hidden md:flex-row">

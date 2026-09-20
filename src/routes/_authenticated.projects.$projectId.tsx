@@ -1,5 +1,6 @@
 import {
   createFileRoute,
+  Link,
   Outlet,
   useNavigate,
   useRouterState,
@@ -11,6 +12,7 @@ import { ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
+
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
@@ -27,6 +29,36 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   component: WorkspaceLayout,
 });
 
+/** Pages a student can open for a project, per domain. */
+const COMMON_PAGES = [
+  { to: "/projects/$projectId", label: "Overview", exact: true },
+  { to: "/projects/$projectId/build", label: "Build" },
+  { to: "/projects/$projectId/tasks", label: "Tasks" },
+  { to: "/projects/$projectId/research", label: "Research" },
+  { to: "/projects/$projectId/risks", label: "Risks" },
+  { to: "/projects/$projectId/documents", label: "Documentation" },
+  { to: "/projects/$projectId/review", label: "Viva" },
+  { to: "/projects/$projectId/showcase", label: "Showcase" },
+] as const;
+
+const PM_PAGES = [
+  { to: "/projects/$projectId/schedule", label: "Schedule" },
+  { to: "/projects/$projectId/budget", label: "Budget" },
+  { to: "/projects/$projectId/stakeholders", label: "Stakeholders" },
+] as const;
+
+const TECH_PAGES = [
+  { to: "/projects/$projectId/requirements", label: "Requirements" },
+  { to: "/projects/$projectId/testing", label: "Testing" },
+  { to: "/projects/$projectId/experiments", label: "Experiments" },
+] as const;
+
+function pagesForDomain(domain: string | undefined) {
+  const extra = domain === "project_management" ? PM_PAGES : TECH_PAGES;
+  // Keep Overview and Build first, then the domain pages, then the shared ones.
+  return [...COMMON_PAGES.slice(0, 3), ...extra, ...COMMON_PAGES.slice(3)];
+}
+
 function WorkspaceLayout() {
   const { projectId, data, isPending, isError, error, refetch } = useWorkspace();
   const navigate = useNavigate();
@@ -36,6 +68,7 @@ function WorkspaceLayout() {
   // the shared project breadcrumb bar is removed there.
   const isMentor = /\/mentor(\/[^/]+)*$/.test(pathname);
   const showHeader = !/(\/review|\/documents|\/mentor)(\/[^/]+)*$/.test(pathname);
+  const pages = pagesForDomain(data?.project.domain);
 
   return (
     <div className={cn("h-full", isMentor && "flex flex-col")}>
@@ -52,8 +85,29 @@ function WorkspaceLayout() {
               </p>
             </div>
           </div>
+          <nav
+            aria-label="Project pages"
+            className="mx-auto max-w-7xl overflow-x-auto px-5 pb-2"
+          >
+            <ul className="flex items-center gap-1 whitespace-nowrap">
+              {pages.map((page) => (
+                <li key={page.to}>
+                  <Link
+                    to={page.to}
+                    params={{ projectId }}
+                    activeOptions={{ exact: "exact" in page ? page.exact : false }}
+                    className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                    activeProps={{ className: "bg-secondary text-foreground" }}
+                  >
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </header>
       ) : null}
+
 
       <div className={cn("w-full", !isMentor && "mx-auto max-w-none px-5 py-6")}>
         {isPending ? (

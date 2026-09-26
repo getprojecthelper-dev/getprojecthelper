@@ -10,3 +10,4 @@
 - [x] Add six one-time project products, localized checkout, ownership, and purchase fulfillment.
 - [x] Add public Terms, Refund, and Privacy pages for Sizcon Studios.
 - [x] Let administrators set each purchasable project's regular price and discount.
+- [x] Refresh login and sign-up with the selected pine-and-coral interactive canvas, preserving account actions.

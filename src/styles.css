@@ -225,6 +225,44 @@
   --color-hero-line: var(--hero-line);
 }
 
+/* Authentication canvas: scoped so the selected pine-and-coral direction does not recolor the workspace. */
+.auth-stage {
+  --auth-pine: #142822;
+  --auth-coral: #ef775d;
+  --auth-light: #f1f4ea;
+  --auth-mist: #8aa89b;
+  --auth-sage: #647a6d;
+  --auth-line: #ced8ca;
+  --auth-field: #fffefa;
+  --auth-sheet-shadow: 0 32px 90px -35px oklch(0.06 0.01 160 / 0.65);
+  background: var(--auth-pine);
+}
+
+@theme inline {
+  --color-auth-pine: var(--auth-pine);
+  --color-auth-coral: var(--auth-coral);
+  --color-auth-light: var(--auth-light);
+  --color-auth-mist: var(--auth-mist);
+  --color-auth-sage: var(--auth-sage);
+  --color-auth-line: var(--auth-line);
+  --color-auth-field: var(--auth-field);
+  --shadow-auth-sheet: var(--auth-sheet-shadow);
+}
+
+.auth-diagram { color: var(--auth-mist); opacity: .47; }
+.auth-diagram-line { stroke: currentColor; stroke-width: 1; opacity: .46; }
+.auth-diagram-dash { stroke: var(--auth-coral); stroke-width: 2; stroke-dasharray: 6 24; animation: auth-trace 24s linear infinite; }
+.auth-diagram-node { fill: var(--auth-pine); stroke: var(--auth-coral); stroke-width: 2; }
+.auth-entrance { animation: auth-arrive .65s ease-out both; }
+.auth-form { animation: auth-arrive .4s ease-out both; }
+.auth-input { transition: border-color .2s, box-shadow .2s, transform .2s; }
+.auth-input:focus { transform: translateY(-1px); }
+@keyframes auth-trace { to { stroke-dashoffset: -300; } }
+@keyframes auth-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .auth-diagram-dash, .auth-entrance, .auth-form { animation: none; }
+}
+
 @utility hero-scrim {
   position: absolute;
   inset: 0;

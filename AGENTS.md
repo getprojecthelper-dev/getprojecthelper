@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Scope authentication-specific pine/coral tokens to `.auth-stage` in `src/styles.css` so account-page styling cannot alter the shared workspace theme.

@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/credits")({
     ],
   }),
   component: CreditsPage,
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-md p-10">
       <ErrorState message={error.message} />
     </div>

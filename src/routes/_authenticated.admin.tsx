@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     ],
   }),
   component: AdminDashboard,
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: { error: Error }) => (
     <div className="mx-auto max-w-md p-10">
       <ErrorState message={error.message} />
     </div>

@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
   errorComponent: ({ error }: ErrorComponentProps) => (
     <div className="mx-auto max-w-md p-10">
-      <ErrorState message={error.message} />
+      <ErrorState message={error instanceof Error ? error.message : "Something went wrong."} />
     </div>
   ),
   notFoundComponent: () => <EmptyState title="Nothing here" description="This page does not exist." />,

@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate, type ErrorComponentProps } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -27,9 +27,9 @@ export const Route = createFileRoute("/_authenticated/admin")({
     ],
   }),
   component: AdminDashboard,
-  errorComponent: ({ error }) => (
+  errorComponent: ({ error }: ErrorComponentProps) => (
     <div className="mx-auto max-w-md p-10">
-      <ErrorState message={error.message} />
+      <ErrorState message={error instanceof Error ? error.message : "Something went wrong."} />
     </div>
   ),
   notFoundComponent: () => <EmptyState title="Nothing here" description="This page does not exist." />,

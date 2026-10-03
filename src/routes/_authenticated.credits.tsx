@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Check, Gift, Sparkles, Zap } from "lucide-react";
 import { useState } from "react";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/credits")({
     ],
   }),
   component: CreditsPage,
-  errorComponent: ({ error }: { error: Error }) => (
+  errorComponent: ({ error }: ErrorComponentProps) => (
     <div className="mx-auto max-w-md p-10">
       <ErrorState message={error.message} />
     </div>

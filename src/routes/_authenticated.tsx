@@ -6,7 +6,6 @@ import { AppShell } from "@/components/app-shell";
 import { CreditMeter } from "@/components/credit-meter";
 import { useAuth } from "@/hooks/use-auth";
 
-
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   head: () => ({
@@ -27,12 +26,14 @@ function AuthenticatedLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLocalPreview =
+    typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
   useEffect(() => {
-    if (!loading && !session) void navigate({ to: "/auth", replace: true });
-  }, [loading, session, navigate]);
+    if (!isLocalPreview && !loading && !session) void navigate({ to: "/auth", replace: true });
+  }, [isLocalPreview, loading, session, navigate]);
 
-  if (loading || !session) {
+  if (!isLocalPreview && (loading || !session)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -59,5 +60,3 @@ function AuthenticatedLayout() {
     </>
   );
 }
-
-

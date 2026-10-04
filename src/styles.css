@@ -234,8 +234,8 @@
   --auth-sage: #647a6d;
   --auth-line: #ced8ca;
   --auth-field: #fffefa;
-  --auth-sheet-shadow: 0 32px 90px -35px oklch(0.06 0.01 160 / 0.65);
-  background: var(--auth-pine);
+  --auth-sheet-shadow: 0 28px 70px -30px oklch(0.03 0.02 160 / 0.68);
+  background: linear-gradient(135deg, #10251f 0%, #18372e 52%, #10251f 100%);
 }
 
 @theme inline {
@@ -249,18 +249,31 @@
   --shadow-auth-sheet: var(--auth-sheet-shadow);
 }
 
-.auth-diagram { color: var(--auth-mist); opacity: .47; }
-.auth-diagram-line { stroke: currentColor; stroke-width: 1; opacity: .46; }
-.auth-diagram-dash { stroke: var(--auth-coral); stroke-width: 2; stroke-dasharray: 6 24; animation: auth-trace 24s linear infinite; }
-.auth-diagram-node { fill: var(--auth-pine); stroke: var(--auth-coral); stroke-width: 2; }
+.auth-promise {
+  background:
+    linear-gradient(120deg, oklch(0.12 0.036 160 / .92), oklch(0.19 0.053 160 / .76)),
+    linear-gradient(145deg, #10251f, #265344);
+}
+.auth-promise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  background-image: linear-gradient(oklch(0.88 0.03 155 / .32) 1px, transparent 1px), linear-gradient(90deg, oklch(0.88 0.03 155 / .32) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+.auth-orb { position: absolute; border-radius: 999px; filter: blur(2px); pointer-events: none; }
+.auth-orb-one { width: 30rem; height: 30rem; right: -12rem; top: -9rem; background: oklch(0.73 .16 42 / .20); }
+.auth-orb-two { width: 19rem; height: 19rem; left: -8rem; bottom: -8rem; background: oklch(0.65 .10 170 / .28); }
+.auth-mobile-glow { background: radial-gradient(circle at 50% -8%, oklch(0.72 .15 42 / .21), transparent 38%); }
 .auth-entrance { animation: auth-arrive .65s ease-out both; }
 .auth-form { animation: auth-arrive .4s ease-out both; }
 .auth-input { transition: border-color .2s, box-shadow .2s, transform .2s; }
 .auth-input:focus { transform: translateY(-1px); }
-@keyframes auth-trace { to { stroke-dashoffset: -300; } }
 @keyframes auth-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
-  .auth-diagram-dash, .auth-entrance, .auth-form { animation: none; }
+  .auth-entrance, .auth-form { animation: none; }
 }
 
 @utility hero-scrim {

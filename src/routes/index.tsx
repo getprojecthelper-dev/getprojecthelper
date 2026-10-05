@@ -306,13 +306,17 @@ function Landing() {
               </p>
             </div>
             <Button asChild size="lg" className="group shrink-0">
-              <Link
-                to={session ? "/welcome" : "/auth"}
-                search={session ? undefined : { mode: "signup" }}
-              >
-                {session ? "Open your workspace" : "Start your project"}
-                <ArrowRight className="ml-1.5 size-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              {session ? (
+                <Link to="/welcome">
+                  Open your workspace
+                  <ArrowRight className="ml-1.5 size-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              ) : (
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Start your project
+                  <ArrowRight className="ml-1.5 size-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              )}
             </Button>
           </div>
         </section>

@@ -1,0 +1,10 @@
+CREATE POLICY "admins read all schedule tasks" ON public.schedule_tasks FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all budget lines" ON public.budget_lines FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all risks" ON public.risks FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all stakeholders" ON public.stakeholders FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all status reports" ON public.status_reports FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all research sources" ON public.research_sources FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all document sections" ON public.document_sections FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all documents" ON public.documents FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all wbs items" ON public.wbs_items FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins read all raci assignments" ON public.raci_assignments FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));

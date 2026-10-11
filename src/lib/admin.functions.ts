@@ -110,6 +110,16 @@ export interface AdminStats {
   ai: { credits: number; calls: number; tokens: number; byFeature: { feature: string; credits: number; calls: number }[]; daily: { day: string; credits: number }[] };
   subscriptions: { active: number; total: number; mrrCents: number; byPlan: { plan: string; count: number }[] };
   recentUsers: { id: string; email: string; name: string | null; created_at: string }[];
+  userProjects: {
+    id: string;
+    name: string;
+    domain: string;
+    status: string;
+    currentStage: string;
+    updatedAt: string;
+    ownerName: string | null;
+    ownerEmail: string;
+  }[];
 }
 
 
@@ -131,7 +141,10 @@ export const getAdminStats = createServerFn({ method: "GET" })
 
     const [profiles, projects, usage, subs] = await Promise.all([
       supabaseAdmin.from("profiles").select("id, full_name, created_at").order("created_at", { ascending: false }),
-      supabaseAdmin.from("projects").select("id, status"),
+      supabaseAdmin
+        .from("projects")
+        .select("id, user_id, name, domain, status, current_stage, updated_at")
+        .order("updated_at", { ascending: false }),
       supabaseAdmin.from("ai_usage_events").select("feature, credits, total_tokens, created_at"),
       supabaseAdmin.from("subscriptions").select("plan, status, amount_cents"),
     ]);
@@ -216,6 +229,19 @@ export const getAdminStats = createServerFn({ method: "GET" })
         name: p.full_name,
         created_at: p.created_at,
       })),
+      userProjects: projectRows.slice(0, 25).map((p) => {
+        const owner = profileRows.find((profile) => profile.id === p.user_id);
+        return {
+          id: p.id,
+          name: p.name,
+          domain: p.domain,
+          status: p.status,
+          currentStage: p.current_stage,
+          updatedAt: p.updated_at,
+          ownerName: owner?.full_name ?? null,
+          ownerEmail: emails.get(p.user_id) ?? "—",
+        };
+      }),
     };
   });
 

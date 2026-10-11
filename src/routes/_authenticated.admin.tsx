@@ -202,6 +202,62 @@ function AdminDashboard() {
         </section>
       </div>
 
+      <section className="panel p-5">
+        <h2 className="font-display text-lg">What users are building</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The most recently active projects and who is working on them.
+        </p>
+        {data.userProjects.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No projects have been created yet.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                  <th className="pb-2 font-semibold">Project</th>
+                  <th className="pb-2 font-semibold">Builder</th>
+                  <th className="pb-2 font-semibold">Domain</th>
+                  <th className="pb-2 font-semibold">Stage</th>
+                  <th className="pb-2 font-semibold">Status</th>
+                  <th className="pb-2 text-right font-semibold">Last active</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.userProjects.map((p) => (
+                  <tr key={p.id} className="border-t border-border/60">
+                    <td className="py-2 pr-4 font-medium">{p.name}</td>
+                    <td className="py-2 pr-4">
+                      <div>{p.ownerName ?? "—"}</div>
+                      <div className="text-xs text-muted-foreground">{p.ownerEmail}</div>
+                    </td>
+                    <td className="py-2 pr-4 capitalize text-muted-foreground">
+                      {p.domain.replace(/_/g, " ")}
+                    </td>
+                    <td className="py-2 pr-4 capitalize text-muted-foreground">
+                      {p.currentStage.replace(/_/g, " ")}
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span
+                        className={
+                          p.status === "completed"
+                            ? "rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary"
+                            : "rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        }
+                      >
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="py-2 text-right text-muted-foreground">
+                      {new Date(p.updatedAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <AdminEconomics />
 
       <AdminProjectPricing />

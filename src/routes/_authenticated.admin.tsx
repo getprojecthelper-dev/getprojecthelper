@@ -81,6 +81,10 @@ function AdminDashboard() {
   }
 
   const peak = Math.max(1, ...data.ai.daily.map((d) => d.credits));
+  const selectedProjects = selectedOwnerId
+    ? data.userProjects.filter((p) => p.ownerId === selectedOwnerId)
+    : [];
+  const selectedOwner = selectedProjects[0];
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-5 py-8">

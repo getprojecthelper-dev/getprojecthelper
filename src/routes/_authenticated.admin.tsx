@@ -316,6 +316,52 @@ function AdminDashboard() {
       <AdminProjectPricing />
 
       <AdminReferralCodes />
+
+      <Dialog open={selectedOwnerId !== null} onOpenChange={(open) => !open && setSelectedOwnerId(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedOwner?.ownerName ?? "This user"}'s projects
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOwner && (
+            <p className="text-sm text-muted-foreground">{selectedOwner.ownerEmail}</p>
+          )}
+          {selectedProjects.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">This user has no projects yet.</p>
+          ) : (
+            <ul className="mt-2 space-y-3">
+              {selectedProjects.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    to="/projects/$projectId"
+                    params={{ projectId: p.id }}
+                    className="block rounded-lg border border-border/60 p-4 transition hover:bg-secondary"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium">{p.name}</span>
+                      <span
+                        className={
+                          p.status === "completed"
+                            ? "rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary"
+                            : "rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        }
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs capitalize text-muted-foreground">
+                      {p.domain.replace(/_/g, " ")} · {p.currentStage.replace(/_/g, " ")} · last active{" "}
+                      {new Date(p.updatedAt).toLocaleDateString()}
+                    </div>
+                    <div className="mt-3"><Progress value={p.progress} /></div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -118,6 +118,7 @@ export interface AdminStats {
     status: string;
     currentStage: string;
     updatedAt: string;
+    ownerId: string;
     ownerName: string | null;
     ownerEmail: string;
     progress: number;
@@ -267,6 +268,7 @@ export const getAdminStats = createServerFn({ method: "GET" })
           status: p.status,
           currentStage: p.current_stage,
           updatedAt: p.updated_at,
+          ownerId: p.user_id,
           ownerName: owner?.full_name ?? null,
           ownerEmail: emailFor(p.user_id),
           progress: progressOf(p.id),

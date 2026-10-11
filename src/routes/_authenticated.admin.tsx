@@ -2,6 +2,7 @@ import { Link, createFileRoute, useNavigate, type ErrorComponentProps } from "@t
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { useState } from "react";
 
 import { AdminEconomics } from "@/components/admin-economics";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
@@ -10,6 +11,7 @@ import { MeterBar, MetricCard } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getAdminStats } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -53,6 +55,7 @@ function Progress({ value }: { value: number }) {
 function AdminDashboard() {
   const navigate = useNavigate();
   const fetchStats = useServerFn(getAdminStats);
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string | null>(null);
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => fetchStats(),
@@ -78,6 +81,10 @@ function AdminDashboard() {
   }
 
   const peak = Math.max(1, ...data.ai.daily.map((d) => d.credits));
+  const selectedProjects = selectedOwnerId
+    ? data.userProjects.filter((p) => p.ownerId === selectedOwnerId)
+    : [];
+  const selectedOwner = selectedProjects[0];
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-5 py-8">
@@ -266,7 +273,13 @@ function AdminDashboard() {
                   <tr key={p.id} className="border-t border-border/60">
                     <td className="py-2 pr-4 font-medium">{p.name}</td>
                     <td className="py-2 pr-4">
-                      <div>{p.ownerName ?? "—"}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOwnerId(p.ownerId)}
+                        className="text-left font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {p.ownerName ?? "—"}
+                      </button>
                       <div className="text-xs text-muted-foreground">{p.ownerEmail}</div>
                     </td>
                     <td className="py-2 pr-4 capitalize text-muted-foreground">
@@ -303,6 +316,52 @@ function AdminDashboard() {
       <AdminProjectPricing />
 
       <AdminReferralCodes />
+
+      <Dialog open={selectedOwnerId !== null} onOpenChange={(open) => !open && setSelectedOwnerId(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedOwner?.ownerName ?? "This user"}'s projects
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOwner && (
+            <p className="text-sm text-muted-foreground">{selectedOwner.ownerEmail}</p>
+          )}
+          {selectedProjects.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">This user has no projects yet.</p>
+          ) : (
+            <ul className="mt-2 space-y-3">
+              {selectedProjects.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    to="/projects/$projectId"
+                    params={{ projectId: p.id }}
+                    className="block rounded-lg border border-border/60 p-4 transition hover:bg-secondary"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium">{p.name}</span>
+                      <span
+                        className={
+                          p.status === "completed"
+                            ? "rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary"
+                            : "rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        }
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs capitalize text-muted-foreground">
+                      {p.domain.replace(/_/g, " ")} · {p.currentStage.replace(/_/g, " ")} · last active{" "}
+                      {new Date(p.updatedAt).toLocaleDateString()}
+                    </div>
+                    <div className="mt-3"><Progress value={p.progress} /></div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

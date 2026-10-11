@@ -1,12 +1,8 @@
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Menu, MessageSquareText } from "lucide-react";
+import { ArrowRight, Check, Lightbulb, Menu, MessageSquareText, Route as RouteIcon } from "lucide-react";
 
-import { DomainCards } from "@/components/domain-cards";
 import { HeroShowcase } from "@/components/hero-showcase";
-import { LifecycleStepper } from "@/components/lifecycle-stepper";
-import { Testimonials } from "@/components/testimonials";
-import { FeatureGrid } from "@/components/feature-grid";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -69,9 +65,7 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { session, loading } = useAuth();
   const nav = [
-    ["How it works", "#how-it-works"],
-    ["Domains", "#domains"],
-    ["Features", "#features"],
+    ["Your journey", "#how-it-works"],
     ["AI Mentor", "#mentor"],
   ] as const;
   return (
@@ -191,62 +185,31 @@ function Landing() {
 
         <section id="how-it-works" className="border-b border-border bg-card">
           <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] lg:items-end">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                  The workflow
-                </span>
-                <h2 className="mt-4 max-w-md font-display text-3xl leading-tight tracking-[-0.035em] sm:text-4xl">
-                  A clear route from first thought to final defence.
-                </h2>
-              </div>
-              <p className="max-w-xl text-base leading-7 text-muted-foreground lg:justify-self-end">
-                Your project should never feel like a collection of disconnected tabs. Each stage
-                gives you a useful next step and keeps the evidence for it close by.
-              </p>
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">A calmer way to work</span>
+              <h2 className="mt-4 font-display text-3xl leading-tight tracking-[-0.04em] sm:text-4xl">Everything you need. Nothing to get lost in.</h2>
+              <p className="mt-4 leading-7 text-muted-foreground">Project Helper keeps your work moving with a simple rhythm you can follow from day one.</p>
             </div>
-            <LifecycleStepper />
-          </div>
-        </section>
-
-        <section id="domains" className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
-          <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 max-sm:grid-cols-1">
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-                Start your way
-              </span>
-              <h2 className="mt-3 font-display text-3xl tracking-[-0.035em]">
-                A workspace that meets your discipline.
-              </h2>
-              <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
-                Choose a direction and start with the right structure instead of an empty page.
-              </p>
+            <div className="mt-12 grid gap-4 md:grid-cols-3">
+              {[
+                { icon: Lightbulb, number: "01", title: "Start with the idea", body: "Describe what you want to make. We help you find a useful, realistic direction." },
+                { icon: RouteIcon, number: "02", title: "Follow the plan", body: "Break the work into manageable next steps, with your progress always visible." },
+                { icon: Check, number: "03", title: "Show your work", body: "Bring your research, results and reasoning together for a confident final submission." },
+              ].map(({ icon: Icon, number, title, body }, index) => (
+                <article key={number} className="landing-reveal panel group relative overflow-hidden p-6" style={{ animationDelay: `${index * 110}ms` }}>
+                  <span className="text-xs font-bold tracking-[0.14em] text-primary">{number}</span>
+                  <span className="mt-8 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110"><Icon className="size-5" /></span>
+                  <h3 className="mt-5 font-display text-xl tracking-[-0.03em]">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
+                </article>
+              ))}
             </div>
-            <Button asChild variant="outline">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                Explore all domains
-                <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <DomainCards />
-        </section>
-
-        <section id="features" className="border-y border-border bg-secondary/50">
-          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-              One connected workspace
-            </p>
-            <h2 className="mt-4 max-w-2xl font-display text-3xl leading-tight tracking-[-0.035em] sm:text-4xl">
-              The work stays connected. So does your thinking.
-            </h2>
-            <FeatureGrid />
           </div>
         </section>
 
         <section
           id="mentor"
-          className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:items-center"
+          className="mx-auto grid max-w-5xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:items-center"
         >
           <div>
             <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -277,17 +240,6 @@ function Landing() {
                 both scores again.
               </div>
             </div>
-          </div>
-        </section>
-        <section className="border-t border-border bg-secondary/40">
-          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
-            <div className="mx-auto mb-10 max-w-2xl text-center">
-              <h2 className="font-display text-3xl">Loved by students &amp; developers</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                See what people building real projects say.
-              </p>
-            </div>
-            <Testimonials />
           </div>
         </section>
         <section className="hero-surface relative overflow-hidden">

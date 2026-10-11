@@ -308,6 +308,15 @@
     hero-preview-drift 6s ease-in-out 1s infinite;
 }
 
+.landing-reveal {
+  animation: landing-reveal 650ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes landing-reveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -317,6 +326,8 @@
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+
+  .landing-reveal { animation: none; }
 }
 
 

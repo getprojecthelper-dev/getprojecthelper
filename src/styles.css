@@ -105,6 +105,71 @@
   --sidebar-ring: oklch(0.63 0.19 40);
 }
 
+/* Public landing canvas: intentionally bright and independent of workspace tokens. */
+.landing-wash {
+  background:
+    radial-gradient(circle at 7% 8%, oklch(0.9 0.09 295 / .6), transparent 26rem),
+    radial-gradient(circle at 95% 15%, oklch(0.91 0.09 225 / .54), transparent 31rem),
+    radial-gradient(circle at 72% 82%, oklch(0.93 0.1 155 / .35), transparent 25rem),
+    linear-gradient(135deg, #fbfbff 0%, #f4f6ff 46%, #f8fffd 100%);
+}
+
+.landing-gradient-text {
+  background: linear-gradient(100deg, #6d28d9 0%, #2563eb 48%, #0891b2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-wash-dark {
+  background:
+    radial-gradient(circle at 10% 3%, oklch(0.34 0.14 295 / .32), transparent 27rem),
+    radial-gradient(circle at 88% 18%, oklch(0.33 0.12 245 / .25), transparent 32rem),
+    radial-gradient(circle at 56% 88%, oklch(0.3 0.12 170 / .15), transparent 28rem),
+    #09090b;
+}
+
+/* The marketing experience is deliberately a fixed dark presentation, not a toggleable theme. */
+#projects {
+  border-color: rgb(255 255 255 / 0.08) !important;
+  background: rgb(255 255 255 / 0.025) !important;
+}
+
+#projects > div > div:first-child > h2,
+#how-it-works h2,
+#how-it-works h3 {
+  color: #fff;
+}
+
+#projects > div > div:first-child > p,
+#projects article p,
+#how-it-works p {
+  color: rgb(203 213 225) !important;
+}
+
+#projects article {
+  border-color: rgb(255 255 255 / 0.1) !important;
+  background-image: linear-gradient(145deg, rgb(30 30 39 / .96), rgb(17 18 24 / .96)) !important;
+  box-shadow: 0 18px 45px rgb(0 0 0 / .22) !important;
+}
+
+#projects article h3,
+#projects article a {
+  color: #fff;
+}
+
+#how-it-works > div > div:last-child > div {
+  border-color: rgb(255 255 255 / 0.1) !important;
+  background: rgb(255 255 255 / 0.045) !important;
+  box-shadow: 0 18px 45px rgb(0 0 0 / .18);
+}
+
+#mentor > div > div:last-child {
+  background-image: linear-gradient(135deg, rgb(30 27 75 / .78), rgb(15 23 42 / .62)), url("/project-collaboration.png") !important;
+  background-position: center;
+  background-size: cover;
+}
+
 .dark {
   --background: oklch(0.155 0.004 285);
   --foreground: oklch(0.955 0.006 85);

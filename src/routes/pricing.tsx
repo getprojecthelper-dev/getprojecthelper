@@ -2,7 +2,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, Gift, HelpCircle } from "lucide-react";
 
 import { PricingPacks } from "@/components/pricing-packs";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { STARTER_CREDITS } from "@/lib/credit-costs";
 import { cheapestPack, formatMoney, packPrice } from "@/lib/pricing";
@@ -61,7 +60,6 @@ function PricingPage() {
             </Link>
           </Button>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <Button asChild size="sm">
               <Link to="/auth" search={{ mode: "signup" }}>
                 Start free

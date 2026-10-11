@@ -7,7 +7,6 @@ import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
 
@@ -38,7 +37,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <CreditChip />
-            <ThemeToggle />
             <Button asChild variant="ghost" size="icon" aria-label="Settings">
               <Link to="/settings"><Settings className="h-4 w-4" /></Link>
             </Button>

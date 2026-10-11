@@ -2,7 +2,6 @@ import brandMark from "@/assets/mentor-mark.png";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function LegalPage({
   title,
@@ -21,7 +20,6 @@ export function LegalPage({
             <img src={brandMark} alt="" width={512} height={512} className="h-6 w-6" />
             Project Helper
           </Link>
-          <ThemeToggle />
         </div>
       </header>
 

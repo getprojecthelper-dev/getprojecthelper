@@ -55,6 +55,7 @@ function Progress({ value }: { value: number }) {
 function AdminDashboard() {
   const navigate = useNavigate();
   const fetchStats = useServerFn(getAdminStats);
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string | null>(null);
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => fetchStats(),

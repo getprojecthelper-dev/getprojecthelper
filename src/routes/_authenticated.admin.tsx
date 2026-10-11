@@ -15,15 +15,16 @@ import { getAdminStats } from "@/lib/admin.functions";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — Project Helper" },
+      { title: "Adport — Project Helper" },
       {
         name: "description",
         content: "Registered users, AI credit consumption and subscription revenue for Project Helper.",
       },
-      { property: "og:title", content: "Admin dashboard — Project Helper" },
+      { property: "og:title", content: "Adport — Project Helper" },
       { property: "og:description", content: "Users, AI credits and subscriptions at a glance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AdminDashboard,
@@ -37,6 +38,17 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const money = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+
+function Progress({ value }: { value: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${value}%` }} />
+      </div>
+      <span className="text-xs text-muted-foreground">{value}%</span>
+    </div>
+  );
+}
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -70,7 +82,7 @@ function AdminDashboard() {
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-5 py-8">
       <PageHeader
-        title="Admin dashboard"
+        title="Adport"
         description="Platform-wide view of registered students, AI credit consumption and subscriptions."
         actions={
           <Button asChild variant="outline" size="sm">
@@ -203,6 +215,32 @@ function AdminDashboard() {
       </div>
 
       <section className="panel p-5">
+        <h2 className="font-display text-lg">My projects</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Your own projects and how far along they are.</p>
+        {data.userProjects.filter((p) => p.isMine).length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">You haven't started any projects yet.</p>
+        ) : (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {data.userProjects.filter((p) => p.isMine).map((p) => (
+              <li key={p.id}>
+                <Link
+                  to="/projects/$projectId"
+                  params={{ projectId: p.id }}
+                  className="block rounded-lg border border-border/60 p-4 transition hover:bg-secondary"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium">{p.name}</span>
+                    <span className="text-xs capitalize text-muted-foreground">{p.domain.replace(/_/g, " ")}</span>
+                  </div>
+                  <div className="mt-3"><Progress value={p.progress} /></div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="panel p-5">
         <h2 className="font-display text-lg">What users are building</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           The most recently active projects and who is working on them.
@@ -211,13 +249,14 @@ function AdminDashboard() {
           <p className="mt-4 text-sm text-muted-foreground">No projects have been created yet.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-widest text-muted-foreground">
                   <th className="pb-2 font-semibold">Project</th>
                   <th className="pb-2 font-semibold">Builder</th>
                   <th className="pb-2 font-semibold">Domain</th>
                   <th className="pb-2 font-semibold">Stage</th>
+                  <th className="pb-2 font-semibold">Progress</th>
                   <th className="pb-2 font-semibold">Status</th>
                   <th className="pb-2 text-right font-semibold">Last active</th>
                 </tr>
@@ -236,6 +275,7 @@ function AdminDashboard() {
                     <td className="py-2 pr-4 capitalize text-muted-foreground">
                       {p.currentStage.replace(/_/g, " ")}
                     </td>
+                    <td className="py-2 pr-4"><Progress value={p.progress} /></td>
                     <td className="py-2 pr-4">
                       <span
                         className={

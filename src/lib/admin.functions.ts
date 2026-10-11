@@ -229,6 +229,19 @@ export const getAdminStats = createServerFn({ method: "GET" })
         name: p.full_name,
         created_at: p.created_at,
       })),
+      userProjects: projectRows.slice(0, 25).map((p) => {
+        const owner = profileRows.find((profile) => profile.id === p.user_id);
+        return {
+          id: p.id,
+          name: p.name,
+          domain: p.domain,
+          status: p.status,
+          currentStage: p.current_stage,
+          updatedAt: p.updated_at,
+          ownerName: owner?.full_name ?? null,
+          ownerEmail: emails.get(p.user_id) ?? "—",
+        };
+      }),
     };
   });
 

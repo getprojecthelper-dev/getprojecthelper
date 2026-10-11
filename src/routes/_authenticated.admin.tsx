@@ -2,6 +2,7 @@ import { Link, createFileRoute, useNavigate, type ErrorComponentProps } from "@t
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { useState } from "react";
 
 import { AdminEconomics } from "@/components/admin-economics";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
@@ -10,6 +11,7 @@ import { MeterBar, MetricCard } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getAdminStats } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({

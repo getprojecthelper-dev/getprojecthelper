@@ -273,7 +273,13 @@ function AdminDashboard() {
                   <tr key={p.id} className="border-t border-border/60">
                     <td className="py-2 pr-4 font-medium">{p.name}</td>
                     <td className="py-2 pr-4">
-                      <div>{p.ownerName ?? "—"}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOwnerId(p.ownerId)}
+                        className="text-left font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {p.ownerName ?? "—"}
+                      </button>
                       <div className="text-xs text-muted-foreground">{p.ownerEmail}</div>
                     </td>
                     <td className="py-2 pr-4 capitalize text-muted-foreground">

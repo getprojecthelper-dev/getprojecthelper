@@ -1,3 +1,4 @@
+import { computeProgress, type ProjectSignals } from "@/lib/project-domain";
 import { z } from "zod";
 import { createServerFn } from "@tanstack/react-start";
 
@@ -119,6 +120,8 @@ export interface AdminStats {
     updatedAt: string;
     ownerName: string | null;
     ownerEmail: string;
+    progress: number;
+    isMine: boolean;
   }[];
 }
 
@@ -148,6 +151,32 @@ export const getAdminStats = createServerFn({ method: "GET" })
       supabaseAdmin.from("ai_usage_events").select("feature, credits, total_tokens, created_at"),
       supabaseAdmin.from("subscriptions").select("plan, status, amount_cents"),
     ]);
+    const [buildRows, taskRows, reqRows, testRows, docRows, roleRows] = await Promise.all([
+      supabaseAdmin.from("build_sections").select("project_id, status"),
+      supabaseAdmin.from("tasks").select("project_id, status"),
+      supabaseAdmin.from("requirements").select("project_id, status"),
+      supabaseAdmin.from("test_cases").select("project_id, status"),
+      supabaseAdmin.from("document_sections").select("project_id, status"),
+      supabaseAdmin.from("user_roles").select("user_id, role").eq("role", "admin"),
+    ]);
+    const adminIds = new Set((roleRows.data ?? []).map((r) => r.user_id));
+    const rowsFor = <T extends { project_id: string }>(rows: T[] | null, id: string) =>
+      (rows ?? []).filter((r) => r.project_id === id);
+    const progressOf = (id: string) => {
+      const sections = rowsFor(buildRows.data, id);
+      if (sections.length)
+        return Math.round((sections.filter((x) => x.status === "confirmed").length / sections.length) * 100);
+      return computeProgress({
+        tasks: rowsFor(taskRows.data, id).map((t) => ({ title: "", status: t.status, due_date: null, priority: "" })),
+        requirements: rowsFor(reqRows.data, id).map((r) => ({ status: r.status })),
+        tests: rowsFor(testRows.data, id).map((t) => ({ status: t.status })),
+        docSections: rowsFor(docRows.data, id).map((d) => ({ status: d.status })),
+        risks: [],
+        deadline: null,
+      } as ProjectSignals);
+    };
+    // Administrator emails are never shown in the console.
+    const emailFor = (id: string) => (adminIds.has(id) ? "Hidden" : (emails.get(id) ?? "—"));
 
     const profileRows = profiles.data ?? [];
     const usageRows = usage.data ?? [];
@@ -225,11 +254,11 @@ export const getAdminStats = createServerFn({ method: "GET" })
       },
       recentUsers: profileRows.slice(0, 10).map((p) => ({
         id: p.id,
-        email: emails.get(p.id) ?? "—",
+        email: emailFor(p.id),
         name: p.full_name,
         created_at: p.created_at,
       })),
-      userProjects: projectRows.slice(0, 25).map((p) => {
+      userProjects: projectRows.slice(0, 50).map((p) => {
         const owner = profileRows.find((profile) => profile.id === p.user_id);
         return {
           id: p.id,
@@ -239,7 +268,9 @@ export const getAdminStats = createServerFn({ method: "GET" })
           currentStage: p.current_stage,
           updatedAt: p.updated_at,
           ownerName: owner?.full_name ?? null,
-          ownerEmail: emails.get(p.user_id) ?? "—",
+          ownerEmail: emailFor(p.user_id),
+          progress: progressOf(p.id),
+          isMine: p.user_id === context.userId,
         };
       }),
     };

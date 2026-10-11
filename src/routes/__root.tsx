@@ -1,3 +1,4 @@
+import { MaintenanceGate } from "@/components/maintenance-gate";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -163,7 +164,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <MaintenanceGate>
+          <Outlet />
+        </MaintenanceGate>
         <Toaster richColors position="top-right" />
       </AuthProvider>
     </QueryClientProvider>

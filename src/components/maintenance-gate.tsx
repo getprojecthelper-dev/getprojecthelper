@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Loader2, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -25,17 +25,10 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
   });
 
   // Password recovery must keep working for the admin.
-  if (pathname.startsWith("/reset-password")) return <>{children}</>;
+  if (pathname.startsWith("/reset-password") || pathname.startsWith("/auth")) return <>{children}</>;
   if (user && isAdmin) return <>{children}</>;
 
   const checking = loading || (!!user && isPending);
-
-  async function signIn() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin },
-    });
-  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6">
@@ -58,8 +51,8 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
             </Button>
           </div>
         ) : (
-          <Button className="mt-8" variant="outline" onClick={() => void signIn()}>
-            Admin sign in with Google
+          <Button asChild className="mt-8" variant="outline">
+            <Link to="/auth">Admin sign in</Link>
           </Button>
         )}
       </div>

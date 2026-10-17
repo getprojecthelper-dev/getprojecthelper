@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -6,7 +7,7 @@
 
 /*
  * Project Helper design system.
- * Warm editorial paper + terracotta / deep-pine accents.
+ * Dark studio workspace with a single high-contrast orange accent.
  * All colors are oklch tokens. Never hardcode colors in components.
  */
 
@@ -64,45 +65,45 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.958 0.007 85);
-  --foreground: oklch(0.19 0.006 285);
-  --card: oklch(0.995 0.004 85);
-  --card-foreground: oklch(0.19 0.006 285);
-  --popover: oklch(0.995 0.004 85);
-  --popover-foreground: oklch(0.19 0.006 285);
-  --primary: oklch(0.63 0.19 40);
-  --primary-foreground: oklch(0.985 0.006 85);
-  --secondary: oklch(0.925 0.008 85);
-  --secondary-foreground: oklch(0.26 0.008 285);
-  --muted: oklch(0.932 0.007 85);
-  --muted-foreground: oklch(0.5 0.008 285);
-  --accent: oklch(0.63 0.19 40);
-  --accent-foreground: oklch(0.985 0.006 85);
+  --radius: 1rem;
+  --background: oklch(0.135 0.004 285);
+  --foreground: oklch(0.965 0.004 85);
+  --card: oklch(0.18 0.006 285);
+  --card-foreground: oklch(0.965 0.004 85);
+  --popover: oklch(0.19 0.006 285);
+  --popover-foreground: oklch(0.965 0.004 85);
+  --primary: oklch(0.7 0.19 40);
+  --primary-foreground: oklch(0.16 0.004 285);
+  --secondary: oklch(0.235 0.006 285);
+  --secondary-foreground: oklch(0.94 0.004 85);
+  --muted: oklch(0.225 0.005 285);
+  --muted-foreground: oklch(0.72 0.006 85);
+  --accent: oklch(0.245 0.006 285);
+  --accent-foreground: oklch(0.98 0.004 85);
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.985 0.006 85);
-  --success: oklch(0.52 0.1 155);
-  --success-foreground: oklch(0.985 0.006 85);
-  --warning: oklch(0.74 0.14 68);
-  --warning-foreground: oklch(0.2 0.006 285);
-  --info: oklch(0.52 0.09 250);
-  --info-foreground: oklch(0.985 0.006 85);
-  --border: oklch(0.87 0.006 85);
-  --input: oklch(0.87 0.006 85);
-  --ring: oklch(0.63 0.19 40);
-  --chart-1: oklch(0.63 0.19 40);
-  --chart-2: oklch(0.52 0.09 250);
-  --chart-3: oklch(0.74 0.14 68);
-  --chart-4: oklch(0.52 0.1 155);
-  --chart-5: oklch(0.3 0.02 285);
-  --sidebar: oklch(0.94 0.007 85);
-  --sidebar-foreground: oklch(0.24 0.008 285);
-  --sidebar-primary: oklch(0.63 0.19 40);
-  --sidebar-primary-foreground: oklch(0.985 0.006 85);
-  --sidebar-accent: oklch(0.9 0.008 85);
-  --sidebar-accent-foreground: oklch(0.22 0.008 285);
-  --sidebar-border: oklch(0.87 0.006 85);
-  --sidebar-ring: oklch(0.63 0.19 40);
+  --success: oklch(0.72 0.12 155);
+  --success-foreground: oklch(0.14 0.004 285);
+  --warning: oklch(0.82 0.13 70);
+  --warning-foreground: oklch(0.16 0.004 285);
+  --info: oklch(0.72 0.1 250);
+  --info-foreground: oklch(0.14 0.004 285);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.7 0.19 40);
+  --chart-1: oklch(0.7 0.19 40);
+  --chart-2: oklch(0.72 0.1 250);
+  --chart-3: oklch(0.82 0.13 70);
+  --chart-4: oklch(0.72 0.12 155);
+  --chart-5: oklch(0.86 0.004 85);
+  --sidebar: oklch(0.16 0.005 285);
+  --sidebar-foreground: oklch(0.94 0.004 85);
+  --sidebar-primary: oklch(0.7 0.19 40);
+  --sidebar-primary-foreground: oklch(0.16 0.004 285);
+  --sidebar-accent: oklch(0.245 0.006 285);
+  --sidebar-accent-foreground: oklch(0.96 0.004 85);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.7 0.19 40);
 }
 
 /* Public landing canvas: intentionally bright and independent of workspace tokens. */
@@ -234,11 +235,54 @@
 }
 
 @utility panel {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
-  background-color: var(--color-card);
+  background: linear-gradient(145deg, oklch(0.205 0.006 285), oklch(0.165 0.005 285));
   box-shadow: var(--shadow-panel);
 }
+
+/* Shared workspace treatment. Use icon chips instead of floating bare glyphs. */
+.workspace-canvas {
+  background:
+    radial-gradient(circle at 8% 0%, rgb(255 107 53 / .1), transparent 28rem),
+    radial-gradient(circle at 94% 100%, rgb(124 58 237 / .08), transparent 30rem),
+    var(--background);
+}
+
+.workspace-topbar {
+  background: rgb(9 9 11 / .86);
+  border-color: rgb(255 255 255 / .1);
+}
+
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: .85rem;
+  background: linear-gradient(145deg, rgb(255 255 255 / .1), rgb(255 255 255 / .035));
+  color: #ff6b35;
+  box-shadow: inset 0 1px rgb(255 255 255 / .08);
+}
+
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.125rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-filled { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
 
 @utility grain-overlay {
   position: relative;
@@ -292,15 +336,18 @@
 
 /* Authentication canvas: scoped so the selected pine-and-coral direction does not recolor the workspace. */
 .auth-stage {
-  --auth-pine: #142822;
-  --auth-coral: #ef775d;
-  --auth-light: #f1f4ea;
-  --auth-mist: #8aa89b;
-  --auth-sage: #647a6d;
-  --auth-line: #ced8ca;
-  --auth-field: #fffefa;
-  --auth-sheet-shadow: 0 28px 70px -30px oklch(0.03 0.02 160 / 0.68);
-  background: linear-gradient(135deg, #10251f 0%, #18372e 52%, #10251f 100%);
+  --auth-pine: #111114;
+  --auth-coral: #ff6b35;
+  --auth-light: #f9f9fb;
+  --auth-mist: #a1a1aa;
+  --auth-sage: #71717a;
+  --auth-line: #d4d4d8;
+  --auth-field: #ffffff;
+  --auth-sheet-shadow: 0 28px 70px -30px rgb(0 0 0 / .72);
+  background:
+    radial-gradient(circle at 8% 6%, rgb(255 107 53 / .2), transparent 28rem),
+    radial-gradient(circle at 90% 88%, rgb(124 58 237 / .14), transparent 26rem),
+    #09090b;
 }
 
 @theme inline {
@@ -316,22 +363,22 @@
 
 .auth-promise {
   background:
-    linear-gradient(120deg, oklch(0.12 0.036 160 / .92), oklch(0.19 0.053 160 / .76)),
-    linear-gradient(145deg, #10251f, #265344);
+    linear-gradient(120deg, rgb(9 9 11 / .95), rgb(24 20 18 / .82)),
+    linear-gradient(145deg, #09090b, #22130d);
 }
 .auth-promise::after {
   content: "";
   position: absolute;
   inset: 0;
   opacity: .16;
-  background-image: linear-gradient(oklch(0.88 0.03 155 / .32) 1px, transparent 1px), linear-gradient(90deg, oklch(0.88 0.03 155 / .32) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(255 255 255 / .1) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .1) 1px, transparent 1px);
   background-size: 54px 54px;
   mask-image: linear-gradient(to bottom, black, transparent 78%);
 }
 .auth-orb { position: absolute; border-radius: 999px; filter: blur(2px); pointer-events: none; }
-.auth-orb-one { width: 30rem; height: 30rem; right: -12rem; top: -9rem; background: oklch(0.73 .16 42 / .20); }
-.auth-orb-two { width: 19rem; height: 19rem; left: -8rem; bottom: -8rem; background: oklch(0.65 .10 170 / .28); }
-.auth-mobile-glow { background: radial-gradient(circle at 50% -8%, oklch(0.72 .15 42 / .21), transparent 38%); }
+.auth-orb-one { width: 30rem; height: 30rem; right: -12rem; top: -9rem; background: rgb(255 107 53 / .22); }
+.auth-orb-two { width: 19rem; height: 19rem; left: -8rem; bottom: -8rem; background: rgb(124 58 237 / .18); }
+.auth-mobile-glow { background: radial-gradient(circle at 50% -8%, rgb(255 107 53 / .22), transparent 38%); }
 .auth-entrance { animation: auth-arrive .65s ease-out both; }
 .auth-form { animation: auth-arrive .4s ease-out both; }
 .auth-input { transition: border-color .2s, box-shadow .2s, transform .2s; }

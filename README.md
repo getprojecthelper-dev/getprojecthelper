@@ -46,11 +46,11 @@ The system should continuously answer:
 
 3. What should I do next?
 
---------------------------------------------------
+---
 
 CORE USER JOURNEY
 
---------------------------------------------------
+---
 
 The primary workflow is:
 
@@ -84,11 +84,11 @@ Sign Up
 
 The user should always be able to see their current project stage and recommended next action.
 
---------------------------------------------------
+---
 
 APPLICATION STRUCTURE
 
---------------------------------------------------
+---
 
 Create the following main areas:
 
@@ -130,11 +130,11 @@ Create the following main areas:
 
 19. Settings
 
---------------------------------------------------
+---
 
 DESIGN DIRECTION
 
---------------------------------------------------
+---
 
 Create a premium, modern SaaS interface.
 
@@ -184,11 +184,11 @@ Use a responsive design for:
 
 Desktop should be the primary experience.
 
---------------------------------------------------
+---
 
 GLOBAL NAVIGATION
 
---------------------------------------------------
+---
 
 Use a left sidebar for the project workspace.
 
@@ -230,11 +230,11 @@ Logout
 
 The sidebar should clearly indicate the current section.
 
---------------------------------------------------
+---
 
 LANDING PAGE
 
---------------------------------------------------
+---
 
 Create a strong landing page.
 
@@ -288,11 +288,11 @@ Add sections explaining:
 
 - Portfolio Creation
 
---------------------------------------------------
+---
 
 AUTHENTICATION
 
---------------------------------------------------
+---
 
 Create:
 
@@ -308,11 +308,11 @@ Keep authentication UI simple.
 
 Do not ask for unnecessary information during signup.
 
---------------------------------------------------
+---
 
 ONBOARDING
 
---------------------------------------------------
+---
 
 After registration, guide the user through:
 
@@ -332,11 +332,11 @@ After registration, guide the user through:
 
 Allow the user to skip optional fields.
 
---------------------------------------------------
+---
 
 PROJECT CREATION
 
---------------------------------------------------
+---
 
 Project fields:
 
@@ -378,11 +378,11 @@ Templates should initially include:
 
 - Custom Project
 
---------------------------------------------------
+---
 
 PROJECT DASHBOARD
 
---------------------------------------------------
+---
 
 The dashboard should be the main control centre.
 
@@ -442,11 +442,11 @@ Provide CTA:
 
 "Start Task"
 
---------------------------------------------------
+---
 
 PROJECT PROGRESS
 
---------------------------------------------------
+---
 
 Use meaningful project stages:
 
@@ -474,11 +474,11 @@ Do NOT simply allow users to enter arbitrary percentages.
 
 Progress should eventually be calculated from actual project completion.
 
---------------------------------------------------
+---
 
 PROJECT HEALTH
 
---------------------------------------------------
+---
 
 Keep Project Progress and Project Health separate.
 
@@ -504,11 +504,11 @@ Health can consider:
 
 For the MVP, use a simple deterministic calculation.
 
---------------------------------------------------
+---
 
 TASK MANAGEMENT
 
---------------------------------------------------
+---
 
 Users should be able to:
 
@@ -558,11 +558,11 @@ Display tasks in:
 
 - Timeline where appropriate
 
---------------------------------------------------
+---
 
 REQUIREMENTS
 
---------------------------------------------------
+---
 
 Create a requirements management system.
 
@@ -606,11 +606,11 @@ High
 
 Completed
 
---------------------------------------------------
+---
 
 TRACEABILITY
 
---------------------------------------------------
+---
 
 Support the relationship:
 
@@ -628,11 +628,11 @@ Requirement
 
 Create a visual traceability view where practical.
 
---------------------------------------------------
+---
 
 PROJECT TEMPLATES
 
---------------------------------------------------
+---
 
 Templates should generate an initial project workflow.
 
@@ -710,11 +710,11 @@ Problem
 
 Allow users to customise templates after creation.
 
---------------------------------------------------
+---
 
 RESEARCH WORKSPACE
 
---------------------------------------------------
+---
 
 Allow users to manage:
 
@@ -732,11 +732,11 @@ Allow users to manage:
 
 Documents should be connected to the project.
 
---------------------------------------------------
+---
 
 DATA / EXPERIMENT WORKSPACE
 
---------------------------------------------------
+---
 
 For Data Science / ML projects provide:
 
@@ -772,11 +772,11 @@ Do not build a fake ML training system.
 
 This MVP should focus on PROJECT MANAGEMENT and RECORDING ANALYSIS RESULTS.
 
---------------------------------------------------
+---
 
 TESTING
 
---------------------------------------------------
+---
 
 Create a testing workspace.
 
@@ -806,11 +806,11 @@ Blocked
 
 Display testing coverage.
 
---------------------------------------------------
+---
 
 DOCUMENTATION
 
---------------------------------------------------
+---
 
 Create a document/report workspace.
 
@@ -852,11 +852,11 @@ Discussion ○
 
 Conclusion ○
 
---------------------------------------------------
+---
 
 AI MENTOR
 
---------------------------------------------------
+---
 
 Create an AI Mentor interface.
 
@@ -920,11 +920,11 @@ AI:
 
 "Accuracy alone does not establish that. Check class balance, precision, recall, F1-score and the confusion matrix before concluding that the model performs well."
 
---------------------------------------------------
+---
 
 AI ACTIONS
 
---------------------------------------------------
+---
 
 AI suggestions should be actionable.
 
@@ -954,11 +954,11 @@ The AI must not silently modify important project data.
 
 Use confirmation before write actions.
 
---------------------------------------------------
+---
 
 AI SAFETY
 
---------------------------------------------------
+---
 
 The AI must:
 
@@ -988,11 +988,11 @@ Incorrect:
 
 "Your model achieved 94% accuracy."
 
---------------------------------------------------
+---
 
 VIVA PREPARATION
 
---------------------------------------------------
+---
 
 Create a Viva section.
 
@@ -1016,11 +1016,11 @@ Future Work
 
 Support mock viva conversations.
 
---------------------------------------------------
+---
 
 PROJECT REVIEW
 
---------------------------------------------------
+---
 
 Create a final project review dashboard.
 
@@ -1052,11 +1052,11 @@ At Risk
 
 Also show major project risks.
 
---------------------------------------------------
+---
 
 SHOWCASE
 
---------------------------------------------------
+---
 
 Create a project showcase area.
 
@@ -1078,11 +1078,11 @@ Only use verified project information.
 
 Do not exaggerate skills or results.
 
---------------------------------------------------
+---
 
 DATABASE
 
---------------------------------------------------
+---
 
 Design the application around these entities:
 
@@ -1144,11 +1144,11 @@ Experiments belong to projects.
 
 AI conversations belong to users and projects.
 
---------------------------------------------------
+---
 
 SECURITY
 
---------------------------------------------------
+---
 
 Implement proper authorization.
 
@@ -1172,11 +1172,11 @@ Protect:
 
 Do not expose API keys in frontend code.
 
---------------------------------------------------
+---
 
 ERROR STATES
 
---------------------------------------------------
+---
 
 Every major feature needs:
 
@@ -1192,11 +1192,11 @@ Do not show generic "Error 500" messages to users.
 
 Use helpful messages and recovery actions.
 
---------------------------------------------------
+---
 
 RESPONSIVE DESIGN
 
---------------------------------------------------
+---
 
 Desktop:
 
@@ -1222,11 +1222,11 @@ Mobile should prioritise:
 
 - Notifications
 
---------------------------------------------------
+---
 
 DESIGN SYSTEM
 
---------------------------------------------------
+---
 
 Create reusable components for:
 
@@ -1274,11 +1274,11 @@ Colours
 
 Icons
 
---------------------------------------------------
+---
 
 IMPORTANT MVP CONSTRAINT
 
---------------------------------------------------
+---
 
 Do NOT attempt to implement the entire long-term architecture immediately.
 
@@ -1334,11 +1334,11 @@ Advanced functionality such as:
 
 should be architected for future expansion but NOT unnecessarily implemented in the first version.
 
---------------------------------------------------
+---
 
 CODE QUALITY
 
---------------------------------------------------
+---
 
 Use reusable components.
 
@@ -1358,11 +1358,11 @@ Do not create fake functionality that looks functional but does nothing.
 
 If a feature is not implemented, clearly indicate it as coming soon rather than pretending it works.
 
---------------------------------------------------
+---
 
 FINAL PRODUCT EXPERIENCE
 
---------------------------------------------------
+---
 
 The finished MVP should feel like:
 
@@ -1389,8 +1389,6 @@ PROJECT
 → SHOWCASE
 
 Every feature should support this lifecycle.
-
-I have Added the Image For Homepage
 
 This project was built with [Lovable](https://lovable.dev).
 

@@ -1,20 +1,11 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
-  Bot,
-  Coins,
-  FileText,
-  Hammer,
   History,
-  Home,
-  LayoutDashboard,
-  MessagesSquare,
-  Settings,
-  ShoppingBag,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { MaterialIcon } from "@/components/material-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectsOverview } from "@/lib/db";
 
@@ -141,33 +132,33 @@ function ResumeProjects() {
 type WorkspaceLink = {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: string;
   to: "/welcome" | "/dashboard" | "/settings" | "/credits";
 };
 
 const WORKSPACE_LINKS: WorkspaceLink[] = [
-  { title: "Home", description: "Your starting point", icon: Home, to: "/welcome" },
-  { title: "Dashboard", description: "View every project", icon: LayoutDashboard, to: "/dashboard" },
-  { title: "Credits", description: "Balance and top-ups", icon: Coins, to: "/credits" },
-  { title: "Settings", description: "Profile and preferences", icon: Settings, to: "/settings" },
+  { title: "Home", description: "Your starting point", icon: "home", to: "/welcome" },
+  { title: "Dashboard", description: "View every project", icon: "grid_view", to: "/dashboard" },
+  { title: "Credits", description: "Balance and top-ups", icon: "account_balance_wallet", to: "/credits" },
+  { title: "Settings", description: "Profile and preferences", icon: "settings", to: "/settings" },
 ];
 
 function ProjectTool({
   title,
   description,
-  icon: Icon,
+  icon,
   target,
 }: {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: string;
   target: "documents" | "review" | "mentor";
 }) {
   return (
     <div className="panel min-w-0 p-4">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
-          <Icon className="h-4 w-4" />
+        <span className="icon-chip h-9 w-9 shrink-0">
+          <MaterialIcon name={icon} />
         </span>
         <div className="min-w-0">
           <h2 className="font-display text-base">{title}</h2>
@@ -200,7 +191,7 @@ function WelcomePage() {
           className="group panel flex min-h-48 flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Hammer className="h-5 w-5" />
+            <MaterialIcon name="construction" filled />
           </span>
           <h2 className="font-display text-xl sm:text-2xl">Build a project</h2>
           <p className="text-sm text-muted-foreground">
@@ -215,7 +206,7 @@ function WelcomePage() {
         >
           <div className="flex items-start justify-between gap-2">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <ShoppingBag className="h-5 w-5" />
+              <MaterialIcon name="shopping_bag" filled />
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">One-time purchase</span>
           </div>
@@ -233,16 +224,16 @@ function WelcomePage() {
       <section aria-labelledby="tools-title" className="mt-6">
         <h2 id="tools-title" className="font-display text-lg">Project tools</h2>
         <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
-          <ProjectTool title="Documentation" description="Write your project report" icon={FileText} target="documents" />
-          <ProjectTool title="Viva" description="Prepare questions and answers" icon={MessagesSquare} target="review" />
-          <ProjectTool title="AI Mentor" description="Ask questions about your project" icon={Bot} target="mentor" />
+          <ProjectTool title="Documentation" description="Write your project report" icon="description" target="documents" />
+          <ProjectTool title="Viva" description="Prepare questions and answers" icon="record_voice_over" target="review" />
+          <ProjectTool title="Project support" description="Get help when you need it" icon="support_agent" target="mentor" />
         </div>
       </section>
 
       <nav aria-label="Workspace navigation" className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {WORKSPACE_LINKS.map((item) => (
           <Link key={item.title} to={item.to} className="flex items-center gap-3 rounded-md border border-border bg-background p-3 transition-colors hover:border-primary/40 hover:bg-primary/5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-secondary"><item.icon className="h-4 w-4" /></span>
+            <span className="icon-chip h-9 w-9 shrink-0"><MaterialIcon name={item.icon} /></span>
             <span className="min-w-0"><span className="block text-sm font-semibold">{item.title}</span><span className="block truncate text-xs text-muted-foreground">{item.description}</span></span>
           </Link>
         ))}

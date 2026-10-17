@@ -2,14 +2,12 @@ import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   Eye,
   EyeOff,
   Layers3,
   Loader2,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,6 +15,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MaterialIcon } from "@/components/material-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
@@ -203,7 +202,7 @@ function AuthPage() {
           to="/"
           className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-semibold text-auth-mist transition-colors hover:text-auth-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-coral"
         >
-          <ArrowLeft className="size-4" /> Back to home
+          <MaterialIcon name="arrow_back" className="text-base" /> Back to home
         </Link>
         <div className="relative z-10 my-auto max-w-xl py-12">
           <div className="mb-7 flex size-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 shadow-xl backdrop-blur-sm">
@@ -216,7 +215,7 @@ function AuthPage() {
             />
           </div>
           <p className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-auth-coral">
-            <Sparkles className="size-4" /> Project Helper
+            <MaterialIcon name="architecture" className="text-base" /> Project Helper
           </p>
           <h1 className="max-w-lg text-4xl font-bold leading-[1.08] tracking-[-0.045em] text-auth-light xl:text-5xl">
             Turn a bright idea into a project you can stand behind.
@@ -256,7 +255,7 @@ function AuthPage() {
             to="/"
             className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-auth-mist transition-colors hover:text-auth-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-coral lg:hidden"
           >
-            <ArrowLeft className="size-4" /> Back to home
+            <MaterialIcon name="arrow_back" className="text-base" /> Back to home
           </Link>
 
           <section

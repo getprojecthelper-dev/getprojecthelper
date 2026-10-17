@@ -1,11 +1,11 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
+import { MaterialIcon } from "@/components/material-icon";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
@@ -18,8 +18,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   return (
-    <div className="min-h-screen w-full bg-secondary/30">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <div className="workspace-canvas min-h-screen w-full">
+      <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-1">
             <Button
@@ -28,29 +28,32 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-label="Back"
               onClick={() => router.history.back()}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <MaterialIcon name="arrow_back" className="text-base" />
             </Button>
-            <Link to="/welcome" className="flex min-w-0 items-center gap-2 font-display font-semibold">
-              <img src={brandMark} alt="Project Helper" width={512} height={512} className="h-7 w-7 shrink-0" />
+            <Link to="/welcome" className="flex min-w-0 items-center gap-2.5 font-display font-semibold">
+              <span className="icon-chip h-8 w-8 shrink-0">
+                <img src={brandMark} alt="" width={512} height={512} className="h-5 w-5" />
+              </span>
               <span className="truncate">Project Helper</span>
             </Link>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <CreditChip />
-            <Button asChild variant="ghost" size="icon" aria-label="Settings">
-              <Link to="/settings"><Settings className="h-4 w-4" /></Link>
+            <Button asChild variant="ghost" size="icon" aria-label="Settings" className="text-muted-foreground hover:text-primary">
+              <Link to="/settings"><MaterialIcon name="settings" /></Link>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               aria-label="Log out"
+              className="text-muted-foreground hover:text-primary"
               onClick={() =>
                 void signOutAndRedirect(queryClient, () =>
                   navigate({ to: "/auth", replace: true }),
                 )
               }
             >
-              <LogOut className="h-4 w-4" />
+              <MaterialIcon name="logout" />
             </Button>
           </div>
         </div>

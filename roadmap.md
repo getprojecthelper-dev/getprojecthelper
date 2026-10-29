@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add admin-controlled Public / Private (maintenance) availability and verify access rules.
+- [x] Add admin-controlled Public / Private (maintenance) availability and verify access rules.
 
 - [x] Remove the “Why are Indian prices lower?” question from the pricing page and its source code.
 - [x] Rebuild the homepage in the approved editorial product direction.

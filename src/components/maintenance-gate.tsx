@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteAvailability } from "@/hooks/use-site-availability";
+import { canAccessSite } from "@/lib/site-availability";
 
 /**
  * While the site is under development, only administrators can use it.
@@ -14,19 +16,24 @@ import { supabase } from "@/integrations/supabase/client";
 export function MaintenanceGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const availability = useSiteAvailability();
 
   const { data: isAdmin, isPending } = useQuery({
     queryKey: ["is-admin", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.rpc("has_role", { _user_id: user!.id, _role: "admin" });
+      if (!user) return false;
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
       return data === true;
     },
   });
 
   // Password recovery must keep working for the admin.
-  if (pathname.startsWith("/reset-password") || pathname.startsWith("/auth")) return <>{children}</>;
-  if (user && isAdmin) return <>{children}</>;
+  if (canAccessSite(availability.data ?? true, isAdmin === true, pathname)) return <>{children}</>;
+
+  if (availability.isPending || loading || (!!user && isPending)) {
+    return <main className="flex min-h-screen items-center justify-center bg-background"><Loader2 aria-label="Checking website availability" className="h-6 w-6 animate-spin text-muted-foreground" /></main>;
+  }
 
   const checking = loading || (!!user && isPending);
 

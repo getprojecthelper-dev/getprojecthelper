@@ -291,7 +291,7 @@ function Landing() {
                   size="lg"
                   className="group h-13 rounded-xl bg-white px-6 text-base text-slate-950 shadow-xl shadow-black/30 transition hover:bg-violet-100"
                 >
-                  <Link to={workspace} search={session ? undefined : { mode: "signup" }}>
+                  <Link to={workspace} search={session ? {} : { mode: "signup" }}>
                     Build a project{" "}
                     <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                   </Link>

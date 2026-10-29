@@ -7,6 +7,7 @@ import { useState } from "react";
 import { AdminEconomics } from "@/components/admin-economics";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
 import { AdminProjectPricing } from "@/components/admin-project-pricing";
+import { AdminSiteAvailability } from "@/components/admin-site-availability";
 import { MeterBar, MetricCard } from "@/components/metrics";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
@@ -100,6 +101,8 @@ function AdminDashboard() {
           </Button>
         }
       />
+
+      <AdminSiteAvailability />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard

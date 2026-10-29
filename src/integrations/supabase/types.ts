@@ -1033,6 +1033,24 @@ export type Database = {
           },
         ]
       }
+      site_availability: {
+        Row: {
+          id: boolean
+          maintenance_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          maintenance_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          maintenance_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stakeholders: {
         Row: {
           contact: string | null

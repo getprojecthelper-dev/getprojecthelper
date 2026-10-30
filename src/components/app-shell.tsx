@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { Link, useCanGoBack, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
@@ -9,6 +9,7 @@ import { MaterialIcon } from "@/components/material-icon";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
+import { getBackAction } from "@/lib/back-navigation";
 
 /**
  * Compact workspace chrome shared by every signed-in page.
@@ -17,6 +18,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const canGoBack = useCanGoBack();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const backAction = getBackAction(canGoBack, pathname);
   return (
     <div className="workspace-canvas min-h-screen w-full">
       <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -26,7 +30,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               variant="ghost"
               size="icon"
               aria-label="Back"
-              onClick={() => router.history.back()}
+              title={backAction === "workspace" ? "Back to workspace" : "Previous page"}
+              disabled={backAction === "none"}
+              onClick={() => {
+                if (backAction === "history") router.history.back();
+                else if (backAction === "workspace") void navigate({ to: "/welcome", replace: true });
+              }}
             >
               <MaterialIcon name="arrow_back" className="text-base" />
             </Button>

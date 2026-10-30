@@ -1,32 +1,28 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, Gift, HelpCircle } from "lucide-react";
 
-import { PricingPacks } from "@/components/pricing-packs";
+import { PlanCards } from "@/components/plan-cards";
 import { Button } from "@/components/ui/button";
 import { STARTER_CREDITS } from "@/lib/credit-costs";
-import { cheapestPack, formatMoney, packPrice } from "@/lib/pricing";
-
-const cheapest = cheapestPack();
-const fromUsd = formatMoney(packPrice(cheapest, "USD"), "USD");
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — AI credits for student projects | Project Helper" },
+      { title: "Plans & Pricing — Free, Starter, Student, Professional | Project Helper" },
       {
         name: "description",
-        content: `Simple pay-as-you-go AI credits for student projects. Start with ${STARTER_CREDITS} free credits, then top up from ${fromUsd}. No subscription.`,
+        content: "Start free, then choose Starter (₹199), Student (₹399) or Professional (₹999) monthly plans with AI credits and active-project limits.",
       },
-      { property: "og:title", content: "Pricing — AI credits for student projects" },
+      { property: "og:title", content: "Project Helper plans: Free, Starter, Student, Professional" },
       {
         property: "og:description",
-        content: `AI credit packs from ${fromUsd}. ${STARTER_CREDITS} free credits on every new account, with no subscription.`,
+        content: "Monthly plans from ₹199 with 1M to 10M token-equivalent AI credits.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://getprojecthelper.com/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AI Project Builder Pricing | Project Helper" },
-      { name: "twitter:description", content: `Pay-as-you-go AI credits from ${fromUsd}, with ${STARTER_CREDITS} free credits for new accounts.` },
+      { name: "twitter:description", content: "Monthly student plans from ₹199 with AI credits and project limits." },
     ],
     links: [{ rel: "canonical", href: "https://getprojecthelper.com/pricing" }],
   }),
@@ -35,16 +31,20 @@ export const Route = createFileRoute("/pricing")({
 
 const FAQ = [
   {
-    q: "What is a credit?",
-    a: "One credit is roughly one thousand words of AI thinking. A typical build step — writing code, explaining it, or fixing an error — costs about 5 to 10 credits.",
+    q: "What is a token-equivalent credit?",
+    a: "It measures how much AI work you use. 1M token-equivalent credits covers many build steps, documents and Mentor chats.",
   },
   {
-    q: "Do credits expire?",
-    a: "No. Credits stay on your account until you use them, and anything reserved for a run that fails comes straight back to your balance.",
+    q: "Do unused credits roll over?",
+    a: "No. Each month your credits reset to your plan's amount.",
   },
   {
-    q: "Is there a subscription?",
-    a: "No. You buy credits when you need them, and nothing renews automatically.",
+    q: "What happens when I hit my limit?",
+    a: "AI features pause until your next monthly reset, or until you upgrade.",
+  },
+  {
+    q: "Can I change or cancel my plan?",
+    a: "Yes. Upgrades and downgrades apply straight away and the price difference is charged or credited. Cancelling keeps your plan until the end of the paid month.",
   },
 ];
 
@@ -73,16 +73,15 @@ function PricingPage() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Pricing</p>
           <h1 className="mt-3 font-display text-4xl sm:text-5xl">
-            Pay only for the AI you actually use
+            A plan for every stage of your project
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            No subscription, no seats, nothing to cancel. Every new account starts with{" "}
-            {STARTER_CREDITS} free credits — enough to shape your idea, pick a dataset and plan your
-            build.
+            Every new account starts free with 100K token-equivalent credits. Upgrade any time —
+            credits reset each month, and AI pauses when you reach your plan's limit.
           </p>
         </div>
 
-        <PricingPacks className="mt-12" />
+        <PlanCards className="mt-12" />
 
         <section className="mt-12 rounded-2xl border border-border bg-card p-6 text-center">
           <p className="flex items-center justify-center gap-2 font-display text-lg">

@@ -10,7 +10,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, obj, str } from "@/lib/ai.server";
 
-const MODEL = "openai/gpt-5.6-sol";
+const MODEL = "gpt-5.6-luna";
 
 type AnySupabase = {
   from: (t: string) => any;

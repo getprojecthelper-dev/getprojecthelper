@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Audit files, remove the obsolete dependency lockfile and disposable compilation cache, and preserve user data and required files.
+- [x] Fix and verify previous-page navigation with a safe direct-entry fallback.
+
 - [x] Add admin-controlled Public / Private (maintenance) availability and verify access rules.
 
 - [x] Remove the “Why are Indian prices lower?” question from the pricing page and its source code.

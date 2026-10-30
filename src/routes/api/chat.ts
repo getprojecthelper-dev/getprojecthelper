@@ -9,7 +9,7 @@ import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
 import { MENTOR_SYSTEM, authenticateRequest, buildProjectContext } from "@/lib/mentor.server";
 
-const MODEL = "openai/gpt-5.6-sol";
+import { MODEL } from "@/lib/ai.server";
 
 function textOf(message: UIMessage): string {
   return message.parts
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/api/chat")({
           .maybeSingle();
         if (!thread) return new Response("Conversation not found", { status: 404 });
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
+        const apiKey = process.env["OPENAI_API_KEY"];
         if (!apiKey) return new Response("AI is not configured.", { status: 500 });
 
         const context = await buildProjectContext(auth.supabase, projectId);
@@ -105,14 +105,7 @@ export const Route = createFileRoute("/api/chat")({
           if (touchError) console.error("mentor: failed to update thread", touchError);
         }
 
-        const lovable = createOpenAI({
-          baseURL: "https://ai.gateway.lovable.dev/v1",
-          apiKey,
-          headers: {
-            "Lovable-API-Key": apiKey,
-            "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-          },
-        });
+        const lovable = createOpenAI({ apiKey });
 
         try {
           const result = streamText({

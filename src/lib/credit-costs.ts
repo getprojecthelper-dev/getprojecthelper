@@ -78,7 +78,7 @@ export const creditsForTokens = (totalTokens: number) =>
 export const formatCredits = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0$/, "");
 
-export const STARTER_CREDITS = 50;
+export const STARTER_CREDITS = 100;
 
 /** Public price list lives in pricing.ts; re-exported here for older imports. */
 export { PACKS as CREDIT_PACKS } from "@/lib/pricing";

@@ -1160,33 +1160,51 @@ export type Database = {
       subscriptions: {
         Row: {
           amount_cents: number
+          cancel_at_period_end: boolean
           created_at: string
           currency: string
           current_period_end: string | null
+          current_period_start: string | null
+          environment: string
           id: string
+          paddle_customer_id: string | null
+          paddle_subscription_id: string | null
           plan: string
+          price_id: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
           amount_cents?: number
+          cancel_at_period_end?: boolean
           created_at?: string
           currency?: string
           current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
           id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
+          price_id?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           amount_cents?: number
+          cancel_at_period_end?: boolean
           created_at?: string
           currency?: string
           current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
           id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
+          price_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -1390,6 +1408,7 @@ export type Database = {
         Args: { _amount: number; _reason: string; _user_id: string }
         Returns: number
       }
+      current_plan: { Args: { _user_id: string }; Returns: string }
       ensure_credit_balance: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
@@ -1402,8 +1421,13 @@ export type Database = {
         Args: { _amount: number; _feature: string; _user_id: string }
         Returns: string
       }
+      plan_project_limit: { Args: { _plan: string }; Returns: number }
       redeem_referral_code: { Args: { _code: string }; Returns: number }
       release_credit_hold: { Args: { _hold_id: string }; Returns: undefined }
+      reset_plan_credits: {
+        Args: { _credits: number; _ref: string; _user_id: string }
+        Returns: undefined
+      }
       settle_credit_hold: {
         Args: { _actual: number; _hold_id: string }
         Returns: number

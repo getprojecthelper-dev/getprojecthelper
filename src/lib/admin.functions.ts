@@ -362,3 +362,45 @@ export const getUnitEconomics = createServerFn({ method: "GET" })
     const { computeUnitEconomics } = await import("@/lib/economics.server");
     return { forbidden: false, ...(await computeUnitEconomics(supabaseAdmin, data.window)) };
   });
+
+export interface ModelUsageGroup {
+  key: string;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+export type ModelUsageResult =
+  | { forbidden: true }
+  | {
+      forbidden: false;
+      totals: ModelUsageGroup;
+      byFeature: ModelUsageGroup[];
+      byModel: ModelUsageGroup[];
+      byDay: ModelUsageGroup[];
+    };
+
+/** Developer-only token tracker: raw input/output tokens per feature, model and day. */
+export const getModelUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ window: z.enum(["1d", "7d", "30d", "all"]).default("7d") }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<ModelUsageResult> => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (isAdmin !== true) return { forbidden: true };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const days = { "1d": 1, "7d": 7, "30d": 30, all: 0 }[data.window];
+    let q = supabaseAdmin
+      .from("ai_usage_events")
+      .select("feature, model, input_tokens, output_tokens, created_at")
+      .order("created_at", { ascending: false })
+      .limit(20000);
+    if (days) q = q.gte("created_at", new Date(Date.now() - days * 86_400_000).toISOString());
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const { groupUsage } = await import("@/lib/model-cost");
+    return { forbidden: false, ...groupUsage(rows ?? []) };
+  });

@@ -5,6 +5,7 @@ import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide
 import { useState } from "react";
 
 import { AdminEconomics } from "@/components/admin-economics";
+import { AdminModelUsage } from "@/components/admin-model-usage";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
 import { AdminProjectPricing } from "@/components/admin-project-pricing";
 import { AdminSiteAvailability } from "@/components/admin-site-availability";
@@ -313,6 +314,8 @@ function AdminDashboard() {
           </div>
         )}
       </section>
+
+      <AdminModelUsage />
 
       <AdminEconomics />
 

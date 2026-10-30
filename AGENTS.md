@@ -12,3 +12,4 @@
 - Scope authentication-specific pine/coral tokens to `.auth-stage` in `src/styles.css` so account-page styling cannot alter the shared workspace theme.
 - Persist website availability in a singleton public-readable setting with admin-only RLS writes and an authenticated, role-checked server function; the shared maintenance gate polls it and preserves login/recovery and admin access. This replaces hardcoded maintenance without treating the presentation gate as data authorization.
 - Workspace Back uses router-tracked browser history and falls back to Welcome on direct entry; disable it at the history root on Welcome to avoid no-op clicks and navigation outside the app.
+- Use Bun and `bun.lock` as the sole dependency lockfile; a stale npm lockfile can install a different, incomplete dependency graph.

@@ -24,7 +24,7 @@ async function upsertSubscription(data: any, environment: PaddleEnv) {
       paddle_subscription_id: data.id,
       paddle_customer_id: data.customerId,
       plan: plan.id,
-      price_id: priceExternal,
+      price_id: priceExternal ?? null,
       status: data.status,
       amount_cents: Number(unit?.amount ?? 0),
       currency: String(unit?.currencyCode ?? "INR").toLowerCase(),

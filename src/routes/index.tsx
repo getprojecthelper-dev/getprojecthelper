@@ -16,7 +16,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { HeaderAccountMenu } from "@/components/header-account-menu";
@@ -87,89 +87,94 @@ const marketplaceProjects = [
 ];
 
 function HeroCarousel() {
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [idea, setIdea] = useState("Expense tracker app");
+  const [roadmapRun, setRoadmapRun] = useState(0);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % 2), 5200);
-    return () => window.clearInterval(timer);
-  }, []);
+  const roadmapName = idea.trim() || "your project";
+  const roadmapSteps = [
+    [`Define the scope of ${roadmapName}`, "Day 1"],
+    ["Sketch screens and data", "Days 2–3"],
+    ["Build the core feature", "Week 1"],
+    ["Test with real users", "Week 2"],
+    ["Launch and show it off", "Week 3"],
+  ];
+
+  const createRoadmap = () => {
+    setRoadmapRun((current) => current + 1);
+  };
 
   return (
     <div className="relative mx-auto w-full max-w-xl">
       <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-violet-500/25 via-sky-500/20 to-emerald-500/15 blur-3xl" />
       <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-[#14151c] p-2 shadow-[0_28px_70px_rgba(0,0,0,.45)]">
-        <div
-          className="flex transition-transform duration-700 ease-out"
-          style={{ transform: `translateX(-${activeSlide * 100}%)` }}
-        >
-          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-600 p-6 sm:p-8">
-            <div className="flex items-center justify-between">
-              <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-white">
-                Build a project
-              </span>
-              <Code2 className="size-5 text-white/80" />
-            </div>
-            <h2 className="mt-8 font-display text-3xl font-bold tracking-[-.05em] text-white">
-              Turn an idea into a clear roadmap.
-            </h2>
-            <div className="mt-7 space-y-3">
-              {[
-                ["01", "Choose your project idea"],
-                ["02", "Get your step by step roadmap"],
-                ["03", "Build with guidance"],
-              ].map(([number, text]) => (
-                <div
-                  key={number}
-                  className="flex items-center gap-3 rounded-xl border border-white/15 bg-black/15 p-3.5 text-sm font-medium text-white"
-                >
-                  <span className="grid size-7 place-items-center rounded-lg bg-white text-xs font-bold text-violet-700">
-                    {number}
-                  </span>
-                  {text}
-                  <Check className="ml-auto size-4 text-emerald-300" />
-                </div>
-              ))}
-            </div>
-          </section>
-          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-6 sm:p-8">
-            <div className="flex items-center justify-between">
-              <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-white">
-                Buy a project
-              </span>
-              <BriefcaseBusiness className="size-5 text-white/80" />
-            </div>
-            <h2 className="mt-8 font-display text-3xl font-bold tracking-[-.05em] text-white">
-              Find a project that fits your goal.
-            </h2>
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              {[
-                ["Data dashboard", "Ready to customise"],
-                ["Business website", "Project files included"],
-                ["Portfolio app", "Built for showcasing"],
-                ["Research toolkit", "Structured and documented"],
-              ].map(([title, detail]) => (
-                <div key={title} className="rounded-xl border border-white/15 bg-black/15 p-3.5">
-                  <p className="text-sm font-bold text-white">{title}</p>
-                  <p className="mt-1 text-xs text-white/70">{detail}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-        <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 rounded-full border border-white/15 bg-black/30 p-2 backdrop-blur">
-          {["Build project", "Buy project"].map((label, index) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setActiveSlide(index)}
-              className={
-                "h-2 rounded-full transition-all " +
-                (activeSlide === index ? "w-7 bg-white" : "w-2 bg-white/45 hover:bg-white/75")
-              }
-              aria-label={label}
+        <section className="rounded-[1.55rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-600 p-6 sm:p-8">
+          <div className="flex items-center justify-between">
+            <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-white">
+              Build a project
+            </span>
+            <Code2 className="size-5 text-white/80" />
+          </div>
+          <h2 className="mt-8 font-display text-3xl font-bold tracking-[-.05em] text-white">
+            Type an idea. Get a roadmap.
+          </h2>
+          <form
+            className="mt-6 flex gap-2 rounded-2xl border border-white/20 bg-slate-950/30 p-1.5 pl-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              createRoadmap();
+            }}
+          >
+            <input
+              aria-label="Your project idea"
+              value={idea}
+              onChange={(event) => setIdea(event.target.value)}
+              placeholder="e.g. Expense tracker app"
+              className="min-w-0 flex-1 bg-transparent text-sm font-medium text-white outline-none placeholder:text-white/55"
             />
-          ))}
-        </div>
+            <button
+              type="submit"
+              className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-indigo-800 transition hover:bg-violet-100"
+            >
+              Plan it
+            </button>
+          </form>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {["Habit tracker app", "Portfolio website", "Weather dashboard"].map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => {
+                  setIdea(suggestion);
+                  setRoadmapRun((current) => current + 1);
+                }}
+                className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+          <ol className="mt-5 grid gap-2.5" aria-live="polite">
+            {roadmapSteps.map(([title, timing], index) => (
+              <li
+                key={`${roadmapRun}-${title}`}
+                className="animate-[landing-reveal_500ms_cubic-bezier(.2,.8,.2,1)_both] flex items-center gap-3 rounded-xl border border-white/15 bg-slate-950/25 px-3.5 py-3 text-sm text-white"
+                style={{ animationDelay: `${index * 90}ms` }}
+              >
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-bold text-violet-700">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">{title}</span>
+                <span className="shrink-0 text-xs text-white/70">{timing}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/20">
+            <span
+              key={roadmapRun}
+              className="block h-full animate-[roadmap-progress_900ms_ease-out_forwards] rounded-full bg-gradient-to-r from-emerald-300 to-white"
+            />
+          </div>
+        </section>
       </div>
     </div>
   );

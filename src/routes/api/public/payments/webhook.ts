@@ -3,6 +3,59 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getPremadeProject } from "@/lib/premade-projects";
 import { EventName, verifyPaymentWebhook, type PaddleEnv } from "@/lib/paddle.server";
 import { getTemplate } from "@/lib/project-domain";
+import { planForPriceId } from "@/lib/plans";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function upsertSubscription(data: any, environment: PaddleEnv) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const priceExternal = data.items?.[0]?.price?.importMeta?.externalId as string | undefined;
+  const plan = planForPriceId(priceExternal);
+  let userId = typeof data.customData?.userId === "string" ? data.customData.userId : null;
+  if (!userId) {
+    const { data: row } = await supabaseAdmin
+      .from("subscriptions").select("user_id").eq("paddle_subscription_id", data.id).maybeSingle();
+    userId = row?.user_id ?? null;
+  }
+  if (!userId || !plan) return;
+  const unit = data.items?.[0]?.price?.unitPrice;
+  await supabaseAdmin.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      paddle_subscription_id: data.id,
+      paddle_customer_id: data.customerId,
+      plan: plan.id,
+      price_id: priceExternal,
+      status: data.status,
+      amount_cents: Number(unit?.amount ?? 0),
+      currency: String(unit?.currencyCode ?? "INR").toLowerCase(),
+      current_period_start: data.currentBillingPeriod?.startsAt ?? null,
+      current_period_end: data.currentBillingPeriod?.endsAt ?? data.canceledAt ?? null,
+      cancel_at_period_end: data.scheduledChange?.action === "cancel",
+      environment,
+    },
+    { onConflict: "paddle_subscription_id" },
+  );
+}
+
+/** Each paid plan bill (first, renewal, upgrade) resets credits to the plan amount. */
+async function resetPlanCredits(data: any, environment: PaddleEnv) {
+  if (!data.subscriptionId) return;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const plan = planForPriceId(data.items?.[0]?.price?.importMeta?.externalId);
+  let userId = typeof data.customData?.userId === "string" ? data.customData.userId : null;
+  if (!userId) {
+    const { data: row } = await supabaseAdmin
+      .from("subscriptions").select("user_id").eq("paddle_subscription_id", data.subscriptionId)
+      .eq("environment", environment).maybeSingle();
+    userId = row?.user_id ?? null;
+  }
+  if (!userId || !plan) return;
+  await supabaseAdmin.rpc("reset_plan_credits", {
+    _user_id: userId,
+    _credits: plan.credits,
+    _ref: `paddle:${data.id}`,
+  });
+}
 
 type TransactionData = {
   id: string;
@@ -101,7 +154,15 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         try {
           const event = await verifyPaymentWebhook(request, environment);
           if (event.eventType === EventName.TransactionCompleted) {
-            await fulfilProjectPurchase(event.data as unknown as TransactionData, environment);
+            const tx = event.data as any;
+            if (tx.subscriptionId) await resetPlanCredits(tx, environment);
+            else await fulfilProjectPurchase(tx as TransactionData, environment);
+          } else if (
+            event.eventType === EventName.SubscriptionCreated ||
+            event.eventType === EventName.SubscriptionUpdated ||
+            event.eventType === EventName.SubscriptionCanceled
+          ) {
+            await upsertSubscription(event.data, environment);
           }
           return Response.json({ received: true });
         } catch (error) {

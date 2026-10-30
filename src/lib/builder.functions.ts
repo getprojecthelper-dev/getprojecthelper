@@ -359,6 +359,8 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       .select("id")
       .single();
 
+    if (error?.message?.includes("project_limit_reached"))
+      throw new Error("You have reached the active-project limit for your plan. Finish a project or upgrade on the Pricing page.");
     if (error || !project) throw new Error("The project could not be created.");
 
     // Only ONE section may be the project-structure section; any later

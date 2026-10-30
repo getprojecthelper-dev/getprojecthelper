@@ -108,3 +108,34 @@ export async function openProjectCheckout(options: {
     },
   });
 }
+export async function getLocalizedPlanPrices(priceIds: string[]): Promise<Record<string, string>> {
+  await initializePaddle();
+  const paddle = (window as PaddleWindow).Paddle;
+  if (!paddle) return {};
+  const ids = await Promise.all(priceIds.map((id) => getPaddlePriceId(id)));
+  const preview = await paddle.PricePreview({ items: ids.map((priceId) => ({ priceId, quantity: 1 })) });
+  const out: Record<string, string> = {};
+  preview.data?.details?.lineItems?.forEach((item, i) => {
+    const v = item.formattedTotals?.total;
+    if (v && priceIds[i]) out[priceIds[i]!] = v;
+  });
+  return out;
+}
+
+export async function openPlanCheckout(options: { priceId: string; userId: string; customerEmail?: string }) {
+  await initializePaddle();
+  const paddle = (window as PaddleWindow).Paddle;
+  if (!paddle) throw new Error("Checkout could not be loaded.");
+  const internalPriceId = await getPaddlePriceId(options.priceId);
+  paddle.Checkout.open({
+    items: [{ priceId: internalPriceId, quantity: 1 }],
+    customer: options.customerEmail ? { email: options.customerEmail } : undefined,
+    customData: { userId: options.userId },
+    settings: {
+      displayMode: "overlay",
+      successUrl: `${window.location.origin}/welcome?plan=success`,
+      allowLogout: false,
+      variant: "one-page",
+    },
+  });
+}

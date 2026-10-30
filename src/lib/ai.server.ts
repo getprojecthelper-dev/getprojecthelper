@@ -4,8 +4,8 @@
  * server-side and return parsed JSON.
  */
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/responses";
-const MODEL = "openai/gpt-5.6-sol";
+const GATEWAY_URL = "https://api.openai.com/v1/responses";
+export const MODEL = "gpt-5.6-luna";
 
 export interface UsageMeta {
   userId: string;
@@ -47,7 +47,7 @@ async function recordUsage(
 
 
 export async function generateJson<T>(req: JsonRequest): Promise<T> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
+  const apiKey = process.env["OPENAI_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured for this project.");
 
   // Reserve an estimated cost before the run; settled against real tokens below.
@@ -63,8 +63,7 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
 
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "fetch",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: MODEL,

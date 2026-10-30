@@ -5,7 +5,7 @@
  */
 
 const GATEWAY_URL = "https://api.openai.com/v1/responses";
-export const MODEL = "gpt-5.6-luna";
+export const MODEL = "gpt-6-luna";
 
 export interface UsageMeta {
   userId: string;

@@ -34,9 +34,9 @@ export async function holdCredits(userId: string, feature: string): Promise<stri
 }
 
 /** Charge the real cost of a finished run and refund the rest of the hold. */
-export async function settleCredits(holdId: string, totalTokens: number): Promise<number> {
+export async function settleCredits(holdId: string, inputTokens: number, outputTokens: number): Promise<number> {
   const db = await admin();
-  const actual = creditsForTokens(totalTokens);
+  const actual = creditsForTokens(inputTokens, outputTokens);
   const { data, error } = await db.rpc("settle_credit_hold", { _hold_id: holdId, _actual: actual });
   if (error) {
     console.error("credit settlement failed", error);

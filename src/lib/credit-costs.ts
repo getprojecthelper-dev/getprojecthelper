@@ -1,6 +1,8 @@
 /**
  * Credit pricing — shared by the server (holds/settlement) and the UI (meter).
- * 1 credit ≈ 1,000 AI tokens. Holds are estimates; the real cost is settled
+ * GPT Luna 6 costs $0.10 per 1M input tokens and $0.50 per 1M output tokens.
+ * 1 credit = $0.0001 of model cost, so 1K input tokens = 1 credit and
+ * 1K output tokens = 5 credits. Holds are estimates; the real cost is settled
  * from the model's reported token usage once the run finishes.
  */
 
@@ -72,8 +74,8 @@ export const holdFor = (feature: string) =>
   CREDIT_HOLDS[(feature as CreditAction) in CREDIT_HOLDS ? (feature as CreditAction) : "general"];
 
 /** Credits charged for a completed AI call, from real token usage. */
-export const creditsForTokens = (totalTokens: number) =>
-  Math.max(0.1, Number((totalTokens / 1000).toFixed(2)));
+export const creditsForTokens = (inputTokens: number, outputTokens: number) =>
+  Math.max(0.1, Number((inputTokens / 1000 + outputTokens / 200).toFixed(2)));
 
 export const formatCredits = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0$/, "");

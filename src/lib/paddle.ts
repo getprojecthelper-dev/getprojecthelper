@@ -122,7 +122,7 @@ export async function getLocalizedPlanPrices(priceIds: string[]): Promise<Record
   return out;
 }
 
-export async function openPlanCheckout(options: { priceId: string; userId: string; customerEmail?: string }) {
+export async function openPlanCheckout(options: { priceId: string; userId: string; customerEmail?: string | undefined }) {
   await initializePaddle();
   const paddle = (window as PaddleWindow).Paddle;
   if (!paddle) throw new Error("Checkout could not be loaded.");

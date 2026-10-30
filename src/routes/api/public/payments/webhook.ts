@@ -35,6 +35,20 @@ async function upsertSubscription(data: any, environment: PaddleEnv) {
     },
     { onConflict: "paddle_subscription_id" },
   );
+  if (["active", "trialing"].includes(data.status) && data.currentBillingPeriod?.startsAt) {
+    await grantPeriodCredits(userId, plan, data.id, data.currentBillingPeriod.startsAt);
+  }
+}
+
+/** One refill per subscription + billing period + plan, whichever webhook arrives first. */
+async function grantPeriodCredits(userId: string, plan: { id: string; credits: number }, subId: string, periodStart?: string | null) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.rpc("reset_plan_credits", {
+    _user_id: userId,
+    _credits: plan.credits,
+    _ref: `paddle:${subId}:${periodStart ?? "initial"}:${plan.id}`,
+  });
+  if (error) throw error;
 }
 
 /** Each paid plan bill (first, renewal, upgrade) resets credits to the plan amount. */
@@ -50,11 +64,7 @@ async function resetPlanCredits(data: any, environment: PaddleEnv) {
     userId = row?.user_id ?? null;
   }
   if (!userId || !plan) return;
-  await supabaseAdmin.rpc("reset_plan_credits", {
-    _user_id: userId,
-    _credits: plan.credits,
-    _ref: `paddle:${data.id}`,
-  });
+  await grantPeriodCredits(userId, plan, data.subscriptionId, data.billingPeriod?.startsAt);
 }
 
 type TransactionData = {

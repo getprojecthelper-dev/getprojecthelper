@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Loader2 } from "lucide-react";
@@ -19,7 +20,11 @@ export function WorkspacePlanStatus({ justPaid }: { justPaid: boolean }) {
     enabled: Boolean(user),
     refetchInterval: (q) => (justPaid && (!q.state.data || q.state.data.plan === "free") && q.state.dataUpdateCount < 20 ? 3000 : false),
   });
-  void dataUpdatedAt;
+  const qc = useQueryClient();
+  const activePlan = data?.plan;
+  useEffect(() => {
+    if (activePlan && activePlan !== "free") void qc.invalidateQueries({ queryKey: ["credits"] });
+  }, [activePlan, dataUpdatedAt, qc]);
 
   if (isLoading || !data) return null;
   const plan = getPlan(data.plan);

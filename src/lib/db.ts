@@ -126,9 +126,12 @@ export function useProjects() {
   return useQuery({
     queryKey: projectsKey,
     queryFn: async (): Promise<Project[]> => {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id ?? "";
       const { data, error } = await supabase
         .from("projects")
         .select("*")
+        .eq("user_id", uid)
         .order("updated_at", { ascending: false });
       if (error) fail("We couldn't load your projects.", error);
       return data ?? [];

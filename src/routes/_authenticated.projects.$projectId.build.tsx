@@ -6,7 +6,9 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Database,
   Download,
+  ExternalLink,
   FileCode2,
   FileSpreadsheet,
 
@@ -40,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
+import { asDataset, datasetFacts } from "@/lib/dataset";
 import { getPlaybook, type DomainPlaybook } from "@/lib/domain-playbooks";
 import { type OfficeApp } from "@/lib/file-guidance";
 import {
@@ -203,13 +206,14 @@ function BuildPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("projects")
-        .select("domain,name,pm_profile")
+        .select("domain,name,pm_profile,dataset")
         .eq("id", projectId)
         .maybeSingle();
       return {
         domain: (data?.domain as string | null) ?? null,
         name: (data?.name as string | null) ?? null,
         pm: (data?.pm_profile as { industry?: string; methodology?: string; duration?: string } | null) ?? null,
+        dataset: asDataset((data as Record<string, unknown> | null)?.["dataset"]),
       };
     },
   });
@@ -305,6 +309,30 @@ function BuildPage() {
           {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"} completed
         </p>
       </div>
+
+      {meta?.dataset ? (
+        <div className="panel p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <Database className="h-4 w-4 text-primary" />
+                Dataset you selected
+              </div>
+              <p className="mt-2 font-display text-lg">{meta.dataset.name}</p>
+              {datasetFacts(meta.dataset) ? (
+                <p className="mt-1 text-sm text-muted-foreground">{datasetFacts(meta.dataset)}</p>
+              ) : null}
+            </div>
+            {meta.dataset.url ? (
+              <Button asChild variant="outline" size="sm" className="shrink-0">
+                <a href={meta.dataset.url} target="_blank" rel="noreferrer">
+                  View dataset <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {meta?.pm ? (
         <div className="panel p-5">

@@ -151,8 +151,10 @@ export function useProjectsOverview() {
   return useQuery({
     queryKey: ["projects-overview"],
     queryFn: async (): Promise<ProjectOverview[]> => {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id ?? "";
       const [projects, tasks, requirements, tests, docs, risks, build] = await Promise.all([
-        supabase.from("projects").select("*").order("updated_at", { ascending: false }),
+        supabase.from("projects").select("*").eq("user_id", uid).order("updated_at", { ascending: false }),
         supabase.from("tasks").select("project_id,title,status,due_date,priority"),
         supabase.from("requirements").select("project_id,status"),
         supabase.from("test_cases").select("project_id,status"),
@@ -424,8 +426,9 @@ export function useProjectMutations() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("projects").delete().eq("id", id);
+      const { data, error } = await supabase.from("projects").delete().eq("id", id).select("id");
       if (error) throw error;
+      if (!data?.length) throw new Error("This project couldn't be deleted. Only its owner can delete it.");
     },
     onSuccess: () => invalidate(),
     onError: (error) => {

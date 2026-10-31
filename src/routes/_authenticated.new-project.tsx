@@ -75,10 +75,31 @@ const DIFFICULTIES = [
 type Difficulty = (typeof DIFFICULTIES)[number]["value"];
 type CodeComplexity = "easy" | "intermediate" | "advanced";
 
-const CODE_LEVELS: { value: CodeComplexity; label: string; detail: string }[] = [
-  { value: "easy", label: "Easy", detail: "Small explicit steps, extra plain comments, minimal abstraction." },
-  { value: "intermediate", label: "Intermediate", detail: "Functions and modules with standard error handling." },
-  { value: "advanced", label: "Advanced", detail: "Production structure, stronger typing and useful tests." },
+const CODE_LEVELS: { value: CodeComplexity; label: string; tagline: string; audience: string; detail: string }[] = [
+  {
+    value: "easy",
+    label: "Essential Level",
+    tagline: "Easy to Understand · Easy to Implement · Easy to Remember",
+    audience: "For students & beginners",
+    detail:
+      "Straightforward, readable code with simple functions, familiar syntax and basic concepts. No advanced patterns or unnecessary abstraction — important steps are explained clearly so you can understand, implement and remember the code.",
+  },
+  {
+    value: "intermediate",
+    label: "Intermediate",
+    tagline: "Simple to Understand · Professional Code",
+    audience: "Balanced approach",
+    detail:
+      "Beginner-friendly readability combined with professional practices: modular, reusable, maintainable code with proper functions, error handling and clean structure. Advanced concepts appear only when they add real value — no excessive boilerplate.",
+  },
+  {
+    value: "advanced",
+    label: "Production Level",
+    tagline: "Engineering Excellence · Efficient · Maintainable",
+    audience: "For experienced developers",
+    detail:
+      "Complete, robust, real-world solutions with appropriate architecture, validation, error handling, security and meaningful comments. Optimised where it matters — but a simple problem still gets a simple, efficient solution, never artificial length.",
+  },
 ];
 
 const difficultyTone = (value: string) => {

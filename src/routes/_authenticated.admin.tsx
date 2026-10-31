@@ -96,7 +96,7 @@ function AdminDashboard() {
     );
   }
 
-  const series = data.ai[range];
+  const series = data.ai[range] ?? data.ai.daily ?? [];
   const peak = Math.max(1, ...series.map((d) => d.credits));
   const selectedProjects = selectedOwnerId
     ? data.userProjects.filter((p) => p.ownerId === selectedOwnerId)
@@ -237,7 +237,7 @@ function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.users_list.map((u) => (
+              {(data.users_list ?? []).map((u) => (
                 <tr key={u.id} className="border-t border-border/60">
                   <td className="py-2 pr-4">
                     <div className="font-medium">{u.name ?? "—"}</div>
@@ -256,7 +256,7 @@ function AdminDashboard() {
 
       <section className="panel p-5">
         <h2 className="font-display text-lg">Heaviest consumers</h2>
-        {data.topUsers.length === 0 ? (
+        {(data.topUsers ?? []).length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">No AI usage recorded yet.</p>
         ) : (
           <table className="mt-4 w-full text-sm">
@@ -269,7 +269,7 @@ function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.topUsers.map((u) => (
+              {(data.topUsers ?? []).map((u) => (
                 <tr key={u.id} className="border-t border-border/60">
                   <td className="py-2">{u.name ?? u.email}</td>
                   <td className="py-2 text-right font-mono tabular-nums">{u.credits.toLocaleString()}</td>

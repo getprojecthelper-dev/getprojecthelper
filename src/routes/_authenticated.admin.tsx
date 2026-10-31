@@ -298,14 +298,14 @@ function AdminDashboard() {
             ))}
           </div>
           <div className="mt-6 flex h-40 items-end gap-1.5">
-            {series.map((d) => (
-              <div key={d.day} className="group flex flex-1 flex-col items-center gap-2">
+            {series.map((d, i) => (
+              <div key={d.day} className="group flex h-full flex-1 flex-col items-center justify-end gap-2">
                 <div
                   className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
                   style={{ height: `${Math.max(2, (d.credits / peak) * 100)}%` }}
                   title={`${d.day}: ${d.credits} credits`}
                 />
-                <span className="text-[10px] text-muted-foreground">{range === "monthly" ? d.day.slice(2) : d.day.slice(5)}</span>
+                <span className="h-3 text-[10px] text-muted-foreground">{(range !== "daily" || i % 5 === 0) && (range === "monthly" ? d.day.slice(2) : d.day.slice(5))}</span>
               </div>
             ))}
           </div>

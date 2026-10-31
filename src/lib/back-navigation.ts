@@ -27,7 +27,7 @@ export function initBackTracking(router: AnyRouter) {
 export function peekBackTarget(currentPath: string): string | null {
   let i = stack.length - 1;
   while (i >= 0 && stack[i] === currentPath) i--;
-  return i >= 0 ? stack[i] : null;
+  return i >= 0 ? (stack[i] ?? null) : null;
 }
 
 /**
@@ -36,7 +36,7 @@ export function peekBackTarget(currentPath: string): string | null {
  */
 export function takeBackTarget(currentPath: string): string | null {
   while (stack.length > 0 && stack[stack.length - 1] === currentPath) stack.pop();
-  return stack.length > 0 ? stack[stack.length - 1] : null;
+  return stack.length > 0 ? (stack[stack.length - 1] ?? null) : null;
 }
 
 /** Test-only: clear tracked history between tests. */

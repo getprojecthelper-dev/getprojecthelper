@@ -114,7 +114,11 @@ function AdminDashboard() {
               <ArrowLeft className="h-4 w-4" />
               My projects
             </Link>
-          </Bu      <AdminSiteAvailability />
+          </Button>
+        }
+      />
+
+      <AdminSiteAvailability />
 
       <div className="flex flex-col gap-6 md:flex-row">
         <aside className="md:w-56 md:shrink-0">

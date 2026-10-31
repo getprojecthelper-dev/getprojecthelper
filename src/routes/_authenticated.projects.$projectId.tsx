@@ -36,6 +36,10 @@ function WorkspaceLayout() {
 
   return (
     <div className={cn("h-full", isMentor && "flex flex-col")}>
+      {showHeader ? (
+        <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
+            <div className="min-w-0">
               <p className="truncate font-display">
                 {data?.project.name ?? "Loading project…"}
               </p>

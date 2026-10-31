@@ -1,9 +1,7 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 
 import { MentorDock } from "@/components/mentor-dock";
 import { ErrorState, LoadingState } from "@/components/state-views";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
 
@@ -26,7 +24,6 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
 
 function WorkspaceLayout() {
   const { projectId, data, isPending, isError, error, refetch } = useWorkspace();
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Viva (review), Documentation and AI Mentor have their own page headers, so

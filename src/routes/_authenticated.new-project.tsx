@@ -798,7 +798,9 @@ function NewProject() {
                       onClick={() => setCodeComplexity(level.value)}
                     >
                       <span className="font-semibold">{level.label}</span>
-                      <span className="mt-1 text-xs font-normal opacity-80">{level.detail}</span>
+                      <span className="mt-0.5 text-[11px] font-medium opacity-70">{level.audience}</span>
+                      <span className="mt-1 text-[11px] font-normal italic opacity-80">{level.tagline}</span>
+                      <span className="mt-1.5 text-xs font-normal opacity-80">{level.detail}</span>
                     </Button>
                   ))}
                 </div>

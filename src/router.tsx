@@ -13,5 +13,7 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
   });
 
+  initBackTracking(router);
+
   return router;
 };

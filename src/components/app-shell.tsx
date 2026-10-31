@@ -9,7 +9,7 @@ import { MaterialIcon } from "@/components/material-icon";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
-import { getBackAction } from "@/lib/back-navigation";
+import { peekBackTarget, takeBackTarget } from "@/lib/back-navigation";
 
 /**
  * Compact workspace chrome shared by every signed-in page.

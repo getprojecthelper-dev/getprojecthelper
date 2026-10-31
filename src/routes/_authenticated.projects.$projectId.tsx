@@ -39,10 +39,6 @@ function WorkspaceLayout() {
       {showHeader ? (
         <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
-            <Button variant="ghost" size="sm" onClick={() => void navigate({ to: "/dashboard" })}>
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Projects</span>
-            </Button>
             <div className="min-w-0">
               <p className="truncate font-display">
                 {data?.project.name ?? "Loading project…"}

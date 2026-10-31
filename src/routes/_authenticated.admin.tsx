@@ -27,7 +27,7 @@ type SectionId = (typeof SECTIONS)[number]["id"];
 
 export const Route = createFileRoute("/_authenticated/admin")({
   validateSearch: (search: Record<string, unknown>): { tab: SectionId } => ({
-    tab: SECTIONS.some((x) => x.id === search.tab) ? (search.tab as SectionId) : "users",
+    tab: SECTIONS.some((x) => x.id === search["tab"]) ? (search["tab"] as SectionId) : "users",
   }),
   head: () => ({
     meta: [
@@ -433,8 +433,6 @@ function AdminDashboard() {
           {tab === "premade" && <AdminProjectPricing />}
         </div>
       </div>
-
-  <AdminReferralCodes />
 
       <Dialog open={selectedOwnerId !== null} onOpenChange={(open) => !open && setSelectedOwnerId(null)}>
         <DialogContent className="max-w-lg">

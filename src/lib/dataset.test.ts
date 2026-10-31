@@ -1,36 +1,38 @@
-import { describe, expect, it } from "vitest";
-
+import { describe, test } from "node:test";
+import { strict as assert } from "node:assert";
 import { asDataset, datasetFacts } from "./dataset";
 
-describe("asDataset", () => {
-  it("reads the dataset a student picked", () => {
-    const dataset = asDataset({
-      name: "Iris Flowers",
-      source: "UCI ML Repository",
-      format: "CSV",
-      size: "150 rows",
-      url: "https://example.com/iris",
-    });
-    expect(dataset).toEqual({
-      name: "Iris Flowers",
-      source: "UCI ML Repository",
-      format: "CSV",
-      size: "150 rows",
-      url: "https://example.com/iris",
-    });
+describe("dataset selection", () => {
+  test("reads the dataset a student picked", () => {
+    assert.deepEqual(
+      asDataset({
+        name: "Iris Flowers",
+        source: "UCI ML Repository",
+        format: "CSV",
+        size: "150 rows",
+        url: "https://example.com/iris",
+      }),
+      {
+        name: "Iris Flowers",
+        source: "UCI ML Repository",
+        format: "CSV",
+        size: "150 rows",
+        url: "https://example.com/iris",
+      },
+    );
   });
 
-  it("returns null when no dataset was selected", () => {
-    expect(asDataset(null)).toBeNull();
-    expect(asDataset(undefined)).toBeNull();
-    expect(asDataset("Iris")).toBeNull();
-    expect(asDataset([])).toBeNull();
-    expect(asDataset({ source: "UCI" })).toBeNull();
-    expect(asDataset({ name: "   " })).toBeNull();
+  test("returns null when no dataset was selected", () => {
+    assert.equal(asDataset(null), null);
+    assert.equal(asDataset(undefined), null);
+    assert.equal(asDataset("Iris"), null);
+    assert.equal(asDataset([]), null);
+    assert.equal(asDataset({ source: "UCI" }), null);
+    assert.equal(asDataset({ name: "   " }), null);
   });
 
-  it("blanks out missing fields instead of leaving undefined", () => {
-    expect(asDataset({ name: "Iris" })).toEqual({
+  test("blanks out missing fields instead of leaving undefined", () => {
+    assert.deepEqual(asDataset({ name: "Iris" }), {
       name: "Iris",
       source: "",
       format: "",
@@ -38,13 +40,13 @@ describe("asDataset", () => {
       url: "",
     });
   });
-});
 
-describe("datasetFacts", () => {
-  it("joins only the parts that exist", () => {
-    const dataset = asDataset({ name: "Iris", source: "UCI", format: "CSV", size: "150 rows" });
-    expect(datasetFacts(dataset!)).toBe("UCI · CSV · 150 rows");
-    expect(datasetFacts(asDataset({ name: "Iris", format: "CSV" })!)).toBe("CSV");
-    expect(datasetFacts(asDataset({ name: "Iris" })!)).toBe("");
+  test("joins only the facts that exist", () => {
+    assert.equal(
+      datasetFacts(asDataset({ name: "Iris", source: "UCI", format: "CSV", size: "150 rows" })!),
+      "UCI · CSV · 150 rows",
+    );
+    assert.equal(datasetFacts(asDataset({ name: "Iris", format: "CSV" })!), "CSV");
+    assert.equal(datasetFacts(asDataset({ name: "Iris" })!), "");
   });
 });

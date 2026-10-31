@@ -38,3 +38,9 @@ export function takeBackTarget(currentPath: string): string | null {
   while (stack.length > 0 && stack[stack.length - 1] === currentPath) stack.pop();
   return stack.length > 0 ? stack[stack.length - 1] : null;
 }
+
+/** Test-only: clear tracked history between tests. */
+export function resetBackTracking() {
+  stack = [];
+  initialized = false;
+}

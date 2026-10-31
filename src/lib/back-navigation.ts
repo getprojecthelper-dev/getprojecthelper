@@ -9,9 +9,9 @@ const MAX_STACK = 50;
 let stack: string[] = [];
 let initialized = false;
 
-/** Start recording visited pages. Safe to call once per client session. */
+/** Start recording visited pages. Call once per client session (not during SSR). */
 export function initBackTracking(router: AnyRouter) {
-  if (initialized || typeof window === "undefined") return;
+  if (initialized) return;
   initialized = true;
   stack = [router.state.location.pathname];
   router.subscribe("onResolved", ({ toLocation }) => {

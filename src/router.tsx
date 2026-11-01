@@ -13,7 +13,10 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
   });
 
-  if (typeof window !== "undefined") initBackTracking(router);
+  if (typeof window !== "undefined") {
+    initBackTracking(router);
+    installStaleChunkReload();
+  }
 
   return router;
 };

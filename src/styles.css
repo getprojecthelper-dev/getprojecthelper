@@ -7,7 +7,7 @@
 
 /*
  * Project Helper design system.
- * Dark studio workspace with a single high-contrast orange accent.
+ * Dark studio workspace with the homepage's violet-to-blue accent range.
  * All colors are oklch tokens. Never hardcode colors in components.
  */
 
@@ -72,8 +72,8 @@
   --card-foreground: oklch(0.965 0.004 85);
   --popover: oklch(0.19 0.006 285);
   --popover-foreground: oklch(0.965 0.004 85);
-  --primary: oklch(0.7 0.19 40);
-  --primary-foreground: oklch(0.16 0.004 285);
+  --primary: oklch(0.62 0.23 295);
+  --primary-foreground: oklch(0.98 0.004 285);
   --secondary: oklch(0.235 0.006 285);
   --secondary-foreground: oklch(0.94 0.004 85);
   --muted: oklch(0.225 0.005 285);
@@ -90,16 +90,16 @@
   --info-foreground: oklch(0.14 0.004 285);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.19 40);
-  --chart-1: oklch(0.7 0.19 40);
+  --ring: oklch(0.62 0.23 295);
+  --chart-1: oklch(0.62 0.23 295);
   --chart-2: oklch(0.72 0.1 250);
   --chart-3: oklch(0.82 0.13 70);
   --chart-4: oklch(0.72 0.12 155);
   --chart-5: oklch(0.86 0.004 85);
   --sidebar: oklch(0.16 0.005 285);
   --sidebar-foreground: oklch(0.94 0.004 85);
-  --sidebar-primary: oklch(0.7 0.19 40);
-  --sidebar-primary-foreground: oklch(0.16 0.004 285);
+  --sidebar-primary: oklch(0.62 0.23 295);
+  --sidebar-primary-foreground: oklch(0.98 0.004 285);
   --sidebar-accent: oklch(0.245 0.006 285);
   --sidebar-accent-foreground: oklch(0.96 0.004 85);
   --sidebar-border: oklch(1 0 0 / 12%);
@@ -178,14 +178,14 @@
   --card-foreground: oklch(0.955 0.006 85);
   --popover: oklch(0.198 0.005 285);
   --popover-foreground: oklch(0.955 0.006 85);
-  --primary: oklch(0.7 0.19 40);
-  --primary-foreground: oklch(0.16 0.004 285);
+  --primary: oklch(0.67 0.2 295);
+  --primary-foreground: oklch(0.98 0.004 285);
   --secondary: oklch(0.245 0.005 285);
   --secondary-foreground: oklch(0.94 0.006 85);
   --muted: oklch(0.235 0.005 285);
   --muted-foreground: oklch(0.72 0.006 85);
-  --accent: oklch(0.7 0.19 40);
-  --accent-foreground: oklch(0.16 0.004 285);
+  --accent: oklch(0.28 0.035 290);
+  --accent-foreground: oklch(0.98 0.004 285);
   --destructive: oklch(0.65 0.18 27);
   --destructive-foreground: oklch(0.98 0.006 85);
   --success: oklch(0.7 0.12 155);
@@ -196,16 +196,16 @@
   --info-foreground: oklch(0.16 0.004 285);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.19 40);
-  --chart-1: oklch(0.7 0.19 40);
+  --ring: oklch(0.67 0.2 295);
+  --chart-1: oklch(0.67 0.2 295);
   --chart-2: oklch(0.7 0.1 250);
   --chart-3: oklch(0.8 0.13 70);
   --chart-4: oklch(0.7 0.12 155);
   --chart-5: oklch(0.85 0.006 85);
   --sidebar: oklch(0.185 0.005 285);
   --sidebar-foreground: oklch(0.93 0.006 85);
-  --sidebar-primary: oklch(0.7 0.19 40);
-  --sidebar-primary-foreground: oklch(0.16 0.004 285);
+  --sidebar-primary: oklch(0.67 0.2 295);
+  --sidebar-primary-foreground: oklch(0.98 0.004 285);
   --sidebar-accent: oklch(0.25 0.005 285);
   --sidebar-accent-foreground: oklch(0.96 0.006 85);
   --sidebar-border: oklch(1 0 0 / 12%);
@@ -244,8 +244,8 @@
 /* Shared workspace treatment. Use icon chips instead of floating bare glyphs. */
 .workspace-canvas {
   background:
-    radial-gradient(circle at 8% 0%, rgb(255 107 53 / .1), transparent 28rem),
-    radial-gradient(circle at 94% 100%, rgb(124 58 237 / .08), transparent 30rem),
+    radial-gradient(circle at 8% 0%, rgb(124 58 237 / .16), transparent 28rem),
+    radial-gradient(circle at 94% 100%, rgb(37 99 235 / .1), transparent 30rem),
     var(--background);
 }
 
@@ -261,7 +261,7 @@
   border: 1px solid rgb(255 255 255 / .1);
   border-radius: .85rem;
   background: linear-gradient(145deg, rgb(255 255 255 / .1), rgb(255 255 255 / .035));
-  color: #ff6b35;
+  color: #a78bfa;
   box-shadow: inset 0 1px rgb(255 255 255 / .08);
 }
 
@@ -337,7 +337,7 @@
 /* Authentication canvas: scoped so the selected pine-and-coral direction does not recolor the workspace. */
 .auth-stage {
   --auth-pine: #111114;
-  --auth-coral: #ff6b35;
+  --auth-coral: #8b5cf6;
   --auth-light: #f9f9fb;
   --auth-mist: #a1a1aa;
   --auth-sage: #71717a;
@@ -345,8 +345,8 @@
   --auth-field: #ffffff;
   --auth-sheet-shadow: 0 28px 70px -30px rgb(0 0 0 / .72);
   background:
-    radial-gradient(circle at 8% 6%, rgb(255 107 53 / .2), transparent 28rem),
-    radial-gradient(circle at 90% 88%, rgb(124 58 237 / .14), transparent 26rem),
+    radial-gradient(circle at 8% 6%, rgb(124 58 237 / .24), transparent 28rem),
+    radial-gradient(circle at 90% 88%, rgb(37 99 235 / .14), transparent 26rem),
     #09090b;
 }
 
@@ -376,9 +376,9 @@
   mask-image: linear-gradient(to bottom, black, transparent 78%);
 }
 .auth-orb { position: absolute; border-radius: 999px; filter: blur(2px); pointer-events: none; }
-.auth-orb-one { width: 30rem; height: 30rem; right: -12rem; top: -9rem; background: rgb(255 107 53 / .22); }
-.auth-orb-two { width: 19rem; height: 19rem; left: -8rem; bottom: -8rem; background: rgb(124 58 237 / .18); }
-.auth-mobile-glow { background: radial-gradient(circle at 50% -8%, rgb(255 107 53 / .22), transparent 38%); }
+.auth-orb-one { width: 30rem; height: 30rem; right: -12rem; top: -9rem; background: rgb(124 58 237 / .25); }
+.auth-orb-two { width: 19rem; height: 19rem; left: -8rem; bottom: -8rem; background: rgb(37 99 235 / .18); }
+.auth-mobile-glow { background: radial-gradient(circle at 50% -8%, rgb(124 58 237 / .24), transparent 38%); }
 .auth-entrance { animation: auth-arrive .65s ease-out both; }
 .auth-form { animation: auth-arrive .4s ease-out both; }
 .auth-input { transition: border-color .2s, box-shadow .2s, transform .2s; }

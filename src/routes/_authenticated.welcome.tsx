@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/material-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { useProjectsOverview } from "@/lib/db";
+import { WorkspacePlanStatus } from "@/components/workspace-plan-status";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   head: () => ({
@@ -172,6 +173,7 @@ function ProjectTool({
 
 function WelcomePage() {
   const { session } = useAuth();
+  const justPaid = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("plan") === "success";
   const fullName = String(session?.user.user_metadata?.["full_name"] ?? "").trim();
   const firstName = fullName.split(/\s+/)[0] || "there";
 
@@ -184,6 +186,7 @@ function WelcomePage() {
         </div>
         <Button asChild size="sm" variant="outline"><Link to="/dashboard">All projects <ArrowRight className="h-4 w-4" /></Link></Button>
       </div>
+      <WorkspacePlanStatus justPaid={justPaid} />
 
       <section aria-label="Start a project" className="mt-6 grid gap-4 sm:grid-cols-2">
         <Link

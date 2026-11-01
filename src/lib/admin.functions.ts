@@ -9,7 +9,6 @@ import {
   toReferralRow,
   type ReferralCodeRow,
 } from "@/lib/admin-codes";
-import type { UnitEconomics } from "@/lib/economics.server";
 import { PREMADE_PROJECTS } from "@/lib/premade-projects";
 
 export type { ReferralCodeRow };
@@ -108,7 +107,9 @@ export const updateAdminProjectPricing = createServerFn({ method: "POST" })
 export interface AdminStats {
   users: { total: number; last7d: number; last30d: number };
   projects: { total: number; active: number };
-  ai: { credits: number; calls: number; tokens: number; byFeature: { feature: string; credits: number; calls: number }[]; daily: { day: string; credits: number }[] };
+  ai: { credits: number; calls: number; tokens: number; byFeature: { feature: string; credits: number; calls: number }[]; daily: { day: string; credits: number }[]; weekly: { day: string; credits: number }[]; monthly: { day: string; credits: number }[] };
+  users_list: { id: string; name: string | null; email: string; createdAt: string; credits: number; plan: string | null; projects: number }[];
+  topUsers: { id: string; name: string | null; email: string; credits: number; tokens: number; calls: number }[];
   subscriptions: { active: number; total: number; mrrCents: number; byPlan: { plan: string; count: number }[] };
   recentUsers: { id: string; email: string; name: string | null; created_at: string }[];
   userProjects: {
@@ -149,8 +150,8 @@ export const getAdminStats = createServerFn({ method: "GET" })
         .from("projects")
         .select("id, user_id, name, domain, status, current_stage, updated_at")
         .order("updated_at", { ascending: false }),
-      supabaseAdmin.from("ai_usage_events").select("feature, credits, total_tokens, created_at"),
-      supabaseAdmin.from("subscriptions").select("plan, status, amount_cents"),
+      supabaseAdmin.from("ai_usage_events").select("user_id, feature, credits, total_tokens, created_at"),
+      supabaseAdmin.from("subscriptions").select("user_id, plan, status, amount_cents"),
     ]);
     const [buildRows, taskRows, reqRows, testRows, docRows, roleRows] = await Promise.all([
       supabaseAdmin.from("build_sections").select("project_id, status"),
@@ -195,6 +196,7 @@ export const getAdminStats = createServerFn({ method: "GET" })
 
     const featureMap = new Map<string, { credits: number; calls: number }>();
     const dayMap = new Map<string, number>();
+    const userUsage = new Map<string, { credits: number; tokens: number; calls: number }>();
     let credits = 0;
     let tokens = 0;
     for (const row of usageRows) {
@@ -205,10 +207,29 @@ export const getAdminStats = createServerFn({ method: "GET" })
       featureMap.set(row.feature, { credits: f.credits + c, calls: f.calls + 1 });
       const day = String(row.created_at).slice(0, 10);
       dayMap.set(day, (dayMap.get(day) ?? 0) + c);
+      const u = userUsage.get(row.user_id) ?? { credits: 0, tokens: 0, calls: 0 };
+      userUsage.set(row.user_id, { credits: u.credits + c, tokens: u.tokens + (row.total_tokens ?? 0), calls: u.calls + 1 });
+    }
+    const r2 = (n: number) => Number(n.toFixed(2));
+    const sumRange = (from: string, to: string) =>
+      [...dayMap.entries()].filter(([d]) => d >= from && d < to).reduce((t, [, v]) => t + v, 0);
+    const weekly: { day: string; credits: number }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const from = iso(i * 7 + 6).slice(0, 10);
+      const to = iso(i * 7 - 1).slice(0, 10);
+      weekly.push({ day: from, credits: r2(sumRange(from, to)) });
+    }
+    const monthly: { day: string; credits: number }[] = [];
+    const nowD = new Date(now);
+    for (let i = 11; i >= 0; i--) {
+      const m = new Date(Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth() - i, 1));
+      const key = m.toISOString().slice(0, 7);
+      const total = [...dayMap.entries()].filter(([d]) => d.startsWith(key)).reduce((t, [, v]) => t + v, 0);
+      monthly.push({ day: key, credits: r2(total) });
     }
 
     const daily: { day: string; credits: number }[] = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 29; i >= 0; i--) {
       const day = iso(i).slice(0, 10);
       daily.push({ day, credits: Number((dayMap.get(day) ?? 0).toFixed(2)) });
     }
@@ -216,11 +237,13 @@ export const getAdminStats = createServerFn({ method: "GET" })
     const planMap = new Map<string, number>();
     let mrrCents = 0;
     let activeSubs = 0;
+    const activePlan = new Map<string, string>();
     for (const s of subRows) {
       if (s.status === "active" || s.status === "trialing") {
         activeSubs += 1;
         mrrCents += s.amount_cents ?? 0;
         planMap.set(s.plan, (planMap.get(s.plan) ?? 0) + 1);
+        activePlan.set(s.user_id, s.plan);
       }
     }
 
@@ -246,7 +269,29 @@ export const getAdminStats = createServerFn({ method: "GET" })
           .map(([feature, v]) => ({ feature, credits: Number(v.credits.toFixed(2)), calls: v.calls }))
           .sort((a, b) => b.credits - a.credits),
         daily,
+        weekly,
+        monthly,
       },
+      users_list: profileRows.map((p) => ({
+        id: p.id,
+        name: p.full_name,
+        email: emailFor(p.id),
+        createdAt: p.created_at,
+        credits: r2(userUsage.get(p.id)?.credits ?? 0),
+        plan: activePlan.get(p.id) ?? null,
+        projects: projectRows.filter((x) => x.user_id === p.id).length,
+      })),
+      topUsers: [...userUsage.entries()]
+        .sort((a, b) => b[1].credits - a[1].credits)
+        .slice(0, 10)
+        .map(([id, v]) => ({
+          id,
+          name: profileRows.find((p) => p.id === id)?.full_name ?? null,
+          email: emailFor(id),
+          credits: r2(v.credits),
+          tokens: v.tokens,
+          calls: v.calls,
+        })),
       subscriptions: {
         active: activeSubs,
         total: subRows.length,
@@ -342,25 +387,6 @@ export const setReferralCodeActive = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
-  });
-
-export type UnitEconomicsResult = { forbidden: true } | ({ forbidden: false } & UnitEconomics);
-
-export const getUnitEconomics = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ window: z.enum(["7d", "30d", "all"]).default("30d") }).parse(input ?? {}),
-  )
-  .handler(async ({ data, context }): Promise<UnitEconomicsResult> => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (isAdmin !== true) return { forbidden: true };
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { computeUnitEconomics } = await import("@/lib/economics.server");
-    return { forbidden: false, ...(await computeUnitEconomics(supabaseAdmin, data.window)) };
   });
 
 export interface ModelUsageGroup {

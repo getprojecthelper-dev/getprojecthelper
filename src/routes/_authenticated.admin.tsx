@@ -1,10 +1,9 @@
 import { Link, createFileRoute, useNavigate, type ErrorComponentProps } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, CreditCard, Cpu, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, Coins, CreditCard, Cpu, Gauge, Hammer, Package, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 
-import { AdminEconomics } from "@/components/admin-economics";
 import { AdminModelUsage } from "@/components/admin-model-usage";
 import { AdminReferralCodes } from "@/components/admin-referral-codes";
 import { AdminProjectPricing } from "@/components/admin-project-pricing";
@@ -15,8 +14,21 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getAdminStats } from "@/lib/admin.functions";
+import { cn } from "@/lib/utils";
+
+const SECTIONS = [
+  { id: "users", label: "User Info", icon: Users },
+  { id: "credits", label: "Credits", icon: Coins },
+  { id: "building", label: "Building", icon: Hammer },
+  { id: "tokens", label: "Token Tracker", icon: Gauge },
+  { id: "premade", label: "Premade Project Listing", icon: Package },
+] as const;
+type SectionId = (typeof SECTIONS)[number]["id"];
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  validateSearch: (search: Record<string, unknown>): { tab: SectionId } => ({
+    tab: SECTIONS.some((x) => x.id === search["tab"]) ? (search["tab"] as SectionId) : "users",
+  }),
   head: () => ({
     meta: [
       { title: "Adport — Project Helper" },
@@ -56,6 +68,8 @@ function Progress({ value }: { value: number }) {
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const { tab } = Route.useSearch();
+  const [range, setRange] = useState<"daily" | "weekly" | "monthly">("daily");
   const fetchStats = useServerFn(getAdminStats);
   const [selectedOwnerId, setSelectedOwnerId] = useState<string | null>(null);
   const { data, isPending, isError, error, refetch } = useQuery({
@@ -82,14 +96,15 @@ function AdminDashboard() {
     );
   }
 
-  const peak = Math.max(1, ...data.ai.daily.map((d) => d.credits));
+  const series = data.ai[range] ?? data.ai.daily ?? [];
+  const peak = Math.max(1, ...series.map((d) => d.credits));
   const selectedProjects = selectedOwnerId
     ? data.userProjects.filter((p) => p.ownerId === selectedOwnerId)
     : [];
   const selectedOwner = selectedProjects[0];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-5 py-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-5 py-8">
       <PageHeader
         title="Adport"
         description="Platform-wide view of registered students, AI credit consumption and subscriptions."
@@ -105,6 +120,28 @@ function AdminDashboard() {
 
       <AdminSiteAvailability />
 
+      <div className="flex flex-col gap-6 md:flex-row">
+        <aside className="md:w-56 md:shrink-0">
+          <nav className="panel flex gap-1 overflow-x-auto p-2 md:sticky md:top-6 md:flex-col">
+            {SECTIONS.map((sec) => (
+              <Link
+                key={sec.id}
+                to="/admin"
+                search={{ tab: sec.id }}
+                className={cn(
+                  "flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm transition",
+                  tab === sec.id ? "bg-secondary font-medium text-foreground" : "text-muted-foreground hover:bg-secondary/60",
+                )}
+              >
+                <sec.icon className="h-4 w-4" />
+                {sec.label}
+              </Link>
+            ))}
+          </nav>
+        </aside>
+        <div className="min-w-0 flex-1 space-y-6">
+          {tab === "users" && (
+            <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Registered users"
@@ -132,45 +169,6 @@ function AdminDashboard() {
           hint={`${data.projects.active} currently active`}
           icon={<Cpu className="h-4 w-4" />}
         />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-        <section className="panel p-5">
-          <h2 className="font-display text-lg">AI credits — last 14 days</h2>
-          <div className="mt-6 flex h-40 items-end gap-1.5">
-            {data.ai.daily.map((d) => (
-              <div key={d.day} className="group flex flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
-                  style={{ height: `${Math.max(2, (d.credits / peak) * 100)}%` }}
-                  title={`${d.day}: ${d.credits} credits`}
-                />
-                <span className="text-[10px] text-muted-foreground">{d.day.slice(5)}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="panel p-5">
-          <h2 className="font-display text-lg">Credits by feature</h2>
-          {data.ai.byFeature.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">No AI usage recorded yet.</p>
-          ) : (
-            <ul className="mt-4 space-y-3">
-              {data.ai.byFeature.map((f) => (
-                <li key={f.feature}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="capitalize">{f.feature.replace(/_/g, " ")}</span>
-                    <span className="text-muted-foreground">
-                      {f.credits} cr · {f.calls} runs
-                    </span>
-                  </div>
-                  <MeterBar value={(f.credits / Math.max(1, data.ai.credits)) * 100} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
@@ -225,6 +223,120 @@ function AdminDashboard() {
         </section>
       </div>
 
+      <section className="panel p-5">
+        <h2 className="font-display text-lg">Registered users</h2>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[680px] text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="pb-2 font-semibold">User</th>
+                <th className="pb-2 font-semibold">Plan</th>
+                <th className="pb-2 text-right font-semibold">AI credits used</th>
+                <th className="pb-2 text-right font-semibold">Projects</th>
+                <th className="pb-2 text-right font-semibold">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data.users_list ?? []).map((u) => (
+                <tr key={u.id} className="border-t border-border/60">
+                  <td className="py-2 pr-4">
+                    <div className="font-medium">{u.name ?? "—"}</div>
+                    <div className="text-xs text-muted-foreground">{u.email}</div>
+                  </td>
+                  <td className="py-2 pr-4 capitalize text-muted-foreground">{u.plan ?? "Free"}</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{u.credits.toLocaleString()}</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{u.projects}</td>
+                  <td className="py-2 text-right text-muted-foreground">{new Date(u.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="panel p-5">
+        <h2 className="font-display text-lg">Heaviest consumers</h2>
+        {(data.topUsers ?? []).length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No AI usage recorded yet.</p>
+        ) : (
+          <table className="mt-4 w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="pb-2 font-semibold">User</th>
+                <th className="pb-2 text-right font-semibold">Credits</th>
+                <th className="pb-2 text-right font-semibold">Tokens</th>
+                <th className="pb-2 text-right font-semibold">AI runs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data.topUsers ?? []).map((u) => (
+                <tr key={u.id} className="border-t border-border/60">
+                  <td className="py-2">{u.name ?? u.email}</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{u.credits.toLocaleString()}</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{u.tokens.toLocaleString()}</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{u.calls}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <AdminReferralCodes />
+            </>
+          )}
+          {tab === "credits" && (
+            <>
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+        <section className="panel p-5">
+          <h2 className="font-display text-lg">AI credits used</h2>
+          <div className="mt-3 flex gap-1">
+            {(["daily", "weekly", "monthly"] as const).map((r) => (
+              <Button key={r} size="sm" variant={r === range ? "secondary" : "ghost"} className="h-7 px-3 text-xs capitalize" onClick={() => setRange(r)}>
+                {r === "daily" ? "30 days" : r === "weekly" ? "12 weeks" : "12 months"}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-6 flex h-40 items-end gap-1.5">
+            {series.map((d, i) => (
+              <div key={d.day} className="group flex h-full flex-1 flex-col items-center justify-end gap-2">
+                <div
+                  className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
+                  style={{ height: `${Math.max(2, (d.credits / peak) * 100)}%` }}
+                  title={`${d.day}: ${d.credits} credits`}
+                />
+                <span className="h-3 text-[10px] text-muted-foreground">{(range !== "daily" || i % 5 === 0) && (range === "monthly" ? d.day.slice(2) : d.day.slice(5))}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-display text-lg">Credits by feature</h2>
+          {data.ai.byFeature.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">No AI usage recorded yet.</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {data.ai.byFeature.map((f) => (
+                <li key={f.feature}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="capitalize">{f.feature.replace(/_/g, " ")}</span>
+                    <span className="text-muted-foreground">
+                      {f.credits} cr · {f.calls} runs
+                    </span>
+                  </div>
+                  <MeterBar value={(f.credits / Math.max(1, data.ai.credits)) * 100} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+
+            </>
+          )}
+          {tab === "building" && (
+            <>
       <section className="panel p-5">
         <h2 className="font-display text-lg">My projects</h2>
         <p className="mt-1 text-sm text-muted-foreground">Your own projects and how far along they are.</p>
@@ -315,13 +427,12 @@ function AdminDashboard() {
         )}
       </section>
 
-      <AdminModelUsage />
-
-      <AdminEconomics />
-
-      <AdminProjectPricing />
-
-      <AdminReferralCodes />
+            </>
+          )}
+          {tab === "tokens" && <AdminModelUsage />}
+          {tab === "premade" && <AdminProjectPricing />}
+        </div>
+      </div>
 
       <Dialog open={selectedOwnerId !== null} onOpenChange={(open) => !open && setSelectedOwnerId(null)}>
         <DialogContent className="max-w-lg">

@@ -37,8 +37,8 @@ async function recordUsage(
       input_tokens: tokens.input,
       output_tokens: tokens.output,
       total_tokens: tokens.total,
-      // 1 credit per 1k tokens
-      credits: Number((tokens.total / 1000).toFixed(4)),
+      // GPT Luna 6: 1K input = 1 credit, 1K output = 5 credits
+      credits: Number((tokens.input / 1000 + tokens.output / 200).toFixed(4)),
     });
   } catch (error) {
     console.error("ai usage logging failed", error);
@@ -134,7 +134,7 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   }
 
   await recordUsage(req.usage, tokens);
-  if (holdId) await settleCredits(holdId, tokens.total);
+  if (holdId) await settleCredits(holdId, tokens.input, tokens.output);
 
   if (!text.trim()) throw new Error("The AI returned an empty response. Please try again.");
 

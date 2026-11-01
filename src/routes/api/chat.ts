@@ -139,14 +139,14 @@ export const Route = createFileRoute("/api/chat")({
               await releaseCredits(hold.id);
             },
             onFinish: async ({ text, usage }) => {
-              const total =
-                usage?.totalTokens ??
-                (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
+              const inputTokens = usage?.inputTokens ?? 0;
+              const outputTokens = usage?.outputTokens ?? 0;
+              const total = usage?.totalTokens ?? inputTokens + outputTokens;
               try {
                 let charged = 0;
                 if (hold.id && !hold.settled) {
                   hold.settled = true;
-                  charged = await settleCredits(hold.id, total);
+                  charged = await settleCredits(hold.id, inputTokens, outputTokens);
                 }
                 const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
                 await supabaseAdmin.from("ai_usage_events").insert({

@@ -6,6 +6,7 @@ import { MeterBar, MetricCard, healthTone, meterTone } from "@/components/metric
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { asDataset } from "@/lib/dataset";
 import {
   DOMAINS,
   PURPOSES,
@@ -196,20 +197,6 @@ function concise(value: string | null | undefined) {
   const shortened = clean.slice(0, 360);
   const sentenceEnd = Math.max(shortened.lastIndexOf("."), shortened.lastIndexOf("!"), shortened.lastIndexOf("?"));
   return `${shortened.slice(0, sentenceEnd > 160 ? sentenceEnd + 1 : shortened.lastIndexOf(" "))}…`;
-}
-
-function asDataset(value: unknown) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const record = value as Record<string, unknown>;
-  const name = typeof record["name"] === "string" ? record["name"].trim() : "";
-  if (!name) return null;
-  return {
-    name,
-    source: typeof record["source"] === "string" ? record["source"] : "",
-    format: typeof record["format"] === "string" ? record["format"] : "",
-    size: typeof record["size"] === "string" ? record["size"] : "",
-    url: typeof record["url"] === "string" ? record["url"] : "",
-  };
 }
 
 function Detail({ label, value }: { label: string; value: string }) {

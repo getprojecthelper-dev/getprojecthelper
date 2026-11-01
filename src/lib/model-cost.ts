@@ -4,7 +4,7 @@ export interface ModelRates {
   outputPer1M: number;
 }
 
-export const DEFAULT_RATES: ModelRates = { inputPer1M: 0, outputPer1M: 0 };
+export const DEFAULT_RATES: ModelRates = { inputPer1M: 0.1, outputPer1M: 0.5 };
 
 export const usageCostUsd = (inputTokens: number, outputTokens: number, r: ModelRates) =>
   (inputTokens / 1_000_000) * r.inputPer1M + (outputTokens / 1_000_000) * r.outputPer1M;

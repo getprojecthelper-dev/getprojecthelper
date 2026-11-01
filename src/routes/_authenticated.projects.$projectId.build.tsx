@@ -11,7 +11,6 @@ import {
   ExternalLink,
   FileCode2,
   FileSpreadsheet,
-
   FileText,
   FileType,
   FolderTree,
@@ -20,7 +19,6 @@ import {
   ListChecks,
   HelpCircle,
   SlidersHorizontal,
-
   Lock,
   MapPin,
   NotebookPen,
@@ -37,7 +35,6 @@ import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
-import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,14 +61,19 @@ import {
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
-
 export const Route = createFileRoute("/_authenticated/projects/$projectId/build")({
   head: () => ({
     meta: [
       { title: "Implementation builder — Project Helper" },
-      { name: "description", content: "Build your private project step by step with guided implementation." },
+      {
+        name: "description",
+        content: "Build your private project step by step with guided implementation.",
+      },
       { property: "og:title", content: "Implementation builder — Project Helper" },
-      { property: "og:description", content: "Build your private project step by step with guided implementation." },
+      {
+        property: "og:description",
+        content: "Build your private project step by step with guided implementation.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -91,8 +93,6 @@ interface Block {
   example?: string;
   analogy?: string;
 }
-
-
 
 interface StructureFile {
   path: string;
@@ -132,7 +132,6 @@ interface FixNotes extends FixRound {
   rounds?: FixRound[];
 }
 
-
 interface Walkthrough {
   completed?: string[];
   whats_next?: string[];
@@ -158,7 +157,6 @@ interface BuildSection {
   fix_notes: FixNotes | null;
   walkthrough: Walkthrough | null;
 }
-
 
 const sectionsKey = (projectId: string) => ["build-sections", projectId] as const;
 
@@ -190,7 +188,6 @@ function useSections(projectId: string) {
             ? (value as Walkthrough)
             : null;
         })(),
-
       }));
     },
   });
@@ -212,7 +209,12 @@ function BuildPage() {
       return {
         domain: (data?.domain as string | null) ?? null,
         name: (data?.name as string | null) ?? null,
-        pm: (data?.pm_profile as { industry?: string; methodology?: string; duration?: string } | null) ?? null,
+        pm:
+          (data?.pm_profile as {
+            industry?: string;
+            methodology?: string;
+            duration?: string;
+          } | null) ?? null,
         dataset: asDataset((data as Record<string, unknown> | null)?.["dataset"]),
       };
     },
@@ -268,6 +270,7 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
+  const nextSection = sections.find((section) => section.status !== "confirmed");
 
   // For document domains: which step first asks for each office file, so we
   // say "create" once and "open the file you already made" afterwards.
@@ -284,8 +287,6 @@ function BuildPage() {
     return map;
   }, [sections, playbook.buildsCode]);
 
-  
-
   if (isPending) {
     return (
       <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
@@ -295,28 +296,58 @@ function BuildPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title={playbook.headline}
-        description={playbook.subhead}
-      />
-
-      <div className="panel space-y-2 p-5">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
+    <div className="mx-auto max-w-7xl space-y-5 pb-8">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(125deg,rgba(124,58,237,.2),rgba(9,9,11,.92)_48%,rgba(37,99,235,.14))] px-5 py-6 shadow-[0_20px_60px_rgba(0,0,0,.2)] sm:px-7 sm:py-8">
+        <div
+          className="absolute -right-20 -top-24 size-72 rounded-full bg-violet-500/15 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-300">
+              Build workspace
+            </p>
+            <h1 className="mt-3 font-display text-3xl font-bold tracking-[-.045em] text-white sm:text-4xl">
+              {playbook.headline}
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+              {playbook.subhead}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:min-w-[320px]">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Progress</p>
+              <p className="mt-1 font-display text-2xl font-bold text-white">{percent}%</p>
+              <p className="mt-1 text-xs text-slate-400">
+                {completed} of {sections.length} complete
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Up next</p>
+              <p className="mt-1 line-clamp-2 font-display text-sm font-semibold text-white">
+                {nextSection?.title ?? "All steps complete"}
+              </p>
+              <p className="mt-1 text-xs text-violet-200">
+                {nextSection ? "Ready when you are" : "Great work"}
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"} completed
-        </p>
-      </div>
+        <div className="relative mt-6 h-2 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-400 to-sky-400 transition-all duration-500"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+      </section>
 
       {meta?.dataset ? (
-        <div className="panel p-5">
+        <div className="panel border-primary/20 p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <Database className="h-4 w-4 text-primary" />
-                Dataset you selected
+                Selected dataset
               </div>
               <p className="mt-2 font-display text-lg">{meta.dataset.name}</p>
               {datasetFacts(meta.dataset) ? (
@@ -336,7 +367,9 @@ function BuildPage() {
 
       {meta?.pm ? (
         <div className="panel p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Project profile</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Project profile
+          </p>
           <p className="mt-1 text-base font-semibold text-foreground">{meta.name}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
@@ -345,7 +378,9 @@ function BuildPage() {
               { label: "Duration", value: meta.pm.duration },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border bg-muted/40 p-3">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{item.label}</p>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {item.label}
+                </p>
                 <p className="mt-0.5 text-sm font-medium text-foreground">{item.value ?? "—"}</p>
               </div>
             ))}
@@ -386,11 +421,7 @@ function BuildPage() {
   );
 }
 
-function GettingStarted({
-  guide,
-}: {
-  guide: NonNullable<DomainPlaybook["gettingStarted"]>;
-}) {
+function GettingStarted({ guide }: { guide: NonNullable<DomainPlaybook["gettingStarted"]> }) {
   const [open, setOpen] = useState(true);
   return (
     <section className="panel overflow-hidden">
@@ -421,15 +452,14 @@ function GettingStarted({
                   className="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-panel"
                 >
                   <span
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg",
-                      meta.tint,
-                    )}
+                    className={cn("flex h-9 w-9 items-center justify-center rounded-lg", meta.tint)}
                   >
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <p className="mt-3 text-sm font-semibold">{tool.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tool.detail}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {tool.detail}
+                  </p>
                 </div>
               );
             })}
@@ -463,10 +493,7 @@ function GettingStarted({
   );
 }
 
-const APP_META: Record<
-  OfficeApp,
-  { icon: typeof FileText; tint: string; short: string }
-> = {
+const APP_META: Record<OfficeApp, { icon: typeof FileText; tint: string; short: string }> = {
   word: {
     icon: FileType,
     tint: "bg-info/15 text-info",
@@ -497,13 +524,33 @@ function toolApp(label: string): OfficeApp {
 function briefTone(title: string) {
   const t = title.toLowerCase();
   if (/problem|challenge|pain/.test(t))
-    return { icon: HelpCircle, ring: "border-warning/40", tint: "bg-warning/10", text: "text-warning" };
+    return {
+      icon: HelpCircle,
+      ring: "border-warning/40",
+      tint: "bg-warning/10",
+      text: "text-warning",
+    };
   if (/solution|approach|idea/.test(t))
-    return { icon: Lightbulb, ring: "border-primary/40", tint: "bg-primary/10", text: "text-primary" };
+    return {
+      icon: Lightbulb,
+      ring: "border-primary/40",
+      tint: "bg-primary/10",
+      text: "text-primary",
+    };
   if (/tech|stack|tool|method/.test(t))
-    return { icon: SlidersHorizontal, ring: "border-accent/40", tint: "bg-accent/10", text: "text-accent" };
+    return {
+      icon: SlidersHorizontal,
+      ring: "border-accent/40",
+      tint: "bg-accent/10",
+      text: "text-accent",
+    };
   if (/objective|goal|outcome|scope/.test(t))
-    return { icon: ListChecks, ring: "border-success/40", tint: "bg-success/10", text: "text-success" };
+    return {
+      icon: ListChecks,
+      ring: "border-success/40",
+      tint: "bg-success/10",
+      text: "text-success",
+    };
   return { icon: MapPin, ring: "border-border", tint: "bg-muted", text: "text-muted-foreground" };
 }
 
@@ -527,7 +574,9 @@ function OverviewBrief({ blocks }: { blocks: Block[] }) {
             )}
           >
             <div className="flex items-center gap-2.5">
-              <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
+              <span
+                className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}
+              >
                 <Icon className={cn("h-4 w-4", tone.text)} />
               </span>
               <p className="font-display text-base font-semibold tracking-tight">{block.title}</p>
@@ -588,7 +637,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
 
         {why.length ? (
           <section className="space-y-2">
-            <h4 className="font-display text-base font-semibold tracking-tight">Why we do it this way</h4>
+            <h4 className="font-display text-base font-semibold tracking-tight">
+              Why we do it this way
+            </h4>
             <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
               {why.map((line, li) => (
                 <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
@@ -620,7 +671,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
 
         {params.length ? (
           <section className="space-y-2">
-            <h4 className="font-display text-base font-semibold tracking-tight">The choices made</h4>
+            <h4 className="font-display text-base font-semibold tracking-tight">
+              The choices made
+            </h4>
             <div className="overflow-hidden rounded-lg border border-border">
               <table className="w-full border-collapse text-sm">
                 <tbody>
@@ -651,7 +704,6 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
   );
 }
 
-
 /**
  * Notebook steps: hand the student a real .ipynb with this step's cells inside,
  * so the notebooks in the project structure actually get used.
@@ -670,8 +722,8 @@ function NotebookActions({
           <NotebookPen className="h-4 w-4 text-info" /> Work in your notebook
         </p>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          The code below belongs in a Jupyter notebook — one cell per part. Download it
-          ready to run, then open it in Jupyter, VS Code or Colab and run the cells in order.
+          The code below belongs in a Jupyter notebook — one cell per part. Download it ready to
+          run, then open it in Jupyter, VS Code or Colab and run the cells in order.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -698,13 +750,7 @@ function NotebookActions({
 const appOf = (kind: FileSpec["kind"]): OfficeApp => kind;
 
 /** "Files you need for this step" — with a real empty file to download. */
-function StepFiles({
-  specs,
-  isNew,
-}: {
-  specs: FileSpec[];
-  isNew: (spec: FileSpec) => boolean;
-}) {
+function StepFiles({ specs, isNew }: { specs: FileSpec[]; isNew: (spec: FileSpec) => boolean }) {
   const [busy, setBusy] = useState<string | null>(null);
 
   const download = async (spec: FileSpec) => {
@@ -723,8 +769,8 @@ function StepFiles({
     <div className="rounded-xl border border-border bg-card p-4">
       <p className="text-sm font-semibold">Files you need for this step</p>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        No terminal, no coding. Download the blank file once, then paste each part
-        into the place named below.
+        No terminal, no coding. Download the blank file once, then paste each part into the place
+        named below.
       </p>
       <ul className="mt-3 space-y-2">
         {specs.map((spec) => {
@@ -736,7 +782,9 @@ function StepFiles({
               key={spec.fileName}
               className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border/70 bg-muted/20 px-3 py-2"
             >
-              <span className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}>
+              <span
+                className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}
+              >
                 <Icon className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1">
@@ -780,7 +828,9 @@ function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
   const Icon = meta.icon;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
-      <span className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}>
+      <span
+        className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}
+      >
         <Icon className="h-3.5 w-3.5" /> {meta.short}
       </span>
       <span className="text-muted-foreground">{isNew ? "Open your new file" : "Open"}</span>
@@ -788,7 +838,9 @@ function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
         {spec.fileName}
       </span>
       <span className="text-muted-foreground">
-        {spec.part ? `→ paste into the ${spec.partLabel} “${spec.part}”` : "→ paste this at the end"}
+        {spec.part
+          ? `→ paste into the ${spec.partLabel} “${spec.part}”`
+          : "→ paste this at the end"}
       </span>
     </div>
   );
@@ -819,9 +871,9 @@ function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2">
       <p className="text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">No typing needed.</span> The table
-        below is ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"}{" "}
-        already filled in.
+        <span className="font-semibold text-foreground">No typing needed.</span> The table below is
+        ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"} already
+        filled in.
       </p>
       <Button size="lg" onClick={download} disabled={busy} className="gap-2">
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
@@ -865,8 +917,8 @@ function CodeFileBar({ file, action }: { file: string; action?: string | undefin
         <div className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">Set up your environment variables.</span>{" "}
           Replace every placeholder with your own value, keep the file in the project root, and add{" "}
-          <span className="font-mono">.env</span> to <span className="font-mono">.gitignore</span> so
-          your keys never get pushed online.
+          <span className="font-mono">.env</span> to <span className="font-mono">.gitignore</span>{" "}
+          so your keys never get pushed online.
         </div>
       ) : null}
       {isRequirements ? (
@@ -882,11 +934,6 @@ function CodeFileBar({ file, action }: { file: string; action?: string | undefin
     </div>
   );
 }
-
-
-
-
-
 
 function SectionCard({
   section,
@@ -976,7 +1023,6 @@ function SectionCard({
       ).map(([path, cells]) => ({ path, cells }))
     : [];
 
-
   const downloadZip = async () => {
     setZipping(true);
     try {
@@ -990,12 +1036,7 @@ function SectionCard({
           const path = file.path.replace(/^\.?\//, "");
           // Files ship empty on purpose; a notebook still needs valid JSON so
           // Jupyter can open it.
-          zip.file(
-            path,
-            isNotebookFile(path)
-              ? JSON.stringify(buildNotebook([]), null, 1)
-              : "",
-          );
+          zip.file(path, isNotebookFile(path) ? JSON.stringify(buildNotebook([]), null, 1) : "");
         }
         if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
       }
@@ -1016,11 +1057,16 @@ function SectionCard({
   return (
     <section
       className={cn(
-        "panel overflow-hidden transition-colors",
-        confirmed ? "border-success/40" : locked ? "opacity-70" : "",
+        "panel overflow-hidden rounded-2xl transition-all duration-300",
+        confirmed
+          ? "border-success/40 bg-[linear-gradient(145deg,rgba(16,185,129,.07),rgba(24,24,27,.95))]"
+          : open
+            ? "border-primary/45 shadow-[0_18px_46px_rgba(76,29,149,.16)]"
+            : "hover:border-primary/30",
+        locked ? "opacity-70" : "",
       )}
     >
-      <div className="flex items-start justify-between gap-3 p-4">
+      <div className="flex items-start justify-between gap-3 p-4 sm:p-5">
         <button
           type="button"
           onClick={onToggle}
@@ -1029,7 +1075,7 @@ function SectionCard({
         >
           <span
             className={cn(
-              "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+              "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm",
               confirmed
                 ? "bg-success text-success-foreground"
                 : locked
@@ -1039,8 +1085,8 @@ function SectionCard({
           >
             {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
           </span>
-          <span className="space-y-1">
-            <span className="flex items-center gap-2 font-display text-base">
+          <span className="min-w-0 space-y-1.5">
+            <span className="flex items-center gap-2 font-display text-base font-semibold sm:text-lg">
               {section.title}
               {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
             </span>
@@ -1051,9 +1097,25 @@ function SectionCard({
         </button>
 
         <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={cn(
+              "hidden rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex",
+              confirmed
+                ? "bg-success/15 text-success"
+                : generated
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground",
+            )}
+          >
+            {confirmed ? "Complete" : generated ? "Ready to review" : "Not started"}
+          </span>
           {!locked && !generated ? (
             <Button size="sm" onClick={onGenerate} disabled={generating}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
               {generating ? "Generating…" : "Generate"}
             </Button>
           ) : null}
@@ -1073,14 +1135,19 @@ function SectionCard({
               {generating ? "Regenerating…" : "Regenerate"}
             </Button>
           ) : null}
-          <Button size="icon" variant="ghost" onClick={onToggle} aria-label={open ? "Close section" : "Open section"}>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onToggle}
+            aria-label={open ? "Close section" : "Open section"}
+          >
             {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
       </div>
 
       {open ? (
-        <div className="space-y-5 border-t border-border bg-muted/20 p-5">
+        <div className="space-y-5 border-t border-border bg-black/10 p-5 sm:p-6">
           {section.question ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
           ) : null}
@@ -1099,8 +1166,8 @@ function SectionCard({
                     <FolderTree className="h-4 w-4 text-primary" /> Project structure
                   </p>
                   <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    Only the files this project actually needs. Every file comes down
-                    empty — you fill them in as you work through the steps below.
+                    Only the files this project actually needs. Every file comes down empty — you
+                    fill them in as you work through the steps below.
                   </p>
                 </div>
                 <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
@@ -1120,92 +1187,88 @@ function SectionCard({
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
 
-          {notebooks.length ? <NotebookActions notebooks={notebooks} language={section.language} /> : null}
+          {notebooks.length ? (
+            <NotebookActions notebooks={notebooks} language={section.language} />
+          ) : null}
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
-          {isOverview ? null : blocks.map((block, i) => {
+          {isOverview
+            ? null
+            : blocks.map((block, i) => {
+                const hasCode = Boolean(block.code?.trim());
+                const blockFile = block.file?.trim();
+                const spec = playbook.buildsCode
+                  ? null
+                  : parseFileSpec(blockFile || block.title, block.code ?? "");
+                // Document domains get one continuous deliverable per step, so the
+                // "Part N" chrome is dropped — the document speaks for itself.
+                const showPartHeader = playbook.buildsCode || blocks.length > 1;
+                return (
+                  <div
+                    key={`${block.title}-${i}`}
+                    className="overflow-hidden rounded-xl border border-border bg-card/60"
+                  >
+                    {showPartHeader ? (
+                      <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                          {i + 1}
+                        </span>
+                        <p className="min-w-0 flex-1 font-display text-[15px]">
+                          {playbook.buildsCode && hasCode
+                            ? `Part ${i + 1} — ${block.title}`
+                            : block.title}
+                        </p>
+                      </div>
+                    ) : null}
 
-            const hasCode = Boolean(block.code?.trim());
-            const blockFile = block.file?.trim();
-            const spec = playbook.buildsCode
-              ? null
-              : parseFileSpec(blockFile || block.title, block.code ?? "");
-            // Document domains get one continuous deliverable per step, so the
-            // "Part N" chrome is dropped — the document speaks for itself.
-            const showPartHeader = playbook.buildsCode || blocks.length > 1;
-            return (
-              <div
-                key={`${block.title}-${i}`}
-                className="overflow-hidden rounded-xl border border-border bg-card/60"
-              >
-                {showPartHeader ? (
-                  <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
-                      {i + 1}
-                    </span>
-                    <p className="min-w-0 flex-1 font-display text-[15px]">
-                      {playbook.buildsCode && hasCode
-                        ? `Part ${i + 1} — ${block.title}`
-                        : block.title}
-                    </p>
-                  </div>
-                ) : null}
-
-
-                <div className="space-y-4 p-5">
-                  {playbook.buildsCode
-                    ? blockFile && hasCode
-                      ? <CodeFileBar file={blockFile} action={block.action} />
-                      : null
-                    : spec && hasCode
-                      ? (
+                    <div className="space-y-4 p-5">
+                      {playbook.buildsCode ? (
+                        blockFile && hasCode ? (
+                          <CodeFileBar file={blockFile} action={block.action} />
+                        ) : null
+                      ) : spec && hasCode ? (
                         <>
                           <DocFileBar spec={spec} isNew={specIsNew(spec)} />
                           {spec.kind === "excel" ? (
                             <SpreadsheetActions spec={spec} content={block.code ?? ""} />
                           ) : null}
                         </>
-                      )
-                      : null}
-                  {hasCode ? (
-                    playbook.buildsCode ? (
-                      isNotebookFile(blockFile) ? (
-                        <NotebookCellView
-                          code={block.code}
-                          notebook={notebookName(blockFile ?? "")}
-                          index={notebookCellIndex(blockFile) ?? i + 1}
-                        />
-                      ) : (
-                        <CodeBlock
-                          code={block.code}
-                          language={section.language}
-                          filename={blockFile}
-                        />
-                      )
-                    ) : (
-                      <DocSheet
-                        content={block.code}
-                        label={
-                          spec
-                            ? spec.part
-                              ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
-                              : spec.fileName
-                            : undefined
-                        }
-                      />
-                    )
-                  ) : null}
+                      ) : null}
+                      {hasCode ? (
+                        playbook.buildsCode ? (
+                          isNotebookFile(blockFile) ? (
+                            <NotebookCellView
+                              code={block.code}
+                              notebook={notebookName(blockFile ?? "")}
+                              index={notebookCellIndex(blockFile) ?? i + 1}
+                            />
+                          ) : (
+                            <CodeBlock
+                              code={block.code}
+                              language={section.language}
+                              filename={blockFile}
+                            />
+                          )
+                        ) : (
+                          <DocSheet
+                            content={block.code}
+                            label={
+                              spec
+                                ? spec.part
+                                  ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
+                                  : spec.fileName
+                                : undefined
+                            }
+                          />
+                        )
+                      ) : null}
 
-
-                  <BlockExplanation block={block} hasCode={hasCode} />
-                </div>
-              </div>
-            );
-          })}
-
-
-
+                      <BlockExplanation block={block} hasCode={hasCode} />
+                    </div>
+                  </div>
+                );
+              })}
 
           {section.walkthrough &&
           (section.walkthrough.completed?.length ||
@@ -1256,10 +1319,6 @@ function SectionCard({
             </div>
           ) : null}
 
-
-
-
-
           {fixRounds(section.fix_notes).map((round, ri) => (
             <FixRoundCard
               key={`round-${round.at ?? ri}`}
@@ -1270,7 +1329,6 @@ function SectionCard({
               buildsCode={playbook.buildsCode}
             />
           ))}
-
 
           {generated && !isOverview ? (
             <div
@@ -1485,11 +1543,7 @@ function FixRoundCard({
                 ) : null}
                 {block.code?.trim() ? (
                   buildsCode ? (
-                    <CodeBlock
-                      code={block.code}
-                      language={language}
-                      filename={block.file}
-                    />
+                    <CodeBlock code={block.code} language={language} filename={block.file} />
                   ) : (
                     <DocSheet content={block.code} label={block.file ?? undefined} />
                   )

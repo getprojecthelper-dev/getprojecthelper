@@ -35,6 +35,7 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
+import { LiveCodeEditor, type EditorFile } from "@/components/live-code-editor";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
@@ -223,14 +224,19 @@ function BuildPage() {
   const fix = withMeter("fix_section", useServerFn(fixSectionError));
 
   const [openId, setOpenId] = useState<string | null>(null);
+  const [editor, setEditor] = useState<{ sectionId: string; path: string | null } | null>(null);
+  const [typeToken, setTypeToken] = useState(0);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: sectionsKey(projectId) });
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
-    onSuccess: (_r, sectionId) => {
-      void invalidate();
+    onMutate: (sectionId) => setEditor({ sectionId, path: null }),
+    onSuccess: async (_r, sectionId) => {
+      await invalidate();
       setOpenId(sectionId);
+      setEditor({ sectionId, path: null });
+      setTypeToken((t) => t + 1);
       toast.success("Section generated and reviewed.");
     },
     onError: (error: unknown) =>
@@ -284,7 +290,21 @@ function BuildPage() {
     return map;
   }, [sections, playbook.buildsCode]);
 
-  
+  const editorSection = sections.find((s) => s.id === editor?.sectionId) ?? null;
+  const editorFiles = useMemo<EditorFile[]>(() => {
+    if (!editorSection) return [];
+    const list: EditorFile[] = editorSection.blocks
+      .filter((b) => b.code?.trim())
+      .map((b, i) => ({ path: b.file?.trim() || b.title || `part-${i + 1}`, code: b.code ?? "" }));
+    if (!list.length && editorSection.code) list.push({ path: "code", code: editorSection.code });
+    // same file in several parts: keep each part as its own tab
+    const seen = new Map<string, number>();
+    return list.map((f) => {
+      const n = (seen.get(f.path) ?? 0) + 1;
+      seen.set(f.path, n);
+      return n > 1 ? { ...f, path: `${f.path} (part ${n})` } : f;
+    });
+  }, [editorSection]);
 
   if (isPending) {
     return (
@@ -294,8 +314,8 @@ function BuildPage() {
     );
   }
 
-  return (
-    <div className="space-y-4">
+  const content = (
+    <div className="min-w-0 space-y-4">
       <PageHeader
         title={playbook.headline}
         description={playbook.subhead}
@@ -373,6 +393,11 @@ function BuildPage() {
             fixToken={fixTokens[section.id] ?? 0}
             fileOrigins={fileOrigins}
             onConfirm={() => confirmMutation.mutate(section.id)}
+            onOpenFile={
+              playbook.buildsCode
+                ? (file) => setEditor({ sectionId: section.id, path: file })
+                : undefined
+            }
           />
         );
       })}
@@ -382,6 +407,26 @@ function BuildPage() {
           This project has no generated implementation plan yet.
         </div>
       ) : null}
+    </div>
+  );
+
+  if (!playbook.buildsCode) return content;
+
+  // code projects: roadmap on the left, live editor on the right
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {content}
+      <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:self-start">
+        <LiveCodeEditor
+          title={editorSection?.title ?? null}
+          files={editorFiles}
+          activePath={editor?.path ?? null}
+          onSelect={(path) => setEditor((e) => (e ? { ...e, path } : e))}
+          language={editorSection?.language}
+          generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
+          typeToken={typeToken}
+        />
+      </aside>
     </div>
   );
 }
@@ -902,7 +947,9 @@ function SectionCard({
   onFix,
   onConfirm,
   fileOrigins,
+  onOpenFile,
 }: {
+  onOpenFile?: ((file: string) => void) | undefined;
   section: BuildSection;
   playbook: DomainPlaybook;
   index: number;
@@ -1176,6 +1223,19 @@ function SectionCard({
                           notebook={notebookName(blockFile ?? "")}
                           index={notebookCellIndex(blockFile) ?? i + 1}
                         />
+                      ) : onOpenFile ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => {
+                            const path = blockFile || block.title || `part-${i + 1}`;
+                            const n = blocks.slice(0, i).filter((b) => b.code?.trim() && (b.file?.trim() || b.title) === path).length;
+                            onOpenFile(n ? `${path} (part ${n + 1})` : path);
+                          }}
+                        >
+                          <Code2 className="h-4 w-4" /> Open in code editor
+                        </Button>
                       ) : (
                         <CodeBlock
                           code={block.code}

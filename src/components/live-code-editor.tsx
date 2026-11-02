@@ -34,6 +34,36 @@ export function LiveCodeEditor({
   if (treePaths?.length && !files.length) {
     return <FileExplorer title={title} paths={treePaths} typeToken={typeToken} />;
   }
+  return (
+    <CodeView
+      title={title}
+      files={files}
+      activePath={activePath}
+      onSelect={onSelect}
+      language={language}
+      generating={generating}
+      typeToken={typeToken}
+    />
+  );
+}
+
+function CodeView({
+  title,
+  files,
+  activePath,
+  onSelect,
+  language,
+  generating,
+  typeToken,
+}: {
+  title: string | null;
+  files: EditorFile[];
+  activePath: string | null;
+  onSelect: (path: string) => void;
+  language?: string | undefined;
+  generating: boolean;
+  typeToken: number;
+}) {
   const active = files.find((f) => f.path === activePath) ?? files[0] ?? null;
   const code = active?.code ?? "";
 

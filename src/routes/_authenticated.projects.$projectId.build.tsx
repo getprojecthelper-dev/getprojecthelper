@@ -9,6 +9,7 @@ import {
   Database,
   Download,
   ExternalLink,
+  Code2,
   FileCode2,
   FileSpreadsheet,
 

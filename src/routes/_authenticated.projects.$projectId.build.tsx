@@ -386,7 +386,10 @@ function BuildPage() {
             index={index}
             locked={locked}
             open={openId === section.id}
-            onToggle={() => setOpenId((v) => (v === section.id ? null : section.id))}
+            onToggle={() => {
+              setOpenId((v) => (v === section.id ? null : section.id));
+              if (openId !== section.id) setEditor({ sectionId: section.id, path: null });
+            }}
             generating={generateMutation.isPending && generateMutation.variables === section.id}
             fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
             onGenerate={() => generateMutation.mutate(section.id)}

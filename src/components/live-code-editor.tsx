@@ -1,4 +1,4 @@
-import { ChevronDown, Code2, FileCode, Loader2 } from "lucide-react";
+import { ChevronDown, Code2, FileCode, Folder, FolderOpen, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { CodeBlock } from "@/components/code-block";
@@ -194,12 +194,20 @@ function toRows(paths: string[]): Row[] {
   return rows;
 }
 
+// small colour hint per file type, like VS Code icons
+function fileTone(name: string) {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (["py", "ipynb"].includes(ext)) return "text-primary";
+  if (["ts", "tsx", "js", "jsx", "json"].includes(ext)) return "text-accent-foreground";
+  if (["md", "txt"].includes(ext)) return "text-muted-foreground";
+  return "text-muted-foreground";
+}
+
 function FileExplorer({
   title,
   paths,
   typeToken,
   codeFor,
-  language,
 }: {
   title: string | null;
   paths: string[];
@@ -208,10 +216,20 @@ function FileExplorer({
   language?: string | undefined;
 }) {
   const rows = toRows(paths);
+  const firstFile = rows.find((r) => !r.folder)?.key ?? null;
   const [shown, setShown] = useState(rows.length);
   const [closed, setClosed] = useState<Set<string>>(new Set());
+  const [tabs, setTabs] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const lastToken = useRef(0);
+
+  // open the first file by default so the editor is never blank
+  const pathsKey = paths.join("|");
+  useEffect(() => {
+    setSelected(firstFile);
+    setTabs(firstFile ? [firstFile] : []);
+    setClosed(new Set());
+  }, [pathsKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (typeToken === 0 || lastToken.current === typeToken) {
@@ -230,7 +248,6 @@ function FileExplorer({
     return () => window.clearInterval(id);
   }, [typeToken, rows.length]);
 
-  // hide rows inside a collapsed folder
   const visible = rows
     .slice(0, shown)
     .filter((r) => ![...closed].some((c) => r.key.startsWith(`${c}/`)));
@@ -243,11 +260,22 @@ function FileExplorer({
       return next;
     });
 
-  const selectedCode = selected ? (codeFor?.(selected) ?? "") : "";
+  const open = (key: string) => {
+    setSelected(key);
+    setTabs((t) => (t.includes(key) ? t : [...t, key]));
+  };
+  const closeTab = (key: string) => {
+    const rest = tabs.filter((t) => t !== key);
+    setTabs(rest);
+    if (selected === key) setSelected(rest[rest.length - 1] ?? null);
+  };
+
+  const lines = selected ? (codeFor?.(selected) ?? "").replace(/\s+$/, "").split("\n") : [];
+  const empty = lines.length === 1 && !lines[0];
 
   return (
     <div className="panel flex h-full min-h-[28rem] flex-col overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
         <Code2 className="h-4 w-4 text-primary" />
         <p className="min-w-0 flex-1 truncate font-display text-sm">Code editor{title ? ` — ${title}` : ""}</p>
         {shown < rows.length ? (
@@ -257,49 +285,101 @@ function FileExplorer({
         ) : null}
       </div>
       <div className="flex min-h-0 flex-1">
-        <div className="w-56 shrink-0 overflow-auto border-r border-border py-2 text-[13px]">
-          <p className="px-3 pb-2 text-xs font-semibold text-foreground">Files</p>
+        {/* explorer */}
+        <div className="w-52 shrink-0 overflow-auto border-r border-border bg-muted/30 py-2 text-[13px]">
+          <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Explorer
+          </p>
           {visible.map((row) => {
             const isOpen = !closed.has(row.key);
             return (
               <button
                 key={row.key}
                 type="button"
-                onClick={() => (row.folder ? toggle(row.key) : setSelected(row.key))}
+                title={row.key}
+                onClick={() => (row.folder ? toggle(row.key) : open(row.key))}
                 className={cn(
-                  "flex w-full items-center gap-1.5 py-1 pr-3 text-left animate-in fade-in slide-in-from-left-1 hover:bg-muted/60",
-                  selected === row.key && "bg-primary/15 text-primary",
+                  "flex w-full items-center gap-1.5 py-[3px] pr-3 text-left animate-in fade-in slide-in-from-left-1 hover:bg-muted",
+                  selected === row.key && "bg-primary/15 text-foreground",
                 )}
-                style={{ paddingLeft: 10 + row.depth * 14 }}
+                style={{ paddingLeft: 8 + row.depth * 12 }}
               >
                 {row.folder ? (
-                  <ChevronDown
-                    className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform", !isOpen && "-rotate-90")}
-                  />
+                  <>
+                    <ChevronDown
+                      className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform", !isOpen && "-rotate-90")}
+                    />
+                    {isOpen ? (
+                      <FolderOpen className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    ) : (
+                      <Folder className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    )}
+                  </>
                 ) : (
-                  <FileCode className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <FileCode className={cn("ml-5 h-3.5 w-3.5 shrink-0", fileTone(row.name))} />
                 )}
                 <span className="truncate">{row.name}</span>
               </button>
             );
           })}
         </div>
-        <div className="min-w-0 flex-1 overflow-auto p-3">
+
+        {/* editor */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {tabs.length ? (
+            <div className="flex overflow-x-auto border-b border-border bg-muted/30">
+              {tabs.map((t) => (
+                <div
+                  key={t}
+                  className={cn(
+                    "group flex shrink-0 items-center gap-1.5 border-r border-border px-3 py-1.5 font-mono text-xs",
+                    t === selected ? "bg-card text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  <button type="button" onClick={() => setSelected(t)} className="flex items-center gap-1.5">
+                    <FileCode className={cn("h-3.5 w-3.5", fileTone(t))} />
+                    {t.split("/").pop()}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Close ${t}`}
+                    onClick={() => closeTab(t)}
+                    className="rounded opacity-60 hover:bg-muted hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
           {selected ? (
-            selectedCode.trim() ? (
-              <CodeBlock code={selectedCode} language={language} filename={selected} />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <p className="border-b border-border px-3 py-1 font-mono text-[11px] text-muted-foreground">
+              {selected.split("/").join(" › ")}
+            </p>
+          ) : null}
+          <div className="min-h-0 flex-1 overflow-auto bg-card">
+            {!selected ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Click a file to open it.
+              </div>
+            ) : empty ? (
+              <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm text-muted-foreground">
                 <FileCode className="h-6 w-6" />
-                <p className="font-mono text-foreground">{selected}</p>
                 This file is empty for now. Its code is added in a later step.
               </div>
-            )
-          ) : (
-            <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
-              Click a file to open it.
-            </div>
-          )}
+            ) : (
+              <table className="w-full border-collapse font-mono text-[12.5px] leading-5">
+                <tbody>
+                  {lines.map((line, i) => (
+                    <tr key={i} className="hover:bg-muted/40">
+                      <td className="w-10 select-none pr-3 text-right align-top text-muted-foreground/60">{i + 1}</td>
+                      <td className="whitespace-pre pr-4 text-foreground">{line || " "}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -321,6 +401,10 @@ export function pathsFromTree(tree: string): string[] {
     const path = stack.filter(Boolean).join("/") + (name.endsWith("/") ? "/" : "");
     out.push(path);
   }
-  // a single top-level folder line (the project name) wraps everything
+  // a single top-level folder line (the project name) wraps everything: drop it
+  const root = out[0]?.endsWith("/") ? out[0] : null;
+  if (root && out.length > 1 && out.slice(1).every((p) => p.startsWith(root))) {
+    return out.slice(1).map((p) => p.slice(root.length));
+  }
   return out;
 }

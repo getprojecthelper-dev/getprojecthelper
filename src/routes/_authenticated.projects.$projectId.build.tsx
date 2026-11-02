@@ -429,13 +429,14 @@ function BuildPage() {
           language={editorSection?.language}
           generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
           typeToken={typeToken}
-          treePaths={
-            editorSection?.files.length
-              ? editorSection.files.map((f) => f.path).filter(Boolean)
-              : editorSection?.structure
-                ? pathsFromTree(editorSection.structure)
-                : undefined
-          }
+          treePaths={(() => {
+            // merge the structure diagram (keeps empty folders) with the real file list
+            const merged = [
+              ...(editorSection?.structure ? pathsFromTree(editorSection.structure) : []),
+              ...(editorSection?.files ?? []).map((f) => f.path).filter(Boolean),
+            ];
+            return merged.length ? [...new Set(merged)] : undefined;
+          })()}
           codeFor={(path) => {
             // gather this file's code from every generated step, in order
             const norm = (p: string) => p.replace(/^\.?\//, "");

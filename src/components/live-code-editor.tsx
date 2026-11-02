@@ -31,7 +31,7 @@ export function LiveCodeEditor({ projectId, projectName, activePath, generating,
     const path = entries.find((e) => e.type === "file" && e.path === requested)?.path;
     if (path) open(path);
     else if (!selected) { const first = entries.find((e) => e.type === "file"); if (first) open(first.path); }
-  }, [activePath, entries, selected]);
+  }, [activePath, entries]);
   const active = entries.find((e) => e.path === selected && e.type === "file");
   const content = active ? drafts[active.path] ?? active.content : "";
   const dirty = active ? content !== active.content : false;

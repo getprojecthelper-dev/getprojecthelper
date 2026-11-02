@@ -292,7 +292,7 @@ function BuildPage() {
     return map;
   }, [sections, playbook.buildsCode]);
 
-  const editorSection = sections.find((s) => s.id === editor?.sectionId) ?? null;
+  const editorSection = sections.find((s) => s.id === editor?.sectionId) ?? sections.find((s) => s.kind === "structure" && s.status !== "pending") ?? null;
 
   if (isPending) {
     return (

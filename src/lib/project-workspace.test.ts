@@ -20,6 +20,10 @@ describe("generated workspace", () => {
     const entries = collectWorkspace([{ position: 1, files: [{ path: "app.py", content: "print(1)" }] }, { position: 2, files: [{ path: "app.py", content: "print(2)" }], blocks: [{ file: "app.py", code: "print(2)" }] }]);
     expect(entries[0]?.content).toBe("print(2)");
   });
+  it("does not create explanatory tree labels or block group names as files", () => {
+    const entries = collectWorkspace([{ position: 1, structure: "project/\n├── data/\n│   └── raw/\n│       └── (download CSV here)\n└── app.py", files: [{ path: "app.py", content: "print('ready')" }], blocks: [{ file: "terminal", action: "run", code: "mkdir data" }] }]);
+    expect(entries.map((e) => e.path)).toEqual(["app.py", "data", "data/raw"]);
+  });
   it("rejects traversal and absolute paths", () => {
     expect(() => workspacePath("../secret")).toThrow();
     expect(() => workspacePath("/etc/config")).toThrow();

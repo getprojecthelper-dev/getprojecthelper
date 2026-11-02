@@ -1,4 +1,4 @@
-import { ChevronDown, Code2, FileCode, Folder, Loader2 } from "lucide-react";
+import { ChevronDown, Code2, FileCode, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { CodeBlock } from "@/components/code-block";
@@ -19,6 +19,7 @@ export function LiveCodeEditor({
   generating,
   typeToken,
   treePaths,
+  codeFor,
 }: {
   title: string | null;
   files: EditorFile[];
@@ -30,9 +31,10 @@ export function LiveCodeEditor({
   typeToken: number;
   /** Paths from a "create project files" step: shown as a VS Code-style explorer. */
   treePaths?: string[] | undefined;
+  codeFor?: ((path: string) => string) | undefined;
 }) {
   if (treePaths?.length && !files.length) {
-    return <FileExplorer title={title} paths={treePaths} typeToken={typeToken} />;
+    return <FileExplorer title={title} paths={treePaths} typeToken={typeToken} codeFor={codeFor} language={language} />;
   }
   return (
     <CodeView
@@ -183,7 +185,7 @@ function toRows(paths: string[]): Row[] {
     [...node.children.entries()]
       .sort(([a, x], [b, y]) => Number(y.folder) - Number(x.folder) || a.localeCompare(b))
       .forEach(([name, child]) => {
-        const key = `${prefix}/${name}`;
+        const key = prefix ? `${prefix}/${name}` : name;
         rows.push({ name, depth, folder: child.folder, key });
         walk(child, depth + 1, key);
       });
@@ -192,9 +194,23 @@ function toRows(paths: string[]): Row[] {
   return rows;
 }
 
-function FileExplorer({ title, paths, typeToken }: { title: string | null; paths: string[]; typeToken: number }) {
+function FileExplorer({
+  title,
+  paths,
+  typeToken,
+  codeFor,
+  language,
+}: {
+  title: string | null;
+  paths: string[];
+  typeToken: number;
+  codeFor?: ((path: string) => string) | undefined;
+  language?: string | undefined;
+}) {
   const rows = toRows(paths);
   const [shown, setShown] = useState(rows.length);
+  const [closed, setClosed] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<string | null>(null);
   const lastToken = useRef(0);
 
   useEffect(() => {
@@ -214,41 +230,77 @@ function FileExplorer({ title, paths, typeToken }: { title: string | null; paths
     return () => window.clearInterval(id);
   }, [typeToken, rows.length]);
 
+  // hide rows inside a collapsed folder
+  const visible = rows
+    .slice(0, shown)
+    .filter((r) => ![...closed].some((c) => r.key.startsWith(`${c}/`)));
+
+  const toggle = (key: string) =>
+    setClosed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const selectedCode = selected ? (codeFor?.(selected) ?? "") : "";
+
   return (
     <div className="panel flex h-full min-h-[28rem] flex-col overflow-hidden">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Code2 className="h-4 w-4 text-primary" />
-        <p className="min-w-0 flex-1 truncate font-display text-sm">Explorer{title ? ` — ${title}` : ""}</p>
+        <p className="min-w-0 flex-1 truncate font-display text-sm">Code editor{title ? ` — ${title}` : ""}</p>
         {shown < rows.length ? (
           <span className="flex items-center gap-1.5 text-xs text-primary">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Creating files…
           </span>
-        ) : (
-          <span className="text-xs text-muted-foreground">{paths.length} items</span>
-        )}
+        ) : null}
       </div>
-      <div className="flex-1 overflow-auto py-2 font-mono text-[13px]">
-        {rows.slice(0, shown).map((row, i) => (
-          <div
-            key={row.key}
-            className="flex items-center gap-1.5 py-0.5 pr-3 hover:bg-muted/50 animate-in fade-in slide-in-from-left-1"
-            style={{ paddingLeft: 12 + row.depth * 16 }}
-          >
-            <span className="w-7 shrink-0 select-none text-right text-[11px] text-muted-foreground">{i + 1}</span>
-            {row.folder ? (
-              <>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                <Folder className="h-4 w-4 text-primary" />
-              </>
+      <div className="flex min-h-0 flex-1">
+        <div className="w-56 shrink-0 overflow-auto border-r border-border py-2 text-[13px]">
+          <p className="px-3 pb-2 text-xs font-semibold text-foreground">Files</p>
+          {visible.map((row) => {
+            const isOpen = !closed.has(row.key);
+            return (
+              <button
+                key={row.key}
+                type="button"
+                onClick={() => (row.folder ? toggle(row.key) : setSelected(row.key))}
+                className={cn(
+                  "flex w-full items-center gap-1.5 py-1 pr-3 text-left animate-in fade-in slide-in-from-left-1 hover:bg-muted/60",
+                  selected === row.key && "bg-primary/15 text-primary",
+                )}
+                style={{ paddingLeft: 10 + row.depth * 14 }}
+              >
+                {row.folder ? (
+                  <ChevronDown
+                    className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform", !isOpen && "-rotate-90")}
+                  />
+                ) : (
+                  <FileCode className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                )}
+                <span className="truncate">{row.name}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="min-w-0 flex-1 overflow-auto p-3">
+          {selected ? (
+            selectedCode.trim() ? (
+              <CodeBlock code={selectedCode} language={language} filename={selected} />
             ) : (
-              <>
-                <span className="w-3.5" />
-                <FileCode className="h-4 w-4 text-muted-foreground" />
-              </>
-            )}
-            <span className={row.folder ? "text-foreground" : "text-card-foreground"}>{row.name}</span>
-          </div>
-        ))}
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+                <FileCode className="h-6 w-6" />
+                <p className="font-mono text-foreground">{selected}</p>
+                This file is empty for now. Its code is added in a later step.
+              </div>
+            )
+          ) : (
+            <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
+              Click a file to open it.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -427,6 +427,15 @@ function BuildPage() {
           generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
           typeToken={typeToken}
           treePaths={editorSection?.files.map((f) => f.path).filter(Boolean)}
+          codeFor={(path) => {
+            // gather this file's code from every generated step, in order
+            const norm = (p: string) => p.replace(/^\.?\//, "");
+            return sections
+              .flatMap((s) => s.blocks)
+              .filter((b) => b.code?.trim() && norm(b.file?.trim() ?? "") === norm(path))
+              .map((b) => b.code)
+              .join("\n\n");
+          }}
         />
       </aside>
     </div>

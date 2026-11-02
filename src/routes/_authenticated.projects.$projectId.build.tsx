@@ -36,7 +36,7 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
-import { LiveCodeEditor, type EditorFile } from "@/components/live-code-editor";
+import { LiveCodeEditor, pathsFromTree, type EditorFile } from "@/components/live-code-editor";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
@@ -426,7 +426,13 @@ function BuildPage() {
           language={editorSection?.language}
           generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
           typeToken={typeToken}
-          treePaths={editorSection?.files.map((f) => f.path).filter(Boolean)}
+          treePaths={
+            editorSection?.files.length
+              ? editorSection.files.map((f) => f.path).filter(Boolean)
+              : editorSection?.structure
+                ? pathsFromTree(editorSection.structure)
+                : undefined
+          }
           codeFor={(path) => {
             // gather this file's code from every generated step, in order
             const norm = (p: string) => p.replace(/^\.?\//, "");

@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Persist actual generated project files and folders without overwriting saved edits.
+- [ ] Connect the complete Explorer, Monaco editor, file tabs, saving, and separate terminal.
+- [ ] Verify generation, file opening, editing, and restoration in a signed-in project.
+
 - [x] Audit files, remove the obsolete dependency lockfile and disposable compilation cache, and preserve user data and required files.
 - [x] Fix and verify previous-page navigation with a safe direct-entry fallback.
 

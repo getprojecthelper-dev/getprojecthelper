@@ -36,7 +36,8 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
-import { LiveCodeEditor, mergeTreePaths, pathsFromTree, type EditorFile } from "@/components/live-code-editor";
+import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
+import { isTerminalBlock } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
@@ -226,9 +227,9 @@ function BuildPage() {
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [editor, setEditor] = useState<{ sectionId: string; path: string | null } | null>(null);
-  const [typeToken, setTypeToken] = useState(0);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: sectionsKey(projectId) });
+
+  const invalidate = () => Promise.all([qc.invalidateQueries({ queryKey: sectionsKey(projectId) }), qc.invalidateQueries({ queryKey: workspaceKey(projectId) })]);
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
@@ -237,7 +238,7 @@ function BuildPage() {
       await invalidate();
       setOpenId(sectionId);
       setEditor({ sectionId, path: null });
-      setTypeToken((t) => t + 1);
+
       toast.success("Section generated and reviewed.");
     },
     onError: (error: unknown) =>
@@ -292,20 +293,6 @@ function BuildPage() {
   }, [sections, playbook.buildsCode]);
 
   const editorSection = sections.find((s) => s.id === editor?.sectionId) ?? null;
-  const editorFiles = useMemo<EditorFile[]>(() => {
-    if (!editorSection) return [];
-    const list: EditorFile[] = editorSection.blocks
-      .filter((b) => b.code?.trim())
-      .map((b, i) => ({ path: b.file?.trim() || b.title || `part-${i + 1}`, code: b.code ?? "" }));
-    if (!list.length && editorSection.code) list.push({ path: "code", code: editorSection.code });
-    // same file in several parts: keep each part as its own tab
-    const seen = new Map<string, number>();
-    return list.map((f) => {
-      const n = (seen.get(f.path) ?? 0) + 1;
-      seen.set(f.path, n);
-      return n > 1 ? { ...f, path: `${f.path} (part ${n})` } : f;
-    });
-  }, [editorSection]);
 
   if (isPending) {
     return (
@@ -418,33 +405,16 @@ function BuildPage() {
 
   // code projects: roadmap on the left, live editor on the right
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       {content}
-      <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:self-start">
+      <aside className="h-[42rem] min-w-0 md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:min-h-[36rem] md:self-start">
         <LiveCodeEditor
-          title={editorSection?.title ?? null}
-          files={editorFiles}
+          key={projectId}
+          projectId={projectId}
+          projectName={meta?.name ?? "Project"}
           activePath={editor?.path ?? null}
-          onSelect={(path) => setEditor((e) => (e ? { ...e, path } : e))}
-          language={editorSection?.language}
-          generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
-          typeToken={typeToken}
-          treePaths={(() => {
-            const merged = mergeTreePaths(
-              editorSection?.structure ? pathsFromTree(editorSection.structure) : [],
-              (editorSection?.files ?? []).map((f) => f.path).filter(Boolean),
-            );
-            return merged.length ? merged : undefined;
-          })()}
-          codeFor={(path) => {
-            // gather this file's code from every generated step, in order
-            const norm = (p: string) => p.replace(/^\.?\//, "");
-            return sections
-              .flatMap((s) => s.blocks)
-              .filter((b) => b.code?.trim() && norm(b.file?.trim() ?? "") === norm(path))
-              .map((b) => b.code)
-              .join("\n\n");
-          }}
+          generating={generateMutation.isPending}
+          terminal={(editorSection?.blocks ?? []).filter(isTerminalBlock).map((b) => b.code).join("\n\n")}
         />
       </aside>
     </div>

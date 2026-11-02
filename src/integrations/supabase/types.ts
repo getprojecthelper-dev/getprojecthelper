@@ -624,6 +624,50 @@ export type Database = {
           },
         ]
       }
+      project_workspace_entries: {
+        Row: {
+          content: string
+          edited: boolean
+          generated_content: string
+          name: string
+          path: string
+          project_id: string
+          revision: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          edited?: boolean
+          generated_content?: string
+          name: string
+          path: string
+          project_id: string
+          revision?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          edited?: boolean
+          generated_content?: string
+          name?: string
+          path?: string
+          project_id?: string
+          revision?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_workspace_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           academic_level: string | null
@@ -1420,6 +1464,10 @@ export type Database = {
       hold_credits: {
         Args: { _amount: number; _feature: string; _user_id: string }
         Returns: string
+      }
+      merge_project_workspace: {
+        Args: { _entries: Json; _project_id: string }
+        Returns: undefined
       }
       plan_project_limit: { Args: { _plan: string }; Returns: number }
       redeem_referral_code: { Args: { _code: string }; Returns: number }

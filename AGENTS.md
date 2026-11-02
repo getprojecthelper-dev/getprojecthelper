@@ -14,3 +14,5 @@
 - Workspace Back uses router-tracked browser history and falls back to Welcome on direct entry; disable it at the history root on Welcome to avoid no-op clicks and navigation outside the app.
 - Use Bun and `bun.lock` as the sole dependency lockfile; a stale npm lockfile can install a different, incomplete dependency graph.
 - Subscription plans live in `src/lib/plans.ts`; each paid plan bill resets the credit balance via the `reset_plan_credits` DB function, and a DB trigger enforces active-project limits so every creation path is covered.
+- Project workspace entries persist separately from teaching steps; generation merges complete files atomically without replacing user edits, and file saves use owner checks plus revision matching to prevent lost changes.
+- Load bundled Monaco only after hydration through the lazy editor module so server rendering never imports browser-only editor code or depends on a CDN.

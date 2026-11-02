@@ -36,7 +36,7 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
-import { LiveCodeEditor, pathsFromTree, type EditorFile } from "@/components/live-code-editor";
+import { LiveCodeEditor, mergeTreePaths, pathsFromTree, type EditorFile } from "@/components/live-code-editor";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
@@ -430,12 +430,11 @@ function BuildPage() {
           generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
           typeToken={typeToken}
           treePaths={(() => {
-            // merge the structure diagram (keeps empty folders) with the real file list
-            const merged = [
-              ...(editorSection?.structure ? pathsFromTree(editorSection.structure) : []),
-              ...(editorSection?.files ?? []).map((f) => f.path).filter(Boolean),
-            ];
-            return merged.length ? [...new Set(merged)] : undefined;
+            const merged = mergeTreePaths(
+              editorSection?.structure ? pathsFromTree(editorSection.structure) : [],
+              (editorSection?.files ?? []).map((f) => f.path).filter(Boolean),
+            );
+            return merged.length ? merged : undefined;
           })()}
           codeFor={(path) => {
             // gather this file's code from every generated step, in order

@@ -401,10 +401,16 @@ export function pathsFromTree(tree: string): string[] {
     const path = stack.filter(Boolean).join("/") + (name.endsWith("/") ? "/" : "");
     out.push(path);
   }
-  // a single top-level folder line (the project name) wraps everything: drop it
-  const root = out[0]?.endsWith("/") ? out[0] : null;
-  if (root && out.length > 1 && out.slice(1).every((p) => p.startsWith(root))) {
-    return out.slice(1).map((p) => p.slice(root.length));
-  }
   return out;
+}
+
+/** Merge diagram paths (keeps empty folders) with real file paths, without duplicating a root folder. */
+export function mergeTreePaths(treePaths: string[], filePaths: string[]): string[] {
+  const root = treePaths[0]?.endsWith("/") ? treePaths[0] : null;
+  const wrapped = root && treePaths.slice(1).every((p) => p.startsWith(root));
+  const files = filePaths.map((p) => p.replace(/^\.?\//, ""));
+  // file list written without the project folder: put it under that folder too
+  const fixed =
+    wrapped && files.length && !files.some((p) => p.startsWith(root)) ? files.map((p) => root + p) : files;
+  return [...new Set([...treePaths, ...fixed])];
 }

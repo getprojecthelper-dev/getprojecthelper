@@ -1,4 +1,4 @@
-import { Code2, FileCode, Loader2 } from "lucide-react";
+import { ChevronDown, Code2, FileCode, Folder, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { CodeBlock } from "@/components/code-block";
@@ -18,6 +18,7 @@ export function LiveCodeEditor({
   language,
   generating,
   typeToken,
+  treePaths,
 }: {
   title: string | null;
   files: EditorFile[];
@@ -27,7 +28,12 @@ export function LiveCodeEditor({
   generating: boolean;
   /** Changes after each fresh generation; files not yet shown for it get typed in. */
   typeToken: number;
+  /** Paths from a "create project files" step: shown as a VS Code-style explorer. */
+  treePaths?: string[] | undefined;
 }) {
+  if (treePaths?.length && !files.length) {
+    return <FileExplorer title={title} paths={treePaths} typeToken={typeToken} />;
+  }
   const active = files.find((f) => f.path === activePath) ?? files[0] ?? null;
   const code = active?.code ?? "";
 
@@ -117,6 +123,102 @@ export function LiveCodeEditor({
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+type Row = { name: string; depth: number; folder: boolean; key: string };
+
+// turn ["src/app.py", "data/raw/"] into sorted explorer rows, folders first
+function toRows(paths: string[]): Row[] {
+  type Node = { children: Map<string, Node>; folder: boolean };
+  const root: Node = { children: new Map(), folder: true };
+  for (const raw of paths) {
+    const clean = raw.replace(/^\.?\//, "");
+    const parts = clean.split("/").filter(Boolean);
+    let node = root;
+    parts.forEach((part, i) => {
+      const folder = i < parts.length - 1 || clean.endsWith("/");
+      let next = node.children.get(part);
+      if (!next) {
+        next = { children: new Map(), folder };
+        node.children.set(part, next);
+      } else if (folder) next.folder = true;
+      node = next;
+    });
+  }
+  const rows: Row[] = [];
+  const walk = (node: Node, depth: number, prefix: string) => {
+    [...node.children.entries()]
+      .sort(([a, x], [b, y]) => Number(y.folder) - Number(x.folder) || a.localeCompare(b))
+      .forEach(([name, child]) => {
+        const key = `${prefix}/${name}`;
+        rows.push({ name, depth, folder: child.folder, key });
+        walk(child, depth + 1, key);
+      });
+  };
+  walk(root, 0, "");
+  return rows;
+}
+
+function FileExplorer({ title, paths, typeToken }: { title: string | null; paths: string[]; typeToken: number }) {
+  const rows = toRows(paths);
+  const [shown, setShown] = useState(rows.length);
+  const lastToken = useRef(0);
+
+  useEffect(() => {
+    if (typeToken === 0 || lastToken.current === typeToken) {
+      setShown(rows.length);
+      return;
+    }
+    lastToken.current = typeToken;
+    // add one file/folder at a time, like they are being created
+    let n = 0;
+    setShown(0);
+    const id = window.setInterval(() => {
+      n += 1;
+      setShown(n);
+      if (n >= rows.length) window.clearInterval(id);
+    }, 120);
+    return () => window.clearInterval(id);
+  }, [typeToken, rows.length]);
+
+  return (
+    <div className="panel flex h-full min-h-[28rem] flex-col overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <Code2 className="h-4 w-4 text-primary" />
+        <p className="min-w-0 flex-1 truncate font-display text-sm">Explorer{title ? ` — ${title}` : ""}</p>
+        {shown < rows.length ? (
+          <span className="flex items-center gap-1.5 text-xs text-primary">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Creating files…
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">{paths.length} items</span>
+        )}
+      </div>
+      <div className="flex-1 overflow-auto py-2 font-mono text-[13px]">
+        {rows.slice(0, shown).map((row, i) => (
+          <div
+            key={row.key}
+            className="flex items-center gap-1.5 py-0.5 pr-3 hover:bg-muted/50 animate-in fade-in slide-in-from-left-1"
+            style={{ paddingLeft: 12 + row.depth * 16 }}
+          >
+            <span className="w-7 shrink-0 select-none text-right text-[11px] text-muted-foreground">{i + 1}</span>
+            {row.folder ? (
+              <>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <Folder className="h-4 w-4 text-primary" />
+              </>
+            ) : (
+              <>
+                <span className="w-3.5" />
+                <FileCode className="h-4 w-4 text-muted-foreground" />
+              </>
+            )}
+            <span className={row.folder ? "text-foreground" : "text-card-foreground"}>{row.name}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

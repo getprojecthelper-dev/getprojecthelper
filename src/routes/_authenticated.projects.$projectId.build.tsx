@@ -426,6 +426,7 @@ function BuildPage() {
           language={editorSection?.language}
           generating={generateMutation.isPending && generateMutation.variables === editor?.sectionId}
           typeToken={typeToken}
+          treePaths={editorSection?.files.map((f) => f.path).filter(Boolean)}
         />
       </aside>
     </div>

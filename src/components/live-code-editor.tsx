@@ -33,7 +33,7 @@ export function LiveCodeEditor({
   treePaths?: string[] | undefined;
   codeFor?: ((path: string) => string) | undefined;
 }) {
-  if (treePaths?.length && !files.length) {
+  if (treePaths?.length) {
     return <FileExplorer title={title} paths={treePaths} typeToken={typeToken} codeFor={codeFor} language={language} />;
   }
   return (
@@ -304,4 +304,23 @@ function FileExplorer({
       </div>
     </div>
   );
+}
+
+/** Parse an ASCII tree ("├── src/", "│   └── app.py") into relative paths. */
+export function pathsFromTree(tree: string): string[] {
+  const out: string[] = [];
+  const stack: string[] = [];
+  for (const raw of tree.split("\n")) {
+    const m = raw.match(/^([\s│|]*)(?:[├└`]──|[├└]─|[+\\|]--)?\s*(.+?)\s*(?:#.*)?$/);
+    if (!m || !m[2]) continue;
+    const name = m[2].trim();
+    if (!name || /^[│|]+$/.test(name)) continue;
+    const depth = Math.round(m[1]!.replace(/│|\|/g, " ").length / 4) + (/[├└`+\\]/.test(raw) ? 1 : 0);
+    stack.length = depth;
+    stack[depth] = name.replace(/\/$/, "");
+    const path = stack.filter(Boolean).join("/") + (name.endsWith("/") ? "/" : "");
+    out.push(path);
+  }
+  // a single top-level folder line (the project name) wraps everything
+  return out;
 }

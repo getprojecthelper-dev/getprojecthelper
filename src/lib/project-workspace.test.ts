@@ -47,3 +47,13 @@ describe("generated workspace", () => {
     expect(() => workspacePath("src/../../config")).toThrow();
   });
 });
+import { notebookToPython, pythonToNotebook } from "./project-workspace";
+test("notebook shows as Python and round-trips", () => {
+  const nb = JSON.stringify({ cells: [{ cell_type: "markdown", source: ["# Title"] }, { cell_type: "code", source: ["import pandas as pd\n", "print(1)"] }], metadata: { k: 1 } });
+  const py = notebookToPython(nb);
+  expect(py).toBe("# %% [markdown]\n# # Title\n\n# %%\nimport pandas as pd\nprint(1)");
+  const back = JSON.parse(pythonToNotebook(py, nb));
+  expect(back.metadata).toEqual({ k: 1 });
+  expect(back.cells[1].source.join("")).toBe("import pandas as pd\nprint(1)");
+  expect(back.cells[0].source.join("")).toBe("# Title");
+});

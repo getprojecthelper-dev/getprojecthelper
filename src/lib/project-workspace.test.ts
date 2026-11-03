@@ -5,7 +5,19 @@ describe("generated workspace", () => {
   it("preserves every file's actual content and empty folders without duplicating the project root", () => {
     const entries = collectWorkspace([{ position: 1, structure: "project/\n├── data/\n│   └── raw/\n├── dashboard/\n│   └── app.py\n└── requirements.txt", files: [{ path: "dashboard/app.py", content: "import streamlit as st\nst.title('Analysis')" }, { path: "requirements.txt", content: "streamlit==1.41.0" }], blocks: [{ file: "terminal", action: "run", code: "mkdir data" }] }]);
     expect(entries.find((e) => e.path === "data/raw")?.type).toBe("directory");
-    expect(entries.find((e) => e.path === "dashboard/app.py")?.content).toBe("import streamlit as st\nst.title('Analysis')");
+    expect(entries.find((e) => e.path === "dashboard/app.py")?.content).toBe("");
+    expect(entries.find((e) => e.path === "requirements.txt")?.content).toBe("streamlit==1.41.0");
+  });
+
+  it("setup creates every planned file, with empty notebooks and no code", () => {
+    const entries = collectWorkspace([{ position: 1, structure: "proj/\n├── README.md\n├── notebooks/\n│   └── 02_explore_churn.ipynb\n└── src/\n    └── api.py", files: [{ path: "README.md", content: "# Churn" }] }]);
+    expect(entries.find((e) => e.path === "README.md")?.content).toBe("# Churn");
+    expect(entries.find((e) => e.path === "src/api.py")?.content).toBe("");
+    expect(JSON.parse(entries.find((e) => e.path === "notebooks/02_explore_churn.ipynb")!.content).cells).toHaveLength(0);
+  });
+
+  it("keeps the old structure checks", () => {
+    const entries = collectWorkspace([{ position: 1, structure: "project/\n├── data/\n│   └── raw/\n├── dashboard/\n│   └── app.py\n└── requirements.txt", files: [{ path: "dashboard/app.py", content: "x" }], blocks: [{ file: "terminal", action: "run", code: "mkdir data" }] }]);
     expect(entries.filter((e) => e.path.endsWith("app.py"))).toHaveLength(1);
     expect(entries.some((e) => e.path === "terminal")).toBe(false);
     expect(workspaceTree(entries).find((e) => e.path === "data")?.children[0]?.path).toBe("data/raw");

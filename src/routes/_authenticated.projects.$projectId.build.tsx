@@ -199,9 +199,38 @@ function useSections(projectId: string) {
   });
 }
 
+// Code projects fill the rest of the screen: the editor column stays put while the
+// roadmap scrolls inside its own column, so the editor never drifts.
+function useFillRemainingHeight() {
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!node) return;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const measure = () => {
+      if (!wide.matches) { setHeight(null); return; }
+      const top = node.getBoundingClientRect().top + window.scrollY;
+      const below = document.documentElement.scrollHeight - (top + node.offsetHeight);
+      setHeight(Math.max(320, Math.round(window.innerHeight - top - below)));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.body);
+    window.addEventListener("resize", measure);
+    wide.addEventListener("change", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      wide.removeEventListener("change", measure);
+    };
+  }, [node]);
+  return { ref: setNode, height };
+}
+
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
+  const { ref: workspaceRef, height: workspaceHeight } = useFillRemainingHeight();
   const { data: sections = [], isPending } = useSections(projectId);
 
   const { data: meta } = useQuery({
@@ -405,9 +434,13 @@ function BuildPage() {
 
   // code projects: roadmap on the left, live editor on the right
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-      {content}
-      <aside className="h-[42rem] min-w-0 md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:min-h-[36rem] md:self-start">
+    <div
+      ref={workspaceRef}
+      className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
+      style={workspaceHeight ? { height: workspaceHeight } : undefined}
+    >
+      <div className="min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-1">{content}</div>
+      <aside className="h-[42rem] min-w-0 md:h-full md:min-h-0">
         <LiveCodeEditor
           key={projectId}
           projectId={projectId}

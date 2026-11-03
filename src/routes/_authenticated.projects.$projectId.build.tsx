@@ -31,7 +31,7 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
@@ -199,9 +199,37 @@ function useSections(projectId: string) {
   });
 }
 
+// Code projects fill the rest of the screen: the editor column stays put while the
+// roadmap scrolls inside its own column, so the editor never drifts.
+function useFillRemainingHeight() {
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!node) return;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const measure = () => {
+      if (!wide.matches) { setHeight(null); return; }
+      const top = node.getBoundingClientRect().top + window.scrollY;
+      setHeight(Math.max(320, Math.round(window.innerHeight - top)));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.body);
+    window.addEventListener("resize", measure);
+    wide.addEventListener("change", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      wide.removeEventListener("change", measure);
+    };
+  }, [node]);
+  return { ref: setNode, height };
+}
+
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
+  const { ref: workspaceRef, height: workspaceHeight } = useFillRemainingHeight();
   const { data: sections = [], isPending } = useSections(projectId);
 
   const { data: meta } = useQuery({

@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://getprojecthelper.com/sitemap.xml
+Sitemap: https://www.getprojecthelper.com/sitemap.xml

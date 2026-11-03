@@ -544,6 +544,21 @@ async function loadContext(
     )
     .join("\n\n");
 
+  // The file-planning step must see the whole roadmap, otherwise it can only
+  // guess and falls back to generic names like "01_explore.ipynb".
+  let roadmap = "";
+  if (section.kind === "structure") {
+    const { data: upcoming } = await supabase
+      .from("build_sections")
+      .select("position,title,objective")
+      .eq("project_id", section.project_id)
+      .gt("position", section.position)
+      .order("position");
+    roadmap = ((upcoming ?? []) as SectionRow[])
+      .map((p) => `- Step ${p.position + 1}: ${p.title} — ${p.objective ?? ""}`)
+      .join("\n");
+  }
+
   const playbook = getPlaybook(project.domain as string | null);
 
   const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;

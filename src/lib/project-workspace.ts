@@ -15,6 +15,20 @@ export interface WorkspaceSection {
   fix_notes?: { rounds?: { fixed_blocks?: { part_number?: number; file?: string; code?: string; title?: string; action?: string }[] }[] } | null;
 }
 
+const SETUP_FILLED = /(^|\/)(readme(\.md|\.txt)?|requirements[\w-]*\.txt|package\.json)$/i;
+
+function looksLikeFile(path: string): boolean {
+  const name = path.split("/").at(-1) ?? "";
+  return /^[\w.@+-]+$/.test(name) && (/\.[\w]+$/.test(name) || /^(Dockerfile|Makefile|Procfile|LICENSE)$/i.test(name));
+}
+
+/** Setup content: README and dependencies keep their text; notebooks start empty but valid; others start blank. */
+export function starterContent(path: string, content: string): string {
+  if (SETUP_FILLED.test(path)) return content;
+  if (/\.ipynb$/i.test(path)) return JSON.stringify(buildNotebook([]), null, 2);
+  return "";
+}
+
 export function workspacePath(raw: string): string {
   const path = (/\.ipynb\b/i.test(raw) ? notebookPath(raw) : raw).trim().replace(/^\.\//, "").replace(/\/$/, "");
   if (!path || path.startsWith("/") || path.includes("\\") || path.split("/").some((p) => !p || p === ".." || p === ".")) {
@@ -74,14 +88,18 @@ export function collectWorkspace(sections: WorkspaceSection[]): WorkspaceEntry[]
     entries.set(path, { path, name: parts.at(-1) ?? path, type, content: content || existing?.content || "" });
   };
   for (const path of trees) {
-    // Diagrams can include explanatory labels; only files[] and blocks create files.
+    // Every folder and file in the plan exists up front; labels are stripped by structurePaths.
     if (path.endsWith("/")) put(path, "directory");
+    else if (looksLikeFile(path)) put(path, "file", starterContent(path, ""));
   }
   for (const section of [...sections].sort((a, b) => a.position - b.position)) {
     const complete = new Set<string>();
     for (const f of section.files ?? []) {
-      put(f.path, "file", f.content);
-      if (f.content.trim()) complete.add(normalize(f.path));
+      // The setup step only fills README and dependency files; steps fill the rest.
+      const content = section.structure ? starterContent(f.path, f.content) : f.content;
+      put(f.path, "file", content);
+      if (section.structure && !content.trim()) continue;
+      if (content.trim()) complete.add(normalize(f.path));
     }
     const blocks = [...(section.blocks ?? [])];
     for (const round of section.fix_notes?.rounds ?? []) {

@@ -210,7 +210,8 @@ function useFillRemainingHeight() {
     const measure = () => {
       if (!wide.matches) { setHeight(null); return; }
       const top = node.getBoundingClientRect().top + window.scrollY;
-      setHeight(Math.max(320, Math.round(window.innerHeight - top)));
+      const below = document.documentElement.scrollHeight - (top + node.offsetHeight);
+      setHeight(Math.max(320, Math.round(window.innerHeight - top - below)));
     };
     measure();
     const observer = new ResizeObserver(measure);

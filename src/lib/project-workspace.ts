@@ -47,16 +47,21 @@ export function structurePaths(tree: string): string[] {
   return result.map((p) => result.some((q) => q.startsWith(p.replace(/\/$/, "") + "/")) ? p.replace(/\/$/, "") + "/" : p);
 }
 
+/** Use the same project-root normalization for saved files and editor requests. */
+export function workspaceFilePath(raw: string, sections: WorkspaceSection[]): string {
+  const trees = sections.flatMap((s) => structurePaths(s.structure ?? ""));
+  const root = trees[0]?.endsWith("/") ? trees[0].replace(/\/$/, "") : null;
+  const path = workspacePath(raw);
+  return root && path.startsWith(root + "/") ? path.slice(root.length + 1) : path;
+}
+
 /** One shared source for the saved workspace and the implementation editor. */
 export function collectWorkspace(sections: WorkspaceSection[]): WorkspaceEntry[] {
   const entries = new Map<string, WorkspaceEntry>();
   const notebooks = new Map<string, Map<number, { title: string; code: string }>>();
   const trees = sections.flatMap((s) => structurePaths(s.structure ?? ""));
   const root = trees[0]?.endsWith("/") ? trees[0].replace(/\/$/, "") : null;
-  const normalize = (raw: string) => {
-    const p = workspacePath(raw);
-    return root && p.startsWith(root + "/") ? p.slice(root.length + 1) : p;
-  };
+  const normalize = (raw: string) => workspaceFilePath(raw, sections);
   const put = (raw: string, type: WorkspaceEntry["type"], content = "") => {
     const path = normalize(raw);
     if (path === root && type === "directory") return;

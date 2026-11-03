@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectWorkspace, workspacePath, workspaceTree } from "./project-workspace";
+import { collectWorkspace, workspaceFilePath, workspacePath, workspaceTree } from "./project-workspace";
 
 describe("generated workspace", () => {
   it("preserves every file's actual content and empty folders without duplicating the project root", () => {
@@ -23,6 +23,23 @@ describe("generated workspace", () => {
   it("does not create explanatory tree labels or block group names as files", () => {
     const entries = collectWorkspace([{ position: 1, structure: "project/\n├── data/\n│   └── raw/\n│       └── (download CSV here)\n└── app.py", files: [{ path: "app.py", content: "print('ready')" }], blocks: [{ file: "terminal", action: "run", code: "mkdir data" }] }]);
     expect(entries.map((e) => e.path)).toEqual(["app.py", "data", "data/raw"]);
+  });
+  it("opens all parts under the one saved file path, including the project root", () => {
+    const sections = [{ position: 1, structure: "project/\n└── src/\n    └── app.py", blocks: [{ file: "./project/src/app.py", code: "def main():" }, { file: "project/src/app.py", code: "    print('ready')" }] }];
+    const entries = collectWorkspace(sections);
+    for (const block of sections[0]?.blocks ?? []) {
+      const requested = workspaceFilePath(block.file, sections);
+      expect(requested).toBe("src/app.py");
+      expect(entries.find((e) => e.path === requested)?.content).toBe("def main():\n\n    print('ready')");
+    }
+    expect(entries.filter((e) => e.type === "file")).toHaveLength(1);
+  });
+  it("does not invent workspace files for unnamed code or terminal commands", () => {
+    const entries = collectWorkspace([{ position: 1, blocks: [{ title: "Example", code: "print('example')" }, { file: "terminal", code: "pip install pandas" }] }]);
+    expect(entries).toEqual([]);
+  });
+  it("normalizes notebook cell requests to the saved notebook", () => {
+    expect(workspaceFilePath("./project/notebooks/demo.ipynb — cell: 2", [{ position: 1, structure: "project/\n└── notebooks/" }])).toBe("notebooks/demo.ipynb");
   });
   it("rejects traversal and absolute paths", () => {
     expect(() => workspacePath("../secret")).toThrow();

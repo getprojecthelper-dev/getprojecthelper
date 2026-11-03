@@ -37,7 +37,7 @@ import { toast } from "sonner";
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
 import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
-import { isTerminalBlock } from "@/lib/project-workspace";
+import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { PageHeader } from "@/components/page-header";
@@ -386,7 +386,7 @@ function BuildPage() {
             onConfirm={() => confirmMutation.mutate(section.id)}
             onOpenFile={
               playbook.buildsCode
-                ? (file) => setEditor({ sectionId: section.id, path: file })
+                ? (file) => setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
                 : undefined
             }
           />
@@ -412,7 +412,7 @@ function BuildPage() {
           key={projectId}
           projectId={projectId}
           projectName={meta?.name ?? "Project"}
-          activePath={editor?.path ?? null}
+          activeFile={editor}
           generating={generateMutation.isPending}
           terminal={(editorSection?.blocks ?? []).filter(isTerminalBlock).map((b) => b.code).join("\n\n")}
         />
@@ -1213,16 +1213,12 @@ function SectionCard({
                           notebook={notebookName(blockFile ?? "")}
                           index={notebookCellIndex(blockFile) ?? i + 1}
                         />
-                      ) : onOpenFile ? (
+                      ) : onOpenFile && blockFile && !isTerminalBlock(block) ? (
                         <Button
                           variant="outline"
                           size="sm"
                           className="gap-2"
-                          onClick={() => {
-                            const path = blockFile || block.title || `part-${i + 1}`;
-                            const n = blocks.slice(0, i).filter((b) => b.code?.trim() && (b.file?.trim() || b.title) === path).length;
-                            onOpenFile(n ? `${path} (part ${n + 1})` : path);
-                          }}
+                          onClick={() => onOpenFile(blockFile)}
                         >
                           <Code2 className="h-4 w-4" /> Open in code editor
                         </Button>

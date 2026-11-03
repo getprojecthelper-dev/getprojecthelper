@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 const Monaco = lazy(() => import("@/components/workspace-monaco"));
 export const workspaceKey = (projectId: string) => ["project-workspace", projectId] as const;
 
-export function LiveCodeEditor({ projectId, projectName, activePath, generating, terminal }: {
-  projectId: string; projectName: string; activePath: string | null; generating: boolean; terminal: string;
+export function LiveCodeEditor({ projectId, projectName, activeFile, generating, terminal }: {
+  projectId: string; projectName: string; activeFile: { path: string | null } | null; generating: boolean; terminal: string;
 }) {
   const qc = useQueryClient();
   const load = useServerFn(loadProjectWorkspace);
@@ -27,11 +27,11 @@ export function LiveCodeEditor({ projectId, projectName, activePath, generating,
   const tree = useMemo(() => workspaceTree(entries.map((e) => ({ ...e, type: e.type === "directory" ? "directory" : "file" }))), [entries]);
   const open = (path: string) => { setSelected(path); setTabs((old) => old.includes(path) ? old : [...old, path]); };
   useEffect(() => {
-    const requested = activePath?.replace(/\s*[—–-]\s*cell\s*:\s*\d+.*$/i, "").replace(/^\.\//, "");
+    const requested = activeFile?.path;
     const path = entries.find((e) => e.type === "file" && e.path === requested)?.path;
     if (path) open(path);
     else if (!selected) { const first = entries.find((e) => e.type === "file"); if (first) open(first.path); }
-  }, [activePath, entries]);
+  }, [activeFile, entries]);
   const active = entries.find((e) => e.path === selected && e.type === "file");
   const content = active ? drafts[active.path] ?? active.content : "";
   const dirty = active ? content !== active.content : false;

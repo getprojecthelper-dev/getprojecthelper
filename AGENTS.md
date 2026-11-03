@@ -16,3 +16,4 @@
 - Subscription plans live in `src/lib/plans.ts`; each paid plan bill resets the credit balance via the `reset_plan_credits` DB function, and a DB trigger enforces active-project limits so every creation path is covered.
 - Project workspace entries persist separately from teaching steps; generation merges complete files atomically without replacing user edits, and file saves use owner checks plus revision matching to prevent lost changes.
 - Load bundled Monaco only after hydration through the lazy editor module so server rendering never imports browser-only editor code or depends on a CDN.
+- Resolve implementation file buttons with the same path normalization as workspace collection; unnamed and terminal blocks stay inline because they have no saved file, and each click is a new editor request so repeated opens work.

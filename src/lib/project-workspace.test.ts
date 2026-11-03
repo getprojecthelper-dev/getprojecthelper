@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectWorkspace, workspaceFilePath, workspacePath, workspaceTree } from "./project-workspace";
+import { collectWorkspace, workspaceFilePath, workspacePath, workspaceTree, notebookToPython, pythonToNotebook } from "./project-workspace";
 
 describe("generated workspace", () => {
   it("preserves every file's actual content and empty folders without duplicating the project root", () => {
@@ -46,4 +46,14 @@ describe("generated workspace", () => {
     expect(() => workspacePath("/etc/config")).toThrow();
     expect(() => workspacePath("src/../../config")).toThrow();
   });
+});
+
+it("notebook shows as Python and round-trips", () => {
+  const nb = JSON.stringify({ cells: [{ cell_type: "markdown", source: ["# Title"] }, { cell_type: "code", source: ["import pandas as pd\n", "print(1)"] }], metadata: { k: 1 } });
+  const py = notebookToPython(nb);
+  expect(py).toBe("# %% [markdown]\n# # Title\n\n# %%\nimport pandas as pd\nprint(1)");
+  const back = JSON.parse(pythonToNotebook(py, nb));
+  expect(back.metadata).toEqual({ k: 1 });
+  expect(back.cells[1].source.join("")).toBe("import pandas as pd\nprint(1)");
+  expect(back.cells[0].source.join("")).toBe("# Title");
 });

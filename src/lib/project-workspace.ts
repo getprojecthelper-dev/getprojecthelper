@@ -136,5 +136,35 @@ export function workspaceTree(entries: WorkspaceEntry[]): WorkspaceTreeNode[] {
 
 export function fileLanguage(path: string): string {
   const ext = path.split(".").at(-1)?.toLowerCase() ?? "";
-  return ({ py: "python", ipynb: "json", json: "json", ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript", md: "markdown", html: "html", css: "css", sql: "sql", yml: "yaml", yaml: "yaml", sh: "shell" } as Record<string, string>)[ext] ?? "plaintext";
+  return ({ py: "python", ipynb: "python", json: "json", ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript", md: "markdown", html: "html", css: "css", sql: "sql", yml: "yaml", yaml: "yaml", sh: "shell" } as Record<string, string>)[ext] ?? "plaintext";
+}
+/** Show a notebook as plain Python: each cell starts with a `# %%` marker, markdown cells become comments. */
+export function notebookToPython(json: string): string {
+  try {
+    const nb = JSON.parse(json) as { cells?: { cell_type?: string; source?: string | string[] }[] };
+    if (!Array.isArray(nb.cells)) return json;
+    return nb.cells.map((cell) => {
+      const src = Array.isArray(cell.source) ? cell.source.join("") : cell.source ?? "";
+      if (cell.cell_type === "markdown") return `# %% [markdown]\n${src.split("\n").map((l) => `# ${l}`.trimEnd()).join("\n")}`;
+      return `# %%\n${src}`;
+    }).join("\n\n");
+  } catch {
+    return json;
+  }
+}
+
+/** Turn edited `# %%` Python back into notebook JSON, keeping the original notebook's metadata. */
+export function pythonToNotebook(python: string, original: string): string {
+  let base: Record<string, unknown> = { metadata: {}, nbformat: 4, nbformat_minor: 5 };
+  try { base = JSON.parse(original); } catch { /* use default */ }
+  const cells = python.split(/^# %%/m).filter((c, i) => i > 0 || c.trim()).map((chunk) => {
+    const markdown = chunk.startsWith(" [markdown]");
+    const body = chunk.replace(/^[^\n]*\n?/, "").replace(/\n+$/, "");
+    const text = markdown ? body.split("\n").map((l) => l.replace(/^# ?/, "")).join("\n") : body;
+    const source = text.split("\n").map((l, i, a) => (i < a.length - 1 ? `${l}\n` : l));
+    return markdown
+      ? { cell_type: "markdown", metadata: {}, source }
+      : { cell_type: "code", execution_count: null, metadata: {}, outputs: [], source };
+  });
+  return JSON.stringify({ ...base, cells }, null, 1);
 }

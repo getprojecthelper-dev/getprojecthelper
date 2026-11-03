@@ -158,10 +158,14 @@ export function CreditMeter() {
 
   if (!visible) return null;
 
-  // Asymptotic fill: fast at first, never quite 100% until settled.
+  // The hold is only a reservation: the live counter keeps climbing past it
+  // for long runs, since the final charge is the real usage, not the hold.
   const elapsed = (Date.now() - meter.startedAt) / 1000 + tick * 0;
   const progress = meter.active ? 1 - Math.exp(-elapsed / 14) : 1;
-  const running = Number((meter.estimate * progress).toFixed(2));
+  const running = Number(
+    (meter.estimate * (elapsed <= 14 ? progress : 1 - Math.exp(-1) + (elapsed - 14) / 28)).toFixed(2),
+  );
+  const overHold = meter.active && running > meter.estimate;
 
   return (
     <div className="pointer-events-none fixed bottom-5 right-5 z-50 w-[19rem] max-w-[calc(100vw-2.5rem)]">
@@ -195,7 +199,9 @@ export function CreditMeter() {
 
         <p className="mt-2 text-xs text-muted-foreground">
           {meter.active
-            ? `Holding ${formatCredits(meter.estimate)} credits — you only pay for what the run uses.`
+            ? overHold
+              ? `Above the ${formatCredits(meter.estimate)}-credit hold — the run continues and you pay what it uses.`
+              : `Holding ${formatCredits(meter.estimate)} credits — you only pay for what the run uses.`
             : meter.settling
               ? "Working out the exact cost…"
               : `Charged ${formatCredits(meter.spent)} credits for this run.`}

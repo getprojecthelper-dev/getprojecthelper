@@ -31,7 +31,7 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
@@ -405,9 +405,13 @@ function BuildPage() {
 
   // code projects: roadmap on the left, live editor on the right
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-      {content}
-      <aside className="h-[42rem] min-w-0 md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:min-h-[36rem] md:self-start">
+    <div
+      ref={workspaceRef}
+      className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
+      style={workspaceHeight ? { height: workspaceHeight } : undefined}
+    >
+      <div className="min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-1">{content}</div>
+      <aside className="h-[42rem] min-w-0 md:h-full md:min-h-0">
         <LiveCodeEditor
           key={projectId}
           projectId={projectId}

@@ -56,7 +56,7 @@ export function LiveCodeEditor({ projectId, projectName, activeFile, generating,
     window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn);
   }, [drafts, entries]);
 
-  return <section className="flex h-full min-h-[36rem] min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card" aria-label="Project code workspace">
+  return <section className="flex h-full min-h-[36rem] min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card md:min-h-0" aria-label="Project code workspace">
     <header className="flex h-11 shrink-0 items-center gap-2 border-b border-border px-3">
       <Code2 className="h-4 w-4 text-primary" /><h2 className="min-w-0 flex-1 truncate text-sm font-semibold">Code editor</h2>
       {generating || workspace.isFetching ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : null}

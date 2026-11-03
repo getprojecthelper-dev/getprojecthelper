@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectWorkspace, workspaceFilePath, workspacePath, workspaceTree } from "./project-workspace";
+import { collectWorkspace, workspaceFilePath, workspacePath, workspaceTree, notebookToPython, pythonToNotebook } from "./project-workspace";
 
 describe("generated workspace", () => {
   it("preserves every file's actual content and empty folders without duplicating the project root", () => {
@@ -47,8 +47,8 @@ describe("generated workspace", () => {
     expect(() => workspacePath("src/../../config")).toThrow();
   });
 });
-import { notebookToPython, pythonToNotebook } from "./project-workspace";
-test("notebook shows as Python and round-trips", () => {
+
+it("notebook shows as Python and round-trips", () => {
   const nb = JSON.stringify({ cells: [{ cell_type: "markdown", source: ["# Title"] }, { cell_type: "code", source: ["import pandas as pd\n", "print(1)"] }], metadata: { k: 1 } });
   const py = notebookToPython(nb);
   expect(py).toBe("# %% [markdown]\n# # Title\n\n# %%\nimport pandas as pd\nprint(1)");

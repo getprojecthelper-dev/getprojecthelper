@@ -102,3 +102,7 @@ export const PREMADE_PROJECTS: PremadeProject[] = [
 export function getPremadeProject(id: string): PremadeProject | undefined {
   return PREMADE_PROJECTS.find((p) => p.id === id);
 }
+
+export function isPremadePriceId(priceId: string): boolean {
+  return PREMADE_PROJECTS.some((p) => p.priceId === priceId);
+}

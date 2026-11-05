@@ -1081,16 +1081,19 @@ export type Database = {
         Row: {
           id: boolean
           maintenance_enabled: boolean
+          premade_enabled: boolean
           updated_at: string
         }
         Insert: {
           id?: boolean
           maintenance_enabled?: boolean
+          premade_enabled?: boolean
           updated_at?: string
         }
         Update: {
           id?: boolean
           maintenance_enabled?: boolean
+          premade_enabled?: boolean
           updated_at?: string
         }
         Relationships: []

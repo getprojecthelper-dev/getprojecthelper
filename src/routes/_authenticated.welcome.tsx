@@ -2,13 +2,58 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   History,
+  LockKeyhole,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/material-icon";
 import { useAuth } from "@/hooks/use-auth";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePremadeAvailability } from "@/hooks/use-site-availability";
 import { useProjectsOverview } from "@/lib/db";
+import { canOpenPremade } from "@/lib/site-availability";
 import { WorkspacePlanStatus } from "@/components/workspace-plan-status";
+
+function BuyProjectsCard() {
+  const availability = usePremadeAvailability();
+  const { isAdmin } = useIsAdmin();
+  const open = canOpenPremade(availability.data === true, isAdmin);
+
+  if (open) {
+    return (
+      <Link
+        to="/premade"
+        className="group panel flex min-h-48 flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <MaterialIcon name="shopping_bag" filled />
+          </span>
+          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">One-time purchase</span>
+        </div>
+        <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
+        <p className="text-sm text-muted-foreground">Choose a guided project, review its details, and make it your own.</p>
+        <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Browse projects <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+      </Link>
+    );
+  }
+
+  return (
+    <div className="panel flex min-h-48 flex-col gap-3 p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-2">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary text-muted-foreground">
+          <LockKeyhole className="h-5 w-5" />
+        </span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">Launching soon</span>
+      </div>
+      <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
+      <p className="text-sm text-muted-foreground">
+        Guided projects aren't open yet. Build your own project from an idea in the meantime.
+      </p>
+      <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">Launching soon</span>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   head: () => ({
@@ -203,20 +248,7 @@ function WelcomePage() {
           <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Start building <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
         </Link>
 
-        <Link
-          to="/premade"
-          className="group panel flex min-h-48 flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
-        >
-          <div className="flex items-start justify-between gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <MaterialIcon name="shopping_bag" filled />
-            </span>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">One-time purchase</span>
-          </div>
-          <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
-          <p className="text-sm text-muted-foreground">Choose a guided project, review its details, and make it your own.</p>
-          <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Browse projects <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
-        </Link>
+        <BuyProjectsCard />
       </section>
 
       <section aria-labelledby="resume-title" className="mt-6 panel p-4 sm:p-5">

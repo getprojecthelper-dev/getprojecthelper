@@ -19,3 +19,24 @@ describe("website availability", () => {
     assert.equal(canAccessSite(true, false, "/auth-other"), false);
   });
 });
+
+describe("buy projects availability", () => {
+  test("the store stays locked for students while the switch is off", () => {
+    assert.equal(canOpenPremade(false, false), false);
+  });
+  test("the store opens for everyone once the switch is on", () => {
+    assert.equal(canOpenPremade(true, false), true);
+  });
+  test("administrators can open a locked store", () => {
+    assert.equal(canOpenPremade(false, true), true);
+  });
+  test("project checkout prices are recognised so the lock can block them", () => {
+    assert.equal(isPremadePriceId("campus_event_planner_once"), true);
+    assert.equal(isPremadePriceId("flight_delay_predictor_once"), true);
+  });
+  test("subscription prices are not blocked by the store lock", () => {
+    assert.equal(isPremadePriceId("starter_monthly"), false);
+    assert.equal(isPremadePriceId("student_monthly"), false);
+    assert.equal(isPremadePriceId("professional_monthly"), false);
+  });
+});

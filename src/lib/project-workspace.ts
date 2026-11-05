@@ -175,9 +175,9 @@ export function notebookToPython(json: string): string {
 export function pythonToNotebook(python: string, original: string): string {
   let base: Record<string, unknown> = { metadata: {}, nbformat: 4, nbformat_minor: 5 };
   try { base = JSON.parse(original); } catch { /* use default */ }
-  const cells = python.split(/^# %%/m).filter((c, i) => i > 0 || c.trim()).map((chunk) => {
-    const markdown = chunk.startsWith(" [markdown]");
-    const body = chunk.replace(/^[^\n]*\n?/, "").replace(/\n+$/, "");
+  const cells = python.split(/^# %%/m).map((chunk, i) => ({ chunk, lead: i === 0 })).filter(({ chunk, lead }) => !lead || chunk.trim()).map(({ chunk, lead }) => {
+    const markdown = !lead && chunk.startsWith(" [markdown]");
+    const body = (lead ? chunk : chunk.replace(/^[^\n]*\n?/, "")).replace(/\n+$/, "");
     const text = markdown ? body.split("\n").map((l) => l.replace(/^# ?/, "")).join("\n") : body;
     const source = text.split("\n").map((l, i, a) => (i < a.length - 1 ? `${l}\n` : l));
     return markdown

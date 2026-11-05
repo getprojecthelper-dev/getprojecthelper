@@ -12,6 +12,9 @@ import { cancelPlan, changePlan, getMyPlan } from "@/lib/plans.functions";
 import { PLANS, getPlan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
+const fallbackPrices = () =>
+  Object.fromEntries(PLANS.flatMap((p) => (p.priceId ? [[p.priceId, `₹${p.inrPrice}`]] : [])));
+
 const RANK = { free: 0, starter: 1, student: 2, professional: 3 } as const;
 
 export function PlanCards({ className }: { className?: string }) {
@@ -26,8 +29,8 @@ export function PlanCards({ className }: { className?: string }) {
 
   useEffect(() => {
     getLocalizedPlanPrices(PLANS.flatMap((p) => (p.priceId ? [p.priceId] : [])))
-      .then(setPrices)
-      .catch(() => {});
+      .then((found) => setPrices(Object.keys(found).length ? found : fallbackPrices()))
+      .catch(() => setPrices(fallbackPrices()));
   }, []);
 
   const { data: mine } = useQuery({
@@ -73,7 +76,7 @@ export function PlanCards({ className }: { className?: string }) {
     <div className={cn("grid gap-5 md:grid-cols-2 xl:grid-cols-4", className)}>
       {PLANS.map((plan) => {
         const isCurrent = Boolean(user) && current.id === plan.id;
-        const price = plan.priceId ? prices[plan.priceId] ?? `₹${plan.inrPrice}` : "₹0";
+        const price = plan.priceId ? prices[plan.priceId] ?? "…" : "Free";
         return (
           <div
             key={plan.id}

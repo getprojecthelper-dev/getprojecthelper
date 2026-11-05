@@ -70,7 +70,7 @@ it("notebook shows as Python and round-trips", () => {
   expect(back.cells[0].source.join("")).toBe("# Title");
 });
 
-test("notebook keeps text typed before the first cell marker", () => {
+it("notebook keeps text typed before the first cell marker", () => {
   const back = JSON.parse(pythonToNotebook("import pandas", JSON.stringify({ cells: [], metadata: {}, nbformat: 4, nbformat_minor: 5 })));
   expect(back.cells[0].source.join("")).toBe("import pandas");
 });

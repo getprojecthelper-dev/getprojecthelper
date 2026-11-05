@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
-import { PricingPacks } from "@/components/pricing-packs";
+import { PlanCards } from "@/components/plan-cards";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/credits")({
         content: "Track your AI credit balance, usage history and redeem referral codes in Project Helper.",
       },
       { property: "og:title", content: "AI credits — Project Helper" },
-      { property: "og:description", content: "Your balance, usage history and credit packs." },
+      { property: "og:description", content: "Your balance, usage history and monthly plans." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/credits")({
 const KIND_LABEL: Record<string, string> = {
   grant: "Starter credits",
   redeem: "Code redeemed",
-  purchase: "Credit pack",
+  purchase: "Plan credits",
   hold: "Reserved",
   spend: "AI run",
   refund: "Returned",
@@ -149,12 +149,12 @@ function CreditsPage() {
       </section>
 
       <section>
-        <h2 className="font-display text-lg">Credit packs</h2>
+        <h2 className="font-display text-lg">Plans</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Every new account starts with {STARTER_CREDITS} free credits. Packs are coming soon —
-          checkout is not enabled yet.
+          Every new account starts with {STARTER_CREDITS} free credits. Pick a monthly plan for more
+          credits and projects. Prices show in your local currency automatically.
         </p>
-        <PricingPacks className="mt-5" />
+        <PlanCards className="mt-5" />
       </section>
 
       <section>

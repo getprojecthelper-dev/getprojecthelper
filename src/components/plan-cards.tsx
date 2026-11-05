@@ -73,7 +73,7 @@ export function PlanCards({ className }: { className?: string }) {
     <div className={cn("grid gap-5 md:grid-cols-2 xl:grid-cols-4", className)}>
       {PLANS.map((plan) => {
         const isCurrent = Boolean(user) && current.id === plan.id;
-        const price = plan.priceId ? prices[plan.priceId] ?? `₹${plan.inrPrice}` : "₹0";
+        const price = plan.priceId ? prices[plan.priceId] ?? "…" : "Free";
         return (
           <div
             key={plan.id}

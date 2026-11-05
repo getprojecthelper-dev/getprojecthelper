@@ -1,6 +1,7 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
-import { canAccessSite } from "./site-availability";
+import { canAccessSite, canOpenPremade } from "./site-availability";
+import { isPremadePriceId } from "./premade-projects";
 
 describe("website availability", () => {
   test("public mode allows visitors", () => {

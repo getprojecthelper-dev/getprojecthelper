@@ -4,6 +4,7 @@ import { Loader2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { usePremadeAvailability } from "@/hooks/use-site-availability";
+import { canOpenPremade } from "@/lib/site-availability";
 
 export const Route = createFileRoute("/_authenticated/premade")({
   component: PremadeSection,
@@ -21,7 +22,7 @@ function PremadeSection() {
     );
   }
 
-  if (availability.data === true || isAdmin) return <Outlet />;
+  if (canOpenPremade(availability.data === true, isAdmin)) return <Outlet />;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6">

@@ -11,12 +11,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { usePremadeAvailability } from "@/hooks/use-site-availability";
 import { useProjectsOverview } from "@/lib/db";
+import { canOpenPremade } from "@/lib/site-availability";
 import { WorkspacePlanStatus } from "@/components/workspace-plan-status";
 
 function BuyProjectsCard() {
   const availability = usePremadeAvailability();
   const { isAdmin } = useIsAdmin();
-  const open = availability.data === true || isAdmin;
+  const open = canOpenPremade(availability.data === true, isAdmin);
 
   if (open) {
     return (

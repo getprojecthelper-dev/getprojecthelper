@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { BadgeIndianRupee, Loader2, Save } from "lucide-react";
+import { BadgeIndianRupee, Globe, Loader2, LockKeyhole, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { premadeAvailabilityKey, usePremadeAvailability } from "@/hooks/use-site-availability";
 import { listAdminProjectPricing, updateAdminProjectPricing } from "@/lib/admin.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
+import { updatePremadeAvailability } from "@/lib/site-availability.functions";
 
 type Draft = { regular: string; discount: string };
 

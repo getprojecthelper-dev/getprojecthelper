@@ -498,3 +498,9 @@
 .landing-light .text-cyan-200:not(:is([class*="from-"]) *) { color: #0e7490; }
 .landing-light :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(:is([class*="from-"]) *) { color: #047857; }
 .landing-light .bg-black\/55, .landing-light .bg-black\/55 * { color: #fff !important; background-color: rgb(0 0 0 / .55); }
+
+/* Keep text readable on dark surfaces inside the bright landing page. */
+.landing-light :is(.bg-slate-950, .bg-black, .bg-\[\#14151c\]) :is(h1, h2, h3, p, span, a) { color: #fff; }
+.landing-light :is(.bg-slate-950, .bg-black) .text-slate-300 { color: #cbd5e1 !important; }
+.landing-light :is(.bg-slate-950, .bg-black) .text-primary { color: #e2e8f0 !important; }
+.landing-light :is(.bg-slate-950, .bg-black) .bg-white :is(p, span, a), .landing-light #mentor .bg-white, .landing-light #mentor .bg-white * { color: #0f172a !important; }

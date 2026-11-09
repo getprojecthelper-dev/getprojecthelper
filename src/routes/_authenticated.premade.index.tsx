@@ -64,6 +64,9 @@ function PremadePage() {
   const { data: listings = [], isPending } = useQuery({
     queryKey: ["premade-listings", environment],
     queryFn: () => listLiveListings({ data: { environment } }),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
   const { data: purchases = [] } = useQuery({
     queryKey: ["project-purchases", environment],

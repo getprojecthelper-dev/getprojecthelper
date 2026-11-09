@@ -147,7 +147,6 @@ function Landing() {
   const workspace = session ? "/welcome" : "/auth";
   const nav = [
     ["Build a project", "#build-project"],
-    ["Find projects", "#projects"],
     ["AI guidance", "#mentor"],
   ] as const;
 

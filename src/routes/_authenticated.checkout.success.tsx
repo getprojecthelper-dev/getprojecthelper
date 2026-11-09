@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { getPremadeProject } from "@/lib/premade-projects";
 import { getProjectPurchase } from "@/lib/premade.functions";
 
 export const Route = createFileRoute("/_authenticated/checkout/success")({
@@ -26,13 +25,12 @@ export const Route = createFileRoute("/_authenticated/checkout/success")({
 
 function CheckoutSuccess() {
   const { project } = Route.useSearch();
-  const entry = getPremadeProject(project);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["project-purchase", project, getPaddleEnvironment()],
     queryFn: () => getProjectPurchase({ data: { id: project, environment: getPaddleEnvironment() } }),
-    enabled: Boolean(entry),
+    enabled: Boolean(project),
     refetchInterval: (query) => query.state.data?.owned ? false : 1500,
   });
   useEffect(() => {

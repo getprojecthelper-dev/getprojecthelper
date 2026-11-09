@@ -3,15 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getPremadeProject, isPremadePriceId } from "@/lib/premade-projects";
 import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
-
-export interface CatalogPricing {
-  catalogProjectId: string;
-  regularPriceMinor: number;
-  discountPercent: number;
-  salePriceMinor: number;
-}
 
 const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open here shortly.";
 
@@ -54,52 +46,24 @@ async function assertPremadeOpen() {
   if (!(await isPremadeOpen())) throw new Error(PREMASE_CLOSED_MESSAGE);
 }
 
-export const listCatalogPricing = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ environment: z.enum(["sandbox", "live"]) }).parse(input))
-  .handler(async ({ data, context }): Promise<CatalogPricing[]> => {
-    await assertPremadeOpen();
-    const { data: rows, error } = await context.supabase
-      .from("project_catalog_pricing")
-      .select("catalog_project_id,regular_price_minor,discount_percent")
-      .eq("environment", data.environment)
-      .eq("is_active", true);
-    if (error) throw new Error("Project prices could not be loaded.");
-    return (rows ?? []).map((row) => ({
-      catalogProjectId: row.catalog_project_id,
-      regularPriceMinor: row.regular_price_minor,
-      discountPercent: row.discount_percent,
-      salePriceMinor: Math.round(row.regular_price_minor * (100 - row.discount_percent) / 100),
-    }));
-  });
-
-export const getCatalogPricing = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input))
-  .handler(async ({ data, context }): Promise<CatalogPricing | null> => {
-    await assertPremadeOpen();
-    const { data: row, error } = await context.supabase
-      .from("project_catalog_pricing")
-      .select("catalog_project_id,regular_price_minor,discount_percent")
-      .eq("catalog_project_id", data.id)
-      .eq("environment", data.environment)
-      .eq("is_active", true)
-      .maybeSingle();
-    if (error) throw new Error("Project pricing could not be loaded.");
-    return row ? {
-      catalogProjectId: row.catalog_project_id,
-      regularPriceMinor: row.regular_price_minor,
-      discountPercent: row.discount_percent,
-      salePriceMinor: Math.round(row.regular_price_minor * (100 - row.discount_percent) / 100),
-    } : null;
-  });
-
 export const resolveProjectPrice = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
     z.object({ priceId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data }) => {
-    if (isPremadePriceId(data.priceId)) await assertPremadeOpen();
+    if (data.priceId.startsWith("pri_")) {
+      // Admin-listed projects store the checkout price directly.
+      await assertPremadeOpen();
+      const { data: listing } = await createPublishableReadClient()
+        .from("premade_listings")
+        .select("id")
+        .eq("provider_price_id", data.priceId)
+        .eq("is_live", true)
+        .eq("is_available", true)
+        .maybeSingle();
+      if (!listing) throw new Error("This project is not available right now.");
+      return data.priceId;
+    }
     const response = await gatewayFetch(
       data.environment as PaddleEnv,
       `/prices?external_id=${encodeURIComponent(data.priceId)}`,
@@ -117,7 +81,6 @@ export const getProjectPurchase = createServerFn({ method: "GET" })
     z.object({ id: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    if (!getPremadeProject(data.id)) return { owned: false, projectId: null };
     const { data: purchase, error } = await context.supabase
       .from("project_purchases")
       .select("project_id")

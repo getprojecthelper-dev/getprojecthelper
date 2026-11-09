@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getPremadeProject } from "@/lib/premade-projects";
 import { EventName, verifyPaymentWebhook, type PaddleEnv } from "@/lib/paddle.server";
 import { getTemplate } from "@/lib/project-domain";
 import { planForPriceId } from "@/lib/plans";
@@ -82,10 +81,18 @@ async function fulfilProjectPurchase(data: TransactionData, environment: PaddleE
       ? data.customData["catalogProjectId"]
       : null;
   if (!userId || !catalogProjectId) return;
-  const entry = getPremadeProject(catalogProjectId);
-  if (!entry) return;
-
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: listing } = await supabaseAdmin
+    .from("premade_listings")
+    .select("title,description,tech_stack,domain")
+    .eq("id", catalogProjectId)
+    .maybeSingle();
+  if (!listing) return;
+  const entry = {
+    title: listing.title,
+    brief: `${listing.description}\n\nTech stack: ${listing.tech_stack}`,
+    domain: listing.domain as "software" | "data_science" | "project_management",
+  };
   const { data: existing } = await supabaseAdmin
     .from("project_purchases")
     .select("id,project_id")

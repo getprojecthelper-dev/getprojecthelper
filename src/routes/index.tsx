@@ -62,29 +62,6 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const marketplaceProjects = [
-  {
-    title: "Analytics dashboard",
-    image: "/analytics-dashboard-project.png",
-    stack: ["React", "TypeScript", "Charts"],
-    description: "A polished dashboard for turning data into clear insights.",
-    price: "$79",
-  },
-  {
-    title: "Campus event planner",
-    image: "/student-project-workspace.png",
-    stack: ["React", "Node.js", "PostgreSQL"],
-    description: "Plan, manage and share events with one simple workspace.",
-    price: "$69",
-  },
-  {
-    title: "Project research toolkit",
-    image: "/project-collaboration.png",
-    stack: ["Python", "Pandas", "Jupyter"],
-    description: "Organise research, explore data and document your findings.",
-    price: "$59",
-  },
-];
 
 function HeroCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -141,19 +118,9 @@ function HeroCarousel() {
             <h2 className="mt-8 font-display text-3xl font-bold tracking-[-.05em] text-white">
               Find a project that fits your goal.
             </h2>
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              {[
-                ["Data dashboard", "Ready to customise"],
-                ["Business website", "Project files included"],
-                ["Portfolio app", "Built for showcasing"],
-                ["Research toolkit", "Structured and documented"],
-              ].map(([title, detail]) => (
-                <div key={title} className="rounded-xl border border-white/15 bg-black/15 p-3.5">
-                  <p className="text-sm font-bold text-white">{title}</p>
-                  <p className="mt-1 text-xs text-white/70">{detail}</p>
-                </div>
-              ))}
-            </div>
+            <p className="mt-7 rounded-xl border border-white/15 bg-black/15 p-4 text-sm font-medium text-white">
+              Ready-made projects are launching soon.
+            </p>
           </section>
         </div>
         <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 rounded-full border border-white/15 bg-black/30 p-2 backdrop-blur">
@@ -180,7 +147,6 @@ function Landing() {
   const workspace = session ? "/welcome" : "/auth";
   const nav = [
     ["Build a project", "#build-project"],
-    ["Find projects", "#projects"],
     ["AI guidance", "#mentor"],
   ] as const;
 
@@ -298,7 +264,7 @@ function Landing() {
                   variant="outline"
                   className="h-13 rounded-xl border-white/20 bg-white/5 px-6 text-base text-white hover:bg-white/10 hover:text-white"
                 >
-                  <a href="#projects">Browse projects to buy</a>
+                  <Link to="/auth" search={{ mode: "signup" }}>Buy projects · Launching soon</Link>
                 </Button>
               </div>
               <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm font-medium text-slate-300">
@@ -406,78 +372,6 @@ function Landing() {
               </article>
             </div>
             <ProjectWorkflow />
-          </div>
-        </section>
-        <section
-          id="projects"
-          className="relative border-y border-white/10 bg-white/[.025] px-5 py-20 sm:px-6 sm:py-24"
-        >
-          <div className="mx-auto max-w-7xl">
-            <div className="max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-300">
-                Project marketplace
-              </p>
-              <h2 className="mt-3 font-display text-3xl font-bold tracking-[-.05em] text-white sm:text-5xl">
-                Explore projects ready to make your own.
-              </h2>
-              <p className="mt-4 text-lg leading-8 text-slate-300">
-                Browse practical projects with clear technology, details and pricing.
-              </p>
-            </div>
-            <div className="mt-11 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {marketplaceProjects.map(({ title, image, stack, description, price }) => (
-                <article
-                  key={title}
-                  className="group overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#14151c] shadow-[0_18px_45px_rgba(0,0,0,.22)] transition duration-300 hover:-translate-y-1 hover:border-violet-300/35 hover:shadow-[0_25px_55px_rgba(76,29,149,.2)]"
-                >
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={image}
-                      alt={title}
-                      className="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                    <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/55 px-3 py-1 text-xs font-bold text-white backdrop-blur">
-                      Ready to explore
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display text-xl font-bold tracking-[-.04em] text-white">
-                        {title}
-                      </h3>
-                      <span className="shrink-0 text-lg font-bold text-emerald-300">{price}</span>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {stack.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full bg-white/8 px-2.5 py-1 text-xs font-medium text-slate-300"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="mt-4 text-sm leading-6 text-slate-400">{description}</p>
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-                      >
-                        <Link to="/auth" search={{ mode: "signup" }}>
-                          Explore
-                        </Link>
-                      </Button>
-                      <Button asChild className="bg-white text-slate-950 hover:bg-violet-100">
-                        <Link to="/auth" search={{ mode: "signup" }}>
-                          Get project <ArrowRight className="ml-1 size-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
           </div>
         </section>
         <section id="how-it-works" className="px-5 py-20 sm:px-6 sm:py-28">

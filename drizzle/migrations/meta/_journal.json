@@ -43,6 +43,13 @@
       "when": 1793628680621,
       "tag": "0005_project_workspace_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794221524522,
+      "tag": "0006_premade_listings",
+      "breakpoints": true
     }
   ]
 }

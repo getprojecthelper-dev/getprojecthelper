@@ -1,7 +1,6 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
 import { canAccessSite, canOpenPremade } from "./site-availability";
-import { isPremadePriceId } from "./premade-projects";
 
 describe("website availability", () => {
   test("public mode allows visitors", () => {
@@ -29,14 +28,5 @@ describe("buy projects availability", () => {
   });
   test("administrators can open a locked store", () => {
     assert.equal(canOpenPremade(false, true), true);
-  });
-  test("project checkout prices are recognised so the lock can block them", () => {
-    assert.equal(isPremadePriceId("campus_event_planner_once"), true);
-    assert.equal(isPremadePriceId("flight_delay_predictor_once"), true);
-  });
-  test("subscription prices are not blocked by the store lock", () => {
-    assert.equal(isPremadePriceId("starter_monthly"), false);
-    assert.equal(isPremadePriceId("student_monthly"), false);
-    assert.equal(isPremadePriceId("professional_monthly"), false);
   });
 });

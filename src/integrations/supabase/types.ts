@@ -508,6 +508,54 @@ export type Database = {
           },
         ]
       }
+      premade_listings: {
+        Row: {
+          created_at: string
+          description: string
+          domain: string
+          environment: string
+          id: string
+          image_url: string | null
+          is_available: boolean
+          is_live: boolean
+          price_minor: number
+          provider_price_id: string | null
+          tech_stack: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          domain?: string
+          environment?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          is_live?: boolean
+          price_minor: number
+          provider_price_id?: string | null
+          tech_stack?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          domain?: string
+          environment?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          is_live?: boolean
+          price_minor?: number
+          provider_price_id?: string | null
+          tech_stack?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -520,6 +520,7 @@ export type Database = {
           is_live: boolean
           price_minor: number
           provider_price_id: string | null
+          show_on_homepage: boolean
           tech_stack: string
           title: string
           updated_at: string
@@ -535,6 +536,7 @@ export type Database = {
           is_live?: boolean
           price_minor: number
           provider_price_id?: string | null
+          show_on_homepage?: boolean
           tech_stack?: string
           title: string
           updated_at?: string
@@ -550,6 +552,7 @@ export type Database = {
           is_live?: boolean
           price_minor?: number
           provider_price_id?: string | null
+          show_on_homepage?: boolean
           tech_stack?: string
           title?: string
           updated_at?: string

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Eye, EyeOff, Globe, ImagePlus, Loader2, LockKeyhole, Pencil, Plus, Rocket, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Globe, Home, ImagePlus, Loader2, LockKeyhole, Pencil, Plus, Rocket, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,7 @@ export function AdminProjectPricing() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: key });
     void queryClient.invalidateQueries({ queryKey: ["premade-listings"] });
+    void queryClient.invalidateQueries({ queryKey: ["homepage-listings"] });
   };
 
   const saveMutation = useMutation({
@@ -87,7 +88,7 @@ export function AdminProjectPricing() {
     onError: (e: Error) => toast.error(e.message),
   });
   const flagMutation = useMutation({
-    mutationFn: (v: { id: string; isLive?: boolean; isAvailable?: boolean }) => flags({ data: v }),
+    mutationFn: (v: { id: string; isLive?: boolean; isAvailable?: boolean; showOnHomepage?: boolean }) => flags({ data: v }),
     onSuccess: refresh,
     onError: (e: Error) => toast.error(e.message),
   });
@@ -124,6 +125,7 @@ export function AdminProjectPricing() {
                   <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase">
                     <span className={`rounded-full px-2 py-0.5 ${l.isLive ? "bg-success/15 text-success" : "bg-secondary text-muted-foreground"}`}>{l.isLive ? "Live" : "Draft"}</span>
                     <span className={`rounded-full px-2 py-0.5 ${l.isAvailable ? "bg-secondary text-muted-foreground" : "bg-destructive/15 text-destructive"}`}>{l.isAvailable ? "Available" : "Not available"}</span>
+                    {l.showOnHomepage && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-primary">On homepage</span>}
                   </div>
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display text-base">{l.title}</h3>
@@ -137,6 +139,9 @@ export function AdminProjectPricing() {
                     </Button>
                     <Button size="sm" variant="outline" disabled={flagMutation.isPending} onClick={() => flagMutation.mutate({ id: l.id, isAvailable: !l.isAvailable })}>
                       {l.isAvailable ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}{l.isAvailable ? "Mark not available" : "Mark available"}
+                    </Button>
+                    <Button size="sm" variant={l.showOnHomepage ? "default" : "outline"} disabled={flagMutation.isPending} onClick={() => flagMutation.mutate({ id: l.id, showOnHomepage: !l.showOnHomepage })}>
+                      <Home className="h-3.5 w-3.5" />{l.showOnHomepage ? "Remove from homepage" : "Show on homepage"}
                     </Button>
                     <Button size="sm" variant="ghost" aria-label="Edit" onClick={() => setDraft({ id: l.id, title: l.title, description: l.description, techStack: l.techStack, imageUrl: l.imageUrl, domain: l.domain, price: String(l.priceMinor / 100) })}><Pencil className="h-3.5 w-3.5" /></Button>
                     <Button size="sm" variant="ghost" aria-label="Delete" disabled={deleteMutation.isPending} onClick={() => { if (confirm(`Delete ${l.title}?`)) deleteMutation.mutate(l.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>

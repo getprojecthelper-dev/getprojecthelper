@@ -15,14 +15,16 @@ export interface PremadeListing {
   providerPriceId: string | null;
   isLive: boolean;
   isAvailable: boolean;
+  showOnHomepage: boolean;
 }
 
 const env = z.enum(["sandbox", "live"]);
-const COLUMNS = "id,title,description,tech_stack,image_url,domain,price_minor,provider_price_id,is_live,is_available";
+const COLUMNS = "id,title,description,tech_stack,image_url,domain,price_minor,provider_price_id,is_live,is_available,show_on_homepage";
 
 type Row = {
   id: string; title: string; description: string; tech_stack: string; image_url: string | null;
   domain: string; price_minor: number; provider_price_id: string | null; is_live: boolean; is_available: boolean;
+  show_on_homepage: boolean;
 };
 
 const toListing = (r: Row): PremadeListing => ({
@@ -36,6 +38,7 @@ const toListing = (r: Row): PremadeListing => ({
   providerPriceId: r.provider_price_id,
   isLive: r.is_live,
   isAvailable: r.is_available,
+  showOnHomepage: r.show_on_homepage,
 });
 
 const listingInput = z.object({
@@ -49,6 +52,19 @@ const listingInput = z.object({
   domain: z.enum(["software", "data_science", "project_management"]),
   priceMinor: z.number().int().min(70).max(10_000_000),
 });
+
+/** Public homepage: live listings the admin chose to feature. No sign-in needed. */
+export const listHomepageListings = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ environment: env }).parse(i))
+  .handler(async ({ data }) => {
+    const { createPublishableReadClient } = await import("@/lib/premade.functions");
+    const { data: rows, error } = await createPublishableReadClient()
+      .from("premade_listings").select(COLUMNS)
+      .eq("environment", data.environment).eq("is_live", true).eq("show_on_homepage", true)
+      .order("created_at", { ascending: false }).limit(6);
+    if (error) return [];
+    return (rows ?? []).map(toListing);
+  });
 
 /** Students: live listings only (RLS also enforces this). */
 export const listLiveListings = createServerFn({ method: "GET" })
@@ -146,13 +162,19 @@ export const saveListing = createServerFn({ method: "POST" })
 export const setListingFlags = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ id: z.string().uuid(), isLive: z.boolean().optional(), isAvailable: z.boolean().optional() }).parse(i),
+    z.object({
+      id: z.string().uuid(),
+      isLive: z.boolean().optional(),
+      isAvailable: z.boolean().optional(),
+      showOnHomepage: z.boolean().optional(),
+    }).parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const patch: { is_live?: boolean; is_available?: boolean } = {};
+    const patch: { is_live?: boolean; is_available?: boolean; show_on_homepage?: boolean } = {};
     if (data.isLive !== undefined) patch.is_live = data.isLive;
     if (data.isAvailable !== undefined) patch.is_available = data.isAvailable;
+    if (data.showOnHomepage !== undefined) patch.show_on_homepage = data.showOnHomepage;
     const { data: row, error } = await context.supabase
       .from("premade_listings").update(patch).eq("id", data.id).select(COLUMNS).single();
     if (error || !row) throw new Error("The listing could not be updated.");

@@ -504,3 +504,4 @@
 .landing-light :is(.bg-slate-950, .bg-black) .text-slate-300 { color: #cbd5e1 !important; }
 .landing-light :is(.bg-slate-950, .bg-black) .text-primary { color: #e2e8f0 !important; }
 .landing-light :is(.bg-slate-950, .bg-black) .bg-white :is(p, span, a), .landing-light #mentor .bg-white, .landing-light #mentor .bg-white * { color: #0f172a !important; }
+.landing-light #mentor span.inline-grid svg { color: #0f172a !important; }

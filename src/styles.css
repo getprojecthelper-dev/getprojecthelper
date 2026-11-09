@@ -497,3 +497,4 @@
 .landing-light :is(.text-violet-200, .text-violet-300):not(:is([class*="from-"]) *) { color: #6d28d9; }
 .landing-light .text-cyan-200:not(:is([class*="from-"]) *) { color: #0e7490; }
 .landing-light :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(:is([class*="from-"]) *) { color: #047857; }
+.landing-light .bg-black\/55, .landing-light .bg-black\/55 * { color: #fff !important; background-color: rgb(0 0 0 / .55); }

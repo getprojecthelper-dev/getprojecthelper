@@ -273,9 +273,6 @@ function Landing() {
         <section className="relative px-5 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28">
           <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.02fr_.98fr] lg:gap-10">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-1.5 text-xs font-bold text-violet-200 shadow-sm">
-                <Sparkles className="size-3.5" /> Build it yourself or find the right project
-              </div>
               <h1 className="mt-6 font-display text-5xl font-bold leading-[.98] tracking-[-.065em] text-white sm:text-6xl xl:text-7xl">
                 Your next big project is{" "}
                 <span className="landing-gradient-text">closer than you think.</span>

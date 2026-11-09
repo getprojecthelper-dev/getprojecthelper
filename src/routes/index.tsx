@@ -486,6 +486,67 @@ function Landing() {
   );
 }
 
+const rupees = (minor: number) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(minor / 100);
+
+/** Ready-made projects the admin chose to feature. Hidden until at least one is featured. */
+function FeaturedProjects() {
+  const environment = getPaddleEnvironment();
+  const fetchListings = useServerFn(listHomepageListings);
+  const { data: listings = [] } = useQuery({
+    queryKey: ["homepage-listings", environment],
+    queryFn: () => fetchListings({ data: { environment } }),
+  });
+
+  if (listings.length === 0) return null;
+
+  return (
+    <section id="featured-projects" className="px-5 pb-20 sm:px-6 sm:pb-28">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-600">
+              Ready-made projects
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-[-.05em] sm:text-4xl">
+              Featured projects you can buy.
+            </h2>
+          </div>
+          <Button asChild variant="outline" className="rounded-xl">
+            <Link to="/auth" search={{ mode: "signup" }}>
+              Browse all projects <ArrowRight className="ml-2 size-4" />
+            </Link>
+          </Button>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {listings.map((listing) => (
+            <article
+              key={listing.id}
+              className="overflow-hidden rounded-3xl border border-violet-100 bg-white/75 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(76,29,149,.15)]"
+            >
+              {listing.imageUrl ? (
+                <img src={listing.imageUrl} alt={listing.title} className="aspect-[16/10] w-full object-cover" />
+              ) : (
+                <div className="grid aspect-[16/10] w-full place-items-center bg-violet-50">
+                  <BriefcaseBusiness className="size-8 text-violet-300" />
+                </div>
+              )}
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-display text-lg font-bold tracking-[-.03em]">{listing.title}</h3>
+                  <span className="shrink-0 font-semibold text-violet-700">{rupees(listing.priceMinor)}</span>
+                </div>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{listing.description}</p>
+                <p className="mt-3 text-xs font-medium text-slate-500">{listing.techStack}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const PROJECT_STAGES = [
   { icon: Lightbulb, title: "Choose an idea", detail: "Tell us what you want to build." },
   {

@@ -65,8 +65,9 @@ export const listLiveListings = createServerFn({ method: "GET" })
 
 export const getLiveListing = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .inputValidator((i: unknown) => z.object({ id: z.string().min(1) }).parse(i))
   .handler(async ({ data, context }) => {
+    if (!z.string().uuid().safeParse(data.id).success) return null;
     const { data: row } = await context.supabase
       .from("premade_listings").select(COLUMNS).eq("id", data.id).eq("is_live", true).maybeSingle();
     return row ? toListing(row) : null;

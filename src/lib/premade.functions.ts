@@ -12,7 +12,7 @@ const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open 
  * The flag lives in the same public-readable settings row as website
  * availability, so every checkout path can be checked on the server.
  */
-function createPublishableReadClient() {
+export function createPublishableReadClient() {
   const url = process.env["SUPABASE_URL"];
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   if (!url || !key) throw new Error(PREMASE_CLOSED_MESSAGE);

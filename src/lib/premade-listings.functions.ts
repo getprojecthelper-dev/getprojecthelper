@@ -53,6 +53,19 @@ const listingInput = z.object({
   priceMinor: z.number().int().min(70).max(10_000_000),
 });
 
+/** Public homepage: live listings the admin chose to feature. No sign-in needed. */
+export const listHomepageListings = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ environment: env }).parse(i))
+  .handler(async ({ data }) => {
+    const { createPublishableReadClient } = await import("@/lib/premade.functions");
+    const { data: rows, error } = await createPublishableReadClient()
+      .from("premade_listings").select(COLUMNS)
+      .eq("environment", data.environment).eq("is_live", true).eq("show_on_homepage", true)
+      .order("created_at", { ascending: false }).limit(6);
+    if (error) return [];
+    return (rows ?? []).map(toListing);
+  });
+
 /** Students: live listings only (RLS also enforces this). */
 export const listLiveListings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

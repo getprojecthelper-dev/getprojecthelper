@@ -77,13 +77,13 @@ function HeroCarousel() {
 
   return (
     <div className="relative mx-auto w-full max-w-xl">
-      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-violet-500/25 via-sky-500/20 to-emerald-500/15 blur-3xl" />
+      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-primary/25 via-primary/20 to-emerald-500/15 blur-3xl" />
       <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-[#14151c] p-2 shadow-[0_28px_70px_rgba(0,0,0,.45)]">
         <div
           className="flex transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${activeSlide * 100}%)` }}
         >
-          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-sky-600 p-6 sm:p-8">
+          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-primary via-primary to-primary p-6 sm:p-8">
             <div className="flex items-center justify-between">
               <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-white">
                 Build a project
@@ -103,7 +103,7 @@ function HeroCarousel() {
                   key={number}
                   className="flex items-center gap-3 rounded-xl border border-white/15 bg-black/15 p-3.5 text-sm font-medium text-white"
                 >
-                  <span className="grid size-7 place-items-center rounded-lg bg-white text-xs font-bold text-violet-700">
+                  <span className="grid size-7 place-items-center rounded-lg bg-white text-xs font-bold text-primary">
                     {number}
                   </span>
                   {text}
@@ -112,7 +112,7 @@ function HeroCarousel() {
               ))}
             </div>
           </section>
-          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-6 sm:p-8">
+          <section className="w-full shrink-0 rounded-[1.55rem] bg-gradient-to-br from-emerald-500 via-teal-600 to-primary p-6 sm:p-8">
             <div className="flex items-center justify-between">
               <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-white">
                 Buy a project
@@ -162,18 +162,18 @@ function Landing() {
             to="/"
             className="flex min-w-0 items-center gap-2.5 font-display text-base font-bold tracking-[-0.04em] sm:text-lg"
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 shadow-lg shadow-violet-300/60">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary shadow-lg shadow-primary/60">
               <img src={brandMark} alt="" width={512} height={512} className="size-5" />
             </span>
             <span className="truncate">Project Helper</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 lg:flex">
             {nav.map(([label, href]) => (
-              <a key={href} href={href} className="transition-colors hover:text-violet-300">
+              <a key={href} href={href} className="transition-colors hover:text-primary">
                 {label}
               </a>
             ))}
-            <Link to="/pricing" className="transition-colors hover:text-violet-300">
+            <Link to="/pricing" className="transition-colors hover:text-primary">
               Pricing
             </Link>
           </nav>
@@ -194,7 +194,7 @@ function Landing() {
                   <Button
                     asChild
                     size="sm"
-                    className="hidden rounded-xl bg-white px-4 text-slate-950 shadow-lg shadow-black/30 hover:bg-violet-100 sm:inline-flex"
+                    className="hidden rounded-xl bg-white px-4 text-slate-950 shadow-lg shadow-black/30 hover:bg-primary/10 sm:inline-flex"
                   >
                     <Link to="/auth" search={{ mode: "signup" }}>
                       Get started
@@ -215,7 +215,7 @@ function Landing() {
                     <SheetClose key={href} asChild>
                       <a
                         href={href}
-                        className="rounded-xl px-3 py-3 font-medium hover:bg-violet-50"
+                        className="rounded-xl px-3 py-3 font-medium hover:bg-primary/10"
                       >
                         {label}
                       </a>
@@ -224,7 +224,7 @@ function Landing() {
                   <SheetClose asChild>
                     <Link
                       to="/pricing"
-                      className="rounded-xl px-3 py-3 font-medium hover:bg-violet-50"
+                      className="rounded-xl px-3 py-3 font-medium hover:bg-primary/10"
                     >
                       Pricing
                     </Link>
@@ -255,7 +255,7 @@ function Landing() {
                 <Button
                   asChild
                   size="lg"
-                  className="group h-13 rounded-xl bg-white px-6 text-base text-slate-950 shadow-xl shadow-black/30 transition hover:bg-violet-100"
+                  className="group h-13 rounded-xl bg-white px-6 text-base text-slate-950 shadow-xl shadow-black/30 transition hover:bg-primary/10"
                 >
                   <Link to={workspace} search={session ? {} : { mode: "signup" }}>
                     Build a project{" "}
@@ -295,7 +295,7 @@ function Landing() {
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-end">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.2em] text-violet-300">
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-primary">
                   Build project
                 </p>
                 <h2 className="mt-4 max-w-xl font-display text-4xl font-bold leading-[1.04] tracking-[-.055em] text-white sm:text-5xl">
@@ -315,9 +315,9 @@ function Landing() {
               </p>
             </div>
             <div className="mt-12 grid gap-4 md:grid-cols-3">
-              <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-6 transition duration-300 hover:-translate-y-1 hover:border-violet-300/45 hover:bg-white/[.07] hover:shadow-[0_18px_45px_rgba(76,29,149,.2)]">
-                <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-violet-400/10 transition group-hover:bg-violet-400/20" />
-                <span className="relative flex size-11 items-center justify-center rounded-xl bg-violet-400/15 text-violet-200">
+              <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/45 hover:bg-white/[.07] hover:shadow-[0_18px_45px_rgba(76,29,149,.2)]">
+                <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-primary/10 transition group-hover:bg-primary/20" />
+                <span className="relative flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
                   <Lightbulb className="size-5" />
                 </span>
                 <h3 className="mt-5 font-display text-xl font-bold tracking-[-.035em] text-white">
@@ -327,7 +327,7 @@ function Landing() {
                 <Button
                   asChild
                   variant="link"
-                  className="mt-5 h-auto px-0 text-violet-200 hover:text-white"
+                  className="mt-5 h-auto px-0 text-primary hover:text-white"
                 >
                   <Link to="/auth" search={{ mode: "signup" }}>
                     Start here{" "}
@@ -335,9 +335,9 @@ function Landing() {
                   </Link>
                 </Button>
               </article>
-              <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-6 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/45 hover:bg-white/[.07] hover:shadow-[0_18px_45px_rgba(8,145,178,.2)]">
-                <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-cyan-400/10 transition group-hover:bg-cyan-400/20" />
-                <span className="relative flex size-11 items-center justify-center rounded-xl bg-cyan-400/15 text-cyan-200">
+              <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/45 hover:bg-white/[.07] hover:shadow-[0_18px_45px_rgba(8,145,178,.2)]">
+                <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-primary/10 transition group-hover:bg-primary/20" />
+                <span className="relative flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
                   <Sparkles className="size-5" />
                 </span>
                 <h3 className="mt-5 font-display text-xl font-bold tracking-[-.035em] text-white">
@@ -347,7 +347,7 @@ function Landing() {
                 <Button
                   asChild
                   variant="link"
-                  className="mt-5 h-auto px-0 text-cyan-200 hover:text-white"
+                  className="mt-5 h-auto px-0 text-primary hover:text-white"
                 >
                   <Link to="/auth" search={{ mode: "signup" }}>
                     Get ideas{" "}
@@ -382,7 +382,7 @@ function Landing() {
         <section id="how-it-works" className="px-5 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-7xl">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-300">
+              <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">
                 How it works
               </p>
               <h2 className="mt-3 font-display text-3xl font-bold tracking-[-.05em] sm:text-5xl">
@@ -409,9 +409,9 @@ function Landing() {
               ].map(([number, title, text]) => (
                 <div
                   key={number}
-                  className="rounded-3xl border border-violet-100 bg-white/75 p-7 shadow-sm"
+                  className="rounded-3xl border border-primary/20 bg-white/75 p-7 shadow-sm"
                 >
-                  <span className="font-display text-5xl font-bold tracking-[-.08em] text-violet-300">
+                  <span className="font-display text-5xl font-bold tracking-[-.08em] text-primary">
                     {number}
                   </span>
                   <h3 className="mt-10 font-display text-xl font-bold tracking-[-.04em]">
@@ -427,9 +427,9 @@ function Landing() {
           <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 text-white lg:grid-cols-[.95fr_1.05fr]">
             <div className="p-8 sm:p-12">
               <span className="inline-grid size-11 place-items-center rounded-xl bg-white/10">
-                <MessageSquareText className="size-5 text-violet-300" />
+                <MessageSquareText className="size-5 text-primary" />
               </span>
-              <p className="mt-7 text-xs font-bold uppercase tracking-[.18em] text-violet-300">
+              <p className="mt-7 text-xs font-bold uppercase tracking-[.18em] text-primary">
                 Your AI project mentor
               </p>
               <h2 className="mt-3 font-display text-3xl font-bold leading-tight tracking-[-.05em] sm:text-4xl">
@@ -441,22 +441,22 @@ function Landing() {
               </p>
               <Button
                 asChild
-                className="mt-8 rounded-xl bg-white text-slate-950 hover:bg-violet-100"
+                className="mt-8 rounded-xl bg-white text-slate-950 hover:bg-primary/10"
               >
                 <Link to={workspace}>
                   Meet your mentor <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
             </div>
-            <div className="m-5 rounded-[1.5rem] bg-gradient-to-br from-violet-500 to-indigo-600 p-5 sm:m-8 sm:p-7">
+            <div className="m-5 rounded-[1.5rem] bg-gradient-to-br from-primary to-primary p-5 sm:m-8 sm:p-7">
               <div className="rounded-2xl bg-white p-5 text-slate-900 shadow-xl">
-                <p className="text-xs font-bold text-violet-700">YOU</p>
+                <p className="text-xs font-bold text-primary">YOU</p>
                 <p className="mt-2 text-sm leading-6">
                   How can I make my final presentation more convincing?
                 </p>
               </div>
               <div className="mt-4 rounded-2xl bg-slate-950 p-5 shadow-xl">
-                <p className="text-xs font-bold text-violet-300">PROJECT HELPER</p>
+                <p className="text-xs font-bold text-primary">PROJECT HELPER</p>
                 <p className="mt-2 text-sm leading-6 text-slate-200">
                   Lead with the problem you solved, then show one clear decision from your project
                   and the evidence behind it. That gives your audience a story they can follow.
@@ -470,13 +470,13 @@ function Landing() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 text-sm text-slate-400">
           <span>© 2026 Sizcon Studios</span>
           <div className="flex gap-5">
-            <Link to="/terms" className="hover:text-violet-300">
+            <Link to="/terms" className="hover:text-primary">
               Terms
             </Link>
-            <Link to="/refund-policy" className="hover:text-violet-300">
+            <Link to="/refund-policy" className="hover:text-primary">
               Refund policy
             </Link>
-            <Link to="/privacy" className="hover:text-violet-300">
+            <Link to="/privacy" className="hover:text-primary">
               Privacy
             </Link>
           </div>
@@ -505,7 +505,7 @@ function FeaturedProjects() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-600">
+            <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">
               Ready-made projects
             </p>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-[-.05em] sm:text-4xl">
@@ -522,19 +522,19 @@ function FeaturedProjects() {
           {listings.map((listing) => (
             <article
               key={listing.id}
-              className="overflow-hidden rounded-3xl border border-violet-100 bg-white/75 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(76,29,149,.15)]"
+              className="overflow-hidden rounded-3xl border border-primary/20 bg-white/75 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(76,29,149,.15)]"
             >
               {listing.imageUrl ? (
                 <img src={listing.imageUrl} alt={listing.title} className="aspect-[16/10] w-full object-cover" />
               ) : (
-                <div className="grid aspect-[16/10] w-full place-items-center bg-violet-50">
-                  <BriefcaseBusiness className="size-8 text-violet-300" />
+                <div className="grid aspect-[16/10] w-full place-items-center bg-primary/10">
+                  <BriefcaseBusiness className="size-8 text-primary" />
                 </div>
               )}
               <div className="p-6">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-display text-lg font-bold tracking-[-.03em]">{listing.title}</h3>
-                  <span className="shrink-0 font-semibold text-violet-700">{rupees(listing.priceMinor)}</span>
+                  <span className="shrink-0 font-semibold text-primary">{rupees(listing.priceMinor)}</span>
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{listing.description}</p>
                 <p className="mt-3 text-xs font-medium text-slate-500">{listing.techStack}</p>
@@ -579,7 +579,7 @@ function ProjectWorkflow() {
     <div className="mt-14 border-t border-white/10 pt-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-300">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">
             Your roadmap
           </p>
           <h3 className="mt-2 font-display text-2xl font-bold tracking-[-.04em] text-white">
@@ -592,7 +592,7 @@ function ProjectWorkflow() {
       </div>
       <div className="relative mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 xl:gap-3">
         <div
-          className="absolute left-[6%] right-[6%] top-[3.8rem] hidden h-px bg-gradient-to-r from-violet-500/70 via-cyan-300/40 to-violet-500/70 xl:block"
+          className="absolute left-[6%] right-[6%] top-[3.8rem] hidden h-px bg-gradient-to-r from-primary/70 via-primary/40 to-primary/70 xl:block"
           aria-hidden
         />
         {PROJECT_STAGES.map(({ icon: Icon, title, detail }, index) => (
@@ -604,8 +604,8 @@ function ProjectWorkflow() {
               className={
                 "relative z-10 mx-auto flex size-14 items-center justify-center rounded-2xl border xl:mx-0 " +
                 (index === 3
-                  ? "border-violet-300 bg-violet-500 text-white shadow-[0_0_30px_rgba(139,92,246,.45)]"
-                  : "border-white/15 bg-white/[.06] text-violet-200")
+                  ? "border-primary bg-primary text-white shadow-[0_0_30px_rgba(139,92,246,.45)]"
+                  : "border-white/15 bg-white/[.06] text-primary")
               }
             >
               <Icon className="size-5" />
@@ -628,7 +628,7 @@ function ProjectWorkflow() {
           </p>
         </div>
         <div className="border-t border-white/10 pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-          <p className="text-xs font-bold uppercase tracking-[.14em] text-violet-300">
+          <p className="text-xs font-bold uppercase tracking-[.14em] text-primary">
             What you get
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-300">

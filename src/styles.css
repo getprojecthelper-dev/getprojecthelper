@@ -131,45 +131,20 @@
 }
 
 /* The marketing experience is deliberately a fixed dark presentation, not a toggleable theme. */
-#projects {
-  border-color: rgb(255 255 255 / 0.08) !important;
-  background: rgb(255 255 255 / 0.025) !important;
-}
-
-#projects > div > div:first-child > h2,
-#how-it-works h2,
-#how-it-works h3 {
-  color: #fff;
-}
-
-#projects > div > div:first-child > p,
-#projects article p,
-#how-it-works p {
-  color: rgb(203 213 225) !important;
-}
-
-#projects article {
-  border-color: rgb(255 255 255 / 0.1) !important;
-  background-image: linear-gradient(145deg, rgb(30 30 39 / .96), rgb(17 18 24 / .96)) !important;
-  box-shadow: 0 18px 45px rgb(0 0 0 / .22) !important;
-}
-
-#projects article h3,
-#projects article a {
-  color: #fff;
-}
-
-#how-it-works > div > div:last-child > div {
-  border-color: rgb(255 255 255 / 0.1) !important;
-  background: rgb(255 255 255 / 0.045) !important;
-  box-shadow: 0 18px 45px rgb(0 0 0 / .18);
-}
-
-#mentor > div > div:last-child {
-  background-image: linear-gradient(135deg, rgb(30 27 75 / .78), rgb(15 23 42 / .62)), url("/project-collaboration.png") !important;
-  background-position: center;
-  background-size: cover;
-}
+/* Light marketing presentation: white canvas with dark ink; colored gradient cards keep white text. */
+.landing-light { background: #fff; color: #0f172a; }
+.landing-light :is(.text-white, .text-slate-200):not(:is([class*="from-"], [class*="bg-violet"], [class*="bg-blue"], [class*="bg-indigo"], [class*="bg-sky"], [class*="bg-gradient"]) *):not([class*="from-"], [class*="bg-violet"], [class*="bg-blue"], [class*="bg-indigo"]) { color: #0f172a; }
+.landing-light .text-slate-300:not(:is([class*="from-"], [class*="bg-gradient"]) *) { color: #475569; }
+.landing-light .text-slate-400:not(:is([class*="from-"], [class*="bg-gradient"]) *) { color: #64748b; }
+.landing-light :is(.border-white\/10, .border-white\/15, .border-white\/20):not(:is([class*="from-"]) *) { border-color: #e2e8f0; }
+.landing-light :is([class*="bg-white/"], [class*="bg-[#1"]):not(:is([class*="from-"], [class*="bg-gradient"]) *) { background-color: #f8fafc; box-shadow: 0 10px 30px -18px rgb(15 23 42 / .25); }
+.landing-light header > div { background-color: rgb(255 255 255 / .85); box-shadow: 0 8px 30px -16px rgb(15 23 42 / .2); }
+.landing-light #projects { border-color: #e2e8f0 !important; background: #f8fafc !important; }
+.landing-light #projects article { border-color: #e2e8f0 !important; background: #fff !important; box-shadow: 0 18px 45px -24px rgb(15 23 42 / .25) !important; }
+.landing-light #projects p, .landing-light #how-it-works p { color: #475569 !important; }
+.landing-light #how-it-works > div > div:last-child > div { border-color: #e2e8f0 !important; background: #fff !important; }
+.landing-light #mentor > div > div:last-child { background-image: linear-gradient(135deg, rgb(30 27 75 / .82), rgb(15 23 42 / .7)), url("/project-collaboration.png") !important; background-size: cover; }
+.landing-light #mentor > div > div:last-child, .landing-light #mentor > div > div:last-child * { color: #fff; }
 
 .dark {
   --background: oklch(0.155 0.004 285);

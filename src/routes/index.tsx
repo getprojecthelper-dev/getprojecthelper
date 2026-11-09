@@ -185,9 +185,8 @@ function Landing() {
   ] as const;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#09090b] text-white">
-      <div className="landing-wash-dark pointer-events-none fixed inset-0 -z-10" aria-hidden />
-      <header className="relative z-30 px-4 pt-4 sm:px-6">
+    <div className="landing-light min-h-screen overflow-x-hidden">
+            <header className="relative z-30 px-4 pt-4 sm:px-6">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#111218]/75 px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.28)] backdrop-blur-xl sm:px-5">
           <Link
             to="/"

@@ -70,6 +70,7 @@ export function AdminProjectPricing() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: key });
     void queryClient.invalidateQueries({ queryKey: ["premade-listings"] });
+    void queryClient.invalidateQueries({ queryKey: ["homepage-listings"] });
   };
 
   const saveMutation = useMutation({

@@ -149,13 +149,19 @@ export const saveListing = createServerFn({ method: "POST" })
 export const setListingFlags = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ id: z.string().uuid(), isLive: z.boolean().optional(), isAvailable: z.boolean().optional() }).parse(i),
+    z.object({
+      id: z.string().uuid(),
+      isLive: z.boolean().optional(),
+      isAvailable: z.boolean().optional(),
+      showOnHomepage: z.boolean().optional(),
+    }).parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const patch: { is_live?: boolean; is_available?: boolean } = {};
+    const patch: { is_live?: boolean; is_available?: boolean; show_on_homepage?: boolean } = {};
     if (data.isLive !== undefined) patch.is_live = data.isLive;
     if (data.isAvailable !== undefined) patch.is_available = data.isAvailable;
+    if (data.showOnHomepage !== undefined) patch.show_on_homepage = data.showOnHomepage;
     const { data: row, error } = await context.supabase
       .from("premade_listings").update(patch).eq("id", data.id).select(COLUMNS).single();
     if (error || !row) throw new Error("The listing could not be updated.");

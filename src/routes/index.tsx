@@ -17,11 +17,15 @@ import {
   Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
 import { HeaderAccountMenu } from "@/components/header-account-menu";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { listHomepageListings } from "@/lib/premade-listings.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -283,6 +287,7 @@ function Landing() {
             <HeroCarousel />
           </div>
         </section>
+        <FeaturedProjects />
         <section
           id="build-project"
           className="build-project-section border-y border-white/10 px-5 py-20 sm:px-6 sm:py-28"

@@ -167,13 +167,13 @@
   --success-foreground: oklch(0.16 0.004 285);
   --warning: oklch(0.8 0.13 70);
   --warning-foreground: oklch(0.18 0.004 285);
-  --info: oklch(0.7 0.1 250);
+  --info: oklch(0.66 0.19 40);
   --info-foreground: oklch(0.16 0.004 285);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.7 0.19 40);
   --chart-1: oklch(0.7 0.19 40);
-  --chart-2: oklch(0.7 0.1 250);
+  --chart-2: oklch(0.78 0.13 70);
   --chart-3: oklch(0.8 0.13 70);
   --chart-4: oklch(0.7 0.12 155);
   --chart-5: oklch(0.85 0.006 85);

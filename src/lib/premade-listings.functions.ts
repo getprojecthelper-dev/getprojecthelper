@@ -15,14 +15,16 @@ export interface PremadeListing {
   providerPriceId: string | null;
   isLive: boolean;
   isAvailable: boolean;
+  showOnHomepage: boolean;
 }
 
 const env = z.enum(["sandbox", "live"]);
-const COLUMNS = "id,title,description,tech_stack,image_url,domain,price_minor,provider_price_id,is_live,is_available";
+const COLUMNS = "id,title,description,tech_stack,image_url,domain,price_minor,provider_price_id,is_live,is_available,show_on_homepage";
 
 type Row = {
   id: string; title: string; description: string; tech_stack: string; image_url: string | null;
   domain: string; price_minor: number; provider_price_id: string | null; is_live: boolean; is_available: boolean;
+  show_on_homepage: boolean;
 };
 
 const toListing = (r: Row): PremadeListing => ({
@@ -36,6 +38,7 @@ const toListing = (r: Row): PremadeListing => ({
   providerPriceId: r.provider_price_id,
   isLive: r.is_live,
   isAvailable: r.is_available,
+  showOnHomepage: r.show_on_homepage,
 });
 
 const listingInput = z.object({

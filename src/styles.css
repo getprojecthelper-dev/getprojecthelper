@@ -112,11 +112,11 @@
     radial-gradient(circle at 7% 8%, oklch(0.9 0.09 295 / .6), transparent 26rem),
     radial-gradient(circle at 95% 15%, oklch(0.91 0.09 225 / .54), transparent 31rem),
     radial-gradient(circle at 72% 82%, oklch(0.93 0.1 155 / .35), transparent 25rem),
-    linear-gradient(135deg, #fbfbff 0%, #f4f6ff 46%, #f8fffd 100%);
+    linear-gradient(135deg, #ffffff 0%, #fffaf7 50%, #ffffff 100%);
 }
 
 .landing-gradient-text {
-  background: linear-gradient(100deg, #6d28d9 0%, #2563eb 48%, #0891b2 100%);
+  background: linear-gradient(100deg, var(--primary) 0%, oklch(0.62 0.2 32) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -143,7 +143,7 @@
 .landing-light #projects article { border-color: #e2e8f0 !important; background: #fff !important; box-shadow: 0 18px 45px -24px rgb(15 23 42 / .25) !important; }
 .landing-light #projects p, .landing-light #how-it-works p { color: #475569 !important; }
 .landing-light #how-it-works > div > div:last-child > div { border-color: #e2e8f0 !important; background: #fff !important; }
-.landing-light #mentor > div > div:last-child { background-image: linear-gradient(135deg, rgb(30 27 75 / .82), rgb(15 23 42 / .7)), url("/project-collaboration.png") !important; background-size: cover; }
+.landing-light #mentor > div > div:last-child { background-image: linear-gradient(135deg, rgb(24 24 27 / .82), rgb(15 23 42 / .7)), url("/project-collaboration.png") !important; background-size: cover; }
 .landing-light #mentor > div > div:last-child, .landing-light #mentor > div > div:last-child * { color: #fff; }
 
 .dark {
@@ -220,7 +220,7 @@
 .workspace-canvas {
   background:
     radial-gradient(circle at 8% 0%, rgb(255 107 53 / .1), transparent 28rem),
-    radial-gradient(circle at 94% 100%, rgb(124 58 237 / .08), transparent 30rem),
+    radial-gradient(circle at 94% 100%, rgb(255 107 53 / .06), transparent 30rem),
     var(--background);
 }
 

@@ -726,15 +726,12 @@ function Footer({
         </div>
         <div
           id="ai-usage-disclaimer"
-          className="border-b border-[#353a44] py-3 text-[13px] leading-5 text-[#c0c5cf]"
+          className="border-b border-[#353a44] py-3 text-center text-[13px] leading-5 text-[#c0c5cf]"
         >
-          <p className="max-w-2xl">
-            AI can make mistakes. Please verify important information before relying on it.
-          </p>
+          <p>AI can make mistakes. Please verify important information before relying on it.</p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 text-xs text-[#c0c5cf]">
+        <div className="pt-3 text-xs text-[#c0c5cf]">
           <span>© 2026 GetProjectHelper. All rights reserved.</span>
-          <span>Based in India</span>
         </div>
       </div>
     </footer>

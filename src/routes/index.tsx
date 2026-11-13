@@ -57,7 +57,43 @@ function Landing() {
     queryKey: ["homepage-listings", environment],
     queryFn: () => fetchListings({ data: { environment } }),
   });
-  const catalogPreview = listings.slice(0, 3);
+  const demoProjects = [
+    {
+      id: "demo-campus-companion",
+      title: "Campus Companion",
+      description:
+        "Plan classes, track assignments, and keep campus events in one simple student dashboard.",
+      techStack: "React · TypeScript · Supabase",
+      imageUrl: "/student-project-workspace.png",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-analytics-dashboard",
+      title: "Analytics Dashboard",
+      description: "Explore clear charts and useful metrics in a responsive analytics workspace.",
+      techStack: "React · TypeScript · Recharts",
+      imageUrl: "/analytics-dashboard-project.png",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-project-collaboration",
+      title: "Project Collaboration",
+      description: "Organize tasks, share updates, and keep a small team moving together.",
+      techStack: "React · Node.js · PostgreSQL",
+      imageUrl: "/project-collaboration.png",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+  ];
+  const catalogPreview =
+    listings.length > 0
+      ? listings.slice(0, 3).map((listing) => ({ ...listing, demo: false }))
+      : demoProjects;
   const { session } = useAuth();
   const getStarted = session ? "/welcome" : "/auth";
   const signup = session ? {} : { mode: "signup" as const };
@@ -279,7 +315,7 @@ function Landing() {
               </Button>
             </div>
             {catalogPreview.length > 0 && (
-              <div className="mt-7 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mx-auto mt-7 grid max-w-5xl items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {catalogPreview.map((product) => (
                   <article
                     key={product.id}
@@ -290,13 +326,13 @@ function Landing() {
                         src={product.imageUrl}
                         alt={`Preview image for ${product.title}`}
                         loading="lazy"
-                        className="aspect-square w-full border-b border-[#e4e4e7] object-cover"
+                        className="aspect-[4/3] w-full border-b border-[#e4e4e7] object-cover"
                       />
                     ) : (
                       <div
                         role="img"
                         aria-label={`Image preview unavailable for ${product.title}`}
-                        className="flex aspect-square items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
+                        className="flex aspect-[4/3] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
                       >
                         <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
                           {product.title}
@@ -332,7 +368,11 @@ function Landing() {
                             ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
                           </p>
                         </div>
-                        {!product.isAvailable ? (
+                        {product.demo ? (
+                          <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
+                            Demo project
+                          </span>
+                        ) : !product.isAvailable ? (
                           <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
                             Not available
                           </span>
@@ -358,12 +398,6 @@ function Landing() {
                   </article>
                 ))}
               </div>
-            )}
-            {catalogPreview.length === 0 && (
-              <p className="mt-7 py-6 text-sm leading-6 text-[#62666e]">
-                New ready-made projects are on the way. Browse the full catalog to see what is
-                available.
-              </p>
             )}
           </div>
         </section>

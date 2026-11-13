@@ -623,7 +623,7 @@ function Footer({
             From ideas to working solutions. Explore, plan, and build projects with confidence.
           </p>
         </div>
-        <div className="grid gap-x-8 gap-y-4 border-b border-[#353a44] py-4 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-4 border-b border-[#353a44] py-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="font-display text-sm font-semibold">Platform</p>
             <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">

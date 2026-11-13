@@ -129,19 +129,12 @@ export function HomepageRoadmap() {
                     ) : step.number === "06" ? (
                       <ul className="roadmap-step-bullets">
                         <li>
-                          Create research papers with an abstract, methodology, results, and
-                          references.
+                          Create research papers and literature reviews with references, key themes,
+                          and research gaps.
                         </li>
                         <li>
-                          Write literature reviews that group research by theme and highlight gaps.
-                        </li>
-                        <li>
-                          Prepare project reports covering design, implementation, testing, and
-                          results.
-                        </li>
-                        <li>
-                          Draft a synopsis or proposal with the problem, objectives, methodology,
-                          and timeline.
+                          Prepare project reports, synopses, and proposals covering design, testing,
+                          objectives, and timelines.
                         </li>
                         <li>Choose an academic template and export compile-ready LaTeX.</li>
                       </ul>

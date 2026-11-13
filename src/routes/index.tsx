@@ -615,63 +615,75 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="border-t border-[#e4e4e7] bg-white px-5 py-8 text-[#111111] sm:px-8">
-      <div className="mx-auto grid max-w-[90rem] gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-[#353a44] bg-[#111318] px-5 py-8 text-[#f5f7fa] sm:px-8 sm:py-9">
+      <div className="mx-auto grid max-w-[90rem] gap-x-12 gap-y-8 sm:grid-cols-2">
         <div>
           <p className="font-display text-lg font-semibold">GetProjectHelper</p>
-          <p className="mt-2 text-sm text-[#62666e]">
-            Custom projects and ready-made digital products.
+          <p className="mt-3 max-w-md text-sm leading-5 text-[#c0c5cf]">
+            From ideas to working solutions. Build custom projects or explore products ready to use.
           </p>
         </div>
         <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Services</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
-            <Link
-              to={getStarted}
-              search={signup}
-              className="transition-colors hover:text-[#0866e8]"
-            >
+          <p className="font-display text-base font-semibold">Services</p>
+          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
               Get a Project
             </Link>
             <Link
               to={products}
               search={productSearch}
-              className="transition-colors hover:text-[#0866e8]"
+              className="transition-colors hover:text-white"
             >
-              Products
+              Buy a Product
+            </Link>
+            <Link
+              to={products}
+              search={productSearch}
+              className="transition-colors hover:text-white"
+            >
+              Explore Projects
             </Link>
           </div>
         </div>
         <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Company</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
-            <a href="#services" className="transition-colors hover:text-[#0866e8]">
-              About GetProjectHelper
+          <p className="font-display text-base font-semibold">Company</p>
+          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <a href="#get-project" className="transition-colors hover:text-white">
+              About Us
+            </a>
+            <a href="#how-it-works" className="transition-colors hover:text-white">
+              How It Works
             </a>
             <a
               href="mailto:support@getprojecthelper.com"
-              className="transition-colors hover:text-[#0866e8]"
+              className="transition-colors hover:text-white"
             >
-              Contact support
+              Contact Us
             </a>
           </div>
         </div>
         <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Legal</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
-            <Link to="/terms" className="transition-colors hover:text-[#0866e8]">
-              Terms and Conditions
-            </Link>
-            <Link to="/privacy" className="transition-colors hover:text-[#0866e8]">
+          <p className="font-display text-base font-semibold">Legal &amp; Support</p>
+          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <Link to="/privacy" className="transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to="/refund-policy" className="transition-colors hover:text-[#0866e8]">
+            <Link to="/terms" className="transition-colors hover:text-white">
+              Terms and Conditions
+            </Link>
+            <Link to="/refund-policy" className="transition-colors hover:text-white">
               Refund Policy
             </Link>
+            <a
+              href="mailto:support@getprojecthelper.com"
+              className="transition-colors hover:text-white"
+            >
+              Support
+            </a>
           </div>
         </div>
-        <div className="text-sm text-[#62666e] sm:col-span-2 lg:col-span-4">
-          © 2026 Sizcon Studios
+        <div className="border-t border-[#353a44] pt-5 text-sm text-[#c0c5cf] sm:col-span-2">
+          © 2026 GetProjectHelper. All rights reserved.
         </div>
       </div>
     </footer>

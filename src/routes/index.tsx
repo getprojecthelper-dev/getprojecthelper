@@ -343,7 +343,7 @@ function Landing() {
                           src={product.imageUrl}
                           alt={`Preview image for ${product.title}`}
                           loading="lazy"
-                          className="aspect-[4/3] w-full border-b border-[#e4e4e7] object-cover"
+                          className="aspect-[16/10] w-full border-b border-[#e4e4e7] object-cover"
                         />
                         {product.demo && (
                           <span
@@ -364,7 +364,7 @@ function Landing() {
                       <div
                         role="img"
                         aria-label={`Image preview unavailable for ${product.title}`}
-                        className="flex aspect-[4/3] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
+                        className="flex aspect-[16/10] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
                       >
                         <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
                           {product.title}
@@ -374,7 +374,7 @@ function Landing() {
                         </span>
                       </div>
                     )}
-                    <div className="flex flex-1 flex-col bg-[#f1f1f1] p-4 sm:p-5">
+                    <div className="flex flex-1 flex-col bg-[#f1f1f1] p-3 sm:p-4">
                       <div className="min-w-0">
                         <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
                           {product.title}
@@ -398,15 +398,15 @@ function Landing() {
                           </div>
                         </div>
                         {product.demo && (
-                          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                            <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
+                          <div className="mt-2 flex flex-wrap items-center gap-1">
+                            <span className="mr-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#62666e]">
                               Includes
                             </span>
                             {["Dataset", "Documentation", "Report", "Research paper"].map(
                               (item) => (
                                 <span
                                   key={item}
-                                  className="rounded-full border border-[#d4d4d8] bg-white/75 px-2 py-1 text-[10px] font-medium leading-none text-[#3f3f46]"
+                                  className="whitespace-nowrap rounded-full border border-[#d4d4d8] bg-white/75 px-1.5 py-1 text-[9px] font-medium leading-none text-[#3f3f46]"
                                 >
                                   {item}
                                 </span>
@@ -415,10 +415,10 @@ function Landing() {
                           </div>
                         )}
                       </div>
-                      <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#525866]">
+                      <p className="mt-2 line-clamp-3 text-sm leading-5 text-[#525866]">
                         {product.description}
                       </p>
-                      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3">
                         <div>
                           <p className="text-xs text-[#62666e]">
                             {product.isAvailable ? "One-time purchase" : "Currently unavailable"}

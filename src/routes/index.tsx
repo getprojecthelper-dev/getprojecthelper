@@ -1,5 +1,4 @@
 import { HomepageRoadmap } from "@/components/homepage-roadmap";
-import { HomepagePaths } from "@/components/homepage-paths";
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -75,7 +74,10 @@ function Landing() {
         signedIn={Boolean(session)}
       />
       <main>
-        <section className="landing-hero overflow-hidden px-5 pb-0 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
+        <section
+          id="get-project"
+          className="landing-hero scroll-mt-8 overflow-hidden px-5 pb-0 pt-14 sm:px-8 sm:pt-20 lg:pt-24"
+        >
           <div className="mx-auto max-w-[90rem] text-center">
             <h1 className="mx-auto max-w-6xl font-display text-[clamp(3.25rem,8.3vw,7.7rem)] font-semibold leading-[.98] tracking-[-.075em]">
               From idea to
@@ -250,24 +252,21 @@ function Landing() {
         </section>
 
         <HomepageRoadmap />
-        <HomepagePaths />
-
         <section
-          id="products"
-          className="border-y border-[#14120f] bg-[#e6e2d8] px-5 py-20 sm:px-8 sm:py-24"
+          id="services"
+          className="scroll-mt-8 border-y border-[#14120f] bg-[#e6e2d8] px-5 py-16 sm:px-8 sm:py-20"
         >
           <div className="mx-auto max-w-[90rem]">
-            <div className="flex flex-col gap-6 border-b border-[#14120f] pb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-6 border-b border-[#14120f] pb-7 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="font-mono text-xs font-bold uppercase tracking-[.17em] text-[#376d5c]">
-                  02 / Ready-made products
-                </p>
-                <h2 className="mt-4 max-w-2xl font-display text-5xl font-semibold leading-[.92] tracking-[-.075em] sm:text-6xl">
-                  A practical place to start.
+                <h2
+                  id="products"
+                  className="max-w-3xl font-display text-5xl font-semibold leading-[.92] tracking-[-.075em] sm:text-6xl"
+                >
+                  Explore ready-made projects
                 </h2>
-                <p className="mt-4 max-w-xl text-base leading-7 text-[#514c45]">
-                  Explore project briefs already in the catalog. Review the scope and tools before
-                  checkout.
+                <p className="mt-3 max-w-xl text-lg leading-7 text-[#514c45]">
+                  Find your starting point. Make it yours.
                 </p>
               </div>
               <Button
@@ -276,52 +275,92 @@ function Landing() {
                 className="h-11 w-fit rounded-none border-[#14120f] bg-transparent text-[#14120f] shadow-none hover:bg-[#d9e4da] hover:text-[#14120f]"
               >
                 <Link to={products} search={productSearch}>
-                  View all products <ArrowRight className="size-4" />
+                  Browse all projects <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </div>
             {catalogPreview.length > 0 && (
-              <div className="mt-8 grid gap-5 md:grid-cols-3">
-                {catalogPreview.map((product, index) => (
+              <div className="mt-7 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {catalogPreview.map((product) => (
                   <article
                     key={product.id}
-                    className="flex flex-col border border-[#14120f] bg-[#fdfbf6] transition-transform duration-200 hover:-translate-y-1"
+                    className="flex min-w-0 flex-col overflow-hidden border border-[#14120f] bg-[#fdfbf6] transition-transform duration-200 hover:-translate-y-1"
                   >
-                    <div
-                      className={`flex min-h-36 items-end justify-between border-b border-[#14120f] p-5 ${index === 0 ? "bg-[#dce9df]" : index === 1 ? "bg-[#e0e4ef]" : "bg-[#f0ddcb]"}`}
-                    >
-                      <span className="max-w-[15rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
-                        {product.title}
-                      </span>
-                      <span className="font-mono text-xs font-bold">0{index + 1}</span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <p className="text-sm leading-6 text-[#514c45]">{product.description}</p>
-                      <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                        <span className="border border-[#d4cec2] px-2 py-1">
-                          {product.domain.replaceAll("_", " ")}
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.title}
+                        loading="lazy"
+                        className="aspect-[16/9] w-full border-b border-[#14120f] object-cover"
+                      />
+                    ) : (
+                      <div className="flex aspect-[16/9] items-end justify-between border-b border-[#14120f] bg-[#dce9df] p-5">
+                        <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
+                          {product.title}
                         </span>
-                        <span className="border border-[#d4cec2] px-2 py-1">
-                          {product.techStack}
+                        <span className="font-mono text-xs font-bold uppercase text-[#376d5c]">
+                          Project
                         </span>
                       </div>
-                      <p className="mt-5 text-xs text-[#746d63]">
-                        {new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(product.priceMinor / 100)}
+                    )}
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="border border-[#d4cec2] px-2 py-1 capitalize">
+                          {product.domain.replaceAll("_", " ")}
+                        </span>
+                        <span className="border border-[#d4cec2] px-2 py-1">Ready-made</span>
+                      </div>
+                      <h3 className="mt-4 font-display text-2xl font-semibold leading-tight tracking-[-.04em]">
+                        {product.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#514c45]">
+                        {product.description}
                       </p>
-                      <Link
-                        to={products}
-                        search={productSearch}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#376d5c] hover:text-[#14120f]"
-                      >
-                        Review product details <ArrowRight className="size-4" />
-                      </Link>
+                      <p className="mt-4 text-xs leading-5 text-[#746d63]">
+                        <span className="font-semibold text-[#14120f]">Tools:</span>{" "}
+                        {product.techStack}
+                      </p>
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-4 border-t border-[#d4cec2] pt-5">
+                        <div>
+                          <p className="text-xs text-[#746d63]">
+                            {product.isAvailable ? "One-time purchase" : "Currently unavailable"}
+                          </p>
+                          <p className="mt-1 text-xl font-semibold text-[#14120f]">
+                            ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                        {!product.isAvailable ? (
+                          <span className="inline-flex min-h-11 items-center border border-[#d4cec2] px-4 py-2 text-sm font-semibold text-[#746d63]">
+                            Not available
+                          </span>
+                        ) : session ? (
+                          <Link
+                            to="/premade/$projectId"
+                            params={{ projectId: product.id }}
+                            className="inline-flex min-h-11 items-center gap-2 bg-[#0866e8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                          >
+                            View project <ArrowRight className="size-4" />
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/auth"
+                            search={{ mode: "signup" }}
+                            className="inline-flex min-h-11 items-center gap-2 bg-[#0866e8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                          >
+                            Sign up to buy <ArrowRight className="size-4" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </article>
                 ))}
               </div>
+            )}
+            {catalogPreview.length === 0 && (
+              <p className="mt-7 border border-[#14120f] bg-[#fdfbf6] p-6 text-sm leading-6 text-[#514c45]">
+                New ready-made projects are on the way. Browse the full catalog to see what is
+                available.
+              </p>
             )}
           </div>
         </section>

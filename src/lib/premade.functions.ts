@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
 
 const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open here shortly.";
 

@@ -1,14 +1,7 @@
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  Layers3,
-  Loader2,
-} from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Layers3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -60,8 +53,8 @@ function AuthPage() {
     typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
   useEffect(() => {
-    if (isLocalPreview || (!loading && session)) void navigate({ to: "/welcome", replace: true });
-  }, [isLocalPreview, loading, session, navigate]);
+    if (!loading && session) void navigate({ to: "/welcome", replace: true });
+  }, [loading, session, navigate]);
 
   // Count the sign-up cooldown down once per second so the button re-enables itself.
   useEffect(() => {
@@ -179,16 +172,6 @@ function AuthPage() {
       );
     }
   };
-
-  if (isLocalPreview) {
-    return (
-      <main className="auth-stage flex min-h-dvh items-center justify-center px-5 text-auth-light">
-        <p className="flex items-center gap-3 text-sm font-medium">
-          <Loader2 className="size-4 animate-spin text-auth-coral" /> Opening your workspace…
-        </p>
-      </main>
-    );
-  }
 
   return (
     <main className="auth-stage relative isolate grid min-h-dvh overflow-hidden lg:grid-cols-[minmax(0,1.08fr)_minmax(440px,.92fr)]">

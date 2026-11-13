@@ -6,7 +6,6 @@ import { generateJson, nullableStr, obj, str, strArray } from "@/lib/ai.server";
 import { getPlaybook, PM_ARTIFACT_PLAN, type PmProfile } from "@/lib/domain-playbooks";
 import { syncProjectWorkspace } from "@/lib/project-workspace.server";
 
-
 export interface SuggestedProject {
   title: string;
   description: string;
@@ -44,7 +43,6 @@ export interface ResearchPaper {
 }
 
 export interface SectionPlan {
-
   title: string;
   question: string;
   objective: string;
@@ -69,8 +67,6 @@ export interface CodeBlock {
   /** "create" | "modify" | "run" — what the student does with it. */
   action?: string;
 }
-
-
 
 export interface StructureFile {
   path: string;
@@ -106,9 +102,21 @@ export const suggestProjects = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().default("").transform((v) => v.slice(0, 600)),
-        jobDescription: z.string().trim().default("").transform((v) => v.slice(0, 6000)),
-        skills: z.string().trim().default("").transform((v) => v.slice(0, 600)),
+        idea: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 600)),
+        jobDescription: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 6000)),
+        skills: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 600)),
         domain: z.string().min(1).max(40),
         difficulty: z.enum(["easy", "intermediate", "hard"]).optional(),
         page: z.number().int().min(1).max(20),
@@ -139,7 +147,6 @@ Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it 
 - market_signals: 2-4 very short tags naming the trend or standard it rides (e.g. "AI copilots", "Cloud-native", "Data governance", "Agile delivery", "PMP-aligned"). No dates, no invented statistics.`,
       input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\n${data.skills ? `Student's skills: ${data.skills}\n` : ""}${data.jobDescription ? `Job description to target:\n"""\n${data.jobDescription}\n"""\n` : ""}Requested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
 
-
       schema: obj({
         projects: {
           type: "array",
@@ -161,7 +168,6 @@ Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it 
       market_signals: (p.market_signals ?? []).slice(0, 4),
     }));
   });
-
 
 /* ------------------------------------------------------------------ */
 /* 1b. Find research papers for the chosen project                     */
@@ -209,13 +215,11 @@ export const findResearchPapers = createServerFn({ method: "POST" })
       description: data.description,
       domain: data.domain,
     });
-
   });
 
 /* ------------------------------------------------------------------ */
 /* 2. Find datasets for a data-oriented project                        */
 /* ------------------------------------------------------------------ */
-
 
 export const findDatasets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -263,7 +267,10 @@ export const createGuidedProject = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().transform((value) => value.slice(0, 600)),
+        idea: z
+          .string()
+          .trim()
+          .transform((value) => value.slice(0, 600)),
         domain: z.string().max(40),
         title: z.string().trim().min(2).max(200),
         description: z.string().trim().max(3000),
@@ -297,7 +304,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
           .max(10)
           .default([]),
         codeComplexity: z.enum(["easy", "intermediate", "advanced"]).default("intermediate"),
-
       })
       .parse(input),
   )
@@ -325,18 +331,17 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       plan = { sections: PM_ARTIFACT_PLAN as unknown as SectionPlan[] };
     } else {
       plan = await generateJson<{ sections: SectionPlan[] }>({
-      usage: { userId, feature: "plan_sections" },
-      name: "implementation_plan",
-      instructions:
-        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. AT MOST ONE section may have kind 'structure' (the project folder/file layout) — never plan two structure sections, and never repeat the folder tree in another section. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
+        usage: { userId, feature: "plan_sections" },
+        name: "implementation_plan",
+        instructions: `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. AT MOST ONE section may have kind 'structure' (the project folder/file layout) — never plan two structure sections, and never repeat the folder tree in another section. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
+        input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
 
-      schema: obj({
-        sections: {
-          type: "array",
-          items: obj({ title: str, question: str, objective: str, kind: str }),
-        },
-      }),
+        schema: obj({
+          sections: {
+            type: "array",
+            items: obj({ title: str, question: str, objective: str, kind: str }),
+          },
+        }),
       });
     }
 
@@ -361,7 +366,9 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       .single();
 
     if (error?.message?.includes("project_limit_reached"))
-      throw new Error("You have reached the active-project limit for your plan. Finish a project or upgrade on the Pricing page.");
+      throw new Error(
+        "You have reached the active-project limit for your plan. Finish a project or upgrade on the Pricing page.",
+      );
     if (error || !project) throw new Error("The project could not be created.");
 
     // Only ONE section may be the project-structure section; any later
@@ -391,7 +398,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       };
     });
 
-
     const { error: sectionError } = await supabase.from("build_sections").insert(rows);
     if (sectionError) throw new Error("The implementation sections could not be saved.");
 
@@ -411,7 +417,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     }
 
     return { projectId: project.id };
-
   });
 
 /* ------------------------------------------------------------------ */
@@ -436,7 +441,6 @@ const sectionFields = {
       example: str,
       analogy: str,
     }),
-
   },
   insights: strArray,
   business_connection: str,
@@ -486,8 +490,6 @@ const fixSchema = obj({
   },
 });
 
-
-
 interface OverviewContent {
   problem_statement: string;
   solution: string;
@@ -511,10 +513,7 @@ interface SectionRow {
   status: string;
 }
 
-async function loadContext(
-  supabase: { from: (t: string) => any },
-  sectionId: string,
-) {
+async function loadContext(supabase: { from: (t: string) => any }, sectionId: string) {
   const { data: section } = await supabase
     .from("build_sections")
     .select("*")
@@ -561,13 +560,19 @@ async function loadContext(
 
   const playbook = getPlaybook(project.domain as string | null);
 
-  const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;
-  const codeComplexity = (project.code_complexity as "easy" | "intermediate" | "advanced" | null) ?? "intermediate";
-  const complexityInstruction = codeComplexity === "easy"
-    ? "CODE LEVEL: ESSENTIAL. Designed for students and beginners new to coding. Generate straightforward, readable code using simple functions, familiar syntax and basic programming concepts. Avoid advanced design patterns, unnecessary abstractions and complex logic. Use small explicit steps, plain loops and if/else, and frequent short first-person comments so beginners can understand, implement and remember the code."
-    : codeComplexity === "advanced"
-      ? "CODE LEVEL: PRODUCTION. Designed for experienced developers and real-world applications. Generate complete, robust, maintainable solutions with appropriate architecture, validation, error handling, security considerations and meaningful comments. Optimize time and space complexity where relevant and follow professional engineering standards — but WITHOUT artificially increasing code length or introducing unnecessary abstractions. A simple problem gets a simple, efficient, production-quality solution."
-      : "CODE LEVEL: INTERMEDIATE. A balanced combination of beginner-friendly readability and professional development practices. Generate modular, reusable, maintainable code using appropriate functions, error handling and clean architecture. Introduce advanced concepts only when they provide meaningful value. Avoid unnecessary complexity and excessive boilerplate.";
+  const pm = project.pm_profile as {
+    industry?: string;
+    methodology?: string;
+    duration?: string;
+  } | null;
+  const codeComplexity =
+    (project.code_complexity as "easy" | "intermediate" | "advanced" | null) ?? "intermediate";
+  const complexityInstruction =
+    codeComplexity === "easy"
+      ? "CODE LEVEL: ESSENTIAL. Designed for students and beginners new to coding. Generate straightforward, readable code using simple functions, familiar syntax and basic programming concepts. Avoid advanced design patterns, unnecessary abstractions and complex logic. Use small explicit steps, plain loops and if/else, and frequent short first-person comments so beginners can understand, implement and remember the code."
+      : codeComplexity === "advanced"
+        ? "CODE LEVEL: PRODUCTION. Designed for experienced developers and real-world applications. Generate complete, robust, maintainable solutions with appropriate architecture, validation, error handling, security considerations and meaningful comments. Optimize time and space complexity where relevant and follow professional engineering standards — but WITHOUT artificially increasing code length or introducing unnecessary abstractions. A simple problem gets a simple, efficient, production-quality solution."
+        : "CODE LEVEL: INTERMEDIATE. A balanced combination of beginner-friendly readability and professional development practices. Generate modular, reusable, maintainable code using appropriate functions, error handling and clean architecture. Introduce advanced concepts only when they provide meaningful value. Avoid unnecessary complexity and excessive boilerplate.";
   const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? complexityInstruction : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code."}\nCONCISENESS RULE: write exactly as much code as the task needs — if something can be done correctly in 3 lines, write 3 lines, never pad it into 100. No filler code, no speculative features, no boilerplate that adds nothing.\n\nPrevious sections:\n${priorContext || "(this is the first section)"}${roadmap ? `\n\nUPCOMING STEPS (the files you plan must cover every one of these):\n${roadmap}` : ""}`;
 
   return {
@@ -578,7 +583,6 @@ async function loadContext(
     codeComplexity,
     supabase,
   };
-
 }
 
 export const generateSection = createServerFn({ method: "POST" })
@@ -586,8 +590,10 @@ export const generateSection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ sectionId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief, playbook, domain } = await loadContext(supabase as never, data.sectionId);
-
+    const { section, brief, playbook, domain } = await loadContext(
+      supabase as never,
+      data.sectionId,
+    );
 
     const isOverview =
       section.kind === "overview" ||
@@ -595,7 +601,11 @@ export const generateSection = createServerFn({ method: "POST" })
 
     if (isOverview) {
       const overview = await generateJson<OverviewContent>({
-        usage: { userId: context.userId, projectId: section.project_id, feature: "section_overview" },
+        usage: {
+          userId: context.userId,
+          projectId: section.project_id,
+          feature: "section_overview",
+        },
         name: "section_overview",
         instructions: playbook.buildsCode
           ? "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler."
@@ -631,7 +641,6 @@ export const generateSection = createServerFn({ method: "POST" })
         },
       ];
 
-
       const { error: overviewError } = await supabase
         .from("build_sections")
         .update({
@@ -655,12 +664,12 @@ export const generateSection = createServerFn({ method: "POST" })
     const isStructure = section.kind === "structure" && playbook.buildsCode;
     const dataProject = isDataDomain(String(domain ?? ""));
     const notebookRule = dataProject
-      ? " NOTEBOOKS MATTER IN THIS PROJECT: put the exploration, analysis and every chart inside a Jupyter notebook. When a part belongs in a notebook, set `file` to the notebook path followed by the cell, in the form \"<notebook path from the project structure> — cell: <n>\" (use the real notebook names planned for this project), set `action` to \"create\" for the first cell of that notebook and \"modify\" afterwards, and keep each cell short enough to run on its own. Every chart you create must actually be looked at and explained: after a plotting cell, say in the bullets what the student should see in the chart and what it means for the project. Never create a notebook or a plotting script that is then ignored — if a file exists in the plan, this project must use it."
+      ? ' NOTEBOOKS MATTER IN THIS PROJECT: put the exploration, analysis and every chart inside a Jupyter notebook. When a part belongs in a notebook, set `file` to the notebook path followed by the cell, in the form "<notebook path from the project structure> — cell: <n>" (use the real notebook names planned for this project), set `action` to "create" for the first cell of that notebook and "modify" afterwards, and keep each cell short enough to run on its own. Every chart you create must actually be looked at and explained: after a plotting cell, say in the bullets what the student should see in the chart and what it means for the project. Never create a notebook or a plotting script that is then ignored — if a file exists in the plan, this project must use it.'
       : "";
     const task = isStructure
       ? "Produce the project folder/file structure as an ASCII tree in `structure`, AND list the same files in `files`. There is NO fixed file count and NO fixed file names: plan as many files and folders as this exact project needs to be complete (modules for data loading, processing, models, utilities, app, tests, configs, docs — whatever applies), and name every file after its real purpose in this project. ONLY include files this specific project genuinely needs — no speculative folders, no files nothing will ever use. Always include a requirements.txt (or package.json) and, when the project uses any key or secret, a .env file in the tree. The tree must be the COMPLETE project: every folder and every file any later step will create or edit. FILE CONTENT AT SETUP: ONLY README.md (full project-specific overview, setup and run instructions, folder guide) and requirements.txt (or package.json — every real pinned dependency the whole project will use) get content. EVERY other file — every source module, config, test and notebook — must be listed in `files` with EMPTY content; the student generates their code later in the matching step. Never put code in notebooks or source files here. Never invent datasets or secrets. All files in the tree must appear in files; empty directories remain in the tree." +
         (dataProject
-          ? " NOTEBOOKS: derive them from the UPCOMING STEPS list — give each analysis, exploration, feature, training or evaluation step its own notebook (merge two steps only when they are truly one piece of work), numbered in roadmap order and named after that step's real topic in snake_case (for example a step \"Explore Churn Patterns\" becomes notebooks/02_explore_churn_patterns.ipynb). Never use bare generic names such as explore.ipynb, model.ipynb, analysis.ipynb, 01_explore.ipynb or 02_model.ipynb. Likewise every source module must map to a real upcoming step. The number of notebooks and files therefore follows the roadmap, not a template."
+          ? ' NOTEBOOKS: derive them from the UPCOMING STEPS list — give each analysis, exploration, feature, training or evaluation step its own notebook (merge two steps only when they are truly one piece of work), numbered in roadmap order and named after that step\'s real topic in snake_case (for example a step "Explore Churn Patterns" becomes notebooks/02_explore_churn_patterns.ipynb). Never use bare generic names such as explore.ipynb, model.ipynb, analysis.ipynb, 01_explore.ipynb or 02_model.ipynb. Likewise every source module must map to a real upcoming step. The number of notebooks and files therefore follows the roadmap, not a template.'
           : "") +
         " `blocks` should contain 1-3 small parts: the commands that create the folders, then how to open the project. Do not dump the whole project into one block."
       : playbook.sectionTask + notebookRule;
@@ -679,7 +688,6 @@ FILE: set \`file\` to the plain office file name only, with no section or sheet 
 WRITE IT AS A REAL DOCUMENT in \`code\` using simple markdown so it reads like a page: "# Title" for the document title, "## Heading" for sections, normal paragraphs of plain prose, "- " bullets, and markdown pipe tables for any tabular content (header row, separator row, then every data row). Fill in real, project-specific content — no placeholders like "TBD" or "<insert here>" unless the student genuinely must decide. Keep the flow continuous: headings and paragraphs in the natural reading order of that document.
 
 Never mention terminals, command lines, repositories, code files or developer tools. EXPLANATION (REQUIRED, in three parts): \`explanation\` = 2-5 short bullets on WHAT WE DID, the first one saying in one plain sentence where this goes (which file, and whether it is a new file or added to an existing one); \`why\` = 2-4 short bullets on WHY WE DID IT; \`parameters\` = one entry per meaningful choice made in this deliverable (a date, duration, threshold, scale, owner role, format) with \`name\`, \`value\` and a one-sentence \`why\` — empty array only when there is genuinely nothing to justify. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. \`walkthrough\` (REQUIRED): completed = 2-4 short bullets on what this deliverable just achieved; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences). Each block must also have \`example\` (one tiny concrete example, max 2 short sentences) and \`analogy\` (one short real-life comparison, max 2 short sentences).`,
-
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
@@ -703,15 +711,16 @@ Never mention terminals, command lines, repositories, code files or developer to
       .update({
         code: joinBlocks(reviewed.blocks),
         blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
-        files: (reviewed.files ?? []).map((f) => ({ path: f.path, content: f.content })),
+        files: (reviewed.files?.length ? reviewed.files : (draft.files ?? [])).map((f) => ({
+          path: f.path,
+          content: f.content,
+        })),
         language: reviewed.language || (playbook.buildsCode ? "python" : "markdown"),
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: isStructure ? reviewed.structure : null,
-        walkthrough: reviewed.walkthrough
-          ? JSON.parse(JSON.stringify(reviewed.walkthrough))
-          : null,
+        walkthrough: reviewed.walkthrough ? JSON.parse(JSON.stringify(reviewed.walkthrough)) : null,
         fix_notes: null,
         status: "generated",
       })
@@ -806,4 +815,3 @@ export const fixSectionError = createServerFn({ method: "POST" })
     if (playbook.buildsCode) await syncProjectWorkspace(supabase, section.project_id);
     return fixed;
   });
-

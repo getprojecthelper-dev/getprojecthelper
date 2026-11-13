@@ -26,12 +26,12 @@ Live site: https://www.getprojecthelper.com
 
 AI usage is metered in credits based on actual model token usage:
 
-| Plan | Price | Monthly credits | Active projects |
-|------|-------|-----------------|-----------------|
-| Free | ₹0 | 100K token-equivalent (one-time welcome) | 1 |
-| Starter | ₹199/mo | 1M token-equivalent | 2 |
-| Student | ₹399/mo | 3M token-equivalent | 5 |
-| Professional | ₹999/mo | 10M token-equivalent | 15 |
+| Plan         | Price   | Monthly credits                          | Active projects |
+| ------------ | ------- | ---------------------------------------- | --------------- |
+| Free         | ₹0      | 100K token-equivalent (one-time welcome) | 1               |
+| Starter      | ₹199/mo | 1M token-equivalent                      | 2               |
+| Student      | ₹399/mo | 3M token-equivalent                      | 5               |
+| Professional | ₹999/mo | 10M token-equivalent                     | 15              |
 
 - Credits settle at real model rates (1,000 input tokens = 1 credit; 1,000 output tokens = 5 credits).
 - When credits run out, AI features pause until the next monthly reset or an upgrade.
@@ -64,3 +64,28 @@ An admin panel with a dedicated sidebar:
 - Project creation enforces the plan's active-project limit at the database level.
 - Credit holds reserve an estimate before a run; settlement charges only actual usage.
 - The site can be put in maintenance mode without locking out admins or sign-in.
+
+## Project scope and principles
+
+## Product scope
+
+Students can create and manage projects across domains such as software development, data science, research, business, cybersecurity, cloud, engineering, and custom projects. The product includes:
+
+- A guided project lifecycle and project workspace
+- Plans, requirements, tasks, research, build support, testing, documents, review, presentation, and showcase areas
+- A project-aware AI mentor
+- Documentation and portfolio-oriented project outputs
+- Credits and subscription plans for AI usage
+- An admin area for operational and availability controls
+
+When adding a feature, keep it connected to a specific project and its lifecycle. Do not add placeholder interactions or make unsupported claims about generated results, citations, metrics, or progress.
+
+## Tech stack
+
+- React 19 with TanStack Start and TanStack Router
+- TypeScript
+- Tailwind CSS v4 and Radix-based UI primitives
+- Drizzle ORM and Postgres-backed Lovable Cloud services
+- OpenAI-powered server-side AI features
+- Paddle subscriptions
+- Bun for package management and scripts

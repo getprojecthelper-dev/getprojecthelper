@@ -12,7 +12,6 @@ import {
   Code2,
   FileCode2,
   FileSpreadsheet,
-
   FileText,
   FileType,
   FolderTree,
@@ -21,7 +20,6 @@ import {
   ListChecks,
   HelpCircle,
   SlidersHorizontal,
-
   Lock,
   MapPin,
   NotebookPen,
@@ -67,14 +65,19 @@ import {
 import { useProjectId } from "@/lib/use-workspace";
 import { cn } from "@/lib/utils";
 
-
 export const Route = createFileRoute("/_authenticated/projects/$projectId/build")({
   head: () => ({
     meta: [
       { title: "Implementation builder — Project Helper" },
-      { name: "description", content: "Build your private project step by step with guided implementation." },
+      {
+        name: "description",
+        content: "Build your private project step by step with guided implementation.",
+      },
       { property: "og:title", content: "Implementation builder — Project Helper" },
-      { property: "og:description", content: "Build your private project step by step with guided implementation." },
+      {
+        property: "og:description",
+        content: "Build your private project step by step with guided implementation.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -94,8 +97,6 @@ interface Block {
   example?: string;
   analogy?: string;
 }
-
-
 
 interface StructureFile {
   path: string;
@@ -135,7 +136,6 @@ interface FixNotes extends FixRound {
   rounds?: FixRound[];
 }
 
-
 interface Walkthrough {
   completed?: string[];
   whats_next?: string[];
@@ -161,7 +161,6 @@ interface BuildSection {
   fix_notes: FixNotes | null;
   walkthrough: Walkthrough | null;
 }
-
 
 const sectionsKey = (projectId: string) => ["build-sections", projectId] as const;
 
@@ -193,7 +192,6 @@ function useSections(projectId: string) {
             ? (value as Walkthrough)
             : null;
         })(),
-
       }));
     },
   });
@@ -208,7 +206,10 @@ function useFillRemainingHeight() {
     if (!node) return;
     const wide = window.matchMedia("(min-width: 768px)");
     const measure = () => {
-      if (!wide.matches) { setHeight(null); return; }
+      if (!wide.matches) {
+        setHeight(null);
+        return;
+      }
       const top = node.getBoundingClientRect().top + window.scrollY;
       const below = document.documentElement.scrollHeight - (top + node.offsetHeight);
       setHeight(Math.max(320, Math.round(window.innerHeight - top - below)));
@@ -244,7 +245,12 @@ function BuildPage() {
       return {
         domain: (data?.domain as string | null) ?? null,
         name: (data?.name as string | null) ?? null,
-        pm: (data?.pm_profile as { industry?: string; methodology?: string; duration?: string } | null) ?? null,
+        pm:
+          (data?.pm_profile as {
+            industry?: string;
+            methodology?: string;
+            duration?: string;
+          } | null) ?? null,
         dataset: asDataset((data as Record<string, unknown> | null)?.["dataset"]),
       };
     },
@@ -257,8 +263,11 @@ function BuildPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [editor, setEditor] = useState<{ sectionId: string; path: string | null } | null>(null);
 
-
-  const invalidate = () => Promise.all([qc.invalidateQueries({ queryKey: sectionsKey(projectId) }), qc.invalidateQueries({ queryKey: workspaceKey(projectId) })]);
+  const invalidate = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: sectionsKey(projectId) }),
+      qc.invalidateQueries({ queryKey: workspaceKey(projectId) }),
+    ]);
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
@@ -321,7 +330,10 @@ function BuildPage() {
     return map;
   }, [sections, playbook.buildsCode]);
 
-  const editorSection = sections.find((s) => s.id === editor?.sectionId) ?? sections.find((s) => s.kind === "structure" && s.status !== "pending") ?? null;
+  const editorSection =
+    sections.find((s) => s.id === editor?.sectionId) ??
+    sections.find((s) => s.kind === "structure" && s.status !== "pending") ??
+    null;
 
   if (isPending) {
     return (
@@ -333,17 +345,18 @@ function BuildPage() {
 
   const content = (
     <div className="min-w-0 space-y-4">
-      <PageHeader
-        title={playbook.headline}
-        description={playbook.subhead}
-      />
+      <PageHeader title={playbook.headline} description={playbook.subhead} />
 
       <div className="panel space-y-2 p-5">
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{ width: `${percent}%` }}
+          />
         </div>
         <p className="text-xs text-muted-foreground">
-          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"} completed
+          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"}{" "}
+          completed
         </p>
       </div>
 
@@ -373,7 +386,9 @@ function BuildPage() {
 
       {meta?.pm ? (
         <div className="panel p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Project profile</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Project profile
+          </p>
           <p className="mt-1 text-base font-semibold text-foreground">{meta.name}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
@@ -382,7 +397,9 @@ function BuildPage() {
               { label: "Duration", value: meta.pm.duration },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border bg-muted/40 p-3">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{item.label}</p>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {item.label}
+                </p>
                 <p className="mt-0.5 text-sm font-medium text-foreground">{item.value ?? "—"}</p>
               </div>
             ))}
@@ -415,7 +432,8 @@ function BuildPage() {
             onConfirm={() => confirmMutation.mutate(section.id)}
             onOpenFile={
               playbook.buildsCode
-                ? (file) => setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
+                ? (file) =>
+                    setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
                 : undefined
             }
           />
@@ -447,18 +465,17 @@ function BuildPage() {
           projectName={meta?.name ?? "Project"}
           activeFile={editor}
           generating={generateMutation.isPending}
-          terminal={(editorSection?.blocks ?? []).filter(isTerminalBlock).map((b) => b.code).join("\n\n")}
+          terminal={(editorSection?.blocks ?? [])
+            .filter(isTerminalBlock)
+            .map((b) => b.code)
+            .join("\n\n")}
         />
       </aside>
     </div>
   );
 }
 
-function GettingStarted({
-  guide,
-}: {
-  guide: NonNullable<DomainPlaybook["gettingStarted"]>;
-}) {
+function GettingStarted({ guide }: { guide: NonNullable<DomainPlaybook["gettingStarted"]> }) {
   const [open, setOpen] = useState(true);
   return (
     <section className="panel overflow-hidden">
@@ -489,15 +506,14 @@ function GettingStarted({
                   className="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-panel"
                 >
                   <span
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg",
-                      meta.tint,
-                    )}
+                    className={cn("flex h-9 w-9 items-center justify-center rounded-lg", meta.tint)}
                   >
                     <Icon className="h-4.5 w-4.5" />
                   </span>
                   <p className="mt-3 text-sm font-semibold">{tool.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tool.detail}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {tool.detail}
+                  </p>
                 </div>
               );
             })}
@@ -531,10 +547,7 @@ function GettingStarted({
   );
 }
 
-const APP_META: Record<
-  OfficeApp,
-  { icon: typeof FileText; tint: string; short: string }
-> = {
+const APP_META: Record<OfficeApp, { icon: typeof FileText; tint: string; short: string }> = {
   word: {
     icon: FileType,
     tint: "bg-info/15 text-info",
@@ -565,13 +578,33 @@ function toolApp(label: string): OfficeApp {
 function briefTone(title: string) {
   const t = title.toLowerCase();
   if (/problem|challenge|pain/.test(t))
-    return { icon: HelpCircle, ring: "border-warning/40", tint: "bg-warning/10", text: "text-warning" };
+    return {
+      icon: HelpCircle,
+      ring: "border-warning/40",
+      tint: "bg-warning/10",
+      text: "text-warning",
+    };
   if (/solution|approach|idea/.test(t))
-    return { icon: Lightbulb, ring: "border-primary/40", tint: "bg-primary/10", text: "text-primary" };
+    return {
+      icon: Lightbulb,
+      ring: "border-primary/40",
+      tint: "bg-primary/10",
+      text: "text-primary",
+    };
   if (/tech|stack|tool|method/.test(t))
-    return { icon: SlidersHorizontal, ring: "border-accent/40", tint: "bg-accent/10", text: "text-accent" };
+    return {
+      icon: SlidersHorizontal,
+      ring: "border-accent/40",
+      tint: "bg-accent/10",
+      text: "text-accent",
+    };
   if (/objective|goal|outcome|scope/.test(t))
-    return { icon: ListChecks, ring: "border-success/40", tint: "bg-success/10", text: "text-success" };
+    return {
+      icon: ListChecks,
+      ring: "border-success/40",
+      tint: "bg-success/10",
+      text: "text-success",
+    };
   return { icon: MapPin, ring: "border-border", tint: "bg-muted", text: "text-muted-foreground" };
 }
 
@@ -595,7 +628,9 @@ function OverviewBrief({ blocks }: { blocks: Block[] }) {
             )}
           >
             <div className="flex items-center gap-2.5">
-              <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
+              <span
+                className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}
+              >
                 <Icon className={cn("h-4 w-4", tone.text)} />
               </span>
               <p className="font-display text-base font-semibold tracking-tight">{block.title}</p>
@@ -656,7 +691,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
 
         {why.length ? (
           <section className="space-y-2">
-            <h4 className="font-display text-base font-semibold tracking-tight">Why we do it this way</h4>
+            <h4 className="font-display text-base font-semibold tracking-tight">
+              Why we do it this way
+            </h4>
             <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
               {why.map((line, li) => (
                 <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
@@ -688,7 +725,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
 
         {params.length ? (
           <section className="space-y-2">
-            <h4 className="font-display text-base font-semibold tracking-tight">The choices made</h4>
+            <h4 className="font-display text-base font-semibold tracking-tight">
+              The choices made
+            </h4>
             <div className="overflow-hidden rounded-lg border border-border">
               <table className="w-full border-collapse text-sm">
                 <tbody>
@@ -719,7 +758,6 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
   );
 }
 
-
 /**
  * Notebook steps: hand the student a real .ipynb with this step's cells inside,
  * so the notebooks in the project structure actually get used.
@@ -738,8 +776,8 @@ function NotebookActions({
           <NotebookPen className="h-4 w-4 text-info" /> Work in your notebook
         </p>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          The code below belongs in a Jupyter notebook — one cell per part. Download it
-          ready to run, then open it in Jupyter, VS Code or Colab and run the cells in order.
+          The code below belongs in a Jupyter notebook — one cell per part. Download it ready to
+          run, then open it in Jupyter, VS Code or Colab and run the cells in order.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -766,13 +804,7 @@ function NotebookActions({
 const appOf = (kind: FileSpec["kind"]): OfficeApp => kind;
 
 /** "Files you need for this step" — with a real empty file to download. */
-function StepFiles({
-  specs,
-  isNew,
-}: {
-  specs: FileSpec[];
-  isNew: (spec: FileSpec) => boolean;
-}) {
+function StepFiles({ specs, isNew }: { specs: FileSpec[]; isNew: (spec: FileSpec) => boolean }) {
   const [busy, setBusy] = useState<string | null>(null);
 
   const download = async (spec: FileSpec) => {
@@ -791,8 +823,8 @@ function StepFiles({
     <div className="rounded-xl border border-border bg-card p-4">
       <p className="text-sm font-semibold">Files you need for this step</p>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        No terminal, no coding. Download the blank file once, then paste each part
-        into the place named below.
+        No terminal, no coding. Download the blank file once, then paste each part into the place
+        named below.
       </p>
       <ul className="mt-3 space-y-2">
         {specs.map((spec) => {
@@ -804,7 +836,9 @@ function StepFiles({
               key={spec.fileName}
               className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border/70 bg-muted/20 px-3 py-2"
             >
-              <span className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}>
+              <span
+                className={cn("flex h-8 w-8 items-center justify-center rounded-md", meta.tint)}
+              >
                 <Icon className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1">
@@ -848,7 +882,9 @@ function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
   const Icon = meta.icon;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-border bg-card px-3 py-2 text-xs">
-      <span className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}>
+      <span
+        className={cn("flex items-center gap-1.5 rounded-md px-2 py-1 font-semibold", meta.tint)}
+      >
         <Icon className="h-3.5 w-3.5" /> {meta.short}
       </span>
       <span className="text-muted-foreground">{isNew ? "Open your new file" : "Open"}</span>
@@ -856,7 +892,9 @@ function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
         {spec.fileName}
       </span>
       <span className="text-muted-foreground">
-        {spec.part ? `→ paste into the ${spec.partLabel} “${spec.part}”` : "→ paste this at the end"}
+        {spec.part
+          ? `→ paste into the ${spec.partLabel} “${spec.part}”`
+          : "→ paste this at the end"}
       </span>
     </div>
   );
@@ -887,9 +925,9 @@ function SpreadsheetActions({ spec, content }: { spec: FileSpec; content: string
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2">
       <p className="text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">No typing needed.</span> The table
-        below is ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"}{" "}
-        already filled in.
+        <span className="font-semibold text-foreground">No typing needed.</span> The table below is
+        ready — download it as a spreadsheet with all {rows} row{rows === 1 ? "" : "s"} already
+        filled in.
       </p>
       <Button size="lg" onClick={download} disabled={busy} className="gap-2">
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
@@ -933,8 +971,8 @@ function CodeFileBar({ file, action }: { file: string; action?: string | undefin
         <div className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">Set up your environment variables.</span>{" "}
           Replace every placeholder with your own value, keep the file in the project root, and add{" "}
-          <span className="font-mono">.env</span> to <span className="font-mono">.gitignore</span> so
-          your keys never get pushed online.
+          <span className="font-mono">.env</span> to <span className="font-mono">.gitignore</span>{" "}
+          so your keys never get pushed online.
         </div>
       ) : null}
       {isRequirements ? (
@@ -950,11 +988,6 @@ function CodeFileBar({ file, action }: { file: string; action?: string | undefin
     </div>
   );
 }
-
-
-
-
-
 
 function SectionCard({
   section,
@@ -1046,7 +1079,6 @@ function SectionCard({
       ).map(([path, cells]) => ({ path, cells }))
     : [];
 
-
   const downloadZip = async () => {
     setZipping(true);
     try {
@@ -1060,12 +1092,7 @@ function SectionCard({
           const path = file.path.replace(/^\.?\//, "");
           // Files ship empty on purpose; a notebook still needs valid JSON so
           // Jupyter can open it.
-          zip.file(
-            path,
-            isNotebookFile(path)
-              ? JSON.stringify(buildNotebook([]), null, 1)
-              : "",
-          );
+          zip.file(path, isNotebookFile(path) ? JSON.stringify(buildNotebook([]), null, 1) : "");
         }
         if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
       }
@@ -1123,7 +1150,11 @@ function SectionCard({
         <div className="flex shrink-0 items-center gap-2">
           {!locked && !generated ? (
             <Button size="sm" onClick={onGenerate} disabled={generating}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
               {generating ? "Generating…" : "Generate"}
             </Button>
           ) : null}
@@ -1143,7 +1174,12 @@ function SectionCard({
               {generating ? "Regenerating…" : "Regenerate"}
             </Button>
           ) : null}
-          <Button size="icon" variant="ghost" onClick={onToggle} aria-label={open ? "Close section" : "Open section"}>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onToggle}
+            aria-label={open ? "Close section" : "Open section"}
+          >
             {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
@@ -1169,8 +1205,8 @@ function SectionCard({
                     <FolderTree className="h-4 w-4 text-primary" /> Project structure
                   </p>
                   <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    Only the files this project actually needs. Every file comes down
-                    empty — you fill them in as you work through the steps below.
+                    Only the files this project actually needs. Every file comes down empty — you
+                    fill them in as you work through the steps below.
                   </p>
                 </div>
                 <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
@@ -1190,101 +1226,97 @@ function SectionCard({
             <StepFiles specs={stepSpecs} isNew={specIsNew} />
           ) : null}
 
-          {notebooks.length ? <NotebookActions notebooks={notebooks} language={section.language} /> : null}
+          {notebooks.length ? (
+            <NotebookActions notebooks={notebooks} language={section.language} />
+          ) : null}
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
-          {isOverview ? null : blocks.map((block, i) => {
+          {isOverview
+            ? null
+            : blocks.map((block, i) => {
+                const hasCode = Boolean(block.code?.trim());
+                const blockFile = block.file?.trim();
+                const spec = playbook.buildsCode
+                  ? null
+                  : parseFileSpec(blockFile || block.title, block.code ?? "");
+                // Document domains get one continuous deliverable per step, so the
+                // "Part N" chrome is dropped — the document speaks for itself.
+                const showPartHeader = playbook.buildsCode || blocks.length > 1;
+                return (
+                  <div
+                    key={`${block.title}-${i}`}
+                    className="overflow-hidden rounded-xl border border-border bg-card/60"
+                  >
+                    {showPartHeader ? (
+                      <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                          {i + 1}
+                        </span>
+                        <p className="min-w-0 flex-1 font-display text-[15px]">
+                          {playbook.buildsCode && hasCode
+                            ? `Part ${i + 1} — ${block.title}`
+                            : block.title}
+                        </p>
+                      </div>
+                    ) : null}
 
-            const hasCode = Boolean(block.code?.trim());
-            const blockFile = block.file?.trim();
-            const spec = playbook.buildsCode
-              ? null
-              : parseFileSpec(blockFile || block.title, block.code ?? "");
-            // Document domains get one continuous deliverable per step, so the
-            // "Part N" chrome is dropped — the document speaks for itself.
-            const showPartHeader = playbook.buildsCode || blocks.length > 1;
-            return (
-              <div
-                key={`${block.title}-${i}`}
-                className="overflow-hidden rounded-xl border border-border bg-card/60"
-              >
-                {showPartHeader ? (
-                  <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
-                      {i + 1}
-                    </span>
-                    <p className="min-w-0 flex-1 font-display text-[15px]">
-                      {playbook.buildsCode && hasCode
-                        ? `Part ${i + 1} — ${block.title}`
-                        : block.title}
-                    </p>
-                  </div>
-                ) : null}
-
-
-                <div className="space-y-4 p-5">
-                  {playbook.buildsCode
-                    ? blockFile && hasCode
-                      ? <CodeFileBar file={blockFile} action={block.action} />
-                      : null
-                    : spec && hasCode
-                      ? (
+                    <div className="space-y-4 p-5">
+                      {playbook.buildsCode ? (
+                        blockFile && hasCode ? (
+                          <CodeFileBar file={blockFile} action={block.action} />
+                        ) : null
+                      ) : spec && hasCode ? (
                         <>
                           <DocFileBar spec={spec} isNew={specIsNew(spec)} />
                           {spec.kind === "excel" ? (
                             <SpreadsheetActions spec={spec} content={block.code ?? ""} />
                           ) : null}
                         </>
-                      )
-                      : null}
-                  {hasCode ? (
-                    playbook.buildsCode ? (
-                      isNotebookFile(blockFile) ? (
-                        <NotebookCellView
-                          code={block.code}
-                          notebook={notebookName(blockFile ?? "")}
-                          index={notebookCellIndex(blockFile) ?? i + 1}
-                        />
-                      ) : onOpenFile && blockFile && !isTerminalBlock(block) ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          onClick={() => onOpenFile(blockFile)}
-                        >
-                          <Code2 className="h-4 w-4" /> Open in code editor
-                        </Button>
-                      ) : (
-                        <CodeBlock
-                          code={block.code}
-                          language={section.language}
-                          filename={blockFile}
-                        />
-                      )
-                    ) : (
-                      <DocSheet
-                        content={block.code}
-                        label={
-                          spec
-                            ? spec.part
-                              ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
-                              : spec.fileName
-                            : undefined
-                        }
-                      />
-                    )
-                  ) : null}
+                      ) : null}
+                      {hasCode ? (
+                        playbook.buildsCode ? (
+                          isNotebookFile(blockFile) ? (
+                            <NotebookCellView
+                              code={block.code}
+                              notebook={notebookName(blockFile ?? "")}
+                              index={notebookCellIndex(blockFile) ?? i + 1}
+                            />
+                          ) : onOpenFile && blockFile && !isTerminalBlock(block) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2"
+                              onClick={() => onOpenFile(blockFile)}
+                            >
+                              <Code2 className="h-4 w-4" /> Open in code editor
+                            </Button>
+                          ) : (
+                            <CodeBlock
+                              code={block.code}
+                              language={section.language}
+                              filename={blockFile}
+                            />
+                          )
+                        ) : (
+                          <DocSheet
+                            content={block.code}
+                            label={
+                              spec
+                                ? spec.part
+                                  ? `${spec.fileName} · ${spec.partLabel}: ${spec.part}`
+                                  : spec.fileName
+                                : undefined
+                            }
+                          />
+                        )
+                      ) : null}
 
-
-                  <BlockExplanation block={block} hasCode={hasCode} />
-                </div>
-              </div>
-            );
-          })}
-
-
-
+                      <BlockExplanation block={block} hasCode={hasCode} />
+                    </div>
+                  </div>
+                );
+              })}
 
           {section.walkthrough &&
           (section.walkthrough.completed?.length ||
@@ -1335,10 +1367,6 @@ function SectionCard({
             </div>
           ) : null}
 
-
-
-
-
           {fixRounds(section.fix_notes).map((round, ri) => (
             <FixRoundCard
               key={`round-${round.at ?? ri}`}
@@ -1349,7 +1377,6 @@ function SectionCard({
               buildsCode={playbook.buildsCode}
             />
           ))}
-
 
           {generated && !isOverview ? (
             <div
@@ -1565,6 +1592,7 @@ function FixRoundCard({
                 {block.code?.trim() ? (
                   buildsCode ? (
                     <CodeBlock
+                      staticView
                       code={block.code}
                       language={language}
                       filename={block.file}

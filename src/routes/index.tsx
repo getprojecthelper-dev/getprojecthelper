@@ -375,15 +375,12 @@ function Landing() {
                       </div>
                     )}
                     <div className="flex flex-1 flex-col bg-[#f1f1f1] p-4 sm:p-5">
-                      <div className="flex min-w-0 items-start justify-between gap-3">
-                        <h3 className="min-w-0 flex-1 font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
-                          {product.title}
-                        </h3>
-                        <div className="max-w-[52%] shrink-0 text-right">
-                          <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
                             Tech stack
                           </span>
-                          <div className="mt-1.5 flex flex-wrap justify-end gap-1">
+                          <div className="flex min-w-0 flex-wrap gap-1">
                             {product.techStack.split(/[·,]/).map((technology) => {
                               const label = technology.trim();
                               return (
@@ -397,6 +394,9 @@ function Landing() {
                             })}
                           </div>
                         </div>
+                        <h3 className="mt-3 font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
+                          {product.title}
+                        </h3>
                       </div>
                       <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#525866]">
                         {product.description}

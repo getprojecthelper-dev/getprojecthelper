@@ -25,6 +25,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { listHomepageListings } from "@/lib/premade-listings.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
 
+const techStackColors: Record<string, string> = {
+  react: "bg-[#d9f3ff] text-[#075985]",
+  typescript: "bg-[#dbeafe] text-[#1d4ed8]",
+  supabase: "bg-[#dcfce7] text-[#166534]",
+  recharts: "bg-[#f3e8ff] text-[#7e22ce]",
+  "node.js": "bg-[#e4f4dc] text-[#3f6212]",
+  postgresql: "bg-[#e0eafe] text-[#1e40af]",
+};
+
+function getTechStackColor(technology: string) {
+  return techStackColors[technology.trim().toLowerCase()] ?? "bg-[#eee9ff] text-[#5b3da8]";
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -366,13 +379,23 @@ function Landing() {
                         <h3 className="min-w-0 flex-1 font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
                           {product.title}
                         </h3>
-                        <div className="max-w-[44%] shrink-0 text-right">
+                        <div className="max-w-[52%] shrink-0 text-right">
                           <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
                             Tech stack
                           </span>
-                          <span className="mt-1 block line-clamp-2 text-xs leading-4 text-[#3f3f46]">
-                            {product.techStack}
-                          </span>
+                          <div className="mt-1.5 flex flex-wrap justify-end gap-1">
+                            {product.techStack.split(/[·,]/).map((technology) => {
+                              const label = technology.trim();
+                              return (
+                                <span
+                                  key={label}
+                                  className={`rounded-full px-2 py-1 text-[10px] font-semibold leading-none ${getTechStackColor(label)}`}
+                                >
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                       <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#525866]">

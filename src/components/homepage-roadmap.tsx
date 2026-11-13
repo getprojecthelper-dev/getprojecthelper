@@ -93,24 +93,22 @@ export function HomepageRoadmap() {
                       </dl>
                     ) : step.number === "02" ? (
                       <ul className="roadmap-step-bullets">
-                        <li>Discover the problems your project can solve</li>
-                        <li>Explore practical solutions</li>
-                        <li>It finds the right technology stack for your project</li>
-                        <li>GetProjectHelper finds research papers relevant to your project</li>
+                        <li>
+                          Identify the problem, explore solutions, choose a technology stack, and
+                          find related research papers.
+                        </li>
                       </ul>
                     ) : step.number === "03" ? (
                       <>
-                        <p className="roadmap-step-lead">{step.detail}</p>
+                        <p className="roadmap-step-lead">
+                          GetProjectHelper handles setup so you can start building.
+                        </p>
                         <ul className="roadmap-step-bullets">
-                          <li>Finds relevant libraries, tools, and materials for your project.</li>
                           <li>
-                            For data related projects, suggests multiple relevant datasets so you
-                            have options without spending hours searching.
+                            Finds relevant tools, libraries, materials, and multiple datasets for
+                            data projects.
                           </li>
-                          <li>
-                            Creates project folders, directories, and files so you can start
-                            building without setting everything up manually.
-                          </li>
+                          <li>Creates your project structure and starter files automatically.</li>
                         </ul>
                       </>
                     ) : step.number === "04" ? (
@@ -118,11 +116,11 @@ export function HomepageRoadmap() {
                         <p>{step.detail}</p>
                         <ul className="roadmap-step-bullets">
                           <li>
-                            GetProjectHelper breaks your project into a clear implementation plan.
+                            GetProjectHelper breaks the project into a step-by-step implementation
+                            plan.
                           </li>
                           <li>
-                            It explains and generates the code step by step, so you can learn what
-                            each part does as you build.
+                            It explains each code step so you can read and learn as you build.
                           </li>
                         </ul>
                       </>

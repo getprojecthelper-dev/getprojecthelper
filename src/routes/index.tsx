@@ -30,6 +30,8 @@ const techStackColors: Record<string, string> = {
   typescript: "bg-[#dbeafe] text-[#1d4ed8]",
   supabase: "bg-[#dcfce7] text-[#166534]",
   recharts: "bg-[#f3e8ff] text-[#7e22ce]",
+  python: "bg-[#fef3c7] text-[#92400e]",
+  fastapi: "bg-[#cffafe] text-[#155e75]",
   "node.js": "bg-[#e4f4dc] text-[#3f6212]",
   postgresql: "bg-[#e0eafe] text-[#1e40af]",
 };
@@ -101,6 +103,18 @@ function Landing() {
       techStack: "React · Node.js · PostgreSQL",
       imageUrl: "/project-collaboration.png",
       badge: "NEW TECH",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-research-paper-workspace",
+      title: "Research Paper Workspace",
+      description:
+        "Collect sources, organize literature notes, and shape your findings into a clear report.",
+      techStack: "Python · FastAPI · PostgreSQL",
+      imageUrl: "/research-paper-workspace.svg",
+      badge: "NEW",
       priceMinor: 0,
       isAvailable: false,
       demo: true,

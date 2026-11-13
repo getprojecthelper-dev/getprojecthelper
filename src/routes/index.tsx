@@ -376,6 +376,9 @@ function Landing() {
                     )}
                     <div className="flex flex-1 flex-col bg-[#f1f1f1] p-4 sm:p-5">
                       <div className="min-w-0">
+                        <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
+                          {product.title}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                           <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
                             Tech stack
@@ -394,9 +397,23 @@ function Landing() {
                             })}
                           </div>
                         </div>
-                        <h3 className="mt-3 font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
-                          {product.title}
-                        </h3>
+                        {product.demo && (
+                          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                            <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
+                              Includes
+                            </span>
+                            {["Dataset", "Documentation", "Report", "Research paper"].map(
+                              (item) => (
+                                <span
+                                  key={item}
+                                  className="rounded-full border border-[#d4d4d8] bg-white/75 px-2 py-1 text-[10px] font-medium leading-none text-[#3f3f46]"
+                                >
+                                  {item}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                        )}
                       </div>
                       <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#525866]">
                         {product.description}

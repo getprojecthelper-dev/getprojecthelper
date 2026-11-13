@@ -65,6 +65,7 @@ function Landing() {
         "Plan classes, track assignments, and keep campus events in one simple student dashboard.",
       techStack: "React · TypeScript · Supabase",
       imageUrl: "/student-project-workspace.png",
+      badge: "POPULAR PICK",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -75,6 +76,7 @@ function Landing() {
       description: "Explore clear charts and useful metrics in a responsive analytics workspace.",
       techStack: "React · TypeScript · Recharts",
       imageUrl: "/analytics-dashboard-project.png",
+      badge: "TRENDING",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -85,6 +87,7 @@ function Landing() {
       description: "Organize tasks, share updates, and keep a small team moving together.",
       techStack: "React · Node.js · PostgreSQL",
       imageUrl: "/project-collaboration.png",
+      badge: "NEW TECH",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -322,12 +325,28 @@ function Landing() {
                     className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_5px_24px_rgba(17,17,17,.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,17,17,.09)]"
                   >
                     {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={`Preview image for ${product.title}`}
-                        loading="lazy"
-                        className="aspect-[4/3] w-full border-b border-[#e4e4e7] object-cover"
-                      />
+                      <div className="relative">
+                        <img
+                          src={product.imageUrl}
+                          alt={`Preview image for ${product.title}`}
+                          loading="lazy"
+                          className="aspect-[4/3] w-full border-b border-[#e4e4e7] object-cover"
+                        />
+                        {product.demo && (
+                          <span
+                            aria-label={`Demo tag: ${product.badge}`}
+                            className={`absolute right-3 top-3 rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wide text-[#111111] shadow-sm ${
+                              product.badge === "TRENDING"
+                                ? "bg-[#f5e642]"
+                                : product.badge === "NEW TECH"
+                                  ? "bg-[#d4f5df]"
+                                  : "bg-[#dceaff]"
+                            }`}
+                          >
+                            {product.badge}
+                          </span>
+                        )}
+                      </div>
                     ) : (
                       <div
                         role="img"

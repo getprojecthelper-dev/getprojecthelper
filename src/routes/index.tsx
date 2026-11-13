@@ -345,7 +345,7 @@ function Landing() {
               </Button>
             </div>
             {catalogPreview.length > 0 && (
-              <div className="mx-auto mt-7 grid max-w-5xl items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mx-auto mt-7 grid max-w-[90rem] items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {catalogPreview.map((product) => (
                   <article
                     key={product.id}
@@ -615,18 +615,18 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="mx-2 mb-2 rounded-[20px] bg-[#111318] px-4 py-6 text-[#f5f7fa] sm:px-6 sm:py-7">
+    <footer className="mx-2 mb-2 rounded-[18px] bg-[#111318] px-4 py-4 text-[#f5f7fa] sm:px-5 sm:py-5">
       <div className="mx-auto max-w-[90rem]">
-        <div className="border-b border-[#353a44] pb-5">
-          <p className="font-display text-lg font-semibold">GetProjectHelper</p>
-          <p className="mt-3 max-w-2xl text-sm leading-5 text-[#c0c5cf]">
+        <div className="border-b border-[#353a44] pb-3">
+          <p className="font-display text-base font-semibold">GetProjectHelper</p>
+          <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-[#c0c5cf]">
             From ideas to working solutions. Explore, plan, and build projects with confidence.
           </p>
         </div>
-        <div className="grid gap-x-12 gap-y-7 border-b border-[#353a44] py-6 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-4 border-b border-[#353a44] py-4 sm:grid-cols-2">
           <div>
-            <p className="font-display text-base font-semibold">Platform</p>
-            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <p className="font-display text-sm font-semibold">Platform</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
               <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
                 Get a Project
               </Link>
@@ -649,8 +649,8 @@ function Footer({
             </div>
           </div>
           <div>
-            <p className="font-display text-base font-semibold">Legal</p>
-            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <p className="font-display text-sm font-semibold">Legal</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
               <Link to="/privacy" className="transition-colors hover:text-white">
                 Privacy Policy
               </Link>
@@ -669,8 +669,8 @@ function Footer({
             </div>
           </div>
           <div>
-            <p className="font-display text-base font-semibold">Trust &amp; Safety</p>
-            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <p className="font-display text-sm font-semibold">Trust &amp; Safety</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
               <a href="#ai-usage-disclaimer" className="transition-colors hover:text-white">
                 AI Usage Disclaimer
               </a>
@@ -692,8 +692,8 @@ function Footer({
             </div>
           </div>
           <div>
-            <p className="font-display text-base font-semibold">Company &amp; Support</p>
-            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+            <p className="font-display text-sm font-semibold">Company &amp; Support</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
               <a href="#get-project" className="transition-colors hover:text-white">
                 About Us
               </a>
@@ -726,13 +726,13 @@ function Footer({
         </div>
         <div
           id="ai-usage-disclaimer"
-          className="border-b border-[#353a44] py-5 text-sm leading-5 text-[#c0c5cf]"
+          className="border-b border-[#353a44] py-3 text-[13px] leading-5 text-[#c0c5cf]"
         >
           <p className="max-w-2xl">
             AI can make mistakes. Please verify important information before relying on it.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-5 text-xs text-[#c0c5cf]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 text-xs text-[#c0c5cf]">
           <span>© 2026 GetProjectHelper. All rights reserved.</span>
           <span>Based in India</span>
         </div>

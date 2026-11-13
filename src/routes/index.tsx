@@ -655,18 +655,41 @@ function Footer({
                 Privacy Policy
               </Link>
               <Link to="/terms" className="transition-colors hover:text-white">
-                Terms and Conditions
+                Terms of Service
               </Link>
               <Link to="/refund-policy" className="transition-colors hover:text-white">
                 Refund Policy
+              </Link>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Cookie Policy
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                License Agreement
               </Link>
             </div>
           </div>
           <div>
             <p className="font-display text-base font-semibold">Trust &amp; Safety</p>
-            <p className="mt-3 max-w-sm text-sm leading-5 text-[#c0c5cf]">
-              AI can make mistakes. Please verify important information.
-            </p>
+            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+              <a href="#ai-usage-disclaimer" className="transition-colors hover:text-white">
+                AI Usage Disclaimer
+              </a>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Data Protection
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                Acceptable Use
+              </Link>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Security
+              </Link>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Report%20an%20issue"
+                className="transition-colors hover:text-white"
+              >
+                Report an Issue
+              </a>
+            </div>
           </div>
           <div>
             <p className="font-display text-base font-semibold">Company &amp; Support</p>
@@ -675,10 +698,16 @@ function Footer({
                 About Us
               </a>
               <a
-                href="mailto:support@getprojecthelper.com"
+                href="mailto:support@getprojecthelper.com?subject=Help%20request"
                 className="transition-colors hover:text-white"
               >
                 Help Center
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Grievance%20redressal"
+                className="transition-colors hover:text-white"
+              >
+                Grievance Redressal
               </a>
               <a
                 href="mailto:support@getprojecthelper.com"
@@ -686,12 +715,26 @@ function Footer({
               >
                 Contact
               </a>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Accessibility%20feedback"
+                className="transition-colors hover:text-white"
+              >
+                Accessibility
+              </a>
             </div>
           </div>
         </div>
+        <div
+          id="ai-usage-disclaimer"
+          className="border-b border-[#353a44] py-5 text-sm leading-5 text-[#c0c5cf]"
+        >
+          <p className="max-w-2xl">
+            AI can make mistakes. Please verify important information before relying on it.
+          </p>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3 pt-5 text-xs text-[#c0c5cf]">
           <span>© 2026 GetProjectHelper. All rights reserved.</span>
-          <span>Made to help you build with confidence.</span>
+          <span>Based in India</span>
         </div>
       </div>
     </footer>

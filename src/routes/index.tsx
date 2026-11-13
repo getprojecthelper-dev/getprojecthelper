@@ -283,17 +283,21 @@ function Landing() {
                 {catalogPreview.map((product) => (
                   <article
                     key={product.id}
-                    className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#e4e4e7] bg-white shadow-[0_5px_24px_rgba(17,17,17,.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,17,17,.09)]"
+                    className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_5px_24px_rgba(17,17,17,.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,17,17,.09)]"
                   >
                     {product.imageUrl ? (
                       <img
                         src={product.imageUrl}
-                        alt={product.title}
+                        alt={`Preview image for ${product.title}`}
                         loading="lazy"
-                        className="aspect-[16/9] w-full border-b border-[#e4e4e7] object-cover"
+                        className="aspect-square w-full border-b border-[#e4e4e7] object-cover"
                       />
                     ) : (
-                      <div className="flex aspect-[16/9] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5">
+                      <div
+                        role="img"
+                        aria-label={`Image preview unavailable for ${product.title}`}
+                        className="flex aspect-square items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
+                      >
                         <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
                           {product.title}
                         </span>
@@ -302,53 +306,51 @@ function Landing() {
                         </span>
                       </div>
                     )}
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="rounded-full bg-[#f4f6f8] px-3 py-1 capitalize text-[#525866]">
-                          {product.domain.replaceAll("_", " ")}
-                        </span>
-                        <span className="rounded-full bg-[#e8f2ff] px-3 py-1 text-[#0757ad]">
-                          Ready-made
-                        </span>
+                    <div className="flex flex-1 flex-col bg-[#f1f1f1] p-4 sm:p-5">
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <h3 className="min-w-0 flex-1 font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
+                          {product.title}
+                        </h3>
+                        <div className="max-w-[44%] shrink-0 text-right">
+                          <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
+                            Tech stack
+                          </span>
+                          <span className="mt-1 block line-clamp-2 text-xs leading-4 text-[#3f3f46]">
+                            {product.techStack}
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="mt-4 font-display text-2xl font-semibold leading-tight tracking-[-.04em]">
-                        {product.title}
-                      </h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#62666e]">
+                      <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#525866]">
                         {product.description}
                       </p>
-                      <p className="mt-4 text-xs leading-5 text-[#62666e]">
-                        <span className="font-semibold text-[#111111]">Tools:</span>{" "}
-                        {product.techStack}
-                      </p>
-                      <div className="mt-auto flex flex-wrap items-end justify-between gap-4 border-t border-[#e4e4e7] pt-5">
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
                         <div>
                           <p className="text-xs text-[#62666e]">
                             {product.isAvailable ? "One-time purchase" : "Currently unavailable"}
                           </p>
-                          <p className="mt-1 text-xl font-semibold text-[#111111]">
+                          <p className="mt-1 text-lg font-semibold text-[#111111] sm:text-xl">
                             ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
                           </p>
                         </div>
                         {!product.isAvailable ? (
-                          <span className="inline-flex min-h-11 items-center rounded-xl border border-[#e4e4e7] px-4 py-2 text-sm font-semibold text-[#62666e]">
+                          <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
                             Not available
                           </span>
                         ) : session ? (
                           <Link
                             to="/premade/$projectId"
                             params={{ projectId: product.id }}
-                            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#0866e8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#0866e8] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
                           >
-                            View project <ArrowRight className="size-4" />
+                            Explore project <ArrowRight className="size-4" />
                           </Link>
                         ) : (
                           <Link
                             to="/auth"
                             search={{ mode: "signup" }}
-                            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#0866e8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#0866e8] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
                           >
-                            Sign up to buy <ArrowRight className="size-4" />
+                            Explore project <ArrowRight className="size-4" />
                           </Link>
                         )}
                       </div>

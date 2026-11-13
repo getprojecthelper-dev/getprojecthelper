@@ -44,12 +44,7 @@ const phases = [
         title: "Document",
         detail: "Create clear reports that explain your project.",
       },
-      {
-        number: "07",
-        title: "Present",
-        detail: "Prepare slides and practise common project questions.",
-      },
-      { number: "08", title: "Share", detail: "Package your project and show it to others." },
+      { number: "07", title: "Share", detail: "Package your project and show it to others." },
     ],
   },
 ];
@@ -60,10 +55,10 @@ export function HomepageRoadmap() {
     <section id="how-it-works" className="homepage-roadmap" aria-labelledby="roadmap-heading">
       <div className="roadmap-intro">
         <p className="roadmap-eyebrow">HOW BUILDING WITH AI WORKS</p>
-        <h2 id="roadmap-heading">From your first idea to your final presentation.</h2>
+        <h2 id="roadmap-heading">From your first idea to a project ready to share.</h2>
         <div className="roadmap-summary">
           <p>One clear next step, with AI guidance along the way.</p>
-          <span>8 steps. One connected workspace.</span>
+          <span>7 steps. One connected workspace.</span>
         </div>
       </div>
       <div className="roadmap-phases">
@@ -131,6 +126,25 @@ export function HomepageRoadmap() {
                           </li>
                         </ul>
                       </>
+                    ) : step.number === "06" ? (
+                      <ul className="roadmap-step-bullets">
+                        <li>
+                          Create research papers with an abstract, methodology, results, and
+                          references.
+                        </li>
+                        <li>
+                          Write literature reviews that group research by theme and highlight gaps.
+                        </li>
+                        <li>
+                          Prepare project reports covering design, implementation, testing, and
+                          results.
+                        </li>
+                        <li>
+                          Draft a synopsis or proposal with the problem, objectives, methodology,
+                          and timeline.
+                        </li>
+                        <li>Choose an academic template and export compile-ready LaTeX.</li>
+                      </ul>
                     ) : (
                       <p>{step.detail}</p>
                     )}

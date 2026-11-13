@@ -17,9 +17,9 @@ const phases = [
       },
       {
         number: "03",
-        title:
+        title: "Set up your project automatically",
+        detail:
           "Let GetProjectHelper set up your project and files automatically, so you can focus on building.",
-        detail: "",
       },
     ],
   },
@@ -104,17 +104,20 @@ export function HomepageRoadmap() {
                         <li>GetProjectHelper finds research papers relevant to your project</li>
                       </ul>
                     ) : step.number === "03" ? (
-                      <ul className="roadmap-step-bullets">
-                        <li>Finds relevant libraries, tools, and materials for your project.</li>
-                        <li>
-                          For data related projects, suggests multiple relevant datasets so you have
-                          options without spending hours searching.
-                        </li>
-                        <li>
-                          Creates project folders, directories, and files so you can start building
-                          without setting everything up manually.
-                        </li>
-                      </ul>
+                      <>
+                        <p className="roadmap-step-lead">{step.detail}</p>
+                        <ul className="roadmap-step-bullets">
+                          <li>Finds relevant libraries, tools, and materials for your project.</li>
+                          <li>
+                            For data related projects, suggests multiple relevant datasets so you
+                            have options without spending hours searching.
+                          </li>
+                          <li>
+                            Creates project folders, directories, and files so you can start
+                            building without setting everything up manually.
+                          </li>
+                        </ul>
+                      </>
                     ) : (
                       <p>{step.detail}</p>
                     )}

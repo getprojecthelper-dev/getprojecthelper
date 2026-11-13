@@ -27,11 +27,14 @@ export function CodeBlock({
   language,
   filename,
   className,
+  staticView = false,
 }: {
   code: string;
   language?: string | undefined;
   filename?: string | undefined;
   className?: string | undefined;
+  /** Expand with the page instead of creating an inner editor scroll area. */
+  staticView?: boolean | undefined;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -90,7 +93,7 @@ export function CodeBlock({
           </Button>
         </div>
       </div>
-      <div className="max-h-[26rem] overflow-auto bg-card">
+      <div className={cn("bg-card", staticView ? "overflow-hidden" : "max-h-[26rem] overflow-auto")}>
         <table className="w-full border-collapse font-mono text-[12.5px] leading-relaxed">
           <tbody>
             {lines.map((tokens, i) => (
@@ -98,7 +101,12 @@ export function CodeBlock({
                 <td className="w-10 select-none border-r border-border bg-muted/40 px-2 py-0.5 text-right text-[11px] text-muted-foreground">
                   {i + 1}
                 </td>
-                <td className="whitespace-pre px-3 py-0.5 text-card-foreground">
+                <td
+                  className={cn(
+                    "px-3 py-0.5 text-card-foreground",
+                    staticView ? "whitespace-pre-wrap break-words" : "whitespace-pre",
+                  )}
+                >
                   {tokens.length === 0
                     ? " "
                     : tokens.map((token, index) => (

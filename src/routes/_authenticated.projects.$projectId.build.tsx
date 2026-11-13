@@ -5,15 +5,19 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Database,
   Download,
   ExternalLink,
+  File,
   FileCode2,
   FileSpreadsheet,
   FileText,
   FileType,
   FolderTree,
+  Folder,
+  FolderOpen,
   Loader2,
   Lightbulb,
   ListChecks,
@@ -28,7 +32,7 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
@@ -822,6 +826,163 @@ function StepFiles({ specs, isNew }: { specs: FileSpec[]; isNew: (spec: FileSpec
   );
 }
 
+type ExplorerNode = {
+  name: string;
+  path: string;
+  children: ExplorerNode[];
+  isFile?: boolean;
+};
+
+function fileAppearance(path: string) {
+  const ext = path.split(".").pop()?.toLowerCase();
+  if (["py", "js", "ts", "tsx", "jsx"].includes(ext ?? "")) return "text-info";
+  if (["csv", "xlsx", "json"].includes(ext ?? "")) return "text-success";
+  if (["md", "txt", "pdf", "docx"].includes(ext ?? "")) return "text-warning";
+  if (["env", "gitignore"].includes(ext ?? "")) return "text-muted-foreground";
+  return "text-primary";
+}
+
+function buildExplorerTree(files: StructureFile[]) {
+  const root: ExplorerNode = { name: "", path: "", children: [] };
+  for (const item of files) {
+    const clean = item.path.replace(/^\.?\//, "").replace(/\/$/, "");
+    if (!clean) continue;
+    const parts = clean.split("/");
+    let parent = root;
+    parts.forEach((part, index) => {
+      const path = parts.slice(0, index + 1).join("/");
+      let node = parent.children.find((child) => child.name === part);
+      if (!node) {
+        node = { name: part, path, children: [], isFile: index === parts.length - 1 };
+        parent.children.push(node);
+      }
+      if (index === parts.length - 1) node.isFile = true;
+      parent = node;
+    });
+  }
+  const sort = (nodes: ExplorerNode[]) => {
+    nodes.sort((a, b) => Number(Boolean(a.isFile)) - Number(Boolean(b.isFile)) || a.name.localeCompare(b.name));
+    nodes.forEach((node) => sort(node.children));
+  };
+  sort(root.children);
+  return root;
+}
+
+function filesFromStructure(structure: string | null): StructureFile[] {
+  if (!structure) return [];
+  const paths: string[] = [];
+  const folders: string[] = [];
+  for (const rawLine of structure.split("\n")) {
+    const marker = rawLine.search(/[├└]──/);
+    if (marker < 0) continue;
+    const depth = Math.max(0, Math.floor(marker / 4));
+    const name = rawLine.slice(marker + 3).trim().replace(/\s+#.*$/, "");
+    if (!name || name.includes(" ") || name === "…") continue;
+    folders.length = depth;
+    if (name.endsWith("/")) {
+      folders[depth] = name.slice(0, -1);
+      continue;
+    }
+    if (!/\.[a-z0-9]+$/i.test(name) && !name.startsWith(".")) continue;
+    paths.push([...folders.slice(0, depth), name].filter(Boolean).join("/"));
+  }
+  return Array.from(new Set(paths)).map((path) => ({ path, content: "" }));
+}
+
+/** A familiar explorer view keeps setup approachable without asking users to read shell commands. */
+function ProjectExplorer({ files, onDownload, downloading }: {
+  files: StructureFile[];
+  onDownload: () => void;
+  downloading: boolean;
+}) {
+  const tree = useMemo(() => buildExplorerTree(files), [files]);
+  const firstFile = files.find((file) => file.path && !file.path.endsWith("/"))?.path ?? null;
+  const [selected, setSelected] = useState<string | null>(firstFile);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => setSelected(firstFile), [firstFile]);
+
+  const toggleFolder = (path: string) => {
+    setOpenFolders((current) => {
+      const next = new Set(current);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  };
+
+  const renderNode = (node: ExplorerNode, depth = 0): ReactNode => {
+    if (node.isFile) {
+      const active = selected === node.path;
+      return (
+        <button
+          key={node.path}
+          type="button"
+          onClick={() => setSelected(node.path)}
+          className={cn(
+            "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors",
+            active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+          style={{ paddingLeft: `${depth * 16 + 10}px` }}
+        >
+          <File className={cn("h-4 w-4 shrink-0", fileAppearance(node.name))} />
+          <span className="truncate">{node.name}</span>
+        </button>
+      );
+    }
+
+    const isOpen = openFolders.has(node.path) || depth === 0;
+    return (
+      <div key={node.path}>
+        <button
+          type="button"
+          onClick={() => toggleFolder(node.path)}
+          className="flex w-full items-center gap-1 rounded px-2 py-1.5 text-left text-sm font-medium text-foreground hover:bg-muted"
+          style={{ paddingLeft: `${depth * 16 + 6}px` }}
+        >
+          <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
+          {isOpen ? <FolderOpen className="h-4 w-4 text-primary" /> : <Folder className="h-4 w-4 text-primary" />}
+          <span className="truncate">{node.name}</span>
+        </button>
+        {isOpen ? node.children.map((child) => renderNode(child, depth + 1)) : null}
+      </div>
+    );
+  };
+
+  const selectedName = selected?.split("/").pop();
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-[#101014] shadow-inner">
+      <div className="flex items-center justify-between border-b border-white/10 bg-[#18181d] px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+          <FolderTree className="h-4 w-4 text-primary" /> Explorer
+        </div>
+        <Button size="sm" onClick={onDownload} disabled={downloading} className="gap-2">
+          {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {downloading ? "Preparing…" : "Download folder"}
+        </Button>
+      </div>
+      <div className="grid min-h-[300px] md:grid-cols-[minmax(220px,0.8fr)_minmax(300px,1.2fr)]">
+        <div className="border-b border-white/10 bg-[#15151a] p-2 md:border-b-0 md:border-r">
+          <p className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Files</p>
+          {tree.children.length ? tree.children.map((node) => renderNode(node)) : <p className="p-2 text-sm text-muted-foreground">Your project files will appear here.</p>}
+        </div>
+        <div className="flex min-h-[220px] flex-col bg-[#101014]">
+          <div className="border-b border-white/10 bg-[#18181d] px-4 py-2 font-mono text-xs text-muted-foreground">
+            {selected ?? "Select a file"}
+          </div>
+          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+            <FileCode2 className={cn("h-10 w-10", selected ? fileAppearance(selected) : "text-muted-foreground")} />
+            <p className="mt-3 font-medium text-white">{selectedName ?? "Your project structure"}</p>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
+              This file is ready in your project folder. Download it, then follow each build step to fill it in.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Per-part instruction: exactly where this text goes. */
 function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
   const meta = metaOf(appOf(spec.kind));
@@ -979,6 +1140,7 @@ function SectionCard({
   const isOverview =
     section.kind === "overview" ||
     (section.position === 0 && /problem\s*statement/i.test(section.title));
+  const isStructureSection = section.kind === "structure" && playbook.buildsCode;
   const generated = Boolean(section.code) || section.blocks.length > 0;
 
   const blocks: Block[] =
@@ -1023,12 +1185,17 @@ function SectionCard({
       ).map(([path, cells]) => ({ path, cells }))
     : [];
 
+  // Older projects may have an ASCII structure but no saved file list. Read it
+  // once so those projects also get the same explorer and downloadable folders.
+  const structureFiles =
+    section.files.length > 0 ? section.files : filesFromStructure(section.structure);
+
   const downloadZip = async () => {
     setZipping(true);
     try {
       const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
-      const files = section.files.filter((f) => f.path && !f.path.endsWith("/"));
+      const files = structureFiles.filter((f) => f.path && !f.path.endsWith("/"));
       if (files.length === 0) {
         zip.file("project-structure.txt", section.structure ?? "");
       } else {
@@ -1160,26 +1327,18 @@ function SectionCard({
 
           {section.structure && playbook.buildsCode ? (
             <div className="space-y-3 rounded-xl border border-border bg-card p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
                 <div>
                   <p className="flex items-center gap-2 font-display text-base">
                     <FolderTree className="h-4 w-4 text-primary" /> Project structure
                   </p>
                   <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    Only the files this project actually needs. Every file comes down empty — you
-                    fill them in as you work through the steps below.
+                    Your folders and files are ready. Select a file to see what it is for, then
+                    download the complete starter folder.
                   </p>
                 </div>
-                <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
-                  {zipping ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Download className="h-5 w-5" />
-                  )}
-                  {zipping ? "Preparing…" : "Download project folder (.zip)"}
-                </Button>
               </div>
-              <CodeBlock code={section.structure} filename="project structure" />
+              <ProjectExplorer files={structureFiles} onDownload={downloadZip} downloading={zipping} />
             </div>
           ) : null}
 
@@ -1193,7 +1352,7 @@ function SectionCard({
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
-          {isOverview
+          {isOverview || isStructureSection
             ? null
             : blocks.map((block, i) => {
                 const hasCode = Boolean(block.code?.trim());
@@ -1248,6 +1407,7 @@ function SectionCard({
                               code={block.code}
                               language={section.language}
                               filename={blockFile}
+                              staticView
                             />
                           )
                         ) : (

@@ -108,70 +108,37 @@
   --sidebar-ring: oklch(0.7 0.19 40);
 }
 
-/* Public landing canvas: intentionally bright and independent of workspace tokens. */
-.landing-wash {
-  background:
-    radial-gradient(circle at 7% 8%, oklch(0.9 0.09 295 / 0.6), transparent 26rem),
-    radial-gradient(circle at 95% 15%, oklch(0.91 0.09 225 / 0.54), transparent 31rem),
-    radial-gradient(circle at 72% 82%, oklch(0.93 0.1 155 / 0.35), transparent 25rem),
-    linear-gradient(135deg, #fbfbff 0%, #f4f6ff 46%, #f8fffd 100%);
+/* Public homepage: bright, spacious marketing surface, separate from the workspace. */
+.landing-editorial {
+  --landing-paper: #ffffff;
+  --landing-sheet: #ffffff;
+  --landing-ink: #111111;
+  --landing-muted: #52525b;
+  --landing-rule: #e4e4e7;
+  --landing-wash: #f8fafc;
+  --landing-accent: #0866e8;
+  --landing-accent-ink: #0757ad;
 }
 
-.landing-gradient-text {
-  background: linear-gradient(100deg, #6d28d9 0%, #2563eb 48%, #0891b2 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.landing-finished-pill {
+  background: #d1f5dc;
+  white-space: nowrap;
 }
 
-.landing-wash-dark {
-  background:
-    radial-gradient(circle at 10% 3%, oklch(0.34 0.14 295 / 0.32), transparent 27rem),
-    radial-gradient(circle at 88% 18%, oklch(0.33 0.12 245 / 0.25), transparent 32rem),
-    radial-gradient(circle at 56% 88%, oklch(0.3 0.12 170 / 0.15), transparent 28rem), #09090b;
+.landing-preview {
+  transform: translateZ(0);
 }
 
-/* The marketing experience is deliberately a fixed dark presentation, not a toggleable theme. */
-#projects {
-  border-color: rgb(255 255 255 / 0.08) !important;
-  background: rgb(255 255 255 / 0.025) !important;
-}
+@media (max-width: 639px) {
+  .landing-hero {
+    padding-top: 3.5rem;
+  }
 
-#projects > div > div:first-child > h2,
-#how-it-works h2,
-#how-it-works h3 {
-  color: #fff;
-}
-
-#projects > div > div:first-child > p,
-#projects article p,
-#how-it-works p {
-  color: rgb(203 213 225) !important;
-}
-
-#projects article {
-  border-color: rgb(255 255 255 / 0.1) !important;
-  background-image: linear-gradient(145deg, rgb(30 30 39 / 0.96), rgb(17 18 24 / 0.96)) !important;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 0.22) !important;
-}
-
-#projects article h3,
-#projects article a {
-  color: #fff;
-}
-
-#how-it-works > div > div:last-child > div {
-  border-color: rgb(255 255 255 / 0.1) !important;
-  background: rgb(255 255 255 / 0.045) !important;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 0.18);
-}
-
-#mentor > div > div:last-child {
-  background-image:
-    linear-gradient(135deg, rgb(30 27 75 / 0.78), rgb(15 23 42 / 0.62)),
-    url("/project-collaboration.png") !important;
-  background-position: center;
-  background-size: cover;
+  .landing-finished-pill {
+    margin-top: 0.15em;
+    margin-bottom: 0.1em;
+    padding-inline: 0.65em;
+  }
 }
 
 .dark {

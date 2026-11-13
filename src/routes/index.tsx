@@ -615,75 +615,83 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="border-t border-[#353a44] bg-[#111318] px-5 py-8 text-[#f5f7fa] sm:px-8 sm:py-9">
-      <div className="mx-auto grid max-w-[90rem] gap-x-12 gap-y-8 sm:grid-cols-2">
-        <div>
+    <footer className="mx-2 mb-2 rounded-[20px] bg-[#111318] px-4 py-6 text-[#f5f7fa] sm:px-6 sm:py-7">
+      <div className="mx-auto max-w-[90rem]">
+        <div className="border-b border-[#353a44] pb-5">
           <p className="font-display text-lg font-semibold">GetProjectHelper</p>
-          <p className="mt-3 max-w-md text-sm leading-5 text-[#c0c5cf]">
-            From ideas to working solutions. Build custom projects or explore products ready to use.
+          <p className="mt-3 max-w-2xl text-sm leading-5 text-[#c0c5cf]">
+            From ideas to working solutions. Explore, plan, and build projects with confidence.
           </p>
         </div>
-        <div>
-          <p className="font-display text-base font-semibold">Services</p>
-          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
-            <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
-              Get a Project
-            </Link>
-            <Link
-              to={products}
-              search={productSearch}
-              className="transition-colors hover:text-white"
-            >
-              Buy a Product
-            </Link>
-            <Link
-              to={products}
-              search={productSearch}
-              className="transition-colors hover:text-white"
-            >
-              Explore Projects
-            </Link>
+        <div className="grid gap-x-12 gap-y-7 border-b border-[#353a44] py-6 sm:grid-cols-2">
+          <div>
+            <p className="font-display text-base font-semibold">Platform</p>
+            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+              <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
+                Get a Project
+              </Link>
+              <Link
+                to={products}
+                search={productSearch}
+                className="transition-colors hover:text-white"
+              >
+                Buy a Product
+              </Link>
+              <a href="#how-it-works" className="transition-colors hover:text-white">
+                How It Works
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com"
+                className="transition-colors hover:text-white"
+              >
+                Contact Us
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="font-display text-base font-semibold">Legal</p>
+            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                Terms and Conditions
+              </Link>
+              <Link to="/refund-policy" className="transition-colors hover:text-white">
+                Refund Policy
+              </Link>
+            </div>
+          </div>
+          <div>
+            <p className="font-display text-base font-semibold">Trust &amp; Safety</p>
+            <p className="mt-3 max-w-sm text-sm leading-5 text-[#c0c5cf]">
+              AI can make mistakes. Please verify important information.
+            </p>
+          </div>
+          <div>
+            <p className="font-display text-base font-semibold">Company &amp; Support</p>
+            <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
+              <a href="#get-project" className="transition-colors hover:text-white">
+                About Us
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com"
+                className="transition-colors hover:text-white"
+              >
+                Help Center
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com"
+                className="transition-colors hover:text-white"
+              >
+                Contact
+              </a>
+            </div>
           </div>
         </div>
-        <div>
-          <p className="font-display text-base font-semibold">Company</p>
-          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
-            <a href="#get-project" className="transition-colors hover:text-white">
-              About Us
-            </a>
-            <a href="#how-it-works" className="transition-colors hover:text-white">
-              How It Works
-            </a>
-            <a
-              href="mailto:support@getprojecthelper.com"
-              className="transition-colors hover:text-white"
-            >
-              Contact Us
-            </a>
-          </div>
-        </div>
-        <div>
-          <p className="font-display text-base font-semibold">Legal &amp; Support</p>
-          <div className="mt-3 grid justify-items-start gap-2 text-sm text-[#c0c5cf]">
-            <Link to="/privacy" className="transition-colors hover:text-white">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="transition-colors hover:text-white">
-              Terms and Conditions
-            </Link>
-            <Link to="/refund-policy" className="transition-colors hover:text-white">
-              Refund Policy
-            </Link>
-            <a
-              href="mailto:support@getprojecthelper.com"
-              className="transition-colors hover:text-white"
-            >
-              Support
-            </a>
-          </div>
-        </div>
-        <div className="border-t border-[#353a44] pt-5 text-sm text-[#c0c5cf] sm:col-span-2">
-          © 2026 GetProjectHelper. All rights reserved.
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-5 text-xs text-[#c0c5cf]">
+          <span>© 2026 GetProjectHelper. All rights reserved.</span>
+          <span>Made to help you build with confidence.</span>
         </div>
       </div>
     </footer>

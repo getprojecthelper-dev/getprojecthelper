@@ -1,14 +1,71 @@
 # Project Helper
 
-Project Helper is an AI-assisted, project-centred workspace for students. It guides a project from an initial idea through planning, research, build, testing, documentation, review, and showcase.
+**Project Helper** is a student-focused platform that turns a project idea into a complete, portfolio-ready project — with real code files, documentation, and guidance at every step.
 
-The product is intentionally not a generic task manager with a chatbot. Every workspace feature should help answer three questions:
+Live site: https://www.getprojecthelper.com
 
-1. Where am I in my project?
-2. How am I doing?
-3. What should I do next?
+## What it does
 
-Live site: <https://www.getprojecthelper.com>
+### For students
+
+- **Guided project creation** — Describe an idea (or pick a problem statement) and the platform plans a full project: roadmap, folder structure, and every file the project needs.
+- **Project workspace** — A split-screen builder: the implementation roadmap on one side, a VS Code-style code editor (file tree + editor) on the other. Click **Generate** on any step and the code is written live into the right file in front of you.
+- **Real, editable files** — Every project file is saved to your workspace. You can edit code directly in the editor, and your changes are preserved — regeneration never overwrites your edits.
+- **Notebooks** — Jupyter notebooks (`.ipynb`) open as readable Python with cell markers, and edits save back as valid notebooks.
+- **Three code levels** — Choose how the code is written:
+  - **Essential** — simple, readable code for beginners
+  - **Intermediate** — clean, modular, professional code
+  - **Production** — robust, efficient, real-world engineering
+- **AI Mentor** — Ask questions about your project and get help debugging or understanding the code.
+- **Documentation & Viva prep** — Generate project documentation, README files, reports, and viva (oral exam) question-and-answer material.
+- **Downloads** — Export your finished project as a ZIP.
+- **Project domains** — Software Development, Project Management, and Data Science, with dataset recommendations for data projects.
+- **Buy projects (store)** — A premade-projects store where complete projects can be purchased (currently locked — "Launching soon").
+
+### Plans & credits
+
+AI usage is metered in credits based on actual model token usage:
+
+| Plan         | Price   | Monthly credits                          | Active projects |
+| ------------ | ------- | ---------------------------------------- | --------------- |
+| Free         | ₹0      | 100K token-equivalent (one-time welcome) | 1               |
+| Starter      | ₹199/mo | 1M token-equivalent                      | 2               |
+| Student      | ₹399/mo | 3M token-equivalent                      | 5               |
+| Professional | ₹999/mo | 10M token-equivalent                     | 15              |
+
+- Credits settle at real model rates (1,000 input tokens = 1 credit; 1,000 output tokens = 5 credits).
+- When credits run out, AI features pause until the next monthly reset or an upgrade.
+- Prices adapt to the visitor's region (₹ in India, local currency elsewhere).
+- Subscriptions are handled through Paddle checkout with webhook-based activation.
+
+### For admins
+
+An admin panel with a dedicated sidebar:
+
+- **User Info** — registered users, credits used, subscriptions purchased, projects created, newest registrations, redeem codes, heaviest consumers
+- **Credits** — credit usage over days/weeks/months and usage broken down by feature
+- **Building** — see what users are building and open their projects
+- **Token Tracker** — GPT Luna 6 token and cost tracking (internal pricing tool)
+- **Premade Project Listing** — manage store listings and open/lock the store
+- **Website availability** — switch the public site between live and maintenance mode (admins keep access)
+
+## Tech stack
+
+- **Frontend:** React 19 + TanStack Start (SSR), Tailwind CSS v4, shadcn components
+- **Editor:** Monaco (the editor engine behind VS Code), lazy-loaded after hydration
+- **Backend:** Lovable Cloud (auth, database, row-level security)
+- **AI:** Direct OpenAI integration (GPT Luna 6 model) for the builder, mentor, and PM tools
+- **Payments:** Paddle subscriptions
+- **Email:** Transactional email via notify.getprojecthelper.com
+
+## Key behaviors
+
+- Users only ever see their own projects; admin views are role-checked server-side.
+- Project creation enforces the plan's active-project limit at the database level.
+- Credit holds reserve an estimate before a run; settlement charges only actual usage.
+- The site can be put in maintenance mode without locking out admins or sign-in.
+
+## Project scope and principles
 
 ## Product scope
 
@@ -32,115 +89,3 @@ When adding a feature, keep it connected to a specific project and its lifecycle
 - OpenAI-powered server-side AI features
 - Paddle subscriptions
 - Bun for package management and scripts
-
-## Quick start
-
-### Prerequisites
-
-- [Bun](https://bun.sh/) installed
-- Environment variables configured locally (copy an existing development environment file only through the team’s approved secret-sharing process)
-
-### Run locally
-
-```sh
-bun install
-bun run dev
-```
-
-Useful commands:
-
-```sh
-bun run lint
-bun run build
-bun run format
-```
-
-Use `bun.lock` as the only dependency lockfile. Do not introduce `package-lock.json`, `npm install`, or another package manager lockfile.
-
-## Repository map
-
-```text
-src/
-  routes/           File-based application routes
-  components/       Product and shared interface components
-  components/ui/    Reusable UI primitives
-  lib/              Domain logic, server functions, data access, and utilities
-  hooks/            Shared React hooks
-  styles.css        Design tokens and global styling
-drizzle/
-  schema.ts         Application database schema
-  migrations/       Drizzle migrations
-supabase/
-  migrations/       Cloud database migrations and policies
-```
-
-Route files describe product surfaces; keep durable business logic in `src/lib` and reusable presentation in `src/components`. Prefer extending existing components and patterns over creating page-specific duplicates.
-
-## Architecture and security
-
-### Project data
-
-- Projects and all project-related data must be owned and authorised server-side.
-- UI checks improve the experience; they never replace database or server-side authorisation.
-- Add new persistence through the schema and a migration. Avoid client-only state for durable project records.
-
-### AI features
-
-- AI requests run through server-side helpers in `src/lib`.
-- Preserve the project context that makes suggestions relevant.
-- Require confirmation before an AI action writes or substantially changes project data.
-- Never invent outcomes, citations, project metrics, or user data. Clearly state when information is unavailable.
-
-### Credits and subscriptions
-
-- Subscription plans are defined in `src/lib/plans.ts`.
-- Credit holds and settlement must reflect actual usage.
-- Each paid plan bill resets the credit balance through the `reset_plan_credits` database function.
-- Active-project limits are enforced by a database trigger, so every creation path is protected.
-
-### Website availability
-
-Website availability is a singleton setting that is publicly readable but writable only by administrators through an authenticated, role-checked server function. The maintenance gate is a presentation guard—not a substitute for data authorisation—and must preserve authentication, password recovery, and admin access.
-
-## Interface conventions
-
-The visual system is defined in `src/styles.css` and uses semantic tokens. Keep components on those tokens rather than adding raw colours ad hoc.
-
-- Workspace: dark studio surfaces with violet and blue accents
-- Marketing: a separately styled public experience
-- Authentication: account-specific pine/coral tokens must remain scoped under `.auth-stage`; they must not affect the shared workspace theme
-- Reuse `src/components/ui` primitives for controls, feedback, overlays, and inputs
-- Use accessible labels, visible focus states, responsive layouts, and meaningful loading, empty, error, and success states
-- Use Material Symbols or the existing icon system; avoid emoji-as-icon UI
-
-## Navigation
-
-Workspace Back follows router-tracked in-app history. For direct entry with no history target, it falls back to Welcome. It is disabled on Welcome, preventing a no-op click or navigation outside the app. Preserve this behaviour when changing routes or shell navigation.
-
-## Database changes
-
-The project contains both Drizzle and Supabase/Lovable migration history. Before altering data models:
-
-1. Inspect `drizzle/schema.ts` and relevant existing migrations.
-2. Add a forward-only migration appropriate to the affected migration system.
-3. Add or update server-side ownership and role checks.
-4. Verify that the user-facing feature handles loading, empty, error, and success states.
-
-Never rewrite published Git history. This project is connected to Lovable, so force pushes, rebases, amended commits, and squashed already-pushed commits can break the synced history. Keep commits working and forward-moving.
-
-## Development checklist
-
-Before handing off a change:
-
-1. Confirm the feature supports the project lifecycle rather than a generic dashboard pattern.
-2. Keep business logic out of route rendering where practical.
-3. Verify ownership, roles, and server-side protection for new data or actions.
-4. Use existing design tokens and UI primitives.
-5. Run the relevant checks, at minimum `bun run lint` for code changes and `bun run build` for route/build-impacting changes.
-6. Do not commit secrets or expose server credentials to the client.
-
-## Product direction
-
-The MVP prioritises authentication, project creation and templates, the project dashboard, tasks, requirements, project progress, research and document management, testing, the AI mentor, documentation tracking, review, and showcase.
-
-Advanced automation, complex multi-agent systems, full ML training, deep integrations, marketplace expansion, and collaboration should be designed for future growth—but not simulated or prematurely built.

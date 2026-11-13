@@ -1,14 +1,14 @@
 import { Link, createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { getPaddleEnvironment, getLocalizedProjectPricing, openProjectCheckout } from "@/lib/paddle";
-import { getPremadeProject } from "@/lib/premade-projects";
-import { getCatalogPricing, getProjectPurchase } from "@/lib/premade.functions";
+import { getLiveListing } from "@/lib/premade-listings.functions";
+import { getProjectPurchase } from "@/lib/premade.functions";
 import { DOMAINS, getTemplate } from "@/lib/project-domain";
 
 export const Route = createFileRoute("/_authenticated/premade/$projectId")({
@@ -26,25 +26,25 @@ export const Route = createFileRoute("/_authenticated/premade/$projectId")({
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const entry = getPremadeProject(projectId);
-  if (!entry) throw notFound();
   const { user } = useAuth();
   const navigate = useNavigate();
   const environment = getPaddleEnvironment();
   const [busy, setBusy] = useState(false);
+  const { data: entry, isPending } = useQuery({
+    queryKey: ["premade-listing", projectId],
+    queryFn: () => getLiveListing({ data: { id: projectId } }),
+  });
   const { data: purchase } = useQuery({
     queryKey: ["project-purchase", projectId, environment],
     queryFn: () => getProjectPurchase({ data: { id: projectId, environment } }),
   });
-  const { data: pricing } = useQuery({
-    queryKey: ["premade-pricing", environment, projectId],
-    queryFn: () => getCatalogPricing({ data: { id: projectId, environment } }),
-  });
   const { data: localizedPrice } = useQuery({
-    queryKey: ["premade-localized-price", entry.priceId, environment, pricing?.discountPercent],
-    queryFn: () => getLocalizedProjectPricing(entry.priceId, pricing?.discountPercent ?? 0),
-    enabled: pricing !== undefined,
+    queryKey: ["premade-localized-price", entry?.providerPriceId],
+    queryFn: () => getLocalizedProjectPricing(entry?.providerPriceId ?? "", 0),
+    enabled: Boolean(entry?.providerPriceId && entry.isAvailable),
   });
+  if (isPending) return <main className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted-foreground">Loading…</main>;
+  if (!entry) throw notFound();
   const template = getTemplate(entry.domain);
   const domainLabel = DOMAINS.find((domain) => domain.value === entry.domain)?.label ?? entry.domain;
 
@@ -53,7 +53,7 @@ function ProjectDetails() {
     setBusy(true);
     try {
       await openProjectCheckout({
-        priceId: entry.priceId,
+        priceId: entry.providerPriceId ?? "",
         catalogProjectId: entry.id,
         userId: user.id,
         ...(user.email ? { customerEmail: user.email } : {}),
@@ -70,27 +70,28 @@ function ProjectDetails() {
       <Button asChild variant="ghost" size="sm"><Link to="/premade"><ArrowLeft />Back to projects</Link></Button>
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
-          <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase text-muted-foreground"><span>{domainLabel}</span><span>·</span><span>{entry.level}</span></div>
-          <h1 className="mt-3 font-display text-3xl sm:text-4xl">{entry.title}</h1>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">{entry.brief}</p>
+          <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase text-muted-foreground"><span>{domainLabel}</span></div>
+          {entry.imageUrl ? <img src={entry.imageUrl} alt={entry.title} className="mt-4 aspect-[16/9] w-full rounded-lg object-cover" /> : null}
+          <h1 className="mt-4 font-display text-3xl sm:text-4xl">{entry.title}</h1>
+          <p className="mt-4 text-base leading-7 text-muted-foreground"><span className="whitespace-pre-line">{entry.description}</span></p>
           <section className="mt-8 border-t border-border pt-6">
             <h2 className="font-display text-xl">What you will complete</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {template.workflow.map((item) => <div key={item} className="flex items-center gap-2 text-sm"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10"><Check className="h-3.5 w-3.5 text-primary" /></span>{item}</div>)}
             </div>
           </section>
-          <section className="mt-8 border-t border-border pt-6"><h2 className="font-display text-xl">Tools you will use</h2><p className="mt-2 text-sm text-muted-foreground">{entry.stack}</p></section>
+          <section className="mt-8 border-t border-border pt-6"><h2 className="font-display text-xl">Tools you will use</h2><p className="mt-2 text-sm text-muted-foreground">{entry.techStack}</p></section>
         </div>
         <aside className="panel h-fit p-5 lg:sticky lg:top-24">
           <div className="rounded-md border border-border/60 bg-secondary/40 px-3 py-2 text-xs leading-5 text-muted-foreground">
             <strong className="text-foreground">Personal &amp; academic use only.</strong> This project is for your own learning or coursework. It may not be resold, redistributed, or used to operate a business or commercial service.
           </div>
-          {pricing && pricing.discountPercent > 0 ? <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-success"><Sparkles className="h-4 w-4" />{pricing.discountPercent}% discount</div> : null}
-          {pricing && pricing.discountPercent > 0 ? <p className="mt-4 text-sm text-muted-foreground line-through">Regular price: {localizedPrice?.regularPrice ?? `₹${(pricing.regularPriceMinor / 100).toLocaleString("en-IN")}`}</p> : null}
-          <p className="mt-1 text-3xl font-semibold">{localizedPrice?.salePrice ?? "Local price at checkout"}</p>
+          <p className="mt-1 text-3xl font-semibold">{localizedPrice?.salePrice ?? `₹${(entry.priceMinor / 100).toLocaleString("en-IN")}`}</p>
           <p className="mt-1 text-xs text-muted-foreground">One-time purchase</p>
           {purchase?.owned && purchase.projectId ? (
             <Button className="mt-5 w-full" onClick={() => void navigate({ to: "/projects/$projectId", params: { projectId: purchase.projectId ?? "" } })}>Open your project</Button>
+          ) : !entry.isAvailable ? (
+            <Button className="mt-5 w-full" disabled>Not available</Button>
           ) : (
             <Button className="mt-5 w-full" onClick={() => void buy()} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : null}{busy ? "Opening checkout…" : "Buy project"}</Button>
           )}

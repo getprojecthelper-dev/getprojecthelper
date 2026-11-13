@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
-import { canAccessSite } from "./site-availability";
+import { canAccessSite, canOpenPremade } from "./site-availability";
 
 describe("website availability", () => {
   test("public mode allows visitors", () => {
@@ -16,5 +16,17 @@ describe("website availability", () => {
     assert.equal(canAccessSite(true, false, "/auth"), true);
     assert.equal(canAccessSite(true, false, "/reset-password"), true);
     assert.equal(canAccessSite(true, false, "/auth-other"), false);
+  });
+});
+
+describe("buy projects availability", () => {
+  test("the store stays locked for students while the switch is off", () => {
+    assert.equal(canOpenPremade(false, false), false);
+  });
+  test("the store opens for everyone once the switch is on", () => {
+    assert.equal(canOpenPremade(true, false), true);
+  });
+  test("administrators can open a locked store", () => {
+    assert.equal(canOpenPremade(false, true), true);
   });
 });

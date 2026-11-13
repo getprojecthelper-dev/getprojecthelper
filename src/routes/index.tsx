@@ -20,8 +20,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { PREMADE_PROJECTS } from "@/lib/premade-projects";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { listHomepageListings } from "@/lib/premade-listings.functions";
+import { getPaddleEnvironment } from "@/lib/paddle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,9 +51,14 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const catalogPreview = PREMADE_PROJECTS.slice(0, 3);
-
 function Landing() {
+  const environment = getPaddleEnvironment();
+  const fetchListings = useServerFn(listHomepageListings);
+  const { data: listings = [] } = useQuery({
+    queryKey: ["homepage-listings", environment],
+    queryFn: () => fetchListings({ data: { environment } }),
+  });
+  const catalogPreview = listings.slice(0, 3);
   const { session } = useAuth();
   const getStarted = session ? "/welcome" : "/auth";
   const signup = session ? {} : { mode: "signup" as const };
@@ -83,7 +91,8 @@ function Landing() {
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-[#3f3f46] sm:text-xl sm:leading-8">
               <span className="block">
-                Share your idea, ask AI for suggestions, or paste a job description to generate a project idea.
+                Share your idea, ask AI for suggestions, or paste a job description to generate a
+                project idea.
               </span>
               <span className="mt-1 block">Or choose a product that’s ready to use.</span>
             </p>
@@ -271,40 +280,49 @@ function Landing() {
                 </Link>
               </Button>
             </div>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {catalogPreview.map((product, index) => (
-                <article
-                  key={product.id}
-                  className="flex flex-col border border-[#14120f] bg-[#fdfbf6] transition-transform duration-200 hover:-translate-y-1"
-                >
-                  <div
-                    className={`flex min-h-36 items-end justify-between border-b border-[#14120f] p-5 ${index === 0 ? "bg-[#dce9df]" : index === 1 ? "bg-[#e0e4ef]" : "bg-[#f0ddcb]"}`}
+            {catalogPreview.length > 0 && (
+              <div className="mt-8 grid gap-5 md:grid-cols-3">
+                {catalogPreview.map((product, index) => (
+                  <article
+                    key={product.id}
+                    className="flex flex-col border border-[#14120f] bg-[#fdfbf6] transition-transform duration-200 hover:-translate-y-1"
                   >
-                    <span className="max-w-[15rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
-                      {product.title}
-                    </span>
-                    <span className="font-mono text-xs font-bold">0{index + 1}</span>
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <p className="text-sm leading-6 text-[#514c45]">{product.summary}</p>
-                    <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                      <span className="border border-[#d4cec2] px-2 py-1">{product.level}</span>
-                      <span className="border border-[#d4cec2] px-2 py-1">{product.stack}</span>
-                    </div>
-                    <p className="mt-5 text-xs text-[#746d63]">
-                      Localized price shown in catalog / checkout
-                    </p>
-                    <Link
-                      to={products}
-                      search={productSearch}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#376d5c] hover:text-[#14120f]"
+                    <div
+                      className={`flex min-h-36 items-end justify-between border-b border-[#14120f] p-5 ${index === 0 ? "bg-[#dce9df]" : index === 1 ? "bg-[#e0e4ef]" : "bg-[#f0ddcb]"}`}
                     >
-                      Review product details <ArrowRight className="size-4" />
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
+                      <span className="max-w-[15rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
+                        {product.title}
+                      </span>
+                      <span className="font-mono text-xs font-bold">0{index + 1}</span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <p className="text-sm leading-6 text-[#514c45]">{product.description}</p>
+                      <div className="mt-5 flex flex-wrap gap-2 text-xs">
+                        <span className="border border-[#d4cec2] px-2 py-1">
+                          {product.domain.replaceAll("_", " ")}
+                        </span>
+                        <span className="border border-[#d4cec2] px-2 py-1">
+                          {product.techStack}
+                        </span>
+                      </div>
+                      <p className="mt-5 text-xs text-[#746d63]">
+                        {new Intl.NumberFormat(undefined, {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(product.priceMinor / 100)}
+                      </p>
+                      <Link
+                        to={products}
+                        search={productSearch}
+                        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#376d5c] hover:text-[#14120f]"
+                      >
+                        Review product details <ArrowRight className="size-4" />
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

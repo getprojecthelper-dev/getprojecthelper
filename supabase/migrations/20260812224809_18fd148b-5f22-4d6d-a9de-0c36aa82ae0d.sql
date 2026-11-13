@@ -1,3 +1,3 @@
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, 'admin'::app_role FROM auth.users WHERE lower(email) = 'shantanududhankar670@gmail.com'
-ON CONFLICT (user_id, role) DO NOTHING;
+-- Disabled: granting admin by email is unsafe (emails are not verified). The admin role
+-- was already granted to the existing account; grant future admins by user id only.
+SELECT 1;

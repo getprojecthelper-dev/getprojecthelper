@@ -508,6 +508,57 @@ export type Database = {
           },
         ]
       }
+      premade_listings: {
+        Row: {
+          created_at: string
+          description: string
+          domain: string
+          environment: string
+          id: string
+          image_url: string | null
+          is_available: boolean
+          is_live: boolean
+          price_minor: number
+          provider_price_id: string | null
+          show_on_homepage: boolean
+          tech_stack: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          domain?: string
+          environment?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          is_live?: boolean
+          price_minor: number
+          provider_price_id?: string | null
+          show_on_homepage?: boolean
+          tech_stack?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          domain?: string
+          environment?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          is_live?: boolean
+          price_minor?: number
+          provider_price_id?: string | null
+          show_on_homepage?: boolean
+          tech_stack?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -617,6 +668,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "project_purchases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_workspace_entries: {
+        Row: {
+          content: string
+          edited: boolean
+          generated_content: string
+          name: string
+          path: string
+          project_id: string
+          revision: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          edited?: boolean
+          generated_content?: string
+          name: string
+          path: string
+          project_id: string
+          revision?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          edited?: boolean
+          generated_content?: string
+          name?: string
+          path?: string
+          project_id?: string
+          revision?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_workspace_entries_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -1037,16 +1132,19 @@ export type Database = {
         Row: {
           id: boolean
           maintenance_enabled: boolean
+          premade_enabled: boolean
           updated_at: string
         }
         Insert: {
           id?: boolean
           maintenance_enabled?: boolean
+          premade_enabled?: boolean
           updated_at?: string
         }
         Update: {
           id?: boolean
           maintenance_enabled?: boolean
+          premade_enabled?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -1420,6 +1518,10 @@ export type Database = {
       hold_credits: {
         Args: { _amount: number; _feature: string; _user_id: string }
         Returns: string
+      }
+      merge_project_workspace: {
+        Args: { _entries: Json; _project_id: string }
+        Returns: undefined
       }
       plan_project_limit: { Args: { _plan: string }; Returns: number }
       redeem_referral_code: { Args: { _code: string }; Returns: number }

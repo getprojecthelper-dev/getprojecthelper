@@ -5,19 +5,16 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Database,
   Download,
   ExternalLink,
-  File,
+  Code2,
   FileCode2,
   FileSpreadsheet,
   FileText,
   FileType,
   FolderTree,
-  Folder,
-  FolderOpen,
   Loader2,
   Lightbulb,
   ListChecks,
@@ -32,13 +29,16 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
+import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
+import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -197,9 +197,41 @@ function useSections(projectId: string) {
   });
 }
 
+// Code projects fill the rest of the screen: the editor column stays put while the
+// roadmap scrolls inside its own column, so the editor never drifts.
+function useFillRemainingHeight() {
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!node) return;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const measure = () => {
+      if (!wide.matches) {
+        setHeight(null);
+        return;
+      }
+      const top = node.getBoundingClientRect().top + window.scrollY;
+      const below = document.documentElement.scrollHeight - (top + node.offsetHeight);
+      setHeight(Math.max(320, Math.round(window.innerHeight - top - below)));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.body);
+    window.addEventListener("resize", measure);
+    wide.addEventListener("change", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      wide.removeEventListener("change", measure);
+    };
+  }, [node]);
+  return { ref: setNode, height };
+}
+
 function BuildPage() {
   const projectId = useProjectId();
   const qc = useQueryClient();
+  const { ref: workspaceRef, height: workspaceHeight } = useFillRemainingHeight();
   const { data: sections = [], isPending } = useSections(projectId);
 
   const { data: meta } = useQuery({
@@ -229,14 +261,22 @@ function BuildPage() {
   const fix = withMeter("fix_section", useServerFn(fixSectionError));
 
   const [openId, setOpenId] = useState<string | null>(null);
+  const [editor, setEditor] = useState<{ sectionId: string; path: string | null } | null>(null);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: sectionsKey(projectId) });
+  const invalidate = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: sectionsKey(projectId) }),
+      qc.invalidateQueries({ queryKey: workspaceKey(projectId) }),
+    ]);
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
-    onSuccess: (_r, sectionId) => {
-      void invalidate();
+    onMutate: (sectionId) => setEditor({ sectionId, path: null }),
+    onSuccess: async (_r, sectionId) => {
+      await invalidate();
       setOpenId(sectionId);
+      setEditor({ sectionId, path: null });
+
       toast.success("Section generated and reviewed.");
     },
     onError: (error: unknown) =>
@@ -274,7 +314,6 @@ function BuildPage() {
 
   const completed = sections.filter((s) => s.status === "confirmed").length;
   const percent = sections.length ? Math.round((completed / sections.length) * 100) : 0;
-  const nextSection = sections.find((section) => section.status !== "confirmed");
 
   // For document domains: which step first asks for each office file, so we
   // say "create" once and "open the file you already made" afterwards.
@@ -291,6 +330,11 @@ function BuildPage() {
     return map;
   }, [sections, playbook.buildsCode]);
 
+  const editorSection =
+    sections.find((s) => s.id === editor?.sectionId) ??
+    sections.find((s) => s.kind === "structure" && s.status !== "pending") ??
+    null;
+
   if (isPending) {
     return (
       <div className="panel flex items-center gap-2 p-6 text-sm text-muted-foreground">
@@ -299,59 +343,30 @@ function BuildPage() {
     );
   }
 
-  return (
-    <div className="mx-auto max-w-7xl space-y-5 pb-8">
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(125deg,rgba(124,58,237,.2),rgba(9,9,11,.92)_48%,rgba(37,99,235,.14))] px-5 py-6 shadow-[0_20px_60px_rgba(0,0,0,.2)] sm:px-7 sm:py-8">
-        <div
-          className="absolute -right-20 -top-24 size-72 rounded-full bg-violet-500/15 blur-3xl"
-          aria-hidden="true"
-        />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[.18em] text-violet-300">
-              Build workspace
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-bold tracking-[-.045em] text-white sm:text-4xl">
-              {playbook.headline}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-              {playbook.subhead}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:min-w-[320px]">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Progress</p>
-              <p className="mt-1 font-display text-2xl font-bold text-white">{percent}%</p>
-              <p className="mt-1 text-xs text-slate-400">
-                {completed} of {sections.length} complete
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Up next</p>
-              <p className="mt-1 line-clamp-2 font-display text-sm font-semibold text-white">
-                {nextSection?.title ?? "All steps complete"}
-              </p>
-              <p className="mt-1 text-xs text-violet-200">
-                {nextSection ? "Ready when you are" : "Great work"}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="relative mt-6 h-2 overflow-hidden rounded-full bg-white/10">
+  const content = (
+    <div className="min-w-0 space-y-4">
+      <PageHeader title={playbook.headline} description={playbook.subhead} />
+
+      <div className="panel space-y-2 p-5">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-400 to-sky-400 transition-all duration-500"
+            className="h-full rounded-full bg-primary transition-all"
             style={{ width: `${percent}%` }}
           />
         </div>
-      </section>
+        <p className="text-xs text-muted-foreground">
+          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"}{" "}
+          completed
+        </p>
+      </div>
 
       {meta?.dataset ? (
-        <div className="panel border-primary/20 p-5">
+        <div className="panel p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <Database className="h-4 w-4 text-primary" />
-                Selected dataset
+                Dataset you selected
               </div>
               <p className="mt-2 font-display text-lg">{meta.dataset.name}</p>
               {datasetFacts(meta.dataset) ? (
@@ -404,7 +419,10 @@ function BuildPage() {
             index={index}
             locked={locked}
             open={openId === section.id}
-            onToggle={() => setOpenId((v) => (v === section.id ? null : section.id))}
+            onToggle={() => {
+              setOpenId((v) => (v === section.id ? null : section.id));
+              if (openId !== section.id) setEditor({ sectionId: section.id, path: null });
+            }}
             generating={generateMutation.isPending && generateMutation.variables === section.id}
             fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
             onGenerate={() => generateMutation.mutate(section.id)}
@@ -412,6 +430,12 @@ function BuildPage() {
             fixToken={fixTokens[section.id] ?? 0}
             fileOrigins={fileOrigins}
             onConfirm={() => confirmMutation.mutate(section.id)}
+            onOpenFile={
+              playbook.buildsCode
+                ? (file) =>
+                    setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
+                : undefined
+            }
           />
         );
       })}
@@ -421,6 +445,32 @@ function BuildPage() {
           This project has no generated implementation plan yet.
         </div>
       ) : null}
+    </div>
+  );
+
+  if (!playbook.buildsCode) return content;
+
+  // code projects: roadmap on the left, live editor on the right
+  return (
+    <div
+      ref={workspaceRef}
+      className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
+      style={workspaceHeight ? { height: workspaceHeight } : undefined}
+    >
+      <div className="min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-1">{content}</div>
+      <aside className="h-[42rem] min-w-0 md:h-full md:min-h-0">
+        <LiveCodeEditor
+          key={projectId}
+          projectId={projectId}
+          projectName={meta?.name ?? "Project"}
+          activeFile={editor}
+          generating={generateMutation.isPending}
+          terminal={(editorSection?.blocks ?? [])
+            .filter(isTerminalBlock)
+            .map((b) => b.code)
+            .join("\n\n")}
+        />
+      </aside>
     </div>
   );
 }
@@ -826,163 +876,6 @@ function StepFiles({ specs, isNew }: { specs: FileSpec[]; isNew: (spec: FileSpec
   );
 }
 
-type ExplorerNode = {
-  name: string;
-  path: string;
-  children: ExplorerNode[];
-  isFile?: boolean;
-};
-
-function fileAppearance(path: string) {
-  const ext = path.split(".").pop()?.toLowerCase();
-  if (["py", "js", "ts", "tsx", "jsx"].includes(ext ?? "")) return "text-info";
-  if (["csv", "xlsx", "json"].includes(ext ?? "")) return "text-success";
-  if (["md", "txt", "pdf", "docx"].includes(ext ?? "")) return "text-warning";
-  if (["env", "gitignore"].includes(ext ?? "")) return "text-muted-foreground";
-  return "text-primary";
-}
-
-function buildExplorerTree(files: StructureFile[]) {
-  const root: ExplorerNode = { name: "", path: "", children: [] };
-  for (const item of files) {
-    const clean = item.path.replace(/^\.?\//, "").replace(/\/$/, "");
-    if (!clean) continue;
-    const parts = clean.split("/");
-    let parent = root;
-    parts.forEach((part, index) => {
-      const path = parts.slice(0, index + 1).join("/");
-      let node = parent.children.find((child) => child.name === part);
-      if (!node) {
-        node = { name: part, path, children: [], isFile: index === parts.length - 1 };
-        parent.children.push(node);
-      }
-      if (index === parts.length - 1) node.isFile = true;
-      parent = node;
-    });
-  }
-  const sort = (nodes: ExplorerNode[]) => {
-    nodes.sort((a, b) => Number(Boolean(a.isFile)) - Number(Boolean(b.isFile)) || a.name.localeCompare(b.name));
-    nodes.forEach((node) => sort(node.children));
-  };
-  sort(root.children);
-  return root;
-}
-
-function filesFromStructure(structure: string | null): StructureFile[] {
-  if (!structure) return [];
-  const paths: string[] = [];
-  const folders: string[] = [];
-  for (const rawLine of structure.split("\n")) {
-    const marker = rawLine.search(/[├└]──/);
-    if (marker < 0) continue;
-    const depth = Math.max(0, Math.floor(marker / 4));
-    const name = rawLine.slice(marker + 3).trim().replace(/\s+#.*$/, "");
-    if (!name || name.includes(" ") || name === "…") continue;
-    folders.length = depth;
-    if (name.endsWith("/")) {
-      folders[depth] = name.slice(0, -1);
-      continue;
-    }
-    if (!/\.[a-z0-9]+$/i.test(name) && !name.startsWith(".")) continue;
-    paths.push([...folders.slice(0, depth), name].filter(Boolean).join("/"));
-  }
-  return Array.from(new Set(paths)).map((path) => ({ path, content: "" }));
-}
-
-/** A familiar explorer view keeps setup approachable without asking users to read shell commands. */
-function ProjectExplorer({ files, onDownload, downloading }: {
-  files: StructureFile[];
-  onDownload: () => void;
-  downloading: boolean;
-}) {
-  const tree = useMemo(() => buildExplorerTree(files), [files]);
-  const firstFile = files.find((file) => file.path && !file.path.endsWith("/"))?.path ?? null;
-  const [selected, setSelected] = useState<string | null>(firstFile);
-  const [openFolders, setOpenFolders] = useState<Set<string>>(() => new Set());
-
-  useEffect(() => setSelected(firstFile), [firstFile]);
-
-  const toggleFolder = (path: string) => {
-    setOpenFolders((current) => {
-      const next = new Set(current);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  };
-
-  const renderNode = (node: ExplorerNode, depth = 0): ReactNode => {
-    if (node.isFile) {
-      const active = selected === node.path;
-      return (
-        <button
-          key={node.path}
-          type="button"
-          onClick={() => setSelected(node.path)}
-          className={cn(
-            "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors",
-            active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-          )}
-          style={{ paddingLeft: `${depth * 16 + 10}px` }}
-        >
-          <File className={cn("h-4 w-4 shrink-0", fileAppearance(node.name))} />
-          <span className="truncate">{node.name}</span>
-        </button>
-      );
-    }
-
-    const isOpen = openFolders.has(node.path) || depth === 0;
-    return (
-      <div key={node.path}>
-        <button
-          type="button"
-          onClick={() => toggleFolder(node.path)}
-          className="flex w-full items-center gap-1 rounded px-2 py-1.5 text-left text-sm font-medium text-foreground hover:bg-muted"
-          style={{ paddingLeft: `${depth * 16 + 6}px` }}
-        >
-          <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
-          {isOpen ? <FolderOpen className="h-4 w-4 text-primary" /> : <Folder className="h-4 w-4 text-primary" />}
-          <span className="truncate">{node.name}</span>
-        </button>
-        {isOpen ? node.children.map((child) => renderNode(child, depth + 1)) : null}
-      </div>
-    );
-  };
-
-  const selectedName = selected?.split("/").pop();
-  return (
-    <div className="overflow-hidden rounded-xl border border-border bg-[#101014] shadow-inner">
-      <div className="flex items-center justify-between border-b border-white/10 bg-[#18181d] px-4 py-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-white">
-          <FolderTree className="h-4 w-4 text-primary" /> Explorer
-        </div>
-        <Button size="sm" onClick={onDownload} disabled={downloading} className="gap-2">
-          {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          {downloading ? "Preparing…" : "Download folder"}
-        </Button>
-      </div>
-      <div className="grid min-h-[300px] md:grid-cols-[minmax(220px,0.8fr)_minmax(300px,1.2fr)]">
-        <div className="border-b border-white/10 bg-[#15151a] p-2 md:border-b-0 md:border-r">
-          <p className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Files</p>
-          {tree.children.length ? tree.children.map((node) => renderNode(node)) : <p className="p-2 text-sm text-muted-foreground">Your project files will appear here.</p>}
-        </div>
-        <div className="flex min-h-[220px] flex-col bg-[#101014]">
-          <div className="border-b border-white/10 bg-[#18181d] px-4 py-2 font-mono text-xs text-muted-foreground">
-            {selected ?? "Select a file"}
-          </div>
-          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-            <FileCode2 className={cn("h-10 w-10", selected ? fileAppearance(selected) : "text-muted-foreground")} />
-            <p className="mt-3 font-medium text-white">{selectedName ?? "Your project structure"}</p>
-            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
-              This file is ready in your project folder. Download it, then follow each build step to fill it in.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /** Per-part instruction: exactly where this text goes. */
 function DocFileBar({ spec, isNew }: { spec: FileSpec; isNew: boolean }) {
   const meta = metaOf(appOf(spec.kind));
@@ -1110,7 +1003,9 @@ function SectionCard({
   onFix,
   onConfirm,
   fileOrigins,
+  onOpenFile,
 }: {
+  onOpenFile?: ((file: string) => void) | undefined;
   section: BuildSection;
   playbook: DomainPlaybook;
   index: number;
@@ -1140,7 +1035,6 @@ function SectionCard({
   const isOverview =
     section.kind === "overview" ||
     (section.position === 0 && /problem\s*statement/i.test(section.title));
-  const isStructureSection = section.kind === "structure" && playbook.buildsCode;
   const generated = Boolean(section.code) || section.blocks.length > 0;
 
   const blocks: Block[] =
@@ -1185,17 +1079,12 @@ function SectionCard({
       ).map(([path, cells]) => ({ path, cells }))
     : [];
 
-  // Older projects may have an ASCII structure but no saved file list. Read it
-  // once so those projects also get the same explorer and downloadable folders.
-  const structureFiles =
-    section.files.length > 0 ? section.files : filesFromStructure(section.structure);
-
   const downloadZip = async () => {
     setZipping(true);
     try {
       const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
-      const files = structureFiles.filter((f) => f.path && !f.path.endsWith("/"));
+      const files = section.files.filter((f) => f.path && !f.path.endsWith("/"));
       if (files.length === 0) {
         zip.file("project-structure.txt", section.structure ?? "");
       } else {
@@ -1224,16 +1113,11 @@ function SectionCard({
   return (
     <section
       className={cn(
-        "panel overflow-hidden rounded-2xl transition-all duration-300",
-        confirmed
-          ? "border-success/40 bg-[linear-gradient(145deg,rgba(16,185,129,.07),rgba(24,24,27,.95))]"
-          : open
-            ? "border-primary/45 shadow-[0_18px_46px_rgba(76,29,149,.16)]"
-            : "hover:border-primary/30",
-        locked ? "opacity-70" : "",
+        "panel overflow-hidden transition-colors",
+        confirmed ? "border-success/40" : locked ? "opacity-70" : "",
       )}
     >
-      <div className="flex items-start justify-between gap-3 p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3 p-4">
         <button
           type="button"
           onClick={onToggle}
@@ -1242,7 +1126,7 @@ function SectionCard({
         >
           <span
             className={cn(
-              "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm",
+              "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
               confirmed
                 ? "bg-success text-success-foreground"
                 : locked
@@ -1252,8 +1136,8 @@ function SectionCard({
           >
             {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
           </span>
-          <span className="min-w-0 space-y-1.5">
-            <span className="flex items-center gap-2 font-display text-base font-semibold sm:text-lg">
+          <span className="space-y-1">
+            <span className="flex items-center gap-2 font-display text-base">
               {section.title}
               {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
             </span>
@@ -1264,18 +1148,6 @@ function SectionCard({
         </button>
 
         <div className="flex shrink-0 items-center gap-2">
-          <span
-            className={cn(
-              "hidden rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex",
-              confirmed
-                ? "bg-success/15 text-success"
-                : generated
-                  ? "bg-primary/15 text-primary"
-                  : "bg-muted text-muted-foreground",
-            )}
-          >
-            {confirmed ? "Complete" : generated ? "Ready to review" : "Not started"}
-          </span>
           {!locked && !generated ? (
             <Button size="sm" onClick={onGenerate} disabled={generating}>
               {generating ? (
@@ -1314,7 +1186,7 @@ function SectionCard({
       </div>
 
       {open ? (
-        <div className="space-y-5 border-t border-border bg-black/10 p-5 sm:p-6">
+        <div className="space-y-5 border-t border-border bg-muted/20 p-5">
           {section.question ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
           ) : null}
@@ -1327,18 +1199,26 @@ function SectionCard({
 
           {section.structure && playbook.buildsCode ? (
             <div className="space-y-3 rounded-xl border border-border bg-card p-5">
-              <div>
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="flex items-center gap-2 font-display text-base">
                     <FolderTree className="h-4 w-4 text-primary" /> Project structure
                   </p>
                   <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    Your folders and files are ready. Select a file to see what it is for, then
-                    download the complete starter folder.
+                    Only the files this project actually needs. Every file comes down empty — you
+                    fill them in as you work through the steps below.
                   </p>
                 </div>
+                <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
+                  {zipping ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
+                  {zipping ? "Preparing…" : "Download project folder (.zip)"}
+                </Button>
               </div>
-              <ProjectExplorer files={structureFiles} onDownload={downloadZip} downloading={zipping} />
+              <CodeBlock code={section.structure} filename="project structure" />
             </div>
           ) : null}
 
@@ -1352,7 +1232,7 @@ function SectionCard({
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
-          {isOverview || isStructureSection
+          {isOverview
             ? null
             : blocks.map((block, i) => {
                 const hasCode = Boolean(block.code?.trim());
@@ -1402,12 +1282,20 @@ function SectionCard({
                               notebook={notebookName(blockFile ?? "")}
                               index={notebookCellIndex(blockFile) ?? i + 1}
                             />
+                          ) : onOpenFile && blockFile && !isTerminalBlock(block) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2"
+                              onClick={() => onOpenFile(blockFile)}
+                            >
+                              <Code2 className="h-4 w-4" /> Open in code editor
+                            </Button>
                           ) : (
                             <CodeBlock
                               code={block.code}
                               language={section.language}
                               filename={blockFile}
-                              staticView
                             />
                           )
                         ) : (
@@ -1703,7 +1591,12 @@ function FixRoundCard({
                 ) : null}
                 {block.code?.trim() ? (
                   buildsCode ? (
-                    <CodeBlock code={block.code} language={language} filename={block.file} />
+                    <CodeBlock
+                      staticView
+                      code={block.code}
+                      language={language}
+                      filename={block.file}
+                    />
                   ) : (
                     <DocSheet content={block.code} label={block.file ?? undefined} />
                   )

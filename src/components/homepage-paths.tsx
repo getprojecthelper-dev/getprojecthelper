@@ -1,7 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Code2, Home, ListTodo, Search } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { PREMADE_PROJECTS } from "@/lib/premade-projects";
+const PREVIEW_PROJECTS = [
+  {
+    id: "campus",
+    title: "Campus Event Planner",
+    summary: "Plan events and keep your campus connected.",
+  },
+  {
+    id: "finance",
+    title: "Personal Finance Tracker",
+    summary: "Track spending and plan your monthly budget.",
+  },
+];
 import "./homepage-paths.css";
 
 const steps = [
@@ -117,7 +128,7 @@ export function HomepagePaths() {
                 <span>Data science</span>
               </div>
               <div className="path-products">
-                {PREMADE_PROJECTS.slice(0, 2).map((product, index) => (
+                {PREVIEW_PROJECTS.map((product, index) => (
                   <div className="path-product" key={product.id}>
                     <div className="path-product-screen">
                       <div className="path-mini-sidebar">

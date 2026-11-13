@@ -1,69 +1,67 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getPremadeProject } from "@/lib/premade-projects";
-import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
 
-export interface CatalogPricing {
-  catalogProjectId: string;
-  regularPriceMinor: number;
-  discountPercent: number;
-  salePriceMinor: number;
+const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open here shortly.";
+
+/**
+ * The Buy projects area is locked until it is opened from the admin panel.
+ * The flag lives in the same public-readable settings row as website
+ * availability, so every checkout path can be checked on the server.
+ */
+export function createPublishableReadClient() {
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) throw new Error(PREMASE_CLOSED_MESSAGE);
+  return createClient(url, key, {
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(
+          typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+        );
+        if (init?.headers) new Headers(init.headers).forEach((value, name) => headers.set(name, value));
+        headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
-export const listCatalogPricing = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ environment: z.enum(["sandbox", "live"]) }).parse(input))
-  .handler(async ({ data, context }): Promise<CatalogPricing[]> => {
-    const { data: rows, error } = await context.supabase
-      .from("project_catalog_pricing")
-      .select("catalog_project_id,regular_price_minor,discount_percent")
-      .eq("environment", data.environment)
-      .eq("is_active", true);
-    if (error) throw new Error("Project prices could not be loaded.");
-    return (rows ?? []).map((row) => ({
-      catalogProjectId: row.catalog_project_id,
-      regularPriceMinor: row.regular_price_minor,
-      discountPercent: row.discount_percent,
-      salePriceMinor: Math.round(row.regular_price_minor * (100 - row.discount_percent) / 100),
-    }));
-  });
+async function isPremadeOpen(): Promise<boolean> {
+  const { data, error } = await createPublishableReadClient()
+    .from("site_availability")
+    .select("premade_enabled")
+    .eq("id", true)
+    .maybeSingle();
+  if (error || !data) return false; // fail closed: unreadable settings keep the store locked
+  return data.premade_enabled === true;
+}
 
-export const getCatalogPricing = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input))
-  .handler(async ({ data, context }): Promise<CatalogPricing | null> => {
-    const { data: row, error } = await context.supabase
-      .from("project_catalog_pricing")
-      .select("catalog_project_id,regular_price_minor,discount_percent")
-      .eq("catalog_project_id", data.id)
-      .eq("environment", data.environment)
-      .eq("is_active", true)
-      .maybeSingle();
-    if (error) throw new Error("Project pricing could not be loaded.");
-    return row ? {
-      catalogProjectId: row.catalog_project_id,
-      regularPriceMinor: row.regular_price_minor,
-      discountPercent: row.discount_percent,
-      salePriceMinor: Math.round(row.regular_price_minor * (100 - row.discount_percent) / 100),
-    } : null;
-  });
+async function assertPremadeOpen() {
+  if (!(await isPremadeOpen())) throw new Error(PREMASE_CLOSED_MESSAGE);
+}
 
 export const resolveProjectPrice = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
     z.object({ priceId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data }) => {
-    const response = await gatewayFetch(
-      data.environment as PaddleEnv,
-      `/prices?external_id=${encodeURIComponent(data.priceId)}`,
-    );
-    if (!response.ok) throw new Error("This project price is unavailable.");
-    const result = (await response.json()) as { data?: Array<{ id: string }> };
-    const price = result.data?.[0];
-    if (!price) throw new Error("This project price is unavailable.");
-    return price.id;
+    // Only prices attached to a live, available admin listing can be resolved.
+    if (!data.priceId.startsWith("pri_")) throw new Error("This project price is unavailable.");
+    await assertPremadeOpen();
+    const { data: listing } = await createPublishableReadClient()
+      .from("premade_listings")
+      .select("id")
+      .eq("provider_price_id", data.priceId)
+      .eq("is_live", true)
+      .eq("is_available", true)
+      .maybeSingle();
+    if (!listing) throw new Error("This project is not available right now.");
+    return data.priceId;
   });
 
 export const getProjectPurchase = createServerFn({ method: "GET" })
@@ -72,7 +70,6 @@ export const getProjectPurchase = createServerFn({ method: "GET" })
     z.object({ id: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    if (!getPremadeProject(data.id)) return { owned: false, projectId: null };
     const { data: purchase, error } = await context.supabase
       .from("project_purchases")
       .select("project_id")

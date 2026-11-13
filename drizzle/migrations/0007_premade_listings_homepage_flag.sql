@@ -1,0 +1,2 @@
+ALTER TABLE public.premade_listings ADD COLUMN show_on_homepage boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.premade_listings.show_on_homepage IS 'Admin-chosen: show this live listing on the public homepage.';

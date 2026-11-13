@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, nullableStr, obj, str, strArray } from "@/lib/ai.server";
 import { getPlaybook, PM_ARTIFACT_PLAN, type PmProfile } from "@/lib/domain-playbooks";
-
+import { syncProjectWorkspace } from "@/lib/project-workspace.server";
 
 export interface SuggestedProject {
   title: string;
@@ -43,7 +43,6 @@ export interface ResearchPaper {
 }
 
 export interface SectionPlan {
-
   title: string;
   question: string;
   objective: string;
@@ -68,8 +67,6 @@ export interface CodeBlock {
   /** "create" | "modify" | "run" — what the student does with it. */
   action?: string;
 }
-
-
 
 export interface StructureFile {
   path: string;
@@ -105,9 +102,21 @@ export const suggestProjects = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().default("").transform((v) => v.slice(0, 600)),
-        jobDescription: z.string().trim().default("").transform((v) => v.slice(0, 6000)),
-        skills: z.string().trim().default("").transform((v) => v.slice(0, 600)),
+        idea: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 600)),
+        jobDescription: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 6000)),
+        skills: z
+          .string()
+          .trim()
+          .default("")
+          .transform((v) => v.slice(0, 600)),
         domain: z.string().min(1).max(40),
         difficulty: z.enum(["easy", "intermediate", "hard"]).optional(),
         page: z.number().int().min(1).max(20),
@@ -138,7 +147,6 @@ Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it 
 - market_signals: 2-4 very short tags naming the trend or standard it rides (e.g. "AI copilots", "Cloud-native", "Data governance", "Agile delivery", "PMP-aligned"). No dates, no invented statistics.`,
       input: `Idea: ${data.idea || "(none given — suggest strong projects for the domain)"}\nDomain: ${data.domain}\n${data.skills ? `Student's skills: ${data.skills}\n` : ""}${data.jobDescription ? `Job description to target:\n"""\n${data.jobDescription}\n"""\n` : ""}Requested difficulty: ${wanted}\nSuggestion page: ${data.page}\nAlready shown (do not repeat): ${data.exclude.join(", ") || "none"}\n\nReturn exactly 4 distinct project ideas${data.difficulty ? ` that are all ${data.difficulty} difficulty` : ""}.`,
 
-
       schema: obj({
         projects: {
           type: "array",
@@ -160,7 +168,6 @@ Also rate each project's MARKET POTENTIAL as a hiring-manager would, judging it 
       market_signals: (p.market_signals ?? []).slice(0, 4),
     }));
   });
-
 
 /* ------------------------------------------------------------------ */
 /* 1b. Find research papers for the chosen project                     */
@@ -208,13 +215,11 @@ export const findResearchPapers = createServerFn({ method: "POST" })
       description: data.description,
       domain: data.domain,
     });
-
   });
 
 /* ------------------------------------------------------------------ */
 /* 2. Find datasets for a data-oriented project                        */
 /* ------------------------------------------------------------------ */
-
 
 export const findDatasets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -262,7 +267,10 @@ export const createGuidedProject = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        idea: z.string().trim().transform((value) => value.slice(0, 600)),
+        idea: z
+          .string()
+          .trim()
+          .transform((value) => value.slice(0, 600)),
         domain: z.string().max(40),
         title: z.string().trim().min(2).max(200),
         description: z.string().trim().max(3000),
@@ -296,7 +304,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
           .max(10)
           .default([]),
         codeComplexity: z.enum(["easy", "intermediate", "advanced"]).default("intermediate"),
-
       })
       .parse(input),
   )
@@ -324,18 +331,17 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       plan = { sections: PM_ARTIFACT_PLAN as unknown as SectionPlan[] };
     } else {
       plan = await generateJson<{ sections: SectionPlan[] }>({
-      usage: { userId, feature: "plan_sections" },
-      name: "implementation_plan",
-      instructions:
-        `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. AT MOST ONE section may have kind 'structure' (the project folder/file layout) — never plan two structure sections, and never repeat the folder tree in another section. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
-      input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
+        usage: { userId, feature: "plan_sections" },
+        name: "implementation_plan",
+        instructions: `You break a student project into simple, sequential steps. TITLES MUST BE VERY SIMPLE, everyday language a beginner instantly understands, 2-5 words. Never use jargon-heavy titles. The number of sections is fully DYNAMIC: use only as many as this specific project genuinely needs (as few as 4, as many as 12). Each section must build on the previous one. The FIRST section must be titled 'Problem Statement' and have kind 'overview' — it is an explanation-only section (problem, solution, approach, objective), never code. AT MOST ONE section may have kind 'structure' (the project folder/file layout) — never plan two structure sections, and never repeat the folder tree in another section. ${playbook.planInstructions} Keep 'question' and 'objective' in plain, short language too.`,
+        input: `Project: ${data.title}\nDescription: ${data.description}\nDomain: ${data.domain}\nTech stack: ${data.techStack.join(", ")}\nDataset: ${data.dataset ? `${data.dataset.name} (${data.dataset.source}, ${data.dataset.format})` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? "" : "This domain produces documents and plans, NOT software. Do not plan any coding sections.\n"}\nReturn the sections in execution order — only as many as this project actually needs.`,
 
-      schema: obj({
-        sections: {
-          type: "array",
-          items: obj({ title: str, question: str, objective: str, kind: str }),
-        },
-      }),
+        schema: obj({
+          sections: {
+            type: "array",
+            items: obj({ title: str, question: str, objective: str, kind: str }),
+          },
+        }),
       });
     }
 
@@ -360,7 +366,9 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       .single();
 
     if (error?.message?.includes("project_limit_reached"))
-      throw new Error("You have reached the active-project limit for your plan. Finish a project or upgrade on the Pricing page.");
+      throw new Error(
+        "You have reached the active-project limit for your plan. Finish a project or upgrade on the Pricing page.",
+      );
     if (error || !project) throw new Error("The project could not be created.");
 
     // Only ONE section may be the project-structure section; any later
@@ -390,7 +398,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
       };
     });
 
-
     const { error: sectionError } = await supabase.from("build_sections").insert(rows);
     if (sectionError) throw new Error("The implementation sections could not be saved.");
 
@@ -410,7 +417,6 @@ export const createGuidedProject = createServerFn({ method: "POST" })
     }
 
     return { projectId: project.id };
-
   });
 
 /* ------------------------------------------------------------------ */
@@ -435,7 +441,6 @@ const sectionFields = {
       example: str,
       analogy: str,
     }),
-
   },
   insights: strArray,
   business_connection: str,
@@ -485,8 +490,6 @@ const fixSchema = obj({
   },
 });
 
-
-
 interface OverviewContent {
   problem_statement: string;
   solution: string;
@@ -510,10 +513,7 @@ interface SectionRow {
   status: string;
 }
 
-async function loadContext(
-  supabase: { from: (t: string) => any },
-  sectionId: string,
-) {
+async function loadContext(supabase: { from: (t: string) => any }, sectionId: string) {
   const { data: section } = await supabase
     .from("build_sections")
     .select("*")
@@ -543,16 +543,37 @@ async function loadContext(
     )
     .join("\n\n");
 
+  // The file-planning step must see the whole roadmap, otherwise it can only
+  // guess and falls back to generic names like "01_explore.ipynb".
+  let roadmap = "";
+  if (section.kind === "structure") {
+    const { data: upcoming } = await supabase
+      .from("build_sections")
+      .select("position,title,objective")
+      .eq("project_id", section.project_id)
+      .gt("position", section.position)
+      .order("position");
+    roadmap = ((upcoming ?? []) as SectionRow[])
+      .map((p) => `- Step ${p.position + 1}: ${p.title} — ${p.objective ?? ""}`)
+      .join("\n");
+  }
+
   const playbook = getPlaybook(project.domain as string | null);
 
-  const pm = project.pm_profile as { industry?: string; methodology?: string; duration?: string } | null;
-  const codeComplexity = (project.code_complexity as "easy" | "intermediate" | "advanced" | null) ?? "intermediate";
-  const complexityInstruction = codeComplexity === "easy"
-    ? "CODE LEVEL: ESSENTIAL. Designed for students and beginners new to coding. Generate straightforward, readable code using simple functions, familiar syntax and basic programming concepts. Avoid advanced design patterns, unnecessary abstractions and complex logic. Use small explicit steps, plain loops and if/else, and frequent short first-person comments so beginners can understand, implement and remember the code."
-    : codeComplexity === "advanced"
-      ? "CODE LEVEL: PRODUCTION. Designed for experienced developers and real-world applications. Generate complete, robust, maintainable solutions with appropriate architecture, validation, error handling, security considerations and meaningful comments. Optimize time and space complexity where relevant and follow professional engineering standards — but WITHOUT artificially increasing code length or introducing unnecessary abstractions. A simple problem gets a simple, efficient, production-quality solution."
-      : "CODE LEVEL: INTERMEDIATE. A balanced combination of beginner-friendly readability and professional development practices. Generate modular, reusable, maintainable code using appropriate functions, error handling and clean architecture. Introduce advanced concepts only when they provide meaningful value. Avoid unnecessary complexity and excessive boilerplate.";
-  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? complexityInstruction : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code."}\nCONCISENESS RULE: write exactly as much code as the task needs — if something can be done correctly in 3 lines, write 3 lines, never pad it into 100. No filler code, no speculative features, no boilerplate that adds nothing.\n\nPrevious sections:\n${priorContext || "(this is the first section)"}`;
+  const pm = project.pm_profile as {
+    industry?: string;
+    methodology?: string;
+    duration?: string;
+  } | null;
+  const codeComplexity =
+    (project.code_complexity as "easy" | "intermediate" | "advanced" | null) ?? "intermediate";
+  const complexityInstruction =
+    codeComplexity === "easy"
+      ? "CODE LEVEL: ESSENTIAL. Designed for students and beginners new to coding. Generate straightforward, readable code using simple functions, familiar syntax and basic programming concepts. Avoid advanced design patterns, unnecessary abstractions and complex logic. Use small explicit steps, plain loops and if/else, and frequent short first-person comments so beginners can understand, implement and remember the code."
+      : codeComplexity === "advanced"
+        ? "CODE LEVEL: PRODUCTION. Designed for experienced developers and real-world applications. Generate complete, robust, maintainable solutions with appropriate architecture, validation, error handling, security considerations and meaningful comments. Optimize time and space complexity where relevant and follow professional engineering standards — but WITHOUT artificially increasing code length or introducing unnecessary abstractions. A simple problem gets a simple, efficient, production-quality solution."
+        : "CODE LEVEL: INTERMEDIATE. A balanced combination of beginner-friendly readability and professional development practices. Generate modular, reusable, maintainable code using appropriate functions, error handling and clean architecture. Introduce advanced concepts only when they provide meaningful value. Avoid unnecessary complexity and excessive boilerplate.";
+  const brief = `Project: ${project.name}\nDescription: ${project.description ?? ""}\nDomain: ${project.domain}${pm ? `\nIndustry: ${pm.industry}\nMethodology: ${pm.methodology}\nDuration: ${pm.duration}` : ""}\nTech stack: ${(project.tech_stack as string[] | null)?.join(", ") ?? ""}\nDataset: ${dataset ? `${dataset["name"]} — ${dataset["source"]} (${dataset["format"]}, ${dataset["size"]}) ${dataset["url"]}` : "none"}\nTypical deliverables for this domain: ${playbook.deliverables.join("; ")}\n${playbook.buildsCode ? complexityInstruction : "IMPORTANT: this domain produces documents, plans and tables — NOT software. Never write programming code."}\nCONCISENESS RULE: write exactly as much code as the task needs — if something can be done correctly in 3 lines, write 3 lines, never pad it into 100. No filler code, no speculative features, no boilerplate that adds nothing.\n\nPrevious sections:\n${priorContext || "(this is the first section)"}${roadmap ? `\n\nUPCOMING STEPS (the files you plan must cover every one of these):\n${roadmap}` : ""}`;
 
   return {
     section: section as SectionRow & { project_id: string },
@@ -562,7 +583,6 @@ async function loadContext(
     codeComplexity,
     supabase,
   };
-
 }
 
 export const generateSection = createServerFn({ method: "POST" })
@@ -570,8 +590,10 @@ export const generateSection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ sectionId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { section, brief, playbook, domain } = await loadContext(supabase as never, data.sectionId);
-
+    const { section, brief, playbook, domain } = await loadContext(
+      supabase as never,
+      data.sectionId,
+    );
 
     const isOverview =
       section.kind === "overview" ||
@@ -579,7 +601,11 @@ export const generateSection = createServerFn({ method: "POST" })
 
     if (isOverview) {
       const overview = await generateJson<OverviewContent>({
-        usage: { userId: context.userId, projectId: section.project_id, feature: "section_overview" },
+        usage: {
+          userId: context.userId,
+          projectId: section.project_id,
+          feature: "section_overview",
+        },
         name: "section_overview",
         instructions: playbook.buildsCode
           ? "You are a mentor introducing a student project. Write NO CODE AT ALL. Explain, in simple plain language: the problem statement (what problem exists and why it matters), the proposed solution / approach, the technology stack with a one-line reason for each item, and 3-5 concrete measurable objectives. Keep it concrete to this specific project — no generic filler."
@@ -615,7 +641,6 @@ export const generateSection = createServerFn({ method: "POST" })
         },
       ];
 
-
       const { error: overviewError } = await supabase
         .from("build_sections")
         .update({
@@ -639,12 +664,12 @@ export const generateSection = createServerFn({ method: "POST" })
     const isStructure = section.kind === "structure" && playbook.buildsCode;
     const dataProject = isDataDomain(String(domain ?? ""));
     const notebookRule = dataProject
-      ? " NOTEBOOKS MATTER IN THIS PROJECT: put the exploration, analysis and every chart inside a Jupyter notebook. When a part belongs in a notebook, set `file` to the notebook path followed by the cell, exactly like \"notebooks/01_explore.ipynb — cell: 2\", set `action` to \"create\" for the first cell of that notebook and \"modify\" afterwards, and keep each cell short enough to run on its own. Every chart you create must actually be looked at and explained: after a plotting cell, say in the bullets what the student should see in the chart and what it means for the project. Never create a notebook or a plotting script that is then ignored — if a file exists in the plan, this project must use it."
+      ? ' NOTEBOOKS MATTER IN THIS PROJECT: put the exploration, analysis and every chart inside a Jupyter notebook. When a part belongs in a notebook, set `file` to the notebook path followed by the cell, in the form "<notebook path from the project structure> — cell: <n>" (use the real notebook names planned for this project), set `action` to "create" for the first cell of that notebook and "modify" afterwards, and keep each cell short enough to run on its own. Every chart you create must actually be looked at and explained: after a plotting cell, say in the bullets what the student should see in the chart and what it means for the project. Never create a notebook or a plotting script that is then ignored — if a file exists in the plan, this project must use it.'
       : "";
     const task = isStructure
-      ? "Produce the project folder/file structure as an ASCII tree in `structure`, AND list the same files in `files`. ONLY include files this specific project genuinely needs — no speculative folders, no files nothing will ever use. Always include a requirements.txt (or package.json) and, when the project uses any key or secret, a .env file in the tree. EVERY file in `files` must have an EMPTY string as `content`: the student fills them in during the later steps, so do not write code, config, README text or any data into them." +
+      ? "Produce the project folder/file structure as an ASCII tree in `structure`, AND list the same files in `files`. There is NO fixed file count and NO fixed file names: plan as many files and folders as this exact project needs to be complete (modules for data loading, processing, models, utilities, app, tests, configs, docs — whatever applies), and name every file after its real purpose in this project. ONLY include files this specific project genuinely needs — no speculative folders, no files nothing will ever use. Always include a requirements.txt (or package.json) and, when the project uses any key or secret, a .env file in the tree. The tree must be the COMPLETE project: every folder and every file any later step will create or edit. FILE CONTENT AT SETUP: ONLY README.md (full project-specific overview, setup and run instructions, folder guide) and requirements.txt (or package.json — every real pinned dependency the whole project will use) get content. EVERY other file — every source module, config, test and notebook — must be listed in `files` with EMPTY content; the student generates their code later in the matching step. Never put code in notebooks or source files here. Never invent datasets or secrets. All files in the tree must appear in files; empty directories remain in the tree." +
         (dataProject
-          ? " Include the Jupyter notebooks this project will actually work in (e.g. notebooks/01_explore.ipynb, notebooks/02_model.ipynb) — notebooks are where the analysis and charts happen, so the later steps must use them."
+          ? ' NOTEBOOKS: derive them from the UPCOMING STEPS list — give each analysis, exploration, feature, training or evaluation step its own notebook (merge two steps only when they are truly one piece of work), numbered in roadmap order and named after that step\'s real topic in snake_case (for example a step "Explore Churn Patterns" becomes notebooks/02_explore_churn_patterns.ipynb). Never use bare generic names such as explore.ipynb, model.ipynb, analysis.ipynb, 01_explore.ipynb or 02_model.ipynb. Likewise every source module must map to a real upcoming step. The number of notebooks and files therefore follows the roadmap, not a template.'
           : "") +
         " `blocks` should contain 1-3 small parts: the commands that create the folders, then how to open the project. Do not dump the whole project into one block."
       : playbook.sectionTask + notebookRule;
@@ -653,7 +678,7 @@ export const generateSection = createServerFn({ method: "POST" })
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_draft" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. ALWAYS choose the SIMPLEST logic that achieves the result: plain loops and clear variable names over clever one-liners, comprehensions-in-comprehensions, regex tricks, heavy abstractions or unnecessary classes/design patterns. Short, obvious code beats short, clever code. WRITE INLINE COMMENTS FROM THE STUDENT'S OWN PERSPECTIVE: every comment is written as if the student wrote it while doing the work, in first person present/past — \`# load the dataset i downloaded\`, \`# here i'm cleaning the empty rows\`, \`# i store the total so i can print it later\`. Never write instruction-style comments addressed at the reader (\"This function does X\", \"Now we will initialize the variables\", \"Step 1:\"). Comment the meaningful lines or small groups only, explaining WHY the student did it in plain words (not restating syntax). Use descriptive names so the code reads like English. WRITE IT LIKE A HUMAN, NOT AN AI: the code must read as if a real developer typed it while building this project. Use lowercase, casual comments in a natural voice (e.g. \`# grab the rows we care about\`, \`# quick sanity check\`) instead of formal, uniform, machine-generated comment banners. Do NOT comment every single line mechanically, do NOT use decorative separator lines (####, ====, /* --- */), do NOT add docstring templates with Args/Returns/Raises on trivial functions, and never write filler like \"Step 1:\", \"Initialize variables\", \"This function does X\" repeated in the same shape. Vary sentence length and structure; leave natural blank lines to group related work; use short practical names a person would pick (rows, df, total, user_input) instead of over-descriptive ones (processed_data_dictionary_result). Occasional small pragmatic touches are good: a TODO note, a short inline note about why a simpler approach was chosen. Never mention AI, models, or that the code was generated. Avoid emoji in code and avoid over-polished symmetry — real code is slightly uneven. EVERY block MUST set \`file\` to the exact relative path the code belongs in (e.g. "src/app.py", "requirements.txt", or "terminal" for commands to run) and \`action\` to exactly one of "create", "modify" or "run". Keep file paths consistent with earlier sections — reuse the same path when extending a file. AFTER-CODE EXPLANATION (REQUIRED for EVERY block, in three parts): \`explanation\` = 2-5 short bullets on WHAT WE DID in this part (start each with a verb, plain English, no jargon); \`why\` = 2-4 short bullets on WHY WE DID IT (the purpose and what would break without it); \`parameters\` = one entry for each meaningful choice made in this part (a number, threshold, model/tool, library, option, file format, column, size, rate) with \`name\`, the \`value\` used, and \`why\` that value was chosen in one short sentence — return an empty array only when the part truly has no choices to justify. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. \`walkthrough\` (REQUIRED): where_am_i = one short sentence on where the student is in the overall project; completed = 2-4 short bullets on what this step just accomplished; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences) that makes this step's logic click. SIMPLICITY CONTRACT (never break it): write code a beginner can read, but NEVER remove or weaken the real logic. Keep every step that matters — validation, edge cases, the actual computation — just express it plainly: small named steps instead of one dense line, explicit if/else instead of nested ternaries, a normal loop instead of chained comprehensions, no clever tricks, no unnecessary classes, decorators or abstraction layers, and no exotic library shortcuts when three obvious lines do the same job. Simple on the surface, complete underneath — if simplifying would drop a behaviour, keep the behaviour and add a comment instead. EXPLAIN WITH AN EXAMPLE: one bullet of \`explanation\` must be a tiny concrete example using real values from this project (e.g. \"if the file has 500 rows and 12 are empty, we keep 488\"), and all wording stays everyday-simple — no jargon unless you define it in brackets in the same sentence. The \`analogy\` must be a real-life everyday comparison (a kitchen, a queue at a shop, packing a bag) that makes THIS step's logic click, never a generic one. When the section is not a structure section, return an empty \`files\` array. Also fill, for EVERY block, \`example\` = ONE tiny concrete example with real values from this project (max 2 short sentences) and \`analogy\` = ONE short everyday real-life analogy for this exact part (max 2 short sentences). Keep both concise — no paragraphs. ENVIRONMENT VARIABLES: if this part needs an API key, token, database URL, password or any other secret, NEVER hard-code it. Add a dedicated block whose \`file\` is \".env\" listing every variable as KEY=your_value_here with a short comment above each one saying where to get it, load them in code with the standard loader (e.g. python-dotenv + os.getenv), and in the bullets tell the student in plain words to create the .env file, paste their own values in, and add .env to .gitignore. DEPENDENCIES: the first section that introduces any third-party library MUST include a block whose \`file\` is \"requirements.txt\" (or package.json for JS) with the REAL content — one dependency per line, pinned like pandas==2.2.2, only libraries this project actually imports — plus a short terminal block showing \`pip install -r requirements.txt\`. Whenever a later section imports a new library, add a small block that appends it to requirements.txt. Never leave requirements.txt empty outside the structure step. NOTEBOOK CELLS (when the file is a .ipynb): number cells in order and keep them runnable top-to-bottom — cell 1 is always the imports and setup, and no cell may use a variable, dataframe or file that an earlier cell in the SAME notebook did not create. Say in the first bullet what the student should run before this cell, and one bullet must describe the expected output (shape, numbers, or what the chart shows). Never invent columns or files that were not created earlier. COMMENTS: comment the meaningful lines inside the code itself so a beginner can follow it while reading — a short first-person note above each logical group and next to any line that would confuse a newcomer. Return 2-6 blocks.`
+        ? `You are a senior engineer mentoring a beginner student. ${task} Use simple, friendly language everywhere. The student must be able to read the code top-to-bottom and understand it without help. ALWAYS choose the SIMPLEST logic that achieves the result: plain loops and clear variable names over clever one-liners, comprehensions-in-comprehensions, regex tricks, heavy abstractions or unnecessary classes/design patterns. Short, obvious code beats short, clever code. WRITE INLINE COMMENTS FROM THE STUDENT'S OWN PERSPECTIVE: every comment is written as if the student wrote it while doing the work, in first person present/past — \`# load the dataset i downloaded\`, \`# here i'm cleaning the empty rows\`, \`# i store the total so i can print it later\`. Never write instruction-style comments addressed at the reader (\"This function does X\", \"Now we will initialize the variables\", \"Step 1:\"). Comment the meaningful lines or small groups only, explaining WHY the student did it in plain words (not restating syntax). Use descriptive names so the code reads like English. WRITE IT LIKE A HUMAN, NOT AN AI: the code must read as if a real developer typed it while building this project. Use lowercase, casual comments in a natural voice (e.g. \`# grab the rows we care about\`, \`# quick sanity check\`) instead of formal, uniform, machine-generated comment banners. Do NOT comment every single line mechanically, do NOT use decorative separator lines (####, ====, /* --- */), do NOT add docstring templates with Args/Returns/Raises on trivial functions, and never write filler like \"Step 1:\", \"Initialize variables\", \"This function does X\" repeated in the same shape. Vary sentence length and structure; leave natural blank lines to group related work; use short practical names a person would pick (rows, df, total, user_input) instead of over-descriptive ones (processed_data_dictionary_result). Occasional small pragmatic touches are good: a TODO note, a short inline note about why a simpler approach was chosen. Never mention AI, models, or that the code was generated. Avoid emoji in code and avoid over-polished symmetry — real code is slightly uneven. EVERY block MUST set \`file\` to the exact relative path the code belongs in (e.g. "src/app.py", "requirements.txt", or "terminal" for commands to run) and \`action\` to exactly one of "create", "modify" or "run". Keep file paths consistent with earlier sections — reuse the same path when extending a file. AFTER-CODE EXPLANATION (REQUIRED for EVERY block, in three parts): \`explanation\` = 2-5 short bullets on WHAT WE DID in this part (start each with a verb, plain English, no jargon); \`why\` = 2-4 short bullets on WHY WE DID IT (the purpose and what would break without it); \`parameters\` = one entry for each meaningful choice made in this part (a number, threshold, model/tool, library, option, file format, column, size, rate) with \`name\`, the \`value\` used, and \`why\` that value was chosen in one short sentence — return an empty array only when the part truly has no choices to justify. Insights: 2-4 warnings or gotchas. business_connection: 1-2 sentences linking this section to the project goal. \`walkthrough\` (REQUIRED): where_am_i = one short sentence on where the student is in the overall project; completed = 2-4 short bullets on what this step just accomplished; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences) that makes this step's logic click. SIMPLICITY CONTRACT (never break it): write code a beginner can read, but NEVER remove or weaken the real logic. Keep every step that matters — validation, edge cases, the actual computation — just express it plainly: small named steps instead of one dense line, explicit if/else instead of nested ternaries, a normal loop instead of chained comprehensions, no clever tricks, no unnecessary classes, decorators or abstraction layers, and no exotic library shortcuts when three obvious lines do the same job. Simple on the surface, complete underneath — if simplifying would drop a behaviour, keep the behaviour and add a comment instead. EXPLAIN WITH AN EXAMPLE: one bullet of \`explanation\` must be a tiny concrete example using real values from this project (e.g. \"if the file has 500 rows and 12 are empty, we keep 488\"), and all wording stays everyday-simple — no jargon unless you define it in brackets in the same sentence. The \`analogy\` must be a real-life everyday comparison (a kitchen, a queue at a shop, packing a bag) that makes THIS step's logic click, never a generic one. For every coding section, populate \`files\` with COMPLETE updated contents of every file this step creates or changes, including prior imports and logic. Notebook files must be valid notebook JSON containing all cells so far. Terminal commands belong only in blocks with file terminal and action run. Never put shell commands in a source file. Also fill, for EVERY block, \`example\` = ONE tiny concrete example with real values from this project (max 2 short sentences) and \`analogy\` = ONE short everyday real-life analogy for this exact part (max 2 short sentences). Keep both concise — no paragraphs. ENVIRONMENT VARIABLES: if this part needs an API key, token, database URL, password or any other secret, NEVER hard-code it. Add a dedicated block whose \`file\` is \".env\" listing every variable as KEY=your_value_here with a short comment above each one saying where to get it, load them in code with the standard loader (e.g. python-dotenv + os.getenv), and in the bullets tell the student in plain words to create the .env file, paste their own values in, and add .env to .gitignore. DEPENDENCIES: the first section that introduces any third-party library MUST include a block whose \`file\` is \"requirements.txt\" (or package.json for JS) with the REAL content — one dependency per line, pinned like pandas==2.2.2, only libraries this project actually imports — plus a short terminal block showing \`pip install -r requirements.txt\`. Whenever a later section imports a new library, add a small block that appends it to requirements.txt. Never leave requirements.txt empty outside the structure step. NOTEBOOK CELLS (when the file is a .ipynb): number cells in order and keep them runnable top-to-bottom — cell 1 is always the imports and setup, and no cell may use a variable, dataframe or file that an earlier cell in the SAME notebook did not create. Say in the first bullet what the student should run before this cell, and one bullet must describe the expected output (shape, numbers, or what the chart shows). Never invent columns or files that were not created earlier. COMMENTS: comment the meaningful lines inside the code itself so a beginner can follow it while reading — a short first-person note above each logical group and next to any line that would confuse a newcomer. EXPLANATIONS MUST BE EASY: every bullet is one short sentence (max ~15 words) that a 15-year-old understands. Return 2-6 blocks.`
         : `You are an experienced practitioner mentoring a student in this domain. ${task} Write NO programming code anywhere. Use simple, friendly language.
 
 ONE DELIVERABLE, ONE PIECE — THIS IS THE MOST IMPORTANT RULE. Return EXACTLY ONE block. That single block holds the COMPLETE, finished deliverable for this section, written continuously from start to end. NEVER split the deliverable into parts, stages or halves. Never write "Part 1", "Part 2", "continued", "first create the file, then paste the next piece", and never ask the student to create the same file twice. A table is NEVER broken across blocks or interrupted by commentary — every table is written once, complete, with all of its rows together. Set the block \`title\` to the deliverable's own name (e.g. "Project Charter", "Risk Register") — no numbering.
@@ -663,7 +688,6 @@ FILE: set \`file\` to the plain office file name only, with no section or sheet 
 WRITE IT AS A REAL DOCUMENT in \`code\` using simple markdown so it reads like a page: "# Title" for the document title, "## Heading" for sections, normal paragraphs of plain prose, "- " bullets, and markdown pipe tables for any tabular content (header row, separator row, then every data row). Fill in real, project-specific content — no placeholders like "TBD" or "<insert here>" unless the student genuinely must decide. Keep the flow continuous: headings and paragraphs in the natural reading order of that document.
 
 Never mention terminals, command lines, repositories, code files or developer tools. EXPLANATION (REQUIRED, in three parts): \`explanation\` = 2-5 short bullets on WHAT WE DID, the first one saying in one plain sentence where this goes (which file, and whether it is a new file or added to an existing one); \`why\` = 2-4 short bullets on WHY WE DID IT; \`parameters\` = one entry per meaningful choice made in this deliverable (a date, duration, threshold, scale, owner role, format) with \`name\`, \`value\` and a one-sentence \`why\` — empty array only when there is genuinely nothing to justify. Insights: 2-4 warnings or common mistakes. business_connection: 1-2 sentences linking this deliverable to the project objective. \`walkthrough\` (REQUIRED): completed = 2-4 short bullets on what this deliverable just achieved; whats_next = 1-3 short bullets on what comes next; analogy = ONE short everyday analogy (max 2 sentences). Each block must also have \`example\` (one tiny concrete example, max 2 short sentences) and \`analogy\` (one short real-life comparison, max 2 short sentences).`,
-
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nQuestion: ${section.question ?? ""}\nObjective: ${section.objective ?? ""}`,
       schema: sectionSchema,
@@ -675,7 +699,7 @@ Never mention terminals, command lines, repositories, code files or developer to
       usage: { userId: context.userId, projectId: section.project_id, feature: "section_review" },
       name: "section_content",
       instructions: playbook.buildsCode
-        ? `You are a strict code reviewer AND a beginner-friendliness reviewer. Before returning anything, mentally RUN the draft line by line and verify the logic actually produces the intended result: check control flow and conditions, variable definition order, function signatures and argument order, imports, indentation/syntax validity, file paths, edge cases (empty input, missing file, division by zero) and that every variable used is defined earlier. Fix anything that would not run or would give a wrong result. Also review for undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure the meaningful lines or small groups have inline comments written in the STUDENT'S OWN VOICE (first person, e.g. \`# i filter out the empty rows here\`) — rewrite any formal, instructional or third-person comments into that voice and add missing ones yourself. Then HUMANISE: make the final code look hand-written by a real developer — natural lowercase conversational comments, no mechanical comment-on-every-line, no decorative separators or banner blocks, no boilerplate docstring templates on trivial functions, no repeated formulaic phrasing, varied comment length, natural blank-line grouping, and short practical variable names. Strip anything that smells machine-generated while keeping the code correct and easy to follow. Ensure EVERY block has all three explanation parts filled: \`explanation\` (2-5 plain bullets on what we did), \`why\` (2-4 plain bullets on why we did it) and \`parameters\` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and \`walkthrough\` is filled (completed, whats_next, analogy) with a simple everyday analogy. Enforce the SIMPLICITY CONTRACT: the final code must be beginner-readable WITHOUT losing logic — never delete validation, edge-case handling or real computation while simplifying; unpack dense one-liners into named steps and replace clever tricks with plain loops and if/else, keeping behaviour identical. Ensure each block's \`explanation\` contains one tiny concrete example with real values from this project, and that \`analogy\` is an everyday real-life comparison specific to this step. Ensure every block has a short \`example\` and a short \`analogy\` (max 2 sentences each; trim anything longer). ${isStructure ? "THIS IS THE PROJECT STRUCTURE SECTION: preserve the draft's structure and files exactly. `files` must list every generated relative file path, including Jupyter notebooks such as `notebooks/01_explore.ipynb`, each with an empty content string. Do not remove, rename or replace files with terminal commands." : ""} Return the corrected, final version in the same shape, keeping everything already correct.`
+        ? "You are a strict code reviewer AND a beginner-friendliness reviewer. Before returning anything, mentally RUN the draft line by line and verify the logic actually produces the intended result: check control flow and conditions, variable definition order, function signatures and argument order, imports, indentation/syntax validity, file paths, edge cases (empty input, missing file, division by zero) and that every variable used is defined earlier. Fix anything that would not run or would give a wrong result. Also review for undefined variables, wrong APIs, data leakage, and continuity breaks with the previous sections. Then SIMPLIFY: rewrite any clever, dense or over-engineered code into the simplest logic that still works efficiently, remove unnecessary abstractions, and rename unclear variables. Ensure the meaningful lines or small groups have inline comments written in the STUDENT'S OWN VOICE (first person, e.g. `# i filter out the empty rows here`) — rewrite any formal, instructional or third-person comments into that voice and add missing ones yourself. Then HUMANISE: make the final code look hand-written by a real developer — natural lowercase conversational comments, no mechanical comment-on-every-line, no decorative separators or banner blocks, no boilerplate docstring templates on trivial functions, no repeated formulaic phrasing, varied comment length, natural blank-line grouping, and short practical variable names. Strip anything that smells machine-generated while keeping the code correct and easy to follow. Ensure EVERY block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (completed, whats_next, analogy) with a simple everyday analogy. Enforce the SIMPLICITY CONTRACT: the final code must be beginner-readable WITHOUT losing logic — never delete validation, edge-case handling or real computation while simplifying; unpack dense one-liners into named steps and replace clever tricks with plain loops and if/else, keeping behaviour identical. Ensure each block's `explanation` contains one tiny concrete example with real values from this project, and that `analogy` is an everyday real-life comparison specific to this step. Ensure every block has a short `example` and a short `analogy` (max 2 sentences each; trim anything longer). Return the corrected, final version in the same shape, keeping everything already correct. Preserve COMPLETE actual content in files for every generated file, never blank it. For a structure step check that every tree file has meaningful starter contents, including valid notebook JSON. For other steps files must contain the complete updated files, not fragments. Keep terminal commands separate."
         : "You are a strict reviewer of professional project documents. Check the draft for vague or placeholder content, missing owners, dates, dependencies or numbers, unrealistic estimates, and breaks in continuity with the previous sections. Remove any programming code entirely and make every table concrete and specific to this project. MERGE INTO ONE PIECE: the result must contain EXACTLY ONE block holding the whole deliverable as one continuous document — if the draft split it into parts, stages or several blocks, join them in reading order into a single block, delete every 'Part 1 / Part 2 / continued' label and any instruction to create the same file more than once, and merge split tables back into one complete table with all rows together. The block `title` is the deliverable's own name with no numbering, and `file` is a plain office file name with no section or sheet suffix (e.g. 'Project Charter.docx', 'Risk Register.xlsx'). Keep the document formatted as markdown headings, paragraphs, bullets and pipe tables. Ensure the block has all three explanation parts filled: `explanation` (2-5 plain bullets on what we did), `why` (2-4 plain bullets on why we did it) and `parameters` (one entry per meaningful choice: name, value, and a one-line reason it was picked), and `walkthrough` is filled (completed, whats_next, analogy) — explanations stay in plain everyday language with one small concrete example, and the analogy is a real-life comparison specific to this deliverable.",
 
       input: `${brief}\n\nCURRENT SECTION ${section.position + 1}: ${section.title}\nObjective: ${section.objective ?? ""}\n\nDRAFT TO REVIEW:\n${JSON.stringify(draft)}`,
@@ -687,26 +711,23 @@ Never mention terminals, command lines, repositories, code files or developer to
       .update({
         code: joinBlocks(reviewed.blocks),
         blocks: JSON.parse(JSON.stringify(reviewed.blocks ?? [])),
-        // Structure files always ship EMPTY — the student writes the code in
-        // the later steps, so we never store generated content here.
-        files: (reviewed.files?.length ? reviewed.files : draft.files ?? []).map((f) => ({
+        files: (reviewed.files?.length ? reviewed.files : (draft.files ?? [])).map((f) => ({
           path: f.path,
-          content: "",
+          content: f.content,
         })),
         language: reviewed.language || (playbook.buildsCode ? "python" : "markdown"),
         explanation: (reviewed.blocks ?? []).flatMap((b) => b.explanation ?? []),
         insights: reviewed.insights,
         business_connection: reviewed.business_connection,
         structure: isStructure ? reviewed.structure : null,
-        walkthrough: reviewed.walkthrough
-          ? JSON.parse(JSON.stringify(reviewed.walkthrough))
-          : null,
+        walkthrough: reviewed.walkthrough ? JSON.parse(JSON.stringify(reviewed.walkthrough)) : null,
         fix_notes: null,
         status: "generated",
       })
       .eq("id", section.id);
     if (error) throw new Error("The generated section could not be saved.");
 
+    if (playbook.buildsCode) await syncProjectWorkspace(supabase, section.project_id);
     return reviewed;
   });
 
@@ -791,6 +812,6 @@ export const fixSectionError = createServerFn({ method: "POST" })
       .eq("id", section.id);
     if (error) throw new Error("The fix could not be saved.");
 
+    if (playbook.buildsCode) await syncProjectWorkspace(supabase, section.project_id);
     return fixed;
   });
-

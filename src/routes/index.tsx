@@ -615,51 +615,62 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="border-t border-[#14120f] bg-[#ded8cb] px-5 py-8 sm:px-8">
+    <footer className="border-t border-[#e4e4e7] bg-white px-5 py-8 text-[#111111] sm:px-8">
       <div className="mx-auto grid max-w-[90rem] gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="font-display text-lg font-semibold">GetProjectHelper</p>
-          <p className="mt-2 text-sm text-[#514c45]">
+          <p className="mt-2 text-sm text-[#62666e]">
             Custom projects and ready-made digital products.
           </p>
         </div>
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Services</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <Link to={getStarted} search={signup} className="hover:text-[#14120f]">
+          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
+            <Link
+              to={getStarted}
+              search={signup}
+              className="transition-colors hover:text-[#0866e8]"
+            >
               Get a Project
             </Link>
-            <Link to={products} search={productSearch} className="hover:text-[#14120f]">
+            <Link
+              to={products}
+              search={productSearch}
+              className="transition-colors hover:text-[#0866e8]"
+            >
               Products
             </Link>
           </div>
         </div>
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Company</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <a href="#services" className="hover:text-[#14120f]">
+          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
+            <a href="#services" className="transition-colors hover:text-[#0866e8]">
               About GetProjectHelper
             </a>
-            <a href="mailto:support@getprojecthelper.com" className="hover:text-[#14120f]">
+            <a
+              href="mailto:support@getprojecthelper.com"
+              className="transition-colors hover:text-[#0866e8]"
+            >
               Contact support
             </a>
           </div>
         </div>
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Legal</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <Link to="/terms" className="hover:text-[#14120f]">
+          <div className="mt-3 grid gap-2 text-sm text-[#62666e]">
+            <Link to="/terms" className="transition-colors hover:text-[#0866e8]">
               Terms and Conditions
             </Link>
-            <Link to="/privacy" className="hover:text-[#14120f]">
+            <Link to="/privacy" className="transition-colors hover:text-[#0866e8]">
               Privacy Policy
             </Link>
-            <Link to="/refund-policy" className="hover:text-[#14120f]">
+            <Link to="/refund-policy" className="transition-colors hover:text-[#0866e8]">
               Refund Policy
             </Link>
           </div>
         </div>
-        <div className="text-sm text-[#514c45] sm:col-span-2 lg:col-span-4">
+        <div className="text-sm text-[#62666e] sm:col-span-2 lg:col-span-4">
           © 2026 Sizcon Studios
         </div>
       </div>

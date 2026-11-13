@@ -35,7 +35,23 @@ export const Route = createFileRoute("/api/chat")({
           importedProjectIds?: string[];
           threadId?: string;
         };
-        const messages = body.messages;
+        // Only accept plain user/assistant text turns; drop caller-supplied system/tool roles.
+        const messages: UIMessage[] | undefined = Array.isArray(body.messages)
+          ? body.messages
+              .filter(
+                (m): m is UIMessage =>
+                  !!m && (m.role === "user" || m.role === "assistant") && Array.isArray(m.parts),
+              )
+              .slice(-40)
+              .map((m) => ({
+                id: String(m.id ?? ""),
+                role: m.role,
+                parts: m.parts
+                  .filter((part) => part?.type === "text" && typeof part.text === "string")
+                  .map((part) => ({ type: "text" as const, text: (part as { text: string }).text.slice(0, 20000) })),
+              }))
+              .filter((m) => m.parts.length > 0)
+          : undefined;
         const projectId = body.projectId;
         const threadId = body.threadId;
         const importedProjectIds = Array.isArray(body.importedProjectIds)

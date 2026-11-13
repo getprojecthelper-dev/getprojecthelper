@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gatewayFetch, type PaddleEnv } from "@/lib/paddle.server";
 
 const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open here shortly.";
 
@@ -51,28 +50,18 @@ export const resolveProjectPrice = createServerFn({ method: "GET" })
     z.object({ priceId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data }) => {
-    if (data.priceId.startsWith("pri_")) {
-      // Admin-listed projects store the checkout price directly.
-      await assertPremadeOpen();
-      const { data: listing } = await createPublishableReadClient()
-        .from("premade_listings")
-        .select("id")
-        .eq("provider_price_id", data.priceId)
-        .eq("is_live", true)
-        .eq("is_available", true)
-        .maybeSingle();
-      if (!listing) throw new Error("This project is not available right now.");
-      return data.priceId;
-    }
-    const response = await gatewayFetch(
-      data.environment as PaddleEnv,
-      `/prices?external_id=${encodeURIComponent(data.priceId)}`,
-    );
-    if (!response.ok) throw new Error("This project price is unavailable.");
-    const result = (await response.json()) as { data?: Array<{ id: string }> };
-    const price = result.data?.[0];
-    if (!price) throw new Error("This project price is unavailable.");
-    return price.id;
+    // Only prices attached to a live, available admin listing can be resolved.
+    if (!data.priceId.startsWith("pri_")) throw new Error("This project price is unavailable.");
+    await assertPremadeOpen();
+    const { data: listing } = await createPublishableReadClient()
+      .from("premade_listings")
+      .select("id")
+      .eq("provider_price_id", data.priceId)
+      .eq("is_live", true)
+      .eq("is_available", true)
+      .maybeSingle();
+    if (!listing) throw new Error("This project is not available right now.");
+    return data.priceId;
   });
 
 export const getProjectPurchase = createServerFn({ method: "GET" })

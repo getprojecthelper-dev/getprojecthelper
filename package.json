@@ -85,6 +85,7 @@
     "use-stick-to-bottom": "^1.1.6",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.1.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -117,6 +118,6 @@
     }
   },
   "overrides": {
-    "dompurify": "^3.4.18"
+    "dompurify": "3.4.17"
   }
 }

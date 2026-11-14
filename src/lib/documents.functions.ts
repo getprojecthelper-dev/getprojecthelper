@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, obj, str, strArray } from "@/lib/ai.server";
 import { authorSchema, projectSource, sectionSchema } from "@/lib/document-source";
+import { DOC_TYPES } from "@/lib/doc-templates";
 
 export interface DocAuthor {
   name: string;
@@ -81,7 +82,17 @@ export const generateDocument = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data, context }): Promise<GeneratedDocument> => {
+  .handler(async ({ data: input, context }): Promise<GeneratedDocument> => {
+    // Labels and briefs come only from the server-side template catalog, never the caller.
+    const docType = DOC_TYPES.find((t) => t.id === input.docType);
+    const docFormat = docType?.formats.find((f) => f.id === input.format);
+    if (!docType || !docFormat) throw new Error("Unknown document type or format.");
+    const data = {
+      ...input,
+      docTypeLabel: docType.label,
+      formatLabel: docFormat.label,
+      formatBrief: docFormat.brief ?? "",
+    };
     const supabase = context.supabase as unknown as {
       from: (t: string) => ReturnType<typeof context.supabase.from>;
     };

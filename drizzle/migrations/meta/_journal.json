@@ -64,6 +64,13 @@
       "when": 1794645376954,
       "tag": "0008_remove_unused_public_premade_image_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794682825746,
+      "tag": "0009_lock_plan_lookup_and_reopen_limit",
+      "breakpoints": true
     }
   ]
 }

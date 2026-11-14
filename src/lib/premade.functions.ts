@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { planForPriceId } from "@/lib/plans";
 
 const PREMASE_CLOSED_MESSAGE = "Buy projects is launching soon. It will be open here shortly.";
 
@@ -50,6 +51,24 @@ export const resolveProjectPrice = createServerFn({ method: "GET" })
     z.object({ priceId: z.string().min(1), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ data }) => {
+    // Monthly plans are independent of the Buy projects store lock.
+    // Only our configured plan IDs may use the external-ID lookup.
+    if (planForPriceId(data.priceId)) {
+      const { gatewayFetch } = await import("@/lib/paddle.server");
+      const response = await gatewayFetch(
+        data.environment,
+        `/prices?external_id=${encodeURIComponent(data.priceId)}`,
+      );
+      if (!response.ok) throw new Error("This subscription price is unavailable.");
+      const result = await response.json() as {
+        data?: Array<{ id: string; import_meta?: { external_id?: string }; status: string }>;
+      };
+      const price = result.data?.find(
+        (item) => item.import_meta?.external_id === data.priceId && item.status === "active" && item.id.startsWith("pri_"),
+      );
+      if (!price) throw new Error("This subscription price is unavailable.");
+      return price.id;
+    }
     // Only prices attached to a live, available admin listing can be resolved.
     if (!data.priceId.startsWith("pri_")) throw new Error("This project price is unavailable.");
     await assertPremadeOpen();

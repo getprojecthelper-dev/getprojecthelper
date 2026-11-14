@@ -15,7 +15,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 
 const searchSchema = z.object({
-  mode: z.enum(["login", "signup"]).catch("login"),
+  mode: z.enum(["login", "signup"]).default("login").catch("login"),
 });
 
 export const Route = createFileRoute("/auth")({

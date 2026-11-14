@@ -480,4 +480,3 @@ function AuthPage() {
     </main>
   );
 }
-

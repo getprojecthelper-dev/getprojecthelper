@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
@@ -16,51 +16,70 @@ import { peekBackTarget, takeBackTarget } from "@/lib/back-navigation";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const backTarget = peekBackTarget(pathname);
-  const backAction = backTarget ? "history" : pathname === "/welcome" ? "none" : "workspace";
+  const isWorkspaceHome = pathname === "/welcome";
+  const backAction = isWorkspaceHome ? "landing" : backTarget ? "history" : "workspace";
   return (
     <div className="workspace-canvas min-h-screen w-full">
-      <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
+      <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur">
+        <div className="workspace-topbar__inner flex h-[4.5rem] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               aria-label="Back"
-              title={backAction === "workspace" ? "Back to workspace" : "Previous page"}
-              disabled={backAction === "none"}
+              title={
+                backAction === "landing"
+                  ? "Back to homepage"
+                  : backAction === "workspace"
+                    ? "Back to workspace"
+                    : "Previous page"
+              }
+              className="workspace-topbar__back size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#111] disabled:opacity-35"
               onClick={() => {
+                if (isWorkspaceHome) {
+                  void navigate({ to: "/", replace: true });
+                  return;
+                }
                 const target = takeBackTarget(pathname);
-                if (target) router.history.push(target);
-                else if (pathname !== "/welcome") void navigate({ to: "/welcome", replace: true });
+                if (target) void navigate({ to: target as never });
+                else void navigate({ to: "/welcome", replace: true });
               }}
             >
               <MaterialIcon name="arrow_back" className="text-base" />
             </Button>
-            <Link to="/welcome" className="flex min-w-0 items-center gap-2.5 font-display font-semibold">
-              <span className="icon-chip h-8 w-8 shrink-0">
+            <Link
+              to="/welcome"
+              className="workspace-topbar__brand flex min-w-0 items-center gap-2.5 rounded-lg font-display font-semibold tracking-[-.035em]"
+            >
+              <span className="workspace-topbar__mark icon-chip h-9 w-9 shrink-0">
                 <img src={brandMark} alt="" width={512} height={512} className="h-5 w-5" />
               </span>
-              <span className="truncate">Project Helper</span>
+              <span className="truncate text-[1.08rem]">Project Helper</span>
             </Link>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="workspace-topbar__actions flex shrink-0 items-center gap-1.5 sm:gap-2">
             <CreditChip />
-            <Button asChild variant="ghost" size="icon" aria-label="Settings" className="text-muted-foreground hover:text-primary">
-              <Link to="/settings"><MaterialIcon name="settings" /></Link>
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              aria-label="Settings"
+              className="workspace-topbar__icon-button size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
+            >
+              <Link to="/settings">
+                <MaterialIcon name="settings" />
+              </Link>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               aria-label="Log out"
-              className="text-muted-foreground hover:text-primary"
+              className="workspace-topbar__icon-button size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
               onClick={() =>
-                void signOutAndRedirect(queryClient, () =>
-                  navigate({ to: "/auth", replace: true }),
-                )
+                void signOutAndRedirect(queryClient, () => navigate({ to: "/auth", replace: true }))
               }
             >
               <MaterialIcon name="logout" />

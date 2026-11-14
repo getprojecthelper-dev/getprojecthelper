@@ -1,9 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  History,
-  LockKeyhole,
-} from "lucide-react";
+import { useRouterState } from "@tanstack/react-router";
+import { ArrowRight, Compass, LockKeyhole, Plus, WalletCards, Settings2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/material-icon";
@@ -23,17 +20,24 @@ function BuyProjectsCard() {
     return (
       <Link
         to="/premade"
-        className="group panel flex min-h-48 flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
+        className="group relative flex min-h-48 flex-col gap-3 overflow-hidden rounded-xl border border-primary/25 bg-primary/[0.045] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg sm:p-6"
       >
         <div className="flex items-start justify-between gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-primary shadow-sm">
             <MaterialIcon name="shopping_bag" filled />
           </span>
-          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">One-time purchase</span>
+          <span className="rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
+            One-time purchase
+          </span>
         </div>
         <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
-        <p className="text-sm text-muted-foreground">Choose a guided project, review its details, and make it your own.</p>
-        <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Browse projects <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+        <p className="text-sm text-muted-foreground">
+          Choose a guided project, review its details, and make it your own.
+        </p>
+        <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">
+          Browse projects{" "}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
       </Link>
     );
   }
@@ -41,16 +45,20 @@ function BuyProjectsCard() {
   return (
     <div className="panel flex min-h-48 flex-col gap-3 p-5 sm:p-6">
       <div className="flex items-start justify-between gap-2">
-        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary text-muted-foreground">
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
           <LockKeyhole className="h-5 w-5" />
         </span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">Launching soon</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
+          Launching soon
+        </span>
       </div>
       <h2 className="font-display text-xl sm:text-2xl">Buy projects</h2>
       <p className="text-sm text-muted-foreground">
         Guided projects aren't open yet. Build your own project from an idea in the meantime.
       </p>
-      <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">Launching soon</span>
+      <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+        Launching soon
+      </span>
     </div>
   );
 }
@@ -70,11 +78,7 @@ export const Route = createFileRoute("/_authenticated/welcome")({
   component: WelcomePage,
 });
 
-function ProjectPicker({
-  target,
-}: {
-  target: "documents" | "review" | "mentor";
-}) {
+function ProjectPicker({ target }: { target: "documents" | "review" | "mentor" }) {
   const { data: overviews, isLoading } = useProjectsOverview();
 
   if (isLoading) {
@@ -82,32 +86,50 @@ function ProjectPicker({
   }
   if (!overviews?.length) {
     return (
-      <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">You need a project first.</p>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/new-project">Create a project</Link>
-        </Button>
+      <div className="workspace-home__tool-empty">
+        <span>Available once you have a project</span>
+        <Link to="/new-project" className="workspace-home__tool-link">
+          Start one <ArrowRight aria-hidden="true" />
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="space-y-1.5">
-      {overviews.slice(0, 5).map(({ project }) => (
+      {overviews.slice(0, 5).map(({ project }) =>
         target === "documents" ? (
-          <Link key={project.id} to="/projects/$projectId/documents" params={{ projectId: project.id }} className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary">
-            <span className="truncate">{project.name}</span><ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <Link
+            key={project.id}
+            to="/projects/$projectId/documents"
+            params={{ projectId: project.id }}
+            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            <span className="truncate">{project.name}</span>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           </Link>
         ) : target === "review" ? (
-          <Link key={project.id} to="/projects/$projectId/review" params={{ projectId: project.id }} className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary">
-            <span className="truncate">{project.name}</span><ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <Link
+            key={project.id}
+            to="/projects/$projectId/review"
+            params={{ projectId: project.id }}
+            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            <span className="truncate">{project.name}</span>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           </Link>
         ) : (
-          <Link key={project.id} to="/projects/$projectId/mentor" params={{ projectId: project.id }} className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary">
-            <span className="truncate">{project.name}</span><ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <Link
+            key={project.id}
+            to="/projects/$projectId/mentor"
+            params={{ projectId: project.id }}
+            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            <span className="truncate">{project.name}</span>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           </Link>
-        )
-      ))}
+        ),
+      )}
     </div>
   );
 }
@@ -120,12 +142,22 @@ function ResumeProjects() {
   }
   if (!overviews?.length) {
     return (
-      <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">
-          No projects yet — your work-in-progress will show up here.
-        </p>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/new-project">Start your first project</Link>
+      <div className="workspace-home__empty-projects">
+        <div className="workspace-home__empty-copy">
+          <span className="workspace-home__empty-mark" aria-hidden="true">
+            <Plus />
+          </span>
+          <div>
+            <p className="font-medium text-foreground">Your next project starts with an idea.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your active projects will appear here as you build.
+            </p>
+          </div>
+        </div>
+        <Button asChild size="sm" className="workspace-home__empty-action">
+          <Link to="/new-project">
+            Start a project <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
     );
@@ -144,7 +176,7 @@ function ResumeProjects() {
             key={o.project.id}
             to="/projects/$projectId/build"
             params={{ projectId: o.project.id }}
-            className="block min-w-0 rounded-md border border-border bg-background px-3 py-2.5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+            className="group block min-w-0 rounded-lg border border-border/80 bg-background px-3 py-2.5 transition-all hover:border-primary/40 hover:bg-primary/[0.035]"
           >
             <span className="flex items-center justify-between gap-2">
               <span className="truncate text-sm font-medium">{o.project.name}</span>
@@ -156,13 +188,18 @@ function ResumeProjects() {
                 {done ? "Completed" : `${o.progress}%`}
               </span>
             </span>
-            <span className="mt-1.5 block h-1 overflow-hidden rounded-full bg-secondary">
+            <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-secondary">
               <span
                 className={`block h-full rounded-full ${done ? "bg-emerald-400" : "bg-primary"}`}
                 style={{ width: `${Math.max(o.progress, 4)}%` }}
               />
             </span>
-            <span className="mt-1 block truncate text-xs text-muted-foreground">{done ? "Open and review" : o.resumeSection?.title ?? "Continue building"}</span>
+            <span className="mt-1.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span className="truncate">
+                {done ? "Open and review" : (o.resumeSection?.title ?? "Continue building")}
+              </span>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+            </span>
           </Link>
         );
       })}
@@ -174,20 +211,6 @@ function ResumeProjects() {
     </div>
   );
 }
-
-type WorkspaceLink = {
-  title: string;
-  description: string;
-  icon: string;
-  to: "/welcome" | "/dashboard" | "/settings" | "/credits";
-};
-
-const WORKSPACE_LINKS: WorkspaceLink[] = [
-  { title: "Home", description: "Your starting point", icon: "home", to: "/welcome" },
-  { title: "Dashboard", description: "View every project", icon: "grid_view", to: "/dashboard" },
-  { title: "Credits", description: "Balance and top-ups", icon: "account_balance_wallet", to: "/credits" },
-  { title: "Settings", description: "Profile and preferences", icon: "settings", to: "/settings" },
-];
 
 function ProjectTool({
   title,
@@ -201,78 +224,185 @@ function ProjectTool({
   target: "documents" | "review" | "mentor";
 }) {
   return (
-    <div className="panel min-w-0 p-4">
-      <div className="flex items-start gap-3">
-        <span className="icon-chip h-9 w-9 shrink-0">
+    <div className="workspace-home__tool">
+      <div className="workspace-home__tool-heading">
+        <span className="workspace-home__tool-icon" aria-hidden="true">
           <MaterialIcon name={icon} />
         </span>
         <div className="min-w-0">
           <h2 className="font-display text-base">{title}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
-      <div className="min-w-0 mt-3 border-t border-border pt-2"><ProjectPicker target={target} /></div>
+      <div className="workspace-home__tool-projects">
+        <ProjectPicker target={target} />
+      </div>
     </div>
   );
 }
 
 function WelcomePage() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { session } = useAuth();
-  const justPaid = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("plan") === "success";
+  const justPaid =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("plan") === "success";
   const fullName = String(session?.user.user_metadata?.["full_name"] ?? "").trim();
   const firstName = fullName.split(/\s+/)[0] || "there";
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase text-primary">Welcome back, {firstName}</p>
-          <h1 className="mt-1 font-display text-2xl sm:text-3xl">Your workspace</h1>
-        </div>
-        <Button asChild size="sm" variant="outline"><Link to="/dashboard">All projects <ArrowRight className="h-4 w-4" /></Link></Button>
+    <div className="workspace-home-surface landing-editorial min-h-[calc(100vh-4rem)] w-full">
+      <div className="workspace-home-layout mx-auto grid w-full max-w-none grid-cols-1 gap-5 px-4 py-6 sm:px-6 sm:py-9 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10 xl:px-10">
+        <aside className="workspace-home-sidebar" aria-label="Workspace sidebar">
+          <p className="workspace-home-sidebar__label">Workspace</p>
+          <nav className="workspace-home-sidebar__nav" aria-label="Workspace navigation">
+            <Link
+              to="/dashboard"
+              className={`workspace-home-sidebar__link ${pathname === "/dashboard" ? "is-active" : ""}`}
+              aria-current={pathname === "/dashboard" ? "page" : undefined}
+            >
+              <Compass aria-hidden="true" />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              to="/credits"
+              className={`workspace-home-sidebar__link ${pathname === "/credits" ? "is-active" : ""}`}
+              aria-current={pathname === "/credits" ? "page" : undefined}
+            >
+              <WalletCards aria-hidden="true" />
+              <span>Credits</span>
+            </Link>
+            <Link
+              to="/settings"
+              className={`workspace-home-sidebar__link ${pathname === "/settings" ? "is-active" : ""}`}
+              aria-current={pathname === "/settings" ? "page" : undefined}
+            >
+              <Settings2 aria-hidden="true" />
+              <span>Settings</span>
+            </Link>
+          </nav>
+        </aside>
+        <main className="workspace-home min-w-0">
+          <header className="workspace-home__header flex flex-wrap items-end justify-between gap-5 border-b border-border pb-6 sm:pb-8">
+            <div>
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <span className="size-2 rounded-full bg-[#18aa4a]" aria-hidden="true" /> Your
+                project space
+              </p>
+              <h1 className="mt-3 max-w-4xl font-display text-[clamp(2.7rem,5.6vw,5.2rem)] font-semibold leading-[.98] tracking-[-.075em]">
+                Good to see you, {firstName}.
+              </h1>
+              <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
+                Pick up where you left off, or start something new.
+              </p>
+            </div>
+            <Button
+              asChild
+              className="h-11 gap-2 rounded-xl bg-[#0866e8] px-5 text-white shadow-none hover:bg-[#0757c7]"
+            >
+              <Link to="/dashboard">
+                View all projects <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </header>
+          <WorkspacePlanStatus justPaid={justPaid} />
+
+          <section
+            aria-label="Start a project"
+            className="workspace-home__start mt-6 grid gap-3 sm:grid-cols-2"
+          >
+            <Link
+              to="/new-project"
+              className="workspace-home__primary group relative flex min-h-48 flex-col gap-3 overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.035] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
+            >
+              <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-[#0866e8] text-white shadow-sm">
+                <Plus className="h-5 w-5" />
+              </span>
+              <h2 className="relative z-10 font-display text-xl sm:text-2xl">
+                Turn your idea into a project
+              </h2>
+              <p className="relative z-10 max-w-md text-sm text-muted-foreground">
+                Start with your idea and build it step by step.
+              </p>
+              <span className="relative z-10 mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">
+                Start building{" "}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <span
+                aria-hidden="true"
+                className="workspace-home__orb absolute -right-12 -top-16 h-52 w-52 rounded-full border border-primary/10"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -right-3 -top-7 h-36 w-36 rounded-full border border-primary/10"
+              />
+            </Link>
+
+            <BuyProjectsCard />
+          </section>
+
+          <section aria-labelledby="resume-title" className="workspace-home__resume mt-8">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                  Your work
+                </p>
+                <h2 id="resume-title" className="mt-1 font-display text-xl">
+                  Continue a project
+                </h2>
+              </div>
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+              >
+                Project dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="workspace-home__project-panel">
+              <ResumeProjects />
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="tools-title"
+            className="workspace-home__tools mt-8 border-t border-border pt-6"
+          >
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                  More ways to move forward
+                </p>
+                <h2 id="tools-title" className="mt-1 font-display text-xl">
+                  Project tools
+                </h2>
+              </div>
+              <span className="hidden text-xs text-muted-foreground sm:block">
+                Choose a project to get started
+              </span>
+            </div>
+            <div className="workspace-home__tool-grid">
+              <ProjectTool
+                title="Documentation"
+                description="Reports, research and project writing"
+                icon="description"
+                target="documents"
+              />
+              <ProjectTool
+                title="Viva practice"
+                description="Prepare questions and confident answers"
+                icon="record_voice_over"
+                target="review"
+              />
+              <ProjectTool
+                title="Project support"
+                description="Get guidance when you need a hand"
+                icon="support_agent"
+                target="mentor"
+              />
+            </div>
+          </section>
+        </main>
       </div>
-      <WorkspacePlanStatus justPaid={justPaid} />
-
-      <section aria-label="Start a project" className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Link
-          to="/new-project"
-          className="group panel flex min-h-48 flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <MaterialIcon name="construction" filled />
-          </span>
-          <h2 className="font-display text-xl sm:text-2xl">Build a project</h2>
-          <p className="text-sm text-muted-foreground">
-            Start with your idea and build it step by step.
-          </p>
-          <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">Start building <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
-        </Link>
-
-        <BuyProjectsCard />
-      </section>
-
-      <section aria-labelledby="resume-title" className="mt-6 panel p-4 sm:p-5">
-        <div className="mb-3 flex items-center gap-2"><History className="h-4 w-4 text-primary" /><h2 id="resume-title" className="font-display text-lg">Resume a project</h2></div>
-        <ResumeProjects />
-      </section>
-
-      <section aria-labelledby="tools-title" className="mt-6">
-        <h2 id="tools-title" className="font-display text-lg">Project tools</h2>
-        <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
-          <ProjectTool title="Documentation" description="Write your project report" icon="description" target="documents" />
-          <ProjectTool title="Viva" description="Prepare questions and answers" icon="record_voice_over" target="review" />
-          <ProjectTool title="Project support" description="Get help when you need it" icon="support_agent" target="mentor" />
-        </div>
-      </section>
-
-      <nav aria-label="Workspace navigation" className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {WORKSPACE_LINKS.map((item) => (
-          <Link key={item.title} to={item.to} className="flex items-center gap-3 rounded-md border border-border bg-background p-3 transition-colors hover:border-primary/40 hover:bg-primary/5">
-            <span className="icon-chip h-9 w-9 shrink-0"><MaterialIcon name={item.icon} /></span>
-            <span className="min-w-0"><span className="block text-sm font-semibold">{item.title}</span><span className="block truncate text-xs text-muted-foreground">{item.description}</span></span>
-          </Link>
-        ))}
-      </nav>
-    </main>
+    </div>
   );
 }

@@ -29,10 +29,25 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
   });
 
   // Password recovery must keep working for the admin.
-  if (canAccessSite(availability.data ?? true, isAdmin === true, pathname)) return <>{children}</>;
+  // Keep public pages visible while the preference is loading or temporarily
+  // unavailable. Once the server reports maintenance mode, enforce it normally.
+  if (
+    availability.isPending ||
+    availability.isError ||
+    canAccessSite(availability.data ?? true, isAdmin === true, pathname)
+  ) {
+    return <>{children}</>;
+  }
 
-  if (availability.isPending || loading || (!!user && isPending)) {
-    return <main className="flex min-h-screen items-center justify-center bg-background"><Loader2 aria-label="Checking website availability" className="h-6 w-6 animate-spin text-muted-foreground" /></main>;
+  if (loading || (!!user && isPending)) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2
+          aria-label="Checking website availability"
+          className="h-6 w-6 animate-spin text-muted-foreground"
+        />
+      </main>
+    );
   }
 
   const checking = loading || (!!user && isPending);

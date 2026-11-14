@@ -122,7 +122,7 @@ function Landing() {
   ];
   const catalogPreview =
     listings.length > 0
-      ? listings.slice(0, 3).map((listing) => ({ ...listing, demo: false }))
+      ? listings.slice(0, 3).map((listing) => ({ ...listing, badge: null, demo: false }))
       : demoProjects;
   const { session } = useAuth();
   const getStarted = session ? "/welcome" : "/auth";

@@ -1,5 +1,4 @@
 import { HomepageRoadmap } from "@/components/homepage-roadmap";
-import { HomepagePaths } from "@/components/homepage-paths";
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -25,6 +24,21 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listHomepageListings } from "@/lib/premade-listings.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
+
+const techStackColors: Record<string, string> = {
+  react: "bg-[#d9f3ff] text-[#075985]",
+  typescript: "bg-[#dbeafe] text-[#1d4ed8]",
+  supabase: "bg-[#dcfce7] text-[#166534]",
+  recharts: "bg-[#f3e8ff] text-[#7e22ce]",
+  python: "bg-[#fef3c7] text-[#92400e]",
+  fastapi: "bg-[#cffafe] text-[#155e75]",
+  "node.js": "bg-[#e4f4dc] text-[#3f6212]",
+  postgresql: "bg-[#e0eafe] text-[#1e40af]",
+};
+
+function getTechStackColor(technology: string) {
+  return techStackColors[technology.trim().toLowerCase()] ?? "bg-[#eee9ff] text-[#5b3da8]";
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -58,7 +72,58 @@ function Landing() {
     queryKey: ["homepage-listings", environment],
     queryFn: () => fetchListings({ data: { environment } }),
   });
-  const catalogPreview = listings.slice(0, 3);
+  const demoProjects = [
+    {
+      id: "demo-campus-companion",
+      title: "Campus Companion",
+      description:
+        "Plan classes, track assignments, and keep campus events in one simple student dashboard.",
+      techStack: "React · TypeScript · Supabase",
+      imageUrl: "/student-project-workspace.png",
+      badge: "POPULAR PICK",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-analytics-dashboard",
+      title: "Analytics Dashboard",
+      description: "Explore clear charts and useful metrics in a responsive analytics workspace.",
+      techStack: "React · TypeScript · Recharts",
+      imageUrl: "/analytics-dashboard-project.png",
+      badge: "TRENDING",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-project-collaboration",
+      title: "Project Collaboration",
+      description: "Organize tasks, share updates, and keep a small team moving together.",
+      techStack: "React · Node.js · PostgreSQL",
+      imageUrl: "/project-collaboration.png",
+      badge: "NEW TECH",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+    {
+      id: "demo-research-paper-workspace",
+      title: "Research Paper Workspace",
+      description:
+        "Collect sources, organize literature notes, and shape your findings into a clear report.",
+      techStack: "Python · FastAPI · PostgreSQL",
+      imageUrl: "/research-paper-workspace.svg",
+      badge: "NEW",
+      priceMinor: 0,
+      isAvailable: false,
+      demo: true,
+    },
+  ];
+  const catalogPreview =
+    listings.length > 0
+      ? listings.slice(0, 3).map((listing) => ({ ...listing, badge: null, demo: false }))
+      : demoProjects;
   const { session } = useAuth();
   const getStarted = session ? "/welcome" : "/auth";
   const signup = session ? {} : { mode: "signup" as const };
@@ -75,7 +140,10 @@ function Landing() {
         signedIn={Boolean(session)}
       />
       <main>
-        <section className="landing-hero overflow-hidden px-5 pb-0 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
+        <section
+          id="get-project"
+          className="landing-hero scroll-mt-8 overflow-hidden px-5 pb-0 pt-14 sm:px-8 sm:pt-20 lg:pt-24"
+        >
           <div className="mx-auto max-w-[90rem] text-center">
             <h1 className="mx-auto max-w-6xl font-display text-[clamp(3.25rem,8.3vw,7.7rem)] font-semibold leading-[.98] tracking-[-.075em]">
               From idea to
@@ -250,144 +318,160 @@ function Landing() {
         </section>
 
         <HomepageRoadmap />
-        <HomepagePaths />
-
         <section
-          id="products"
-          className="border-y border-[#14120f] bg-[#e6e2d8] px-5 py-20 sm:px-8 sm:py-24"
+          id="services"
+          className="scroll-mt-8 border-y border-[#e4e4e7] bg-white px-5 py-16 text-[#111111] sm:px-8 sm:py-20"
         >
           <div className="mx-auto max-w-[90rem]">
-            <div className="flex flex-col gap-6 border-b border-[#14120f] pb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-6 border-b border-[#e4e4e7] pb-7 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="font-mono text-xs font-bold uppercase tracking-[.17em] text-[#376d5c]">
-                  02 / Ready-made products
-                </p>
-                <h2 className="mt-4 max-w-2xl font-display text-5xl font-semibold leading-[.92] tracking-[-.075em] sm:text-6xl">
-                  A practical place to start.
+                <h2
+                  id="products"
+                  className="max-w-4xl font-display text-5xl font-semibold leading-[.94] tracking-[-.075em] sm:text-6xl"
+                >
+                  Explore ready-made projects
                 </h2>
-                <p className="mt-4 max-w-xl text-base leading-7 text-[#514c45]">
-                  Explore project briefs already in the catalog. Review the scope and tools before
-                  checkout.
+                <p className="mt-3 max-w-xl text-lg leading-7 text-[#62666e]">
+                  Find your starting point. Make it yours.
                 </p>
               </div>
               <Button
                 asChild
-                variant="outline"
-                className="h-11 w-fit rounded-none border-[#14120f] bg-transparent text-[#14120f] shadow-none hover:bg-[#d9e4da] hover:text-[#14120f]"
+                className="h-11 w-fit rounded-xl bg-[#e8f2ff] px-5 text-sm font-semibold text-[#0757ad] shadow-none hover:bg-[#d9eaff]"
               >
                 <Link to={products} search={productSearch}>
-                  View all products <ArrowRight className="size-4" />
+                  Browse all projects <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </div>
             {catalogPreview.length > 0 && (
-              <div className="mt-8 grid gap-5 md:grid-cols-3">
-                {catalogPreview.map((product, index) => (
+              <div className="mx-auto mt-7 grid max-w-[90rem] items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {catalogPreview.map((product) => (
                   <article
                     key={product.id}
-                    className="flex flex-col border border-[#14120f] bg-[#fdfbf6] transition-transform duration-200 hover:-translate-y-1"
+                    className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_5px_24px_rgba(17,17,17,.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,17,17,.09)]"
                   >
-                    <div
-                      className={`flex min-h-36 items-end justify-between border-b border-[#14120f] p-5 ${index === 0 ? "bg-[#dce9df]" : index === 1 ? "bg-[#e0e4ef]" : "bg-[#f0ddcb]"}`}
-                    >
-                      <span className="max-w-[15rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
-                        {product.title}
-                      </span>
-                      <span className="font-mono text-xs font-bold">0{index + 1}</span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <p className="text-sm leading-6 text-[#514c45]">{product.description}</p>
-                      <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                        <span className="border border-[#d4cec2] px-2 py-1">
-                          {product.domain.replaceAll("_", " ")}
+                    {product.imageUrl ? (
+                      <div className="relative">
+                        <img
+                          src={product.imageUrl}
+                          alt={`Preview image for ${product.title}`}
+                          loading="lazy"
+                          className="aspect-[16/10] w-full border-b border-[#e4e4e7] object-cover"
+                        />
+                        {product.demo && (
+                          <span
+                            aria-label={`Demo tag: ${product.badge}`}
+                            className={`absolute right-3 top-3 rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wide text-[#111111] shadow-sm ${
+                              product.badge === "TRENDING"
+                                ? "bg-[#f5e642]"
+                                : product.badge === "NEW TECH"
+                                  ? "bg-[#d4f5df]"
+                                  : "bg-[#dceaff]"
+                            }`}
+                          >
+                            {product.badge}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        role="img"
+                        aria-label={`Image preview unavailable for ${product.title}`}
+                        className="flex aspect-[16/10] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
+                      >
+                        <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
+                          {product.title}
                         </span>
-                        <span className="border border-[#d4cec2] px-2 py-1">
-                          {product.techStack}
+                        <span className="font-mono text-xs font-bold uppercase text-[#0757ad]">
+                          Project
                         </span>
                       </div>
-                      <p className="mt-5 text-xs text-[#746d63]">
-                        {new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(product.priceMinor / 100)}
+                    )}
+                    <div className="flex flex-1 flex-col bg-[#f1f1f1] p-3 sm:p-4">
+                      <div className="min-w-0">
+                        <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
+                          {product.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
+                            Tech stack
+                          </span>
+                          <div className="flex min-w-0 flex-wrap gap-1">
+                            {product.techStack.split(/[·,]/).map((technology) => {
+                              const label = technology.trim();
+                              return (
+                                <span
+                                  key={label}
+                                  className={`rounded-full px-2 py-1 text-[10px] font-semibold leading-none ${getTechStackColor(label)}`}
+                                >
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        {product.demo && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1">
+                            <span className="mr-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#62666e]">
+                              Includes
+                            </span>
+                            {["Dataset", "Documentation", "Report", "Research paper"].map(
+                              (item) => (
+                                <span
+                                  key={item}
+                                  className="whitespace-nowrap rounded-full border border-[#d4d4d8] bg-white/75 px-1.5 py-1 text-[9px] font-medium leading-none text-[#3f3f46]"
+                                >
+                                  {item}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-2 line-clamp-3 text-sm leading-5 text-[#525866]">
+                        {product.description}
                       </p>
-                      <Link
-                        to={products}
-                        search={productSearch}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#376d5c] hover:text-[#14120f]"
-                      >
-                        Review product details <ArrowRight className="size-4" />
-                      </Link>
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3">
+                        <div>
+                          <p className="text-xs text-[#62666e]">
+                            {product.isAvailable ? "One-time purchase" : "Currently unavailable"}
+                          </p>
+                          <p className="mt-1 text-lg font-semibold text-[#111111] sm:text-xl">
+                            ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                        {product.demo ? (
+                          <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
+                            Demo project
+                          </span>
+                        ) : !product.isAvailable ? (
+                          <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
+                            Not available
+                          </span>
+                        ) : session ? (
+                          <Link
+                            to="/premade/$projectId"
+                            params={{ projectId: product.id }}
+                            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#0866e8] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                          >
+                            Explore project <ArrowRight className="size-4" />
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/auth"
+                            search={{ mode: "signup" }}
+                            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#0866e8] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0757c7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0866e8]"
+                          >
+                            Explore project <ArrowRight className="size-4" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </article>
                 ))}
               </div>
             )}
-          </div>
-        </section>
-
-        <section
-          id="why"
-          className="border-y border-[#14120f] bg-[#14120f] px-5 py-16 text-[#f5f2eb] sm:px-8 sm:py-20"
-        >
-          <div className="mx-auto grid max-w-[90rem] gap-10 lg:grid-cols-[.8fr_1.2fr]">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-[.17em] text-[#ff9b83]">
-                Why GetProjectHelper
-              </p>
-              <h2 className="mt-5 max-w-lg font-display text-4xl font-semibold leading-[.95] tracking-[-.065em] sm:text-5xl">
-                A clear starting point for the work ahead.
-              </h2>
-            </div>
-            <ul className="divide-y divide-white/20 border-y border-white/20">
-              {[
-                "Choose between guided custom project setup and ready-made products.",
-                "See each product's brief, level and tools before deciding.",
-                "Keep planning, building and project guidance in one workspace.",
-              ].map((item) => (
-                <li key={item} className="flex gap-4 py-5 text-base leading-7 text-[#ddd7cc]">
-                  <Check className="mt-1 size-4 shrink-0 text-[#ff9b83]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="px-5 py-20 sm:px-8 sm:py-24">
-          <div className="mx-auto flex max-w-[90rem] flex-col items-start justify-between gap-8 md:flex-row md:items-end">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-[.17em] text-[#a94229]">
-                Choose your next step
-              </p>
-              <h2 className="mt-5 max-w-3xl font-display text-5xl font-semibold leading-[.9] tracking-[-.075em] sm:text-7xl">
-                What do you need for your next project?
-              </h2>
-              <p className="mt-5 text-lg leading-8 text-[#514c45]">
-                Request a guided project or find a ready-made product.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                className="h-12 rounded-none bg-[#a94229] px-6 text-base text-white shadow-none hover:bg-[#14120f]"
-              >
-                <Link to={getStarted} search={signup}>
-                  Get a Project <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-12 rounded-none border-[#14120f] bg-transparent px-6 text-base text-[#14120f] shadow-none hover:bg-[#dce9df] hover:text-[#14120f]"
-              >
-                <Link to={products} search={productSearch}>
-                  Browse Products <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
           </div>
         </section>
       </main>
@@ -531,52 +615,123 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="border-t border-[#14120f] bg-[#ded8cb] px-5 py-8 sm:px-8">
-      <div className="mx-auto grid max-w-[90rem] gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <p className="font-display text-lg font-semibold">GetProjectHelper</p>
-          <p className="mt-2 text-sm text-[#514c45]">
-            Custom projects and ready-made digital products.
+    <footer className="mx-2 mb-2 rounded-[18px] bg-[#111318] px-4 py-4 text-[#f5f7fa] sm:px-5 sm:py-5">
+      <div className="mx-auto max-w-[90rem]">
+        <div className="border-b border-[#353a44] pb-3">
+          <p className="font-display text-base font-semibold">GetProjectHelper</p>
+          <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-[#c0c5cf]">
+            From ideas to working solutions. Explore, plan, and build projects with confidence.
           </p>
         </div>
-        <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Services</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <Link to={getStarted} search={signup} className="hover:text-[#14120f]">
-              Get a Project
-            </Link>
-            <Link to={products} search={productSearch} className="hover:text-[#14120f]">
-              Products
-            </Link>
+        <div className="grid gap-x-8 gap-y-4 border-b border-[#353a44] py-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="font-display text-sm font-semibold">Platform</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
+              <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
+                Get a Project
+              </Link>
+              <Link
+                to={products}
+                search={productSearch}
+                className="transition-colors hover:text-white"
+              >
+                Buy a Product
+              </Link>
+              <a href="#how-it-works" className="transition-colors hover:text-white">
+                How It Works
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com"
+                className="transition-colors hover:text-white"
+              >
+                Contact Us
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="font-display text-sm font-semibold">Legal</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                Terms of Service
+              </Link>
+              <Link to="/refund-policy" className="transition-colors hover:text-white">
+                Refund Policy
+              </Link>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Cookie Policy
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                License Agreement
+              </Link>
+            </div>
+          </div>
+          <div>
+            <p className="font-display text-sm font-semibold">Trust &amp; Safety</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
+              <a href="#ai-usage-disclaimer" className="transition-colors hover:text-white">
+                AI Usage Disclaimer
+              </a>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Data Protection
+              </Link>
+              <Link to="/terms" className="transition-colors hover:text-white">
+                Acceptable Use
+              </Link>
+              <Link to="/privacy" className="transition-colors hover:text-white">
+                Security
+              </Link>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Report%20an%20issue"
+                className="transition-colors hover:text-white"
+              >
+                Report an Issue
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="font-display text-sm font-semibold">Company &amp; Support</p>
+            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
+              <a href="#get-project" className="transition-colors hover:text-white">
+                About Us
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Help%20request"
+                className="transition-colors hover:text-white"
+              >
+                Help Center
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Grievance%20redressal"
+                className="transition-colors hover:text-white"
+              >
+                Grievance Redressal
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com"
+                className="transition-colors hover:text-white"
+              >
+                Contact
+              </a>
+              <a
+                href="mailto:support@getprojecthelper.com?subject=Accessibility%20feedback"
+                className="transition-colors hover:text-white"
+              >
+                Accessibility
+              </a>
+            </div>
           </div>
         </div>
-        <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Company</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <a href="#services" className="hover:text-[#14120f]">
-              About GetProjectHelper
-            </a>
-            <a href="mailto:support@getprojecthelper.com" className="hover:text-[#14120f]">
-              Contact support
-            </a>
-          </div>
+        <div
+          id="ai-usage-disclaimer"
+          className="border-b border-[#353a44] py-3 text-center text-[13px] leading-5 text-[#c0c5cf]"
+        >
+          <p>AI can make mistakes. Please verify important information before relying on it.</p>
         </div>
-        <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Legal</p>
-          <div className="mt-3 grid gap-2 text-sm text-[#514c45]">
-            <Link to="/terms" className="hover:text-[#14120f]">
-              Terms and Conditions
-            </Link>
-            <Link to="/privacy" className="hover:text-[#14120f]">
-              Privacy Policy
-            </Link>
-            <Link to="/refund-policy" className="hover:text-[#14120f]">
-              Refund Policy
-            </Link>
-          </div>
-        </div>
-        <div className="text-sm text-[#514c45] sm:col-span-2 lg:col-span-4">
-          © 2026 Sizcon Studios
+        <div className="pt-3 text-xs text-[#c0c5cf]">
+          <span>© 2026 GetProjectHelper. All rights reserved.</span>
         </div>
       </div>
     </footer>

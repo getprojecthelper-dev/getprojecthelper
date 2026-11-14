@@ -15,10 +15,38 @@ export type { ReferralCodeRow };
 export interface AdminStats {
   users: { total: number; last7d: number; last30d: number };
   projects: { total: number; active: number };
-  ai: { credits: number; calls: number; tokens: number; byFeature: { feature: string; credits: number; calls: number }[]; daily: { day: string; credits: number }[]; weekly: { day: string; credits: number }[]; monthly: { day: string; credits: number }[] };
-  users_list: { id: string; name: string | null; email: string; createdAt: string; credits: number; plan: string | null; projects: number }[];
-  topUsers: { id: string; name: string | null; email: string; credits: number; tokens: number; calls: number }[];
-  subscriptions: { active: number; total: number; mrrCents: number; byPlan: { plan: string; count: number }[] };
+  ai: {
+    credits: number;
+    calls: number;
+    tokens: number;
+    byFeature: { feature: string; credits: number; calls: number }[];
+    daily: { day: string; credits: number }[];
+    weekly: { day: string; credits: number }[];
+    monthly: { day: string; credits: number }[];
+  };
+  users_list: {
+    id: string;
+    name: string | null;
+    email: string;
+    createdAt: string;
+    credits: number;
+    plan: string | null;
+    projects: number;
+  }[];
+  topUsers: {
+    id: string;
+    name: string | null;
+    email: string;
+    credits: number;
+    tokens: number;
+    calls: number;
+  }[];
+  subscriptions: {
+    active: number;
+    total: number;
+    mrrCents: number;
+    byPlan: { plan: string; count: number }[];
+  };
   recentUsers: { id: string; email: string; name: string | null; created_at: string }[];
   userProjects: {
     id: string;
@@ -34,7 +62,6 @@ export interface AdminStats {
     isMine: boolean;
   }[];
 }
-
 
 export type AdminStatsResult = { forbidden: true } | ({ forbidden: false } & AdminStats);
 
@@ -53,12 +80,17 @@ export const getAdminStats = createServerFn({ method: "GET" })
     const iso = (daysAgo: number) => new Date(now - daysAgo * 86_400_000).toISOString();
 
     const [profiles, projects, usage, subs] = await Promise.all([
-      supabaseAdmin.from("profiles").select("id, full_name, created_at").order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, created_at")
+        .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("projects")
         .select("id, user_id, name, domain, status, current_stage, updated_at")
         .order("updated_at", { ascending: false }),
-      supabaseAdmin.from("ai_usage_events").select("user_id, feature, credits, total_tokens, created_at"),
+      supabaseAdmin
+        .from("ai_usage_events")
+        .select("user_id, feature, credits, total_tokens, created_at"),
       supabaseAdmin.from("subscriptions").select("user_id, plan, status, amount_cents"),
     ]);
     const [buildRows, taskRows, reqRows, testRows, docRows, roleRows] = await Promise.all([
@@ -75,9 +107,16 @@ export const getAdminStats = createServerFn({ method: "GET" })
     const progressOf = (id: string) => {
       const sections = rowsFor(buildRows.data, id);
       if (sections.length)
-        return Math.round((sections.filter((x) => x.status === "confirmed").length / sections.length) * 100);
+        return Math.round(
+          (sections.filter((x) => x.status === "confirmed").length / sections.length) * 100,
+        );
       return computeProgress({
-        tasks: rowsFor(taskRows.data, id).map((t) => ({ title: "", status: t.status, due_date: null, priority: "" })),
+        tasks: rowsFor(taskRows.data, id).map((t) => ({
+          title: "",
+          status: t.status,
+          due_date: null,
+          priority: "",
+        })),
         requirements: rowsFor(reqRows.data, id).map((r) => ({ status: r.status })),
         tests: rowsFor(testRows.data, id).map((t) => ({ status: t.status })),
         docSections: rowsFor(docRows.data, id).map((d) => ({ status: d.status })),
@@ -96,7 +135,10 @@ export const getAdminStats = createServerFn({ method: "GET" })
     // Emails live in auth, not in profiles.
     const emails = new Map<string, string>();
     try {
-      const { data: authUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+      const { data: authUsers } = await supabaseAdmin.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
       for (const u of authUsers?.users ?? []) if (u.email) emails.set(u.id, u.email);
     } catch {
       // listing users is best-effort
@@ -116,7 +158,11 @@ export const getAdminStats = createServerFn({ method: "GET" })
       const day = String(row.created_at).slice(0, 10);
       dayMap.set(day, (dayMap.get(day) ?? 0) + c);
       const u = userUsage.get(row.user_id) ?? { credits: 0, tokens: 0, calls: 0 };
-      userUsage.set(row.user_id, { credits: u.credits + c, tokens: u.tokens + (row.total_tokens ?? 0), calls: u.calls + 1 });
+      userUsage.set(row.user_id, {
+        credits: u.credits + c,
+        tokens: u.tokens + (row.total_tokens ?? 0),
+        calls: u.calls + 1,
+      });
     }
     const r2 = (n: number) => Number(n.toFixed(2));
     const sumRange = (from: string, to: string) =>
@@ -132,7 +178,9 @@ export const getAdminStats = createServerFn({ method: "GET" })
     for (let i = 11; i >= 0; i--) {
       const m = new Date(Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth() - i, 1));
       const key = m.toISOString().slice(0, 7);
-      const total = [...dayMap.entries()].filter(([d]) => d.startsWith(key)).reduce((t, [, v]) => t + v, 0);
+      const total = [...dayMap.entries()]
+        .filter(([d]) => d.startsWith(key))
+        .reduce((t, [, v]) => t + v, 0);
       monthly.push({ day: key, credits: r2(total) });
     }
 
@@ -174,7 +222,11 @@ export const getAdminStats = createServerFn({ method: "GET" })
         calls: usageRows.length,
         tokens,
         byFeature: [...featureMap.entries()]
-          .map(([feature, v]) => ({ feature, credits: Number(v.credits.toFixed(2)), calls: v.calls }))
+          .map(([feature, v]) => ({
+            feature,
+            credits: Number(v.credits.toFixed(2)),
+            calls: v.calls,
+          }))
           .sort((a, b) => b.credits - a.credits),
         daily,
         weekly,
@@ -204,7 +256,9 @@ export const getAdminStats = createServerFn({ method: "GET" })
         active: activeSubs,
         total: subRows.length,
         mrrCents,
-        byPlan: [...planMap.entries()].map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count),
+        byPlan: [...planMap.entries()]
+          .map(([plan, count]) => ({ plan, count }))
+          .sort((a, b) => b.count - a.count),
       },
       recentUsers: profileRows.slice(0, 10).map((p) => ({
         id: p.id,
@@ -231,13 +285,143 @@ export const getAdminStats = createServerFn({ method: "GET" })
     };
   });
 
+export interface AdminUserDetails {
+  user: { id: string; name: string | null; email: string | null; createdAt: string };
+  projects: {
+    id: string;
+    name: string;
+    description: string | null;
+    idea: string | null;
+    domain: string;
+    projectType: string | null;
+    techStack: string[];
+    status: string;
+    currentStage: string;
+    builderStep: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  usage: {
+    id: string;
+    projectId: string | null;
+    projectName: string | null;
+    feature: string;
+    model: string | null;
+    credits: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    createdAt: string;
+  }[];
+  usageEventCount: number;
+}
+
+/** Detailed projects and credit ledger for one user; administrator-only. */
+export const getAdminUserDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }): Promise<AdminUserDetails> => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [
+      profileResult,
+      authResult,
+      adminRoleResult,
+      projectResult,
+      usageCountResult,
+      usageResult,
+    ] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, created_at")
+        .eq("id", data.userId)
+        .maybeSingle(),
+      supabaseAdmin.auth.admin.getUserById(data.userId),
+      supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("user_id", data.userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("projects")
+        .select(
+          "id, name, description, idea, domain, project_type, tech_stack, status, current_stage, builder_step, created_at, updated_at",
+        )
+        .eq("user_id", data.userId)
+        .order("updated_at", { ascending: false }),
+      supabaseAdmin
+        .from("ai_usage_events")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", data.userId),
+      supabaseAdmin
+        .from("ai_usage_events")
+        .select(
+          "id, project_id, feature, model, credits, input_tokens, output_tokens, total_tokens, created_at",
+        )
+        .eq("user_id", data.userId)
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
+
+    if (profileResult.error) throw new Error("User details could not be loaded.");
+    if (!profileResult.data) throw new Error("User not found.");
+    if (adminRoleResult.error) throw new Error("User details could not be loaded.");
+    if (projectResult.error) throw new Error("The user's projects could not be loaded.");
+    if (usageResult.error || usageCountResult.error)
+      throw new Error("The user's credit history could not be loaded.");
+
+    const projects = projectResult.data ?? [];
+    const projectNames = new Map(projects.map((project) => [project.id, project.name]));
+
+    return {
+      user: {
+        id: profileResult.data.id,
+        name: profileResult.data.full_name,
+        email: adminRoleResult.data ? "Hidden" : (authResult.data.user?.email ?? null),
+        createdAt: profileResult.data.created_at,
+      },
+      projects: projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        idea: project.idea,
+        domain: project.domain,
+        projectType: project.project_type,
+        techStack: Array.isArray(project.tech_stack)
+          ? project.tech_stack.filter((value): value is string => typeof value === "string")
+          : [],
+        status: project.status,
+        currentStage: project.current_stage,
+        builderStep: project.builder_step,
+        createdAt: project.created_at,
+        updatedAt: project.updated_at,
+      })),
+      usage: (usageResult.data ?? []).map((event) => ({
+        id: event.id,
+        projectId: event.project_id,
+        projectName: event.project_id ? (projectNames.get(event.project_id) ?? null) : null,
+        feature: event.feature,
+        model: event.model,
+        credits: Number(event.credits ?? 0),
+        inputTokens: event.input_tokens ?? 0,
+        outputTokens: event.output_tokens ?? 0,
+        totalTokens: event.total_tokens ?? 0,
+        createdAt: event.created_at,
+      })),
+      usageEventCount: usageCountResult.count ?? 0,
+    };
+  });
+
 export const listReferralCodes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ReferralCodeRow[]> => {
     await assertAdmin(context);
     const { data, error } = await context.supabase
       .from("referral_codes")
-      .select("id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at")
+      .select(
+        "id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
@@ -260,7 +444,10 @@ export const createReferralCode = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ReferralCodeRow> => {
     await assertAdmin(context);
 
-    const code = (data.code?.toUpperCase().replace(/\s+/g, "") || randomReferralCode()).slice(0, 40);
+    const code = (data.code?.toUpperCase().replace(/\s+/g, "") || randomReferralCode()).slice(
+      0,
+      40,
+    );
 
     const { data: row, error } = await context.supabase
       .from("referral_codes")
@@ -272,7 +459,9 @@ export const createReferralCode = createServerFn({ method: "POST" })
         expires_at: data.expiresAt ? new Date(data.expiresAt).toISOString() : null,
         created_by: context.userId,
       })
-      .select("id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at")
+      .select(
+        "id,code,credits,label,max_redemptions,redemption_count,expires_at,is_active,created_at",
+      )
       .single();
 
     if (error) {

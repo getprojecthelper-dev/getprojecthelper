@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="750" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7F0FF"/>
+      <stop offset="1" stop-color="#D7E6F7"/>
+    </linearGradient>
+    <filter id="shadow" x="191" y="76" width="818" height="626" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v750H0z"/>
+  <circle cx="1055" cy="105" r="150" fill="#C6D9F4" opacity=".55"/>
+  <circle cx="110" cy="670" r="185" fill="#D3E3F7" opacity=".75"/>
+  <rect x="227" y="119" width="746" height="548" rx="28" fill="#526A89" opacity=".2" filter="url(#shadow)"/>
+  <rect x="219" y="108" width="762" height="548" rx="24" fill="#fff"/>
+  <path d="M219 132a24 24 0 0 1 24-24h714a24 24 0 0 1 24 24v45H219v-45Z" fill="#F8FAFD"/>
+  <circle cx="253" cy="143" r="7" fill="#F28A82"/>
+  <circle cx="277" cy="143" r="7" fill="#E9C465"/>
+  <circle cx="301" cy="143" r="7" fill="#78B89A"/>
+  <rect x="343" y="132" width="188" height="22" rx="11" fill="#E8EEF6"/>
+  <rect x="250" y="214" width="104" height="26" rx="13" fill="#E7F0FF"/>
+  <text x="267" y="232" fill="#37669E" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.2">RESEARCH</text>
+  <text x="250" y="291" fill="#172337" font-family="Arial,sans-serif" font-size="34" font-weight="700">Literature review</text>
+  <text x="250" y="320" fill="#75839A" font-family="Arial,sans-serif" font-size="16">Organize sources and shape your findings</text>
+  <rect x="250" y="357" width="434" height="1" fill="#E6EBF2"/>
+  <text x="250" y="395" fill="#26364C" font-family="Arial,sans-serif" font-size="14" font-weight="700">Research question</text>
+  <rect x="250" y="411" width="417" height="12" rx="6" fill="#E9EEF5"/>
+  <rect x="250" y="435" width="344" height="12" rx="6" fill="#E9EEF5"/>
+  <text x="250" y="491" fill="#26364C" font-family="Arial,sans-serif" font-size="14" font-weight="700">Key themes</text>
+  <rect x="250" y="508" width="178" height="54" rx="12" fill="#F2F6FC"/>
+  <circle cx="270" cy="535" r="6" fill="#6E99D1"/>
+  <rect x="286" y="529" width="114" height="11" rx="5.5" fill="#CCD8E8"/>
+  <rect x="443" y="508" width="178" height="54" rx="12" fill="#F2F6FC"/>
+  <circle cx="463" cy="535" r="6" fill="#8E7FC4"/>
+  <rect x="479" y="529" width="114" height="11" rx="5.5" fill="#CCD8E8"/>
+  <text x="727" y="232" fill="#26364C" font-family="Arial,sans-serif" font-size="14" font-weight="700">Sources</text>
+  <rect x="720" y="251" width="218" height="102" rx="14" fill="#F7F9FC" stroke="#E7ECF3"/>
+  <circle cx="746" cy="279" r="10" fill="#DDEAFF"/>
+  <path d="M743 274h6v10h-6z" stroke="#5E83BA" stroke-width="1.5"/>
+  <rect x="765" y="273" width="133" height="9" rx="4.5" fill="#BFCBDD"/>
+  <rect x="765" y="291" width="108" height="7" rx="3.5" fill="#E0E6EF"/>
+  <rect x="765" y="308" width="88" height="18" rx="9" fill="#E7F4EC"/>
+  <text x="777" y="321" fill="#4E8064" font-family="Arial,sans-serif" font-size="9" font-weight="700">CITED</text>
+  <rect x="720" y="368" width="218" height="102" rx="14" fill="#F7F9FC" stroke="#E7ECF3"/>
+  <circle cx="746" cy="396" r="10" fill="#ECE7FA"/>
+  <path d="M743 391h6v10h-6z" stroke="#8170B1" stroke-width="1.5"/>
+  <rect x="765" y="390" width="133" height="9" rx="4.5" fill="#BFCBDD"/>
+  <rect x="765" y="408" width="108" height="7" rx="3.5" fill="#E0E6EF"/>
+  <rect x="765" y="425" width="88" height="18" rx="9" fill="#E7F4EC"/>
+  <text x="777" y="438" fill="#4E8064" font-family="Arial,sans-serif" font-size="9" font-weight="700">CITED</text>
+  <rect x="720" y="490" width="218" height="92" rx="14" fill="#F7F9FC" stroke="#E7ECF3"/>
+  <rect x="744" y="516" width="168" height="10" rx="5" fill="#DCE5F0"/>
+  <rect x="744" y="537" width="132" height="8" rx="4" fill="#E5EAF1"/>
+  <rect x="744" y="554" width="95" height="8" rx="4" fill="#E5EAF1"/>
+</svg>

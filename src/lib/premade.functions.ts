@@ -61,10 +61,10 @@ export const resolveProjectPrice = createServerFn({ method: "GET" })
       );
       if (!response.ok) throw new Error("This subscription price is unavailable.");
       const result = await response.json() as {
-        data?: Array<{ id: string; external_id: string; status: string }>;
+        data?: Array<{ id: string; import_meta?: { external_id?: string }; status: string }>;
       };
       const price = result.data?.find(
-        (item) => item.external_id === data.priceId && item.status === "active" && item.id.startsWith("pri_"),
+        (item) => item.import_meta?.external_id === data.priceId && item.status === "active" && item.id.startsWith("pri_"),
       );
       if (!price) throw new Error("This subscription price is unavailable.");
       return price.id;

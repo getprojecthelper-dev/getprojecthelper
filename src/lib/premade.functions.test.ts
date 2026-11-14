@@ -32,7 +32,7 @@ describe("shared checkout price resolution", () => {
   for (const priceId of ["starter_monthly", "student_monthly", "professional_monthly"]) {
     it(`resolves ${priceId} without checking the project store`, async () => {
       gatewayFetch.mockResolvedValue(Response.json({
-        data: [{ id: "pri_monthly", external_id: priceId, status: "active" }],
+        data: [{ id: "pri_monthly", import_meta: { external_id: priceId }, status: "active" }],
       }));
       expect(await resolve({ data: { priceId, environment: "sandbox" } })).toBe("pri_monthly");
       expect(gatewayFetch).toHaveBeenCalledWith("sandbox", `/prices?external_id=${priceId}`);
@@ -42,7 +42,7 @@ describe("shared checkout price resolution", () => {
 
   it("uses the requested live catalog", async () => {
     gatewayFetch.mockResolvedValue(Response.json({
-      data: [{ id: "pri_live", external_id: "starter_monthly", status: "active" }],
+      data: [{ id: "pri_live", import_meta: { external_id: "starter_monthly" }, status: "active" }],
     }));
     expect(await resolve({ data: { priceId: "starter_monthly", environment: "live" } })).toBe("pri_live");
     expect(gatewayFetch).toHaveBeenCalledWith("live", "/prices?external_id=starter_monthly");
@@ -56,8 +56,8 @@ describe("shared checkout price resolution", () => {
 
   it("does not return an archived or mismatched subscription price", async () => {
     gatewayFetch.mockResolvedValue(Response.json({ data: [
-      { id: "pri_archived", external_id: "starter_monthly", status: "archived" },
-      { id: "pri_other", external_id: "other_monthly", status: "active" },
+      { id: "pri_archived", import_meta: { external_id: "starter_monthly" }, status: "archived" },
+      { id: "pri_other", import_meta: { external_id: "other_monthly" }, status: "active" },
     ] }));
     await expect(resolve({ data: { priceId: "starter_monthly", environment: "sandbox" } }))
       .rejects.toThrow("This subscription price is unavailable.");

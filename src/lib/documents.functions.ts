@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateJson, obj, str, strArray } from "@/lib/ai.server";
 import { authorSchema, projectSource, sectionSchema } from "@/lib/document-source";
+import { DOC_TYPES } from "@/lib/doc-templates";
 
 export interface DocAuthor {
   name: string;
@@ -81,7 +82,17 @@ export const generateDocument = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data, context }): Promise<GeneratedDocument> => {
+  .handler(async ({ data: input, context }): Promise<GeneratedDocument> => {
+    // Labels and briefs come only from the server-side template catalog, never the caller.
+    const docType = DOC_TYPES.find((t) => t.id === input.docType);
+    const docFormat = docType?.formats.find((f) => f.id === input.format);
+    if (!docType || !docFormat) throw new Error("Unknown document type or format.");
+    const data = {
+      ...input,
+      docTypeLabel: docType.label,
+      formatLabel: docFormat.label,
+      formatBrief: docFormat.brief ?? "",
+    };
     const supabase = context.supabase as unknown as {
       from: (t: string) => ReturnType<typeof context.supabase.from>;
     };
@@ -237,12 +248,15 @@ export const reviseDocument = createServerFn({ method: "POST" })
         )
       : null;
 
+    // Labels come from the server catalog, not stored (possibly caller-supplied) metadata.
+    const reviseType = DOC_TYPES.find((t) => t.id === current.doc_type);
+    const reviseTypeLabel = reviseType?.label ?? "document";
+    const reviseFormatLabel =
+      reviseType?.formats.find((f) => f.id === current.format)?.label ?? "selected";
     const result = await generateJson<{ title: string; sections: DocSection[]; latex: string }>({
       usage: { userId: context.userId, projectId: current.project_id, feature: "revise_document" },
       name: "revised_document",
-      instructions: `You revise an academic ${current.meta?.["doc_type_label"] ?? current.doc_type} written in the ${
-        current.meta?.["format_label"] ?? current.format
-      } template.
+      instructions: `You revise an academic ${reviseTypeLabel} written in the ${reviseFormatLabel} template.
 Rules:
 - Apply the student's requested change faithfully; leave everything else intact.
 - Keep the document strictly relevant to the student's real project data below — never drift to a different topic and never invent results that contradict it.

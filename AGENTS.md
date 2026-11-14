@@ -18,3 +18,4 @@
 - Load bundled Monaco only after hydration through the lazy editor module so server rendering never imports browser-only editor code or depends on a CDN.
 - Resolve implementation file buttons with the same path normalization as workspace collection; unnamed and terminal blocks stay inline because they have no saved file, and each click is a new editor request so repeated opens work.
 - Buy-project listings live in `premade_listings` (admin-written via role-checked server functions, live rows publicly readable); each listing owns its own one-time checkout price so admins can add projects without code changes.
+- Shared checkout price resolution allows configured monthly plan external IDs independently of the store lock; all other prices retain live-listing checks to prevent arbitrary catalog access.

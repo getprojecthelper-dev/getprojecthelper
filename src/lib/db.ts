@@ -126,8 +126,8 @@ export function useProjects() {
   return useQuery({
     queryKey: projectsKey,
     queryFn: async (): Promise<Project[]> => {
-      const { data: auth } = await supabase.auth.getUser();
-      const uid = auth.user?.id ?? "";
+      const { data: auth } = await supabase.auth.getSession();
+      const uid = auth.session?.user.id ?? "";
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -154,10 +154,21 @@ export function useProjectsOverview() {
   return useQuery({
     queryKey: ["projects-overview"],
     queryFn: async (): Promise<ProjectOverview[]> => {
-      const { data: auth } = await supabase.auth.getUser();
-      const uid = auth.user?.id ?? "";
-      const [projects, tasks, requirements, tests, docs, risks, build] = await Promise.all([
-        supabase.from("projects").select("*").eq("user_id", uid).order("updated_at", { ascending: false }),
+      const { data: auth } = await supabase.auth.getSession();
+      const uid = auth.session?.user.id ?? "";
+      if (!uid) return [];
+
+      const { data: projects, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("user_id", uid)
+        .order("updated_at", { ascending: false });
+      if (projectError) fail("We couldn't load your projects.", projectError);
+      // A first-time user has no project metrics to calculate, so avoid making
+      // six empty table requests just to render the welcome screen.
+      if (!projects?.length) return [];
+
+      const [tasks, requirements, tests, docs, risks, build] = await Promise.all([
         supabase.from("tasks").select("project_id,title,status,due_date,priority"),
         supabase.from("requirements").select("project_id,status"),
         supabase.from("test_cases").select("project_id,status"),
@@ -169,12 +180,10 @@ export function useProjectsOverview() {
           .order("position"),
       ]);
 
-      if (projects.error) fail("We couldn't load your projects.", projects.error);
-
       const by = <T extends { project_id: string }>(rows: T[] | null, id: string) =>
         (rows ?? []).filter((r) => r.project_id === id);
 
-      return (projects.data ?? []).map((project) => {
+      return projects.map((project) => {
         const sections = by(build.data, project.id);
         const confirmed = sections.filter((s) => s.status === "confirmed").length;
         const signals: ProjectSignals = {
@@ -204,15 +213,12 @@ export function useProjectsOverview() {
           health: computeHealth(signals, progress).score,
           buildTotal: sections.length,
           buildConfirmed: confirmed,
-          resumeSection: next
-            ? { id: next.id, title: next.title, position: next.position }
-            : null,
+          resumeSection: next ? { id: next.id, title: next.title, position: next.position } : null,
         };
       });
     },
   });
 }
-
 
 export interface ProjectBundle {
   project: Project;
@@ -257,17 +263,33 @@ export function useProjectBundle(projectId: string) {
         supabase.from("tasks").select("*").eq("project_id", projectId).order("created_at"),
         supabase.from("requirements").select("*").eq("project_id", projectId).order("code"),
         supabase.from("test_cases").select("*").eq("project_id", projectId).order("created_at"),
-        supabase.from("research_sources").select("*").eq("project_id", projectId).order("created_at"),
+        supabase
+          .from("research_sources")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("created_at"),
         supabase.from("research_notes").select("*").eq("project_id", projectId).order("created_at"),
-        supabase.from("document_sections").select("*").eq("project_id", projectId).order("position"),
+        supabase
+          .from("document_sections")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("position"),
         supabase.from("experiments").select("*").eq("project_id", projectId).order("created_at"),
         supabase.from("risks").select("*").eq("project_id", projectId).order("created_at"),
         supabase.from("stakeholders").select("*").eq("project_id", projectId).order("created_at"),
-        supabase.from("raci_assignments").select("*").eq("project_id", projectId).order("created_at"),
+        supabase
+          .from("raci_assignments")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("created_at"),
         supabase.from("wbs_items").select("*").eq("project_id", projectId).order("position"),
         supabase.from("schedule_tasks").select("*").eq("project_id", projectId).order("position"),
         supabase.from("budget_lines").select("*").eq("project_id", projectId).order("created_at"),
-        supabase.from("status_reports").select("*").eq("project_id", projectId).order("created_at", { ascending: false }),
+        supabase
+          .from("status_reports")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("created_at", { ascending: false }),
       ]);
 
       if (project.error) fail("We couldn't load this project.", project.error);
@@ -376,7 +398,10 @@ export function usePmMutations(table: PmTable, projectId: string) {
 
   const create = useMutation({
     mutationFn: async (values: Record<string, unknown>) => {
-      const { data, error } = await from().insert({ ...values, project_id: projectId }).select().single();
+      const { data, error } = await from()
+        .insert({ ...values, project_id: projectId })
+        .select()
+        .single();
       if (error) throw error;
       return data;
     },
@@ -405,7 +430,6 @@ export function usePmMutations(table: PmTable, projectId: string) {
   return { create, update, remove };
 }
 
-
 export function useProjectMutations() {
   const qc = useQueryClient();
   const invalidate = (id?: string) => {
@@ -431,7 +455,8 @@ export function useProjectMutations() {
     mutationFn: async (id: string) => {
       const { data, error } = await supabase.from("projects").delete().eq("id", id).select("id");
       if (error) throw error;
-      if (!data?.length) throw new Error("This project couldn't be deleted. Only its owner can delete it.");
+      if (!data?.length)
+        throw new Error("This project couldn't be deleted. Only its owner can delete it.");
     },
     onSuccess: () => invalidate(),
     onError: (error) => {

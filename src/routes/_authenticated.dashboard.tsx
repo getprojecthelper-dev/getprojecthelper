@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Activity,
+  ArrowRight,
   CalendarClock,
   FolderKanban,
   GaugeCircle,
@@ -11,7 +12,7 @@ import {
 import { useState } from "react";
 
 import { MeterBar, healthTone, meterTone } from "@/components/metrics";
-import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
+import { ErrorState, LoadingState } from "@/components/state-views";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,50 +49,61 @@ function Dashboard() {
   const { user } = useAuth();
   const { remove } = useProjectMutations();
   const [pendingDelete, setPendingDelete] = useState<ProjectOverview | null>(null);
+  const activeProjects = overviews?.filter((o) => o.progress < 100).length ?? 0;
+  const completedProjects = overviews?.filter((o) => o.progress >= 100).length ?? 0;
 
   return (
     <>
-      <main className="mx-auto max-w-6xl px-5 py-10">
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="font-display text-2xl">Your projects</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Signed in as {user?.email}. Resume where you left off, or start something new.
+      <main className="workspace-home-surface landing-editorial workspace-dashboard mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[100rem] px-5 py-8 sm:px-8 lg:px-10">
+        <header className="workspace-dashboard__header">
+          <div className="min-w-0">
+            <p className="workspace-dashboard__eyebrow">Your workspace</p>
+            <h1 className="mt-2 font-display text-[clamp(2.25rem,4.2vw,4rem)] font-semibold leading-[1.02] tracking-[-.065em]">
+              Projects, at a glance.
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+              Resume where you left off, or choose what to move forward next.
             </p>
+            {user?.email ? (
+              <p className="mt-2 text-xs text-muted-foreground">Signed in as {user.email}</p>
+            ) : null}
           </div>
-          <Button asChild>
+          <Button asChild className="workspace-dashboard__new-project">
             <Link to="/new-project">
-              <Plus className="h-4 w-4" />
-              New project
+              New project <Plus className="h-4 w-4" />
             </Link>
           </Button>
-        </div>
+        </header>
 
-        <div className="mt-8">
+        {!isPending && !isError && overviews.length > 0 ? (
+          <div className="workspace-dashboard__summary" aria-label="Project summary">
+            <span>
+              <strong>{overviews.length}</strong> {overviews.length === 1 ? "project" : "projects"}
+            </span>
+            <span>
+              <strong>{activeProjects}</strong> in progress
+            </span>
+            <span>
+              <strong>{completedProjects}</strong> completed
+            </span>
+          </div>
+        ) : null}
+
+        <section aria-label="Your project list" className="mt-6">
           {isPending ? (
             <LoadingState label="Loading your projects…" />
           ) : isError ? (
             <ErrorState onRetry={() => void refetch()} />
           ) : overviews.length === 0 ? (
-            <EmptyState
-              icon={<FolderKanban className="h-8 w-8" />}
-              title="No projects yet"
-              description="Create your first project, pick a domain template, and Project Helper will set up a lifecycle, starter tasks and a report structure for you."
-              action={
-                <Button asChild>
-                  <Link to="/new-project">Start your project</Link>
-                </Button>
-              }
-            />
+            null
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="workspace-dashboard__projects">
               {overviews.map((o) => (
                 <ProjectCard key={o.project.id} overview={o} onDelete={setPendingDelete} />
               ))}
             </div>
           )}
-        </div>
+        </section>
       </main>
 
       <AlertDialog
@@ -135,27 +147,27 @@ function ProjectCard({
   const tone = healthTone(health);
 
   return (
-    <div className="panel flex flex-col p-5 transition-shadow hover:shadow-[var(--shadow-lift)]">
+    <article className="workspace-dashboard__project">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <Link
             to="/projects/$projectId"
             params={{ projectId: p.id }}
-            className="font-display text-lg hover:text-primary"
+            className="workspace-dashboard__project-title font-display text-xl"
           >
             {p.name}
           </Link>
           <p className="mt-0.5 text-xs text-muted-foreground">{labelOf(DOMAINS, p.domain)}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-2">
           <StatusBadge
             value="in_progress"
             label={STAGE_LABELS[p.current_stage as Stage] ?? p.current_stage}
           />
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            size="icon"
+            className="h-9 w-9 rounded-full text-muted-foreground hover:bg-red-50 hover:text-destructive"
             aria-label={`Delete ${p.name}`}
             onClick={() => onDelete(overview)}
           >
@@ -165,11 +177,13 @@ function ProjectCard({
       </div>
 
       {p.description ? (
-        <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
+        <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+          {p.description}
+        </p>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi label="Overall progress" value={`${progress}%`}>
+      <div className="workspace-dashboard__metrics">
+        <Kpi label="Build progress" value={`${progress}%`}>
           <MeterBar className="mt-2" value={progress} />
         </Kpi>
         <Kpi
@@ -189,22 +203,26 @@ function ProjectCard({
           label="Deadline"
           value={days === null ? "Not set" : days < 0 ? `${Math.abs(days)}d late` : `${days}d left`}
           icon={<CalendarClock className="h-3.5 w-3.5" />}
+          tone={days !== null && days < 0 ? "bad" : "default"}
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-        <p className="text-xs text-muted-foreground">
-          {buildTotal === 0
-            ? "No implementation sections yet"
-            : resumeSection
-              ? `Left off at step ${resumeSection.position + 1}: ${resumeSection.title}`
-              : `All ${buildTotal} implementation sections confirmed`}
-          {buildTotal > 0 ? ` · ${buildConfirmed}/${buildTotal} done` : ""}
-        </p>
-        <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
+      <div className="workspace-dashboard__project-footer">
+        <div className="min-w-0">
+          <p className="workspace-dashboard__next-label">Next up</p>
+          <p className="mt-1 truncate text-sm text-muted-foreground">
+            {buildTotal === 0
+              ? "Your guided build plan will appear here"
+              : resumeSection
+                ? `Step ${resumeSection.position + 1} · ${resumeSection.title}`
+                : `All ${buildTotal} implementation sections confirmed`}
+            {buildTotal > 0 ? ` · ${buildConfirmed}/${buildTotal} done` : ""}
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Button asChild variant="ghost" size="sm" className="rounded-lg">
             <Link to="/projects/$projectId" params={{ projectId: p.id }}>
-              Open
+              Overview <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button asChild size="sm">
@@ -212,13 +230,12 @@ function ProjectCard({
               to={buildTotal > 0 ? "/projects/$projectId/build" : "/projects/$projectId/tasks"}
               params={{ projectId: p.id }}
             >
-              <Play className="h-4 w-4" />
-              Resume project
+              {buildTotal > 0 ? "Resume" : "View tasks"} <Play className="h-4 w-4" />
             </Link>
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -244,12 +261,12 @@ function Kpi({
           ? "text-destructive"
           : "text-foreground";
   return (
-    <div className="rounded-lg border border-border bg-secondary/40 p-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="workspace-dashboard__metric">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {icon}
         <span className="leading-tight">{label}</span>
       </div>
-      <p className={cn("mt-1 truncate font-display text-lg", toneClass)}>{value}</p>
+      <p className={cn("mt-1 truncate font-display text-base font-semibold", toneClass)}>{value}</p>
       {children}
     </div>
   );

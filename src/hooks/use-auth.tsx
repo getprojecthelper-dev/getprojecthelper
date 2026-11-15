@@ -42,18 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    void supabase.auth.getUser().then(({ data, error }) => {
+    // The persisted session is already available locally. Read it first so the
+    // app can paint and route without waiting for an auth-server round trip.
+    void supabase.auth.getSession().then(({ data, error }) => {
       if (!active) return;
-      if (error || !data.user) {
-        setSession(null);
-        setLoading(false);
-        return;
-      }
-      void supabase.auth.getSession().then(({ data: sessionData }) => {
-        if (!active) return;
-        setSession(sessionData.session);
-        setLoading(false);
-      });
+      setSession(error ? null : data.session);
+      setLoading(false);
     });
 
     return () => {

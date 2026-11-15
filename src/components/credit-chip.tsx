@@ -4,26 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCredits } from "@/lib/credit-costs";
 import { getMyCredits, type CreditTransaction } from "@/lib/credits.functions";
 import { LOW_CREDIT_THRESHOLD } from "@/components/low-credits-banner";
 import { cn } from "@/lib/utils";
 
-function Row({
-  label,
-  value,
-  strong,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-}) {
+function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-6">
       <span className="opacity-70">{label}</span>
@@ -61,7 +48,7 @@ export function CreditChip() {
             variant="ghost"
             size="sm"
             className={cn(
-              "h-9 gap-2 px-2.5",
+              "workspace-topbar__credits-pill h-10 gap-2 px-3",
               low && "bg-destructive/10 text-destructive hover:bg-destructive/15",
             )}
           >

@@ -20,29 +20,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const backTarget = peekBackTarget(pathname);
   const isWorkspaceHome = pathname === "/welcome";
-  const backAction = isWorkspaceHome ? "landing" : backTarget ? "history" : "workspace";
+  const backAction = backTarget ? "history" : "workspace";
   return (
     <div className="workspace-canvas min-h-screen w-full">
       <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur">
-        <div className="workspace-topbar__inner flex h-[4.5rem] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-1">
+        <div className="workspace-topbar__inner mx-auto flex h-[4.5rem] w-full max-w-[96rem] items-center justify-between gap-3 px-4 sm:px-7 lg:px-10">
+          <div className="workspace-topbar__identity flex min-w-0 items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
               aria-label="Back"
-              title={
-                backAction === "landing"
-                  ? "Back to homepage"
-                  : backAction === "workspace"
-                    ? "Back to workspace"
-                    : "Previous page"
-              }
-              className="workspace-topbar__back size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#111] disabled:opacity-35"
+              title={backAction === "workspace" ? "Back to workspace" : "Previous page"}
+              disabled={isWorkspaceHome && !backTarget}
+              className="workspace-topbar__back size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#111] disabled:cursor-not-allowed disabled:opacity-40"
               onClick={() => {
-                if (isWorkspaceHome) {
-                  void navigate({ to: "/", replace: true });
-                  return;
-                }
                 const target = takeBackTarget(pathname);
                 if (target) void navigate({ to: target as never });
                 else void navigate({ to: "/welcome", replace: true });
@@ -54,36 +45,40 @@ export function AppShell({ children }: { children: ReactNode }) {
               to="/welcome"
               className="workspace-topbar__brand flex min-w-0 items-center gap-2.5 rounded-lg font-display font-semibold tracking-[-.035em]"
             >
-              <span className="workspace-topbar__mark icon-chip h-9 w-9 shrink-0">
+              <span className="workspace-topbar__mark icon-chip h-10 w-10 shrink-0">
                 <img src={brandMark} alt="" width={512} height={512} className="h-5 w-5" />
               </span>
-              <span className="truncate text-[1.08rem]">Project Helper</span>
+              <span className="truncate text-[1.12rem]">Project Helper</span>
             </Link>
           </div>
-          <div className="workspace-topbar__actions flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="workspace-topbar__actions flex shrink-0 items-center gap-2 sm:gap-3">
             <CreditChip />
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              aria-label="Settings"
-              className="workspace-topbar__icon-button size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
-            >
-              <Link to="/settings">
-                <MaterialIcon name="settings" />
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Log out"
-              className="workspace-topbar__icon-button size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
-              onClick={() =>
-                void signOutAndRedirect(queryClient, () => navigate({ to: "/auth", replace: true }))
-              }
-            >
-              <MaterialIcon name="logout" />
-            </Button>
+            <div className="workspace-topbar__account-tools flex items-center gap-1 rounded-full p-1">
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                aria-label="Settings"
+                className="workspace-topbar__icon-button size-9 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
+              >
+                <Link to="/settings">
+                  <MaterialIcon name="settings" />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Log out"
+                className="workspace-topbar__icon-button size-9 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#0866e8]"
+                onClick={() =>
+                  void signOutAndRedirect(queryClient, () =>
+                    navigate({ to: "/auth", replace: true }),
+                  )
+                }
+              >
+                <MaterialIcon name="logout" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>

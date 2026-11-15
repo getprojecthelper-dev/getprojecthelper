@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
+import { createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Check, Gift, Sparkles, Zap } from "lucide-react";
+import { Check, Gift, Sparkles, Zap } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -20,7 +20,8 @@ export const Route = createFileRoute("/_authenticated/credits")({
       { title: "AI credits — Project Helper" },
       {
         name: "description",
-        content: "Track your AI credit balance, usage history and redeem referral codes in Project Helper.",
+        content:
+          "Track your AI credit balance, usage history and redeem referral codes in Project Helper.",
       },
       { property: "og:title", content: "AI credits — Project Helper" },
       { property: "og:description", content: "Your balance, usage history and monthly plans." },
@@ -34,7 +35,9 @@ export const Route = createFileRoute("/_authenticated/credits")({
       <ErrorState message={error instanceof Error ? error.message : "Something went wrong."} />
     </div>
   ),
-  notFoundComponent: () => <EmptyState title="Nothing here" description="This page does not exist." />,
+  notFoundComponent: () => (
+    <EmptyState title="Nothing here" description="This page does not exist." />
+  ),
 });
 
 const KIND_LABEL: Record<string, string> = {
@@ -86,13 +89,6 @@ function CreditsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-5 sm:p-8">
-      <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link to="/dashboard">
-          <ArrowLeft className="h-4 w-4" />
-          Back to projects
-        </Link>
-      </Button>
-
       <PageHeader
         title="AI credits"
         description="Credits pay for every AI run — planning, writing sections, and fixing errors. Unused reserved credits always come back to you."
@@ -108,15 +104,11 @@ function CreditsPage() {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Total received</p>
-          <p className="mt-2 font-display text-3xl">
-            {formatCredits(data.lifetimeGranted)}
-          </p>
+          <p className="mt-2 font-display text-3xl">{formatCredits(data.lifetimeGranted)}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Total used</p>
-          <p className="mt-2 font-display text-3xl">
-            {formatCredits(data.lifetimeSpent)}
-          </p>
+          <p className="mt-2 font-display text-3xl">{formatCredits(data.lifetimeSpent)}</p>
         </div>
       </section>
 
@@ -169,7 +161,10 @@ function CreditsPage() {
                   <p className="truncate font-medium">
                     {KIND_LABEL[tx.kind] ?? tx.kind}
                     {tx.feature ? (
-                      <span className="text-muted-foreground"> · {tx.feature.replace(/_/g, " ")}</span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        · {tx.feature.replace(/_/g, " ")}
+                      </span>
                     ) : null}
                   </p>
                   <p className="text-xs text-muted-foreground">

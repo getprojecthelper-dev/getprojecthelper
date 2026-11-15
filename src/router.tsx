@@ -4,7 +4,15 @@ import { routeTree } from "./routeTree.gen";
 import { initBackTracking } from "./lib/back-navigation";
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 15_000,
+        gcTime: 5 * 60_000,
+        retry: 1,
+      },
+    },
+  });
 
   const router = createRouter({
     routeTree,

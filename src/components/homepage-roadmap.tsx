@@ -145,24 +145,6 @@ export function HomepageRoadmap() {
           );
         })}
       </ol>
-
-      <div className="roadmap-support">
-        <div className="roadmap-support-message">
-          <h3>You do not have to figure everything out alone.</h3>
-          <p>Get a clear next step, organised project files, and guidance when you need it.</p>
-        </div>
-        <div className="roadmap-included">
-          <strong>WHAT YOU GET</strong>
-          <p>A roadmap, clear tasks, project files, documents, and support as you build.</p>
-        </div>
-        <Link
-          className="roadmap-cta"
-          to={session ? "/new-project" : "/auth"}
-          search={session ? {} : { mode: "signup" }}
-        >
-          Start building <ArrowRight size={18} aria-hidden="true" />
-        </Link>
-      </div>
     </section>
   );
 }

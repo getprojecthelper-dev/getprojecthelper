@@ -1,19 +1,23 @@
 import { HomepageRoadmap } from "@/components/homepage-roadmap";
+import { HomepageIdeaPlanner } from "@/components/homepage-idea-planner";
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDownRight,
   ArrowRight,
+  BriefcaseBusiness,
   BookOpen,
   Check,
   Files,
   Folder,
   Home,
   LayoutGrid,
+  Lightbulb,
   ListTodo,
   Menu,
   Plus,
   Share2,
+  Sparkles,
   Wrench,
 } from "lucide-react";
 
@@ -142,53 +146,81 @@ function Landing() {
       <main>
         <section
           id="get-project"
-          className="landing-hero scroll-mt-8 overflow-hidden px-5 pb-0 pt-14 sm:px-8 sm:pt-20 lg:pt-24"
+          className="landing-hero relative scroll-mt-8 overflow-hidden px-5 pb-0 pt-8 sm:px-8 sm:pt-10 lg:pt-12"
         >
-          <div className="mx-auto max-w-[90rem] text-center">
-            <h1 className="mx-auto max-w-6xl font-display text-[clamp(3.25rem,8.3vw,7.7rem)] font-semibold leading-[.98] tracking-[-.075em]">
-              From idea to
-              <br className="hidden sm:block" />
-              <span className="landing-finished-pill mx-2 inline-flex translate-y-[-.025em] items-center gap-3 rounded-full px-5 py-1 sm:mx-4 sm:gap-5 sm:px-9">
-                <span
-                  className="size-3.5 shrink-0 rounded-full bg-[#18aa4a] sm:size-5"
-                  aria-hidden="true"
-                />
-                <span>finished</span>
-              </span>{" "}
-              project.
-            </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-[#3f3f46] sm:text-xl sm:leading-8">
-              <span className="block">
-                Share your idea, ask AI for suggestions, or paste a job description to generate a
-                project idea.
-              </span>
-              <span className="mt-1 block">Or choose a product that’s ready to use.</span>
-            </p>
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                className="h-12 rounded-xl bg-[#0866e8] px-6 text-base font-semibold text-white shadow-none hover:bg-[#0757c7]"
+          <svg
+            className="landing-hero__motion"
+            viewBox="0 0 1440 760"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <pattern id="landing-blueprint-dots" width="26" height="26" patternUnits="userSpaceOnUse">
+                <circle cx="1.2" cy="1.2" r="1" fill="#6d8fc9" fillOpacity="0.22" />
+              </pattern>
+              <linearGradient id="landing-glass-stroke" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stopColor="#5a92f5" stopOpacity="0.2" />
+                <stop offset="1" stopColor="#9575e8" stopOpacity="0.08" />
+              </linearGradient>
+            </defs>
+            <rect className="landing-hero__dot-field" x="0" y="0" width="1440" height="760" fill="url(#landing-blueprint-dots)" />
+            <g className="landing-hero__blueprint" aria-hidden="true">
+              <circle cx="720" cy="380" r="225" />
+              <circle cx="720" cy="380" r="274" />
+              <ellipse cx="720" cy="380" rx="335" ry="138" transform="rotate(-28 720 380)" />
+              <path d="M340 380h760M720 70v620" />
+              <rect x="698" y="126" width="44" height="44" rx="12" />
+              <rect x="1032" y="358" width="44" height="44" rx="12" />
+              <rect x="364" y="358" width="44" height="44" rx="12" />
+            </g>
+            <g className="landing-hero__motion-track landing-hero__motion-track--one">
+              <path className="landing-hero__route" d="M-80 540 C180 280 330 680 600 430 S1050 180 1520 400" />
+              <path className="landing-hero__route landing-hero__route--secondary" d="M-80 590 C180 330 330 730 600 480 S1050 230 1520 450" />
+              <circle className="landing-hero__node-halo" cx="602" cy="430" r="10" />
+              <circle className="landing-hero__node" cx="602" cy="430" r="3.5" />
+              <circle className="landing-hero__node-halo landing-hero__node-halo--late" cx="1048" cy="230" r="10" />
+              <circle className="landing-hero__node" cx="1048" cy="230" r="3.5" />
+            </g>
+            <g className="landing-hero__motion-track landing-hero__motion-track--two">
+              <path className="landing-hero__route" d="M-60 250 C250 500 390 150 690 360 S1120 620 1500 300" />
+              <path className="landing-hero__route landing-hero__route--secondary" d="M-60 300 C250 550 390 200 690 410 S1120 670 1500 350" />
+              <circle className="landing-hero__node-halo" cx="690" cy="360" r="10" />
+              <circle className="landing-hero__node" cx="690" cy="360" r="3.5" />
+              <circle className="landing-hero__node-halo landing-hero__node-halo--late" cx="1120" cy="620" r="10" />
+              <circle className="landing-hero__node" cx="1120" cy="620" r="3.5" />
+            </g>
+          </svg>
+          <div className="relative z-10 mx-auto grid max-w-[90rem] items-center gap-10 lg:grid-cols-[.95fr_1.05fr] lg:gap-16 xl:gap-20">
+            <div className="text-center lg:text-left">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#0866e8]">
+                Your next big idea starts here
+              </p>
+              <h1 className="mx-auto max-w-3xl font-display text-[clamp(2.5rem,4vw,4.75rem)] font-semibold leading-[1.02] tracking-[-.07em] lg:mx-0">
+                From idea to a complete, end to end project in minutes
+              </h1>
+              <p className="mx-auto mt-7 max-w-lg text-base leading-7 text-[#52525b] sm:text-lg sm:leading-8 lg:mx-0">
+                <span className="block">
+                  Start with a job description, a college project idea, or a professional project
+                  goal. Let AI help shape it into a complete, end to end project.
+                </span>
+                <span className="mt-4 block border-l-2 border-[#d1f5dc] pl-3 text-[#71717a]">
+                  Explore ready-to-use products for a faster start.
+                </span>
+              </p>
+            </div>
+            <div>
+              <HomepageIdeaPlanner signedIn={Boolean(session)} />
+              <Link
+                to={products}
+                search={productSearch}
+                className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#0757ad] hover:underline"
               >
-                <Link to={getStarted} search={signup}>
-                  Start a custom project <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                className="h-12 rounded-xl bg-[#e8f2ff] px-6 text-base font-semibold text-[#0757ad] shadow-none hover:bg-[#d9eaff]"
-              >
-                <Link to={products} search={productSearch}>
-                  Browse products <ArrowDownRight className="size-4" />
-                </Link>
-              </Button>
+                Or browse ready-made products <ArrowDownRight className="size-4" />
+              </Link>
             </div>
 
-            <div
-              className="landing-preview mx-auto mt-16 max-w-6xl overflow-hidden rounded-t-2xl border border-[#e4e4e7] bg-white text-left shadow-[0_24px_80px_-36px_rgba(15,23,42,.28)] sm:mt-20"
-              aria-label="Preview of a project workspace"
-            >
+            <div className="hidden" aria-label="Preview of a project workspace">
               <div className="flex h-11 items-center gap-2 border-b border-[#e4e4e7] bg-[#fafafa] px-4">
                 <span className="size-2.5 rounded-full bg-[#ff6058]" />
                 <span className="size-2.5 rounded-full bg-[#ffbd2e]" />
@@ -317,12 +349,79 @@ function Landing() {
           </div>
         </section>
 
+        <section
+          id="how-it-works"
+          className="landing-section landing-section--choices relative isolate overflow-hidden border-y px-5 py-14 text-[#111111] sm:px-8 sm:py-18"
+        >
+          <div className="landing-section__content mx-auto max-w-[90rem]">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0866e8]">
+                Choose where to start
+              </p>
+              <h2 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-[-.06em] sm:text-5xl">
+                What do you have in mind?
+              </h2>
+              <p className="mt-3 text-base leading-7 text-[#62666e] sm:text-lg">
+                Start with an idea, a job description, or a domain you want to explore.
+              </p>
+            </div>
+
+            <div className="mt-9 grid gap-3 md:grid-cols-3">
+              {[
+                {
+                  number: "01",
+                  title: "I have an idea",
+                  description:
+                    "For a college assignment or a professional goal, start with a short description. We’ll help turn it into a project plan.",
+                  action: "Shape my idea",
+                },
+                {
+                  number: "02",
+                  title: "I have a job description",
+                  description:
+                    "Use the role’s skills and requirements to shape a relevant project you can build and discuss in interviews.",
+                  action: "Use a job description",
+                },
+                {
+                  number: "03",
+                  title: "Suggest an idea for me",
+                  description:
+                    "Choose a domain and let AI suggest a project that fits what you want to learn or demonstrate.",
+                  action: "Explore project ideas",
+                },
+              ].map((item) => (
+                <article
+                  key={item.title}
+                  className="landing-choice group relative flex min-h-56 flex-col px-5 py-7 transition-colors duration-200 sm:px-7 sm:py-8 md:min-h-60"
+                >
+                  <span className="mb-5 font-mono text-xs tracking-[.14em] text-[#7a8492]">
+                    {item.number}
+                  </span>
+                  <h3 className="font-display text-xl font-semibold tracking-[-.035em] sm:text-2xl">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 max-w-sm text-sm leading-6 text-[#62666e] sm:text-base sm:leading-7">
+                    {item.description}
+                  </p>
+                  <Link
+                    to={getStarted}
+                    search={signup}
+                    className="mt-auto inline-flex min-h-11 w-fit items-end pt-5 text-sm font-semibold text-[#0757ad] underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-current group-hover:text-[#0866e8] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0866e8]"
+                  >
+                    {item.action}
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <HomepageRoadmap />
         <section
           id="services"
-          className="scroll-mt-8 border-y border-[#e4e4e7] bg-white px-5 py-16 text-[#111111] sm:px-8 sm:py-20"
+          className="landing-section landing-section--products relative isolate scroll-mt-8 overflow-hidden border-y px-5 py-16 text-[#111111] sm:px-8 sm:py-20"
         >
-          <div className="mx-auto max-w-[90rem]">
+          <div className="landing-section__content mx-auto max-w-[90rem]">
             <div className="flex flex-col gap-6 border-b border-[#e4e4e7] pb-7 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2
@@ -349,7 +448,7 @@ function Landing() {
                 {catalogPreview.map((product) => (
                   <article
                     key={product.id}
-                    className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#e4e4e7] bg-white shadow-[0_5px_24px_rgba(17,17,17,.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,17,17,.09)]"
+                    className="landing-product-card flex min-w-0 flex-col overflow-hidden rounded-xl transition duration-200 hover:-translate-y-1"
                   >
                     {product.imageUrl ? (
                       <div className="relative">
@@ -388,7 +487,7 @@ function Landing() {
                         </span>
                       </div>
                     )}
-                    <div className="flex flex-1 flex-col bg-[#f1f1f1] p-3 sm:p-4">
+                    <div className="flex flex-1 flex-col p-3 sm:p-4">
                       <div className="min-w-0">
                         <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
                           {product.title}
@@ -499,7 +598,7 @@ function Header({
   signedIn: boolean;
 }) {
   return (
-    <header className="border-b border-[#f0f0f0] bg-white px-5 py-4 sm:px-8">
+    <header className="landing-header border-b px-5 py-4 sm:px-8">
       <div className="mx-auto flex max-w-[90rem] items-center justify-between gap-5">
         <Link
           to="/"
@@ -615,7 +714,7 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="mx-2 mb-2 rounded-[18px] bg-[#111318] px-4 py-4 text-[#f5f7fa] sm:px-5 sm:py-5">
+    <footer className="landing-footer mx-2 mb-2 rounded-[18px] px-4 py-4 text-[#f5f7fa] sm:px-5 sm:py-5">
       <div className="mx-auto max-w-[90rem]">
         <div className="border-b border-[#353a44] pb-3">
           <p className="font-display text-base font-semibold">GetProjectHelper</p>

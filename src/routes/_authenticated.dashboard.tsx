@@ -1,7 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Activity,
-  ArrowRight,
   CalendarClock,
   FolderKanban,
   GaugeCircle,
@@ -94,9 +93,7 @@ function Dashboard() {
             <LoadingState label="Loading your projects…" />
           ) : isError ? (
             <ErrorState onRetry={() => void refetch()} />
-          ) : overviews.length === 0 ? (
-            null
-          ) : (
+          ) : overviews.length === 0 ? null : (
             <div className="workspace-dashboard__projects">
               {overviews.map((o) => (
                 <ProjectCard key={o.project.id} overview={o} onDelete={setPendingDelete} />
@@ -161,8 +158,9 @@ function ProjectCard({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <StatusBadge
-            value="in_progress"
+            value={progress >= 100 ? "completed" : "in_progress"}
             label={STAGE_LABELS[p.current_stage as Stage] ?? p.current_stage}
+            className="workspace-dashboard__status"
           />
           <Button
             variant="ghost"
@@ -220,11 +218,6 @@ function ProjectCard({
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
-          <Button asChild variant="ghost" size="sm" className="rounded-lg">
-            <Link to="/projects/$projectId" params={{ projectId: p.id }}>
-              Overview <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
           <Button asChild size="sm">
             <Link
               to={buildTotal > 0 ? "/projects/$projectId/build" : "/projects/$projectId/tasks"}

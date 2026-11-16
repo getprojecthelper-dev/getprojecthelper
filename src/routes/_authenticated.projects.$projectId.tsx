@@ -5,7 +5,6 @@ import { ErrorState, LoadingState } from "@/components/state-views";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
 
-
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
     meta: [
@@ -21,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   component: WorkspaceLayout,
 });
 
-
 function WorkspaceLayout() {
   const { projectId, data, isPending, isError, error, refetch } = useWorkspace();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -29,15 +27,39 @@ function WorkspaceLayout() {
   // Viva (review), Documentation and AI Mentor have their own page headers, so
   // the shared project breadcrumb bar is removed there.
   const isMentor = /\/mentor(\/[^/]+)*$/.test(pathname);
+  const isBuild = pathname.endsWith("/build");
+  const isOverview = /^\/projects\/[^/]+\/?$/.test(pathname);
   const showHeader = !/(\/review|\/documents|\/mentor)(\/[^/]+)*$/.test(pathname);
 
   return (
-    <div className={cn("h-full", isMentor && "flex flex-col")}>
+    <div
+      className={cn("h-full", isMentor && "flex flex-col", isOverview && "project-overview-layout")}
+    >
       {showHeader ? (
-        <header className="sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur">
-          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-5">
+        <header
+          className={cn(
+            "sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur",
+            isBuild && "project-workspace-header",
+            isOverview && "project-workspace-overview-header",
+          )}
+        >
+          <div
+            className={cn(
+              "mx-auto flex h-16 max-w-7xl items-center gap-3 px-5",
+              isBuild && "project-workspace-header__inner",
+              isOverview && "project-workspace-overview-header__inner",
+            )}
+          >
             <div className="min-w-0">
-              <p className="truncate font-display">
+              {isBuild ? (
+                <p className="project-workspace-header__eyebrow">Implementation workspace</p>
+              ) : null}
+              <p
+                className={cn(
+                  "truncate font-display",
+                  isBuild && "project-workspace-header__title",
+                )}
+              >
                 {data?.project.name ?? "Loading project…"}
               </p>
             </div>
@@ -45,8 +67,14 @@ function WorkspaceLayout() {
         </header>
       ) : null}
 
-
-      <div className={cn("w-full", !isMentor && "mx-auto max-w-none px-5 py-6")}>
+      <div
+        className={cn(
+          "w-full",
+          !isMentor && "mx-auto max-w-none px-5 py-6",
+          isBuild && "project-workspace-build-content",
+          isOverview && "project-workspace-overview-content",
+        )}
+      >
         {isPending ? (
           <LoadingState label="Loading workspace…" />
         ) : isError ? (

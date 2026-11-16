@@ -38,7 +38,6 @@ import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
 import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
-import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -344,24 +343,37 @@ function BuildPage() {
   }
 
   const content = (
-    <div className="min-w-0 space-y-4">
-      <PageHeader title={playbook.headline} description={playbook.subhead} />
-
-      <div className="panel space-y-2 p-5">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all"
-            style={{ width: `${percent}%` }}
-          />
+    <div className="build-roadmap__content min-w-0">
+      <header className="build-roadmap__header">
+        <p className="build-roadmap__eyebrow">Project roadmap</p>
+        <div className="build-roadmap__title-row">
+          <h1>{playbook.headline}</h1>
+          <span className="build-roadmap__completion">
+            {completed}/{sections.length}
+          </span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"}{" "}
-          completed
-        </p>
-      </div>
+        <p className="build-roadmap__subhead">{playbook.subhead}</p>
+        <div
+          className="build-roadmap__progress-track"
+          role="progressbar"
+          aria-label="Project progress"
+          aria-valuemin={0}
+          aria-valuemax={sections.length}
+          aria-valuenow={completed}
+        >
+          <span style={{ width: `${percent}%` }} />
+        </div>
+        <div className="build-roadmap__progress-meta">
+          <span>
+            {completed} of {sections.length} {playbook.buildsCode ? "steps" : "deliverables"}{" "}
+            complete
+          </span>
+          <span>{percent}%</span>
+        </div>
+      </header>
 
       {meta?.dataset ? (
-        <div className="panel p-5">
+        <section className="build-roadmap__dataset">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -381,11 +393,11 @@ function BuildPage() {
               </Button>
             ) : null}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {meta?.pm ? (
-        <div className="panel p-5">
+        <section className="build-roadmap__profile">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Project profile
           </p>
@@ -404,44 +416,50 @@ function BuildPage() {
               </div>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {playbook.gettingStarted ? (
+        <div className="build-roadmap__getting-started">
+          <GettingStarted guide={playbook.gettingStarted} />
         </div>
       ) : null}
 
-      {playbook.gettingStarted ? <GettingStarted guide={playbook.gettingStarted} /> : null}
-
-      {sections.map((section, index) => {
-        const locked = false;
-        return (
-          <SectionCard
-            key={section.id}
-            section={section}
-            playbook={playbook}
-            index={index}
-            locked={locked}
-            open={openId === section.id}
-            onToggle={() => {
-              setOpenId((v) => (v === section.id ? null : section.id));
-              if (openId !== section.id) setEditor({ sectionId: section.id, path: null });
-            }}
-            generating={generateMutation.isPending && generateMutation.variables === section.id}
-            fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
-            onGenerate={() => generateMutation.mutate(section.id)}
-            onFix={(errorText) => fixMutation.mutate({ sectionId: section.id, errorText })}
-            fixToken={fixTokens[section.id] ?? 0}
-            fileOrigins={fileOrigins}
-            onConfirm={() => confirmMutation.mutate(section.id)}
-            onOpenFile={
-              playbook.buildsCode
-                ? (file) =>
-                    setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
-                : undefined
-            }
-          />
-        );
-      })}
+      <div className="build-roadmap__steps">
+        {sections.map((section, index) => {
+          const locked = false;
+          return (
+            <SectionCard
+              key={section.id}
+              section={section}
+              playbook={playbook}
+              index={index}
+              locked={locked}
+              open={openId === section.id}
+              onToggle={() => {
+                setOpenId((v) => (v === section.id ? null : section.id));
+                if (openId !== section.id) setEditor({ sectionId: section.id, path: null });
+              }}
+              generating={generateMutation.isPending && generateMutation.variables === section.id}
+              fixing={fixMutation.isPending && fixMutation.variables?.sectionId === section.id}
+              onGenerate={() => generateMutation.mutate(section.id)}
+              onFix={(errorText) => fixMutation.mutate({ sectionId: section.id, errorText })}
+              fixToken={fixTokens[section.id] ?? 0}
+              fileOrigins={fileOrigins}
+              onConfirm={() => confirmMutation.mutate(section.id)}
+              onOpenFile={
+                playbook.buildsCode
+                  ? (file) =>
+                      setEditor({ sectionId: section.id, path: workspaceFilePath(file, sections) })
+                  : undefined
+              }
+            />
+          );
+        })}
+      </div>
 
       {sections.length === 0 ? (
-        <div className="panel p-6 text-sm text-muted-foreground">
+        <div className="build-roadmap__empty text-sm text-muted-foreground">
           This project has no generated implementation plan yet.
         </div>
       ) : null}
@@ -454,11 +472,13 @@ function BuildPage() {
   return (
     <div
       ref={workspaceRef}
-      className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
+      className="build-screen workspace-home-surface grid min-w-0 gap-5 md:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]"
       style={workspaceHeight ? { height: workspaceHeight } : undefined}
     >
-      <div className="min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-1">{content}</div>
-      <aside className="h-[42rem] min-w-0 md:h-full md:min-h-0">
+      <div className="build-roadmap min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-2">
+        {content}
+      </div>
+      <aside className="build-editor-column min-w-0 h-[38rem] md:h-full md:min-h-0">
         <LiveCodeEditor
           key={projectId}
           projectId={projectId}
@@ -1113,41 +1133,39 @@ function SectionCard({
   return (
     <section
       className={cn(
-        "panel overflow-hidden transition-colors",
-        confirmed ? "border-success/40" : locked ? "opacity-70" : "",
+        "build-roadmap__step",
+        open && "is-open",
+        confirmed && "is-confirmed",
+        locked && "is-locked",
       )}
     >
-      <div className="flex items-start justify-between gap-3 p-4">
+      <div className="build-roadmap__step-header">
         <button
           type="button"
           onClick={onToggle}
-          className="flex flex-1 items-start gap-3 text-left"
+          className="build-roadmap__step-title"
           aria-expanded={open}
         >
           <span
             className={cn(
-              "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-              confirmed
-                ? "bg-success text-success-foreground"
-                : locked
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-primary text-primary-foreground",
+              "build-roadmap__number",
+              confirmed ? "is-confirmed" : locked ? "is-locked" : "",
             )}
           >
             {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
           </span>
-          <span className="space-y-1">
-            <span className="flex items-center gap-2 font-display text-base">
+          <span className="build-roadmap__step-copy">
+            <span className="build-roadmap__step-name">
               {section.title}
               {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
             </span>
             {section.objective ? (
-              <span className="block text-sm text-muted-foreground">{section.objective}</span>
+              <span className="build-roadmap__objective">{section.objective}</span>
             ) : null}
           </span>
         </button>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="build-roadmap__step-actions">
           {!locked && !generated ? (
             <Button size="sm" onClick={onGenerate} disabled={generating}>
               {generating ? (
@@ -1186,7 +1204,7 @@ function SectionCard({
       </div>
 
       {open ? (
-        <div className="space-y-5 border-t border-border bg-muted/20 p-5">
+        <div className="build-roadmap__step-body">
           {section.question ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
           ) : null}

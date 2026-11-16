@@ -185,7 +185,7 @@ function AuthPage() {
 
   return (
     <main
-      className={`auth-stage relative isolate grid h-dvh w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-x-clip overflow-y-hidden font-sans lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] ${mode === "login" ? "auth-login-compact" : "auth-signup-compact"}`}
+      className={`auth-stage relative isolate grid min-h-dvh w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-x-clip font-sans lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] ${mode === "login" ? "auth-login-compact" : "auth-signup-compact"}`}
     >
       <section
         className="auth-promise relative hidden min-w-0 overflow-hidden px-10 py-10 text-auth-pine lg:flex lg:flex-col xl:px-[clamp(3rem,8vw,9rem)]"

@@ -56,10 +56,11 @@ function Overview() {
     : metrics.progress;
   const nextSection = buildSections.find((section) => section.status !== "confirmed");
   const isCompleted =
-    project.status === "completed" || (buildSections.length > 0 && confirmed === buildSections.length);
+    project.status === "completed" ||
+    (buildSections.length > 0 && confirmed === buildSections.length);
   const currentStage = isCompleted
     ? "Completed"
-    : nextSection?.title ?? STAGE_LABELS[project.current_stage as Stage] ?? project.current_stage;
+    : (nextSection?.title ?? STAGE_LABELS[project.current_stage as Stage] ?? project.current_stage);
   const overview = buildSections.find(
     (section) => section.kind === "overview" || /problem\s*statement/i.test(section.title),
   );
@@ -76,30 +77,42 @@ function Overview() {
   };
   const problem = blockText(/problem|challenge/) || project.idea?.trim() || project.description;
   const solution = blockText(/solution|approach/) || project.description;
+  const problemText = concise(problem);
+  const solutionCandidate = concise(solution);
+  const solutionText =
+    solutionCandidate && normalizeCopy(solutionCandidate) !== normalizeCopy(problemText ?? "")
+      ? solutionCandidate
+      : null;
   const dataset = asDataset(project.dataset);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Overview"
-        description="Live progress and the key decisions behind your project."
-        actions={
-          !isCompleted ? (
-            <Button asChild size="lg">
-              <Link to="/projects/$projectId/build" params={{ projectId }}>
-                <Play className="h-4 w-4" />
-                Continue building project
-              </Link>
-            </Button>
-          ) : null
-        }
-      />
+    <div className="project-overview space-y-7">
+      <div className="project-overview__hero">
+        <PageHeader
+          title="Overview"
+          description="Live progress and the key decisions behind your project."
+          actions={
+            !isCompleted ? (
+              <Button asChild size="lg" className="project-overview__continue">
+                <Link to="/projects/$projectId/build" params={{ projectId }}>
+                  <Play className="h-4 w-4" />
+                  Continue building project
+                </Link>
+              </Button>
+            ) : null
+          }
+        />
+      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="project-overview__metrics grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard
           label="Overall progress"
           value={`${progress}%`}
-          hint={buildSections.length ? `${confirmed} of ${buildSections.length} steps completed` : "Progress updates as you complete work"}
+          hint={
+            buildSections.length
+              ? `${confirmed} of ${buildSections.length} steps completed`
+              : "Progress updates as you complete work"
+          }
         >
           <MeterBar value={progress} />
         </MetricCard>
@@ -113,46 +126,59 @@ function Overview() {
         <MetricCard
           label="Current stage"
           value={currentStage}
-          hint={isCompleted ? "All build steps are complete" : nextSection ? `Step ${nextSection.position + 1} is next` : `${template.label} workflow`}
+          hint={
+            isCompleted
+              ? "All build steps are complete"
+              : nextSection
+                ? `Step ${nextSection.position + 1} is next`
+                : `${template.label} workflow`
+          }
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="panel p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="project-overview__summary grid gap-3 lg:grid-cols-2">
+        <article className="project-overview__card project-overview__problem panel p-5">
+          <p className="project-overview__eyebrow text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Problem statement
           </p>
-          <p className="mt-3 text-sm leading-6 text-foreground/90">
-            {concise(problem) ?? "Generate the first build step to define the problem clearly."}
+          <p className="project-overview__copy mt-3 text-sm leading-6 text-foreground/90">
+            {problemText ?? "Generate the first build step to define the problem clearly."}
           </p>
-        </div>
+        </article>
 
-        <div className="panel p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <article className="project-overview__card project-overview__solution panel p-5">
+          <p className="project-overview__eyebrow text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Solution
           </p>
-          <p className="mt-3 text-sm leading-6 text-foreground/90">
-            {concise(solution) ?? "Generate the first build step to define the proposed solution."}
+          <p className="project-overview__copy mt-3 text-sm leading-6 text-foreground/90">
+            {solutionText ??
+              "Your approach will take shape as you work through the project roadmap."}
           </p>
-        </div>
+        </article>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="panel p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Project details</p>
-          <dl className="mt-3 space-y-2 text-sm">
+      <div className="project-overview__details-grid grid gap-3 lg:grid-cols-2">
+        <section className="project-overview__card project-overview__details panel p-5">
+          <div className="project-overview__section-heading">
+            <p className="project-overview__eyebrow text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Project details
+            </p>
+          </div>
+          <dl className="project-overview__detail-list mt-3 space-y-2 text-sm">
             <Detail label="Domain" value={labelOf(DOMAINS, project.domain)} />
             <Detail label="Template" value={template.label} />
             <Detail label="Purpose" value={labelOf(PURPOSES, project.purpose)} />
             <Detail label="Type" value={project.project_type ?? "—"} />
           </dl>
-        </div>
+        </section>
 
         {dataset ? (
-          <div className="panel p-5">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <Database className="h-4 w-4" />
-              Dataset used
+          <section className="project-overview__card project-overview__dataset panel p-5">
+            <div className="project-overview__section-heading">
+              <p className="project-overview__eyebrow flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <Database className="h-4 w-4" />
+                Dataset used
+              </p>
             </div>
             <h2 className="mt-3 font-display text-lg">{dataset.name}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -165,15 +191,18 @@ function Overview() {
                 </a>
               </Button>
             ) : null}
-          </div>
+          </section>
         ) : null}
       </div>
 
-      <div className="panel p-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {template.label} lifecycle
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+      <section className="project-overview__lifecycle panel p-5">
+        <div className="project-overview__section-heading">
+          <p className="project-overview__eyebrow text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Project roadmap
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{template.label} workflow</p>
+        </div>
+        <div className="project-overview__lifecycle-steps mt-4 flex flex-wrap items-center gap-2 text-sm">
           {template.workflow.map((stepName, i) => (
             <span key={stepName} className="flex items-center gap-2">
               <span className="rounded-full border border-border bg-background px-3 py-1">
@@ -185,7 +214,7 @@ function Overview() {
             </span>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -195,13 +224,21 @@ function concise(value: string | null | undefined) {
   const clean = value.replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
   if (clean.length <= 360) return clean;
   const shortened = clean.slice(0, 360);
-  const sentenceEnd = Math.max(shortened.lastIndexOf("."), shortened.lastIndexOf("!"), shortened.lastIndexOf("?"));
+  const sentenceEnd = Math.max(
+    shortened.lastIndexOf("."),
+    shortened.lastIndexOf("!"),
+    shortened.lastIndexOf("?"),
+  );
   return `${shortened.slice(0, sentenceEnd > 160 ? sentenceEnd + 1 : shortened.lastIndexOf(" "))}…`;
+}
+
+function normalizeCopy(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3">
+    <div className="project-overview__detail flex justify-between gap-3">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </div>

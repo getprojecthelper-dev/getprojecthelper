@@ -6,7 +6,6 @@ import brandMark from "@/assets/mentor-mark.png";
 import { CreditChip } from "@/components/credit-chip";
 import { LowCreditsBanner } from "@/components/low-credits-banner";
 import { MaterialIcon } from "@/components/material-icon";
-import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/sign-out";
 import { peekBackTarget, takeBackTarget } from "@/lib/back-navigation";
@@ -20,9 +19,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const backTarget = peekBackTarget(pathname);
   const isWorkspaceHome = pathname === "/welcome";
+  const isProjectOverview = /^\/projects\/[^/]+\/?$/.test(pathname);
   const backAction = backTarget ? "history" : "workspace";
   return (
-    <div className="workspace-canvas min-h-screen w-full">
+    <div
+      className={`workspace-canvas min-h-screen w-full ${pathname.endsWith("/build") ? "workspace-canvas--build" : ""} ${isProjectOverview ? "workspace-canvas--overview" : ""}`}
+    >
       <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur">
         <div className="workspace-topbar__inner mx-auto flex h-[4.5rem] w-full max-w-[96rem] items-center justify-between gap-3 px-4 sm:px-7 lg:px-10">
           <div className="workspace-topbar__identity flex min-w-0 items-center gap-2 sm:gap-3">
@@ -83,7 +85,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <PaymentTestModeBanner />
       <LowCreditsBanner />
       {children}
     </div>

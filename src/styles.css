@@ -246,35 +246,6 @@
   --sidebar-ring: oklch(0.96 0 0);
 }
 
-@layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-}
-
-@utility panel {
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border);
-  background: linear-gradient(145deg, oklch(0.205 0.006 285), oklch(0.165 0.005 285));
-  box-shadow: var(--shadow-panel);
-}
-
 /* Shared workspace treatment. Use icon chips instead of floating bare glyphs. */
 .workspace-canvas {
   background:
@@ -443,35 +414,6 @@
   background: linear-gradient(145deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.035));
   color: #f5f5f5;
   box-shadow: inset 0 1px rgb(255 255 255 / 0.08);
-}
-
-.material-symbols-rounded {
-  font-family: "Material Symbols Rounded";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 1.125rem;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 400,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
-.material-symbols-filled {
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 500,
-    "GRAD" 0,
-    "opsz" 24;
 }
 
 @utility grain-overlay {
@@ -1483,12 +1425,6 @@
   outline: 2px solid #0866e8;
   outline-offset: 2px;
 }
-.workspace-preview-banner {
-  border-color: #e4e4e7;
-  background: #f8fafc;
-  color: #52525b;
-}
-
 @media (max-width: 520px) {
   .workspace-topbar__inner {
     gap: 0.35rem;
@@ -2106,5 +2042,1000 @@
 
   .workspace-builder__primary {
     width: 100%;
+  }
+}
+
+/* Project build view: light roadmap and framed editor with a focused code canvas. */
+.build-screen {
+  min-height: 36rem;
+  align-items: stretch;
+  background: #f7f8fa;
+  color: #111111;
+}
+
+.build-roadmap {
+  scrollbar-color: #cbd2dc transparent;
+  scrollbar-width: thin;
+}
+
+.build-roadmap > .min-w-0 > :first-child {
+  padding-block: 0.25rem 0.5rem;
+}
+
+.build-roadmap h1,
+.build-roadmap h2,
+.build-roadmap h3 {
+  color: #15171a;
+}
+
+.build-roadmap .panel {
+  border-color: #e2e5e9;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 0.035);
+}
+
+.build-roadmap__progress {
+  color: #475569;
+}
+
+.build-roadmap__progress > div:first-child {
+  background: #e9edf2;
+}
+
+.build-roadmap__dataset {
+  box-shadow: none !important;
+}
+
+.build-editor-column {
+  min-height: 0;
+}
+
+.live-code-editor {
+  border-color: #dce1e7;
+  background: #ffffff;
+  box-shadow: 0 12px 30px -24px rgb(15 23 42 / 0.28);
+  color: #1f2937;
+}
+
+.live-code-editor__header {
+  border-color: #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+}
+
+.live-code-editor__header h2 {
+  color: #111827;
+}
+
+.live-code-editor__explorer {
+  border-color: #e5e7eb;
+  background: #f7f8fa;
+}
+
+.live-code-editor__explorer > p:nth-child(2) {
+  color: #303846;
+}
+
+.live-code-editor__tree-button {
+  color: #475569;
+}
+
+.live-code-editor__tree-button:hover,
+.live-code-editor__tree-button.is-selected {
+  background: #eaf2ff;
+  color: #0757ad;
+}
+
+.live-code-editor__tabs {
+  border-color: #272a30;
+  background: #202329;
+  scrollbar-width: thin;
+}
+
+.live-code-editor__tab {
+  border-color: #343840;
+  color: #b9c0cc;
+}
+
+.live-code-editor__tab.is-active {
+  border-top: 2px solid #4d91ff;
+  background: #17191e;
+  color: #f4f6f8;
+}
+
+.live-code-editor__tab button {
+  color: inherit;
+}
+
+.live-code-editor__path {
+  border-color: #30343b;
+  background: #17191e;
+  color: #aeb7c4;
+}
+
+.live-code-editor__code {
+  background: #17191e;
+  color: #d5dbe5;
+}
+
+.live-code-editor__loading {
+  color: #c2cad6;
+}
+
+.live-code-editor__terminal {
+  border-color: #e5e7eb;
+  background: #ffffff;
+  color: #344054;
+}
+
+.live-code-editor__terminal pre {
+  border-color: #e5e7eb;
+  background: #f7f8fa;
+  color: #526071;
+}
+
+.live-code-editor__footer {
+  border-color: #e5e7eb;
+  background: #f7f8fa;
+  color: #697586;
+}
+
+.project-workspace-header {
+  border-color: #e1e4e8;
+  background: rgb(255 255 255 / 0.96);
+  color: #16181b;
+}
+
+.project-workspace-header__inner {
+  max-width: none;
+  height: 4.5rem;
+  padding-inline: clamp(1.25rem, 2.5vw, 2.75rem);
+}
+
+.project-workspace-header__eyebrow {
+  color: #687385;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.project-workspace-header__title {
+  margin-top: 0.1rem;
+  color: #17191c;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.build-roadmap__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding-bottom: 2rem;
+}
+
+.build-roadmap__header {
+  border-bottom: 1px solid #dfe3e8;
+  padding: 0.25rem 0 1rem;
+}
+
+.build-roadmap__eyebrow {
+  color: #667085;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.build-roadmap__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.build-roadmap__title-row h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.5vw, 2rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}
+
+.build-roadmap__completion {
+  flex: 0 0 auto;
+  border: 1px solid #dfe3e8;
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  color: #475467;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-roadmap__subhead {
+  margin-top: 0.5rem;
+  color: #5f6875;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.build-roadmap__progress-track {
+  height: 3px;
+  margin-top: 0.9rem;
+  overflow: hidden;
+  background: #e8ebef;
+}
+
+.build-roadmap__progress-track span {
+  display: block;
+  height: 100%;
+  background: #1268e8;
+  transition: width 220ms ease;
+}
+
+.build-roadmap__progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.35rem;
+  color: #667085;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-roadmap__dataset {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #dfe3e8;
+  padding: 0.1rem 0 1rem;
+}
+
+.build-roadmap__dataset .font-display {
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.build-roadmap__dataset p.text-sm {
+  max-width: 52rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.build-roadmap__dataset button {
+  border-color: #d8dde4;
+  background: #ffffff;
+  color: #283241;
+}
+
+.build-roadmap__dataset button:hover {
+  border-color: #b8c9e0;
+  background: #f5f8fc;
+}
+
+.build-roadmap__profile {
+  border-bottom: 1px solid #dfe3e8;
+  padding: 0.2rem 0 1rem;
+}
+
+.build-roadmap__profile > p:first-child {
+  color: #667085;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+}
+
+.build-roadmap__profile > p:nth-child(2) {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.build-roadmap__profile > div {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.build-roadmap__profile > div > div {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.build-roadmap__profile > div > div p:last-child {
+  color: #303846;
+}
+
+.build-roadmap__getting-started .panel {
+  border: 1px solid #dfe3e8;
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.build-roadmap__steps {
+  position: relative;
+  border-top: 1px solid #dfe3e8;
+}
+
+.build-roadmap__step {
+  position: relative;
+  border-bottom: 1px solid #dfe3e8;
+}
+
+.build-roadmap__step-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.95rem 0.15rem;
+}
+
+.build-roadmap__step-title {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.build-roadmap__number {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #d3d9e1;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #526071;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.build-roadmap__number:not(.is-confirmed):not(.is-locked) {
+  border-color: #1268e8;
+  background: #1268e8;
+  color: #ffffff;
+}
+
+.build-roadmap__number.is-confirmed {
+  border-color: #b4dbc1;
+  background: #eff8f1;
+  color: #207a43;
+}
+
+.build-roadmap__number.is-locked {
+  background: #f4f5f6;
+  color: #8a93a0;
+}
+
+.build-roadmap__step-copy {
+  min-width: 0;
+  padding-top: 0.08rem;
+}
+
+.build-roadmap__step-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #20252c;
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+}
+
+.build-roadmap__step.is-open .build-roadmap__step-name {
+  color: #0757ad;
+}
+
+.build-roadmap__objective {
+  display: block;
+  max-width: 36rem;
+  margin-top: 0.25rem;
+  color: #667085;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.build-roadmap__step-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.build-roadmap__step-actions > button:first-child:not(:last-child) {
+  min-height: 2.25rem;
+  border-radius: 0.45rem;
+  box-shadow: none;
+}
+
+.build-roadmap__step-actions > button[aria-label] {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  color: #667085;
+}
+
+.build-roadmap__step-actions > button[aria-label]:hover {
+  background: #eef2f7;
+  color: #1e293b;
+}
+
+.build-roadmap__step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  margin: 0 0 1rem 2.85rem;
+  border-left: 2px solid #e6ebf1;
+  padding: 0.15rem 0 0.15rem 1.1rem;
+}
+
+.build-roadmap__step-body > :first-child.rounded-lg {
+  border-radius: 0;
+  border-left: 2px solid #1268e8;
+  background: #f4f8ff;
+  padding: 0.6rem 0.8rem;
+}
+
+.build-roadmap__empty {
+  border: 1px dashed #cfd6df;
+  padding: 1.2rem;
+  color: #667085;
+}
+
+@media (max-width: 767px) {
+  .build-screen {
+    min-height: 0;
+    background: transparent;
+  }
+
+  .build-roadmap {
+    overflow: visible;
+  }
+
+  .build-editor-column {
+    height: 34rem;
+  }
+
+  .build-roadmap__step-header {
+    gap: 0.4rem;
+  }
+
+  .build-roadmap__step-body {
+    margin-left: 1rem;
+    padding-left: 0.8rem;
+  }
+
+  .build-roadmap__dataset {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Apple-inspired light workspace, scoped to the implementation builder. */
+.workspace-canvas--build {
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --muted: #f5f5f7;
+  --muted-foreground: #6e6e73;
+  --border: #e5e5ea;
+  background: #f5f5f7 !important;
+  background-image: none !important;
+  color: #1d1d1f;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  overflow-x: clip;
+}
+
+html:has(.workspace-canvas--build),
+body:has(.workspace-canvas--build) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.workspace-canvas--build .project-workspace-header {
+  border-color: #e5e5ea;
+  background: rgb(250 250 252 / 0.94);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.025);
+}
+
+.workspace-canvas--build .project-workspace-build-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1rem clamp(0.75rem, 1.5vw, 1.25rem) 1.25rem;
+  background: #f5f5f7;
+}
+
+.workspace-canvas--build .build-screen {
+  min-height: calc(100vh - 11rem);
+  gap: 0.875rem;
+  border-radius: 1.1rem;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-family: inherit;
+}
+
+.workspace-canvas--build .build-roadmap {
+  border: 1px solid #e5e5ea;
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 1.15rem 1.25rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.025);
+  scrollbar-color: #c7c7cc transparent;
+}
+
+.workspace-canvas--build .build-roadmap__header,
+.workspace-canvas--build .build-roadmap__dataset,
+.workspace-canvas--build .build-roadmap__profile,
+.workspace-canvas--build .build-roadmap__steps,
+.workspace-canvas--build .build-roadmap__step {
+  border-color: #e5e5ea;
+}
+
+.workspace-canvas--build .build-roadmap__eyebrow,
+.workspace-canvas--build .build-roadmap__progress-meta,
+.workspace-canvas--build .build-roadmap__objective {
+  color: #6e6e73;
+}
+
+.workspace-canvas--build .build-roadmap__title-row h1,
+.workspace-canvas--build .build-roadmap__step-name,
+.workspace-canvas--build .build-roadmap__dataset .font-display {
+  color: #1d1d1f;
+  font-family: inherit;
+}
+
+.workspace-canvas--build .build-roadmap__completion {
+  border-color: #e5e5ea;
+  background: #f5f5f7;
+  color: #515154;
+  font-family: inherit;
+}
+
+.workspace-canvas--build .build-roadmap__progress-track {
+  background: #e5e5ea;
+}
+
+.workspace-canvas--build .build-roadmap__progress-track span,
+.workspace-canvas--build .build-roadmap__number:not(.is-confirmed):not(.is-locked) {
+  background: #007aff;
+}
+
+.workspace-canvas--build .build-roadmap__dataset button {
+  min-height: 2.25rem;
+  border-color: #d2d2d7;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  color: #1d1d1f;
+}
+
+.workspace-canvas--build .build-roadmap__dataset button:hover {
+  border-color: #b7b7bd;
+  background: #fafafd;
+}
+
+.workspace-canvas--build .build-roadmap__number {
+  border-color: #d2d2d7;
+  color: #515154;
+  font-family: inherit;
+}
+
+.workspace-canvas--build .build-roadmap__number:not(.is-confirmed):not(.is-locked) {
+  border-color: #007aff;
+  color: #ffffff;
+}
+
+.workspace-canvas--build .build-roadmap__number.is-confirmed {
+  border-color: #b7dfc4;
+  background: #edf8f0;
+  color: #248a45;
+}
+
+.workspace-canvas--build .build-roadmap__step.is-open .build-roadmap__step-name {
+  color: #0066cc;
+}
+
+.workspace-canvas--build .build-roadmap__step-body {
+  border-color: #e5e5ea;
+}
+
+.workspace-canvas--build .build-roadmap__step-body > :first-child.rounded-lg {
+  border-left-color: #007aff;
+  background: #f2f7ff;
+}
+
+.workspace-canvas--build .build-roadmap__step-actions > button[aria-label]:hover {
+  background: #f2f2f7;
+  color: #1d1d1f;
+}
+
+.workspace-canvas--build .live-code-editor {
+  border-color: #e5e5ea;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.035);
+  font-family: inherit;
+}
+
+.workspace-canvas--build .live-code-editor__header {
+  border-color: #e5e5ea;
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+.workspace-canvas--build .live-code-editor__explorer {
+  border-color: #e5e5ea;
+  background: #fafafd;
+}
+
+.workspace-canvas--build .live-code-editor__explorer > p:nth-child(2) {
+  color: #3a3a3c;
+}
+
+.workspace-canvas--build .live-code-editor__tabs {
+  border-color: #e5e5ea;
+  background: #f5f5f7;
+}
+
+.workspace-canvas--build .live-code-editor__tab {
+  border-color: #e5e5ea;
+  color: #6e6e73;
+}
+
+.workspace-canvas--build .live-code-editor__tab.is-active {
+  border-top: 2px solid #007aff;
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+.workspace-canvas--build .live-code-editor__path {
+  border-color: #e5e5ea;
+  background: #ffffff;
+  color: #6e6e73;
+}
+
+.workspace-canvas--build .live-code-editor__code,
+.workspace-canvas--build .monaco-editor,
+.workspace-canvas--build .monaco-editor .margin,
+.workspace-canvas--build .monaco-editor-background {
+  background: #ffffff !important;
+}
+
+.workspace-canvas--build .live-code-editor__loading {
+  color: #6e6e73;
+}
+
+.workspace-canvas--build .live-code-editor__terminal {
+  border-color: #e5e5ea;
+  background: #ffffff;
+  color: #3a3a3c;
+}
+
+.workspace-canvas--build .live-code-editor__terminal pre {
+  border-color: #e5e5ea;
+  background: #fafafd;
+  color: #515154;
+}
+
+.workspace-canvas--build .live-code-editor__footer {
+  border-color: #e5e5ea;
+  background: #f5f5f7;
+  color: #6e6e73;
+}
+
+@media (max-width: 767px) {
+  .workspace-canvas--build,
+  .workspace-canvas--build .project-workspace-build-content,
+  .workspace-canvas--build .build-screen,
+  .workspace-canvas--build .build-roadmap,
+  .workspace-canvas--build .build-editor-column,
+  .workspace-canvas--build .live-code-editor {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .workspace-canvas--build .project-workspace-build-content {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .workspace-canvas--build .build-screen {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: clip;
+  }
+
+  .workspace-canvas--build .build-roadmap {
+    padding: 1rem;
+  }
+
+  .workspace-canvas--build .build-editor-column {
+    width: 100%;
+  }
+
+  .workspace-canvas--build .live-code-editor__explorer {
+    width: clamp(7.5rem, 34vw, 11rem);
+    flex-basis: clamp(7.5rem, 34vw, 11rem);
+  }
+
+  .workspace-canvas--build .build-roadmap :is(p, h1, h2, h3) {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 420px) {
+  .workspace-canvas--build .workspace-topbar__inner {
+    gap: 0.2rem;
+    padding-inline: 0.5rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__identity {
+    gap: 0.15rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__back {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__brand {
+    gap: 0.3rem;
+    font-size: 0.85rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__mark {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__actions {
+    gap: 0.1rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__credits-pill {
+    gap: 0.2rem;
+    padding-inline: 0.35rem;
+  }
+
+  .workspace-canvas--build .workspace-topbar__account-tools {
+    gap: 0;
+    padding: 0;
+  }
+
+  .workspace-canvas--build .workspace-topbar__icon-button {
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .workspace-canvas--build .workspace-topbar__brand > span:last-child {
+    display: none;
+  }
+
+  .workspace-canvas--build .workspace-topbar__credits-pill span.flex > span:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+/* Project overview: a calm, light dashboard that carries the marketing palette into the workspace. */
+.workspace-canvas--overview {
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --muted: #f1f2f4;
+  --muted-foreground: #6e6e73;
+  --primary: #0877ed;
+  --primary-foreground: #ffffff;
+  --border: #e3e5e8;
+  --input: #d2d4d8;
+  --ring: #0877ed;
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f5f7 !important;
+  background-image: none !important;
+  color: #1d1d1f;
+}
+
+.workspace-canvas--overview .project-workspace-overview-header {
+  border-color: #e3e5e8;
+  background: rgb(245 245 247 / 0.92);
+  color: #1d1d1f;
+}
+
+.workspace-canvas--overview .project-workspace-overview-header__inner {
+  width: 100%;
+  max-width: 90rem;
+  height: 4.25rem;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+.workspace-canvas--overview .project-workspace-overview-header__inner > div > p {
+  color: #1d1d1f;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.workspace-canvas--overview .project-workspace-overview-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: clamp(1.5rem, 3vw, 3rem) clamp(1.25rem, 4vw, 3.5rem) 4rem;
+}
+
+.project-overview {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  color: #1d1d1f;
+}
+
+.project-overview__hero {
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid #e0e2e6;
+}
+
+.project-overview__hero h1 {
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  font-weight: 650;
+  letter-spacing: -0.065em;
+  line-height: 1;
+}
+
+.project-overview__hero p {
+  margin-top: 0.65rem;
+  color: #62666d;
+  font-size: 1rem;
+}
+
+.project-overview__hero .project-overview__continue {
+  min-height: 2.9rem;
+  border-radius: 999px;
+  background: #0877ed;
+  box-shadow: 0 6px 16px rgb(8 119 237 / 0.18);
+  color: #ffffff;
+}
+
+.project-overview__hero .project-overview__continue:hover {
+  background: #0065d1;
+}
+
+.workspace-canvas--overview .project-overview__metrics > .panel,
+.workspace-canvas--overview .project-overview__card,
+.workspace-canvas--overview .project-overview__lifecycle {
+  min-width: 0;
+  border: 1px solid #e3e5e8;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 8px 24px -22px rgb(18 29 45 / 0.35);
+}
+
+.workspace-canvas--overview .project-overview__metrics > .panel {
+  min-height: 9.25rem;
+  padding: 1.15rem 1.25rem;
+}
+
+.workspace-canvas--overview .project-overview__metrics > .panel > p:first-of-type {
+  margin-top: 0.75rem;
+  color: #1d1d1f;
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  letter-spacing: -0.055em;
+}
+
+.workspace-canvas--overview .project-overview__metrics > .panel > p:nth-of-type(2) {
+  color: #6e6e73;
+  font-size: 0.78rem;
+}
+
+.workspace-canvas--overview .project-overview__metrics .text-success {
+  color: #248a45;
+}
+
+.workspace-canvas--overview .project-overview__metrics .text-warning {
+  color: #a26800;
+}
+
+.workspace-canvas--overview .project-overview__metrics .text-destructive {
+  color: #c6372b;
+}
+
+.workspace-canvas--overview .project-overview__metrics .bg-muted {
+  background: #eceef1;
+}
+
+.workspace-canvas--overview .project-overview__eyebrow {
+  color: #727780;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.project-overview__card {
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+}
+
+.project-overview__copy {
+  max-width: 70ch;
+  color: #34383f;
+  font-size: 0.94rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.project-overview__detail {
+  border-top: 1px solid #eff0f2;
+  padding-block: 0.65rem;
+}
+
+.project-overview__detail:first-child {
+  border-top: 0;
+}
+
+.project-overview__detail dt {
+  color: #727780;
+}
+
+.project-overview__detail dd {
+  color: #292d33;
+  text-align: right;
+}
+
+.project-overview__dataset h2 {
+  color: #1d1d1f;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.project-overview__lifecycle-steps > span {
+  min-width: 0;
+}
+
+.workspace-canvas--overview .project-overview__lifecycle-steps > span > span:first-child {
+  border-color: #dfe3e8;
+  background: #f7f8fa;
+  color: #454b54;
+}
+
+@media (max-width: 639px) {
+  .workspace-canvas--overview .project-workspace-overview-content {
+    padding-top: 1.25rem;
+  }
+
+  .project-overview__hero {
+    align-items: flex-start;
+  }
+
+  .project-overview__hero .project-overview__continue {
+    width: 100%;
+  }
+
+  .workspace-canvas--overview .project-overview__metrics > .panel {
+    min-height: 0;
   }
 }

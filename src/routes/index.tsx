@@ -370,6 +370,7 @@ function Landing() {
               {[
                 {
                   number: "01",
+                  art: "idea",
                   title: "I have an idea",
                   description:
                     "For a college assignment or a professional goal, start with a short description. We’ll help turn it into a project plan.",
@@ -377,6 +378,7 @@ function Landing() {
                 },
                 {
                   number: "02",
+                  art: "brief",
                   title: "I have a job description",
                   description:
                     "Use the role’s skills and requirements to shape a relevant project you can build and discuss in interviews.",
@@ -384,6 +386,7 @@ function Landing() {
                 },
                 {
                   number: "03",
+                  art: "discover",
                   title: "Suggest an idea for me",
                   description:
                     "Choose a domain and let AI suggest a project that fits what you want to learn or demonstrate.",
@@ -394,9 +397,43 @@ function Landing() {
                   key={item.title}
                   className="landing-choice group relative flex min-h-56 flex-col px-5 py-7 transition-colors duration-200 sm:px-7 sm:py-8 md:min-h-60"
                 >
-                  <span className="mb-5 font-mono text-xs tracking-[.14em] text-[#7a8492]">
-                    {item.number}
-                  </span>
+                  <div className="mb-3 flex min-h-[5.25rem] items-start justify-between gap-4">
+                    <span className="font-mono text-xs tracking-[.14em] text-[#6c7d95]">
+                      {item.number}
+                    </span>
+                    <div className={`landing-choice__art landing-choice__art--${item.art}`} aria-hidden="true">
+                      {item.art === "idea" ? (
+                        <svg viewBox="0 0 132 84" fill="none">
+                          <path className="landing-choice__orbit" d="M13 57c18-34 45 21 66-14s31-20 40-4" />
+                          <rect x="22" y="17" width="72" height="49" rx="10" fill="white" stroke="#dce5f2" />
+                          <path d="M34 32h37M34 41h27M34 50h32" stroke="#9aabc0" strokeWidth="2.5" strokeLinecap="round" />
+                          <circle cx="92" cy="19" r="7" fill="#4285f4" />
+                          <circle cx="111" cy="58" r="5" fill="#34a853" />
+                          <circle cx="15" cy="57" r="4" fill="#fbbc04" />
+                        </svg>
+                      ) : item.art === "brief" ? (
+                        <svg viewBox="0 0 132 84" fill="none">
+                          <rect x="31" y="8" width="58" height="68" rx="9" fill="white" stroke="#dce5f2" />
+                          <rect x="42" y="20" width="21" height="5" rx="2.5" fill="#4285f4" />
+                          <path d="M42 34h36M42 43h29M42 52h36M42 61h22" stroke="#a6b4c6" strokeWidth="2.5" strokeLinecap="round" />
+                          <circle cx="99" cy="20" r="7" fill="#ea4335" />
+                          <circle cx="106" cy="49" r="5" fill="#fbbc04" />
+                          <circle cx="19" cy="63" r="6" fill="#34a853" />
+                          <path d="M19 63h12M89 20h3M89 49h12" stroke="#8fa4c0" strokeWidth="1.5" strokeDasharray="2 3" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 132 84" fill="none">
+                          <ellipse cx="68" cy="43" rx="45" ry="22" stroke="#d4deed" strokeWidth="1.5" />
+                          <ellipse cx="68" cy="43" rx="45" ry="22" transform="rotate(-35 68 43)" stroke="#d4deed" strokeWidth="1.5" />
+                          <path d="m38 55 27-22 31 19M65 33l25-9" stroke="#9cafc8" strokeWidth="1.5" strokeDasharray="3 4" />
+                          <circle cx="38" cy="55" r="7" fill="#34a853" />
+                          <circle cx="65" cy="33" r="8" fill="#4285f4" />
+                          <circle cx="96" cy="52" r="6" fill="#fbbc04" />
+                          <circle cx="90" cy="24" r="5" fill="#ea4335" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
                   <h3 className="font-display text-xl font-semibold tracking-[-.035em] sm:text-2xl">
                     {item.title}
                   </h3>

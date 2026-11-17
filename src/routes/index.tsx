@@ -1,7 +1,9 @@
 import { HomepageRoadmap } from "@/components/homepage-roadmap";
 import { HomepageIdeaPlanner } from "@/components/homepage-idea-planner";
+import { HomepageProjectPreview, type ProjectKind } from "@/components/homepage-project-preview";
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -29,20 +31,30 @@ import { useServerFn } from "@tanstack/react-start";
 import { listHomepageListings } from "@/lib/premade-listings.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
 
-const techStackColors: Record<string, string> = {
-  react: "bg-[#d9f3ff] text-[#075985]",
-  typescript: "bg-[#dbeafe] text-[#1d4ed8]",
-  supabase: "bg-[#dcfce7] text-[#166534]",
-  recharts: "bg-[#f3e8ff] text-[#7e22ce]",
-  python: "bg-[#fef3c7] text-[#92400e]",
-  fastapi: "bg-[#cffafe] text-[#155e75]",
-  "node.js": "bg-[#e4f4dc] text-[#3f6212]",
-  postgresql: "bg-[#e0eafe] text-[#1e40af]",
+const demoPreviewKinds: Record<string, ProjectKind> = {
+  "demo-campus-companion": "campus",
+  "demo-analytics-dashboard": "analytics",
+  "demo-project-collaboration": "collaboration",
+  "demo-research-paper-workspace": "research",
 };
 
-function getTechStackColor(technology: string) {
-  return techStackColors[technology.trim().toLowerCase()] ?? "bg-[#eee9ff] text-[#5b3da8]";
-}
+const demoProjectBadges: Record<string, { label: string; tone: string }> = {
+  "demo-campus-companion": { label: "Mostly purchased", tone: "popular" },
+  "demo-analytics-dashboard": { label: "Trending", tone: "trending" },
+  "demo-project-collaboration": { label: "New technology", tone: "new-tech" },
+  "demo-research-paper-workspace": { label: "Highly recommended", tone: "recommended" },
+};
+
+const technologyColors: Record<string, string> = {
+  react: "#1a73e8",
+  typescript: "#185abc",
+  supabase: "#188038",
+  recharts: "#9334e6",
+  "node.js": "#188038",
+  postgresql: "#b06000",
+  python: "#185abc",
+  fastapi: "#00897b",
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,6 +82,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [motionReady, setMotionReady] = useState(false);
   const environment = getPaddleEnvironment();
   const fetchListings = useServerFn(listHomepageListings);
   const { data: listings = [] } = useQuery({
@@ -83,8 +96,6 @@ function Landing() {
       description:
         "Plan classes, track assignments, and keep campus events in one simple student dashboard.",
       techStack: "React · TypeScript · Supabase",
-      imageUrl: "/student-project-workspace.png",
-      badge: "POPULAR PICK",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -94,8 +105,6 @@ function Landing() {
       title: "Analytics Dashboard",
       description: "Explore clear charts and useful metrics in a responsive analytics workspace.",
       techStack: "React · TypeScript · Recharts",
-      imageUrl: "/analytics-dashboard-project.png",
-      badge: "TRENDING",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -105,8 +114,6 @@ function Landing() {
       title: "Project Collaboration",
       description: "Organize tasks, share updates, and keep a small team moving together.",
       techStack: "React · Node.js · PostgreSQL",
-      imageUrl: "/project-collaboration.png",
-      badge: "NEW TECH",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -117,8 +124,6 @@ function Landing() {
       description:
         "Collect sources, organize literature notes, and shape your findings into a clear report.",
       techStack: "Python · FastAPI · PostgreSQL",
-      imageUrl: "/research-paper-workspace.svg",
-      badge: "NEW",
       priceMinor: 0,
       isAvailable: false,
       demo: true,
@@ -126,7 +131,7 @@ function Landing() {
   ];
   const catalogPreview =
     listings.length > 0
-      ? listings.slice(0, 3).map((listing) => ({ ...listing, badge: null, demo: false }))
+      ? listings.slice(0, 3).map((listing) => ({ ...listing, demo: false }))
       : demoProjects;
   const { session } = useAuth();
   const getStarted = session ? "/welcome" : "/auth";
@@ -134,8 +139,28 @@ function Landing() {
   const products = session ? "/premade" : "/auth";
   const productSearch = session ? {} : { mode: "signup" as const };
 
+  useEffect(() => {
+    setMotionReady(true);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const targets = document.querySelectorAll<HTMLElement>(".landing-scroll-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -36px 0px" },
+    );
+
+    targets.forEach((target) => observer.observe(target));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="landing-editorial min-h-screen bg-white text-[#111111] selection:bg-[#d4f5df] selection:text-[#111111]">
+    <div className={`landing-editorial min-h-screen bg-white text-[#111111] selection:bg-[#d4f5df] selection:text-[#111111]${motionReady ? " landing-motion-ready" : ""}`}>
       <Header
         getStarted={getStarted}
         signup={signup}
@@ -192,7 +217,7 @@ function Landing() {
             </g>
           </svg>
           <div className="relative z-10 mx-auto grid max-w-[90rem] items-center gap-10 lg:grid-cols-[.95fr_1.05fr] lg:gap-16 xl:gap-20">
-            <div className="text-center lg:text-left">
+            <div className="landing-scroll-reveal text-center lg:text-left">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#0866e8]">
                 Your next big idea starts here
               </p>
@@ -209,7 +234,7 @@ function Landing() {
                 </span>
               </p>
             </div>
-            <div>
+            <div className="landing-scroll-reveal landing-scroll-reveal--delay">
               <HomepageIdeaPlanner signedIn={Boolean(session)} />
               <Link
                 to={products}
@@ -354,7 +379,7 @@ function Landing() {
           className="landing-section landing-section--choices relative isolate overflow-hidden border-y px-5 py-14 text-[#111111] sm:px-8 sm:py-18"
         >
           <div className="landing-section__content mx-auto max-w-[90rem]">
-            <div className="max-w-3xl">
+            <div className="landing-scroll-reveal max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0866e8]">
                 Choose where to start
               </p>
@@ -395,7 +420,7 @@ function Landing() {
               ].map((item) => (
                 <article
                   key={item.title}
-                  className="landing-choice group relative flex min-h-56 flex-col px-5 py-7 transition-colors duration-200 sm:px-7 sm:py-8 md:min-h-60"
+                  className="landing-choice landing-scroll-reveal group relative flex min-h-56 flex-col px-5 py-7 transition-colors duration-200 sm:px-7 sm:py-8 md:min-h-60"
                 >
                   <div className="mb-3 flex min-h-[5.25rem] items-start justify-between gap-4">
                     <span className="font-mono text-xs tracking-[.14em] text-[#6c7d95]">
@@ -485,97 +510,87 @@ function Landing() {
                 {catalogPreview.map((product) => (
                   <article
                     key={product.id}
-                    className="landing-product-card flex min-w-0 flex-col overflow-hidden rounded-xl transition duration-200 hover:-translate-y-1"
+                    className="landing-product-card landing-scroll-reveal flex min-w-0 flex-col overflow-hidden rounded-2xl transition duration-200 hover:-translate-y-1"
                   >
-                    {product.imageUrl ? (
-                      <div className="relative">
+                    <div className="landing-product-card__visual">
+                      {product.demo ? (
+                        <HomepageProjectPreview
+                          kind={demoPreviewKinds[product.id] ?? "campus"}
+                          title={product.title}
+                        />
+                      ) : product.imageUrl ? (
                         <img
                           src={product.imageUrl}
                           alt={`Preview image for ${product.title}`}
                           loading="lazy"
                           className="aspect-[16/10] w-full border-b border-[#e4e4e7] object-cover"
                         />
-                        {product.demo && (
-                          <span
-                            aria-label={`Demo tag: ${product.badge}`}
-                            className={`absolute right-3 top-3 rounded-md px-2.5 py-1 text-[10px] font-bold tracking-wide text-[#111111] shadow-sm ${
-                              product.badge === "TRENDING"
-                                ? "bg-[#f5e642]"
-                                : product.badge === "NEW TECH"
-                                  ? "bg-[#d4f5df]"
-                                  : "bg-[#dceaff]"
-                            }`}
-                          >
-                            {product.badge}
+                      ) : (
+                        <div
+                          role="img"
+                          aria-label={`Image preview unavailable for ${product.title}`}
+                          className="flex aspect-[16/10] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
+                        >
+                          <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
+                            {product.title}
                           </span>
-                        )}
-                      </div>
-                    ) : (
-                      <div
-                        role="img"
-                        aria-label={`Image preview unavailable for ${product.title}`}
-                        className="flex aspect-[16/10] items-end justify-between border-b border-[#e4e4e7] bg-[#f5f8fc] p-5"
-                      >
-                        <span className="max-w-[18rem] font-display text-3xl font-semibold leading-[.95] tracking-[-.055em]">
-                          {product.title}
+                          <span className="font-mono text-xs font-bold uppercase text-[#0757ad]">
+                            Project
+                          </span>
+                        </div>
+                      )}
+                      {product.demo && demoProjectBadges[product.id] ? (
+                        <span
+                          className={`landing-product-badge landing-product-badge--${demoProjectBadges[product.id].tone}`}
+                        >
+                          {demoProjectBadges[product.id].label}
                         </span>
-                        <span className="font-mono text-xs font-bold uppercase text-[#0757ad]">
-                          Project
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex flex-1 flex-col p-3 sm:p-4">
+                      ) : null}
+                    </div>
+                    <div className="landing-product-card__body flex flex-1 flex-col p-4 sm:p-5">
                       <div className="min-w-0">
-                        <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.04em] sm:text-2xl">
+                        <h3 className="font-display text-xl font-semibold leading-tight tracking-[-.035em] sm:text-[1.35rem]">
                           {product.title}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#62666e]">
-                            Tech stack
-                          </span>
-                          <div className="flex min-w-0 flex-wrap gap-1">
-                            {product.techStack.split(/[·,]/).map((technology) => {
-                              const label = technology.trim();
-                              return (
-                                <span
-                                  key={label}
-                                  className={`rounded-full px-2 py-1 text-[10px] font-semibold leading-none ${getTechStackColor(label)}`}
-                                >
-                                  {label}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        {product.demo && (
-                          <div className="mt-2 flex flex-wrap items-center gap-1">
-                            <span className="mr-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#62666e]">
-                              Includes
-                            </span>
-                            {["Dataset", "Documentation", "Report", "Research paper"].map(
-                              (item) => (
-                                <span
-                                  key={item}
-                                  className="whitespace-nowrap rounded-full border border-[#d4d4d8] bg-white/75 px-1.5 py-1 text-[9px] font-medium leading-none text-[#3f3f46]"
-                                >
-                                  {item}
-                                </span>
-                              ),
-                            )}
-                          </div>
-                        )}
                       </div>
                       <p className="mt-2 line-clamp-3 text-sm leading-5 text-[#525866]">
                         {product.description}
                       </p>
+                      <div className="landing-product-card__details mt-3 border-t border-[#e8eaed] pt-3">
+                        <div className="landing-product-includes flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.7rem] font-medium">
+                          <span className="shrink-0 text-[0.62rem] font-semibold uppercase tracking-[.08em] text-[#73777d]">
+                            Includes
+                          </span>
+                          <span>Research paper</span>
+                          <span>Code</span>
+                          <span>Documentation</span>
+                        </div>
+                        <p className="landing-product-card__stack mt-2 text-xs text-[#65748a]">
+                          <span className="mr-2 font-semibold uppercase tracking-wide text-[#718096]">Stack</span>
+                          {product.techStack.split(/[·,]/).map((technology, index) => {
+                            const name = technology.trim();
+                            const color = technologyColors[name.toLowerCase()];
+                            return (
+                              <span key={name}>
+                                {index > 0 ? <span className="px-1 text-[#9aa0a6]">·</span> : null}
+                                <span className="font-medium" style={color ? { color } : undefined}>
+                                  {name}
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </p>
+                      </div>
                       <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3">
                         <div>
                           <p className="text-xs text-[#62666e]">
-                            {product.isAvailable ? "One-time purchase" : "Currently unavailable"}
+                            {product.demo ? "Concept preview" : product.isAvailable ? "One-time purchase" : "Currently unavailable"}
                           </p>
-                          <p className="mt-1 text-lg font-semibold text-[#111111] sm:text-xl">
-                            ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
-                          </p>
+                          {product.isAvailable && !product.demo ? (
+                            <p className="mt-1 text-lg font-semibold text-[#111111] sm:text-xl">
+                              ₹{(product.priceMinor / 100).toLocaleString("en-IN")}
+                            </p>
+                          ) : null}
                         </div>
                         {product.demo ? (
                           <span className="inline-flex min-h-11 items-center rounded-lg border border-[#d4d4d8] px-3 py-2 text-sm font-semibold text-[#62666e]">
@@ -610,6 +625,44 @@ function Landing() {
             )}
           </div>
         </section>
+        <section
+          id="faq"
+          aria-labelledby="landing-faq-title"
+          className="landing-faq border-b px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
+        >
+          <div className="mx-auto grid max-w-[90rem] gap-10 lg:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] lg:gap-24">
+            <div className="landing-scroll-reveal">
+              <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#1a73e8]">FAQ</p>
+              <h2
+                id="landing-faq-title"
+                className="mt-4 max-w-md font-display text-4xl font-semibold leading-[1.02] tracking-[-.055em] sm:text-[3.25rem]"
+              >
+                Good to know
+              </h2>
+              <p className="mt-4 max-w-sm text-base leading-7 text-[#5f6368]">
+                A few quick answers about turning a starting point into a project you can build and share.
+              </p>
+            </div>
+            <div className="landing-faq__list landing-scroll-reveal">
+              <details className="landing-faq__item" open>
+                <summary>What can I start with?</summary>
+                <p>Bring a job description, a college project idea, or a professional goal. If you are not sure what to build, ask AI to suggest an idea for a domain you choose.</p>
+              </details>
+              <details className="landing-faq__item">
+                <summary>What will Project Helper help me create?</summary>
+                <p>You get a clear project plan with guidance for defining the problem, setting up files, building, validating, and documenting your work.</p>
+              </details>
+              <details className="landing-faq__item">
+                <summary>Do I need to be an experienced developer?</summary>
+                <p>No. The project is broken into manageable steps, with explanations to help you understand what you are building as you go.</p>
+              </details>
+              <details className="landing-faq__item">
+                <summary>Can I start from a ready-made project?</summary>
+                <p>Yes. Browse the ready-made projects to find a starting point, then make it your own. Availability is shown on each project.</p>
+              </details>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer
         getStarted={getStarted}
@@ -635,32 +688,32 @@ function Header({
   signedIn: boolean;
 }) {
   return (
-    <header className="landing-header border-b px-5 py-4 sm:px-8">
-      <div className="mx-auto flex max-w-[90rem] items-center justify-between gap-5">
+    <header className="landing-header px-5 sm:px-8">
+      <div className="landing-header__inner mx-auto flex max-w-[90rem] items-center justify-between gap-5">
         <Link
           to="/"
-          className="flex items-center gap-3 font-display text-lg font-semibold tracking-[-.04em]"
+          className="landing-header__brand flex items-center gap-3 font-display text-lg font-semibold tracking-[-.04em]"
         >
-          <img src={brandMark} alt="" className="size-8 rounded-xl object-cover" />
+          <img src={brandMark} alt="" className="size-9 rounded-xl object-cover" />
           <span>GetProjectHelper</span>
         </Link>
-        <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-          <a href="#services" className="hover:text-[#0866e8]">
+        <nav aria-label="Main navigation" className="landing-header__nav hidden items-center gap-1 text-sm font-medium md:flex">
+          <a href="#services" className="landing-header__link">
             Product
           </a>
-          <a href="#how-it-works" className="hover:text-[#0866e8]">
+          <a href="#how-it-works" className="landing-header__link">
             Resources
           </a>
-          <Link to="/pricing" className="hover:text-[#0866e8]">
+          <Link to="/pricing" className="landing-header__link">
             Pricing
           </Link>
         </nav>
-        <div className="hidden items-center gap-5 sm:flex">
+        <div className="landing-header__actions hidden items-center gap-5 sm:flex">
           {!signedIn && (
             <Link
               to="/auth"
               search={{ mode: "login" }}
-              className="text-sm font-semibold hover:text-[#0866e8]"
+              className="landing-header__signin text-sm font-semibold"
             >
               Sign in
             </Link>
@@ -668,7 +721,7 @@ function Header({
           <Link
             to={getStarted}
             search={signup}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0866e8] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0757c7]"
+            className="landing-header__cta inline-flex items-center gap-2 rounded-full bg-[#1a73e8] px-5 py-3 text-sm font-semibold text-white transition"
           >
             Get started
           </Link>
@@ -751,109 +804,100 @@ function Footer({
   productSearch: Record<string, string>;
 }) {
   return (
-    <footer className="landing-footer mx-2 mb-2 rounded-[18px] px-4 py-4 text-[#f5f7fa] sm:px-5 sm:py-5">
+    <footer className="landing-footer mx-2 mb-2 rounded-2xl border px-5 py-6 text-[#202124] sm:mx-4 sm:px-8 sm:py-8">
       <div className="mx-auto max-w-[90rem]">
-        <div className="border-b border-[#353a44] pb-3">
-          <p className="font-display text-base font-semibold">GetProjectHelper</p>
-          <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-[#c0c5cf]">
+        <div className="border-b border-[#dadce0] pb-5">
+          <p className="font-display text-lg font-semibold tracking-[-.025em]">GetProjectHelper</p>
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#5f6368]">
             From ideas to working solutions. Explore, plan, and build projects with confidence.
           </p>
         </div>
-        <div className="grid gap-x-8 gap-y-4 border-b border-[#353a44] py-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-x-8 gap-y-7 border-b border-[#dadce0] py-6 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="font-display text-sm font-semibold">Platform</p>
-            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
-              <Link to={getStarted} search={signup} className="transition-colors hover:text-white">
+            <p className="font-display text-sm font-semibold text-[#202124]">Platform</p>
+            <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
+              <Link to={getStarted} search={signup}>
                 Get a Project
               </Link>
               <Link
                 to={products}
                 search={productSearch}
-                className="transition-colors hover:text-white"
               >
                 Buy a Product
               </Link>
-              <a href="#how-it-works" className="transition-colors hover:text-white">
+              <a href="#how-it-works">
                 How It Works
               </a>
-              <a
-                href="mailto:support@getprojecthelper.com"
-                className="transition-colors hover:text-white"
-              >
+              <a href="mailto:support@getprojecthelper.com">
                 Contact Us
               </a>
             </div>
           </div>
           <div>
-            <p className="font-display text-sm font-semibold">Legal</p>
-            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
-              <Link to="/privacy" className="transition-colors hover:text-white">
+            <p className="font-display text-sm font-semibold text-[#202124]">Legal</p>
+            <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
+              <Link to="/privacy">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="transition-colors hover:text-white">
+              <Link to="/terms">
                 Terms of Service
               </Link>
-              <Link to="/refund-policy" className="transition-colors hover:text-white">
+              <Link to="/refund-policy">
                 Refund Policy
               </Link>
-              <Link to="/privacy" className="transition-colors hover:text-white">
+              <Link to="/privacy">
                 Cookie Policy
               </Link>
-              <Link to="/terms" className="transition-colors hover:text-white">
+              <Link to="/terms">
                 License Agreement
               </Link>
             </div>
           </div>
           <div>
-            <p className="font-display text-sm font-semibold">Trust &amp; Safety</p>
-            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
-              <a href="#ai-usage-disclaimer" className="transition-colors hover:text-white">
+            <p className="font-display text-sm font-semibold text-[#202124]">Trust &amp; Safety</p>
+            <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
+              <a href="#ai-usage-disclaimer">
                 AI Usage Disclaimer
               </a>
-              <Link to="/privacy" className="transition-colors hover:text-white">
+              <Link to="/privacy">
                 Data Protection
               </Link>
-              <Link to="/terms" className="transition-colors hover:text-white">
+              <Link to="/terms">
                 Acceptable Use
               </Link>
-              <Link to="/privacy" className="transition-colors hover:text-white">
+              <Link to="/privacy">
                 Security
               </Link>
               <a
                 href="mailto:support@getprojecthelper.com?subject=Report%20an%20issue"
-                className="transition-colors hover:text-white"
               >
                 Report an Issue
               </a>
             </div>
           </div>
           <div>
-            <p className="font-display text-sm font-semibold">Company &amp; Support</p>
-            <div className="mt-2 grid justify-items-start gap-1 text-[13px] text-[#c0c5cf]">
-              <a href="#get-project" className="transition-colors hover:text-white">
+            <p className="font-display text-sm font-semibold text-[#202124]">Company &amp; Support</p>
+            <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
+              <a href="#get-project">
                 About Us
               </a>
               <a
                 href="mailto:support@getprojecthelper.com?subject=Help%20request"
-                className="transition-colors hover:text-white"
               >
                 Help Center
               </a>
               <a
                 href="mailto:support@getprojecthelper.com?subject=Grievance%20redressal"
-                className="transition-colors hover:text-white"
               >
                 Grievance Redressal
               </a>
               <a
                 href="mailto:support@getprojecthelper.com"
-                className="transition-colors hover:text-white"
               >
                 Contact
               </a>
               <a
                 href="mailto:support@getprojecthelper.com?subject=Accessibility%20feedback"
-                className="transition-colors hover:text-white"
               >
                 Accessibility
               </a>
@@ -862,11 +906,11 @@ function Footer({
         </div>
         <div
           id="ai-usage-disclaimer"
-          className="border-b border-[#353a44] py-3 text-center text-[13px] leading-5 text-[#c0c5cf]"
+          className="border-b border-[#dadce0] py-4 text-center text-sm leading-6 text-[#5f6368]"
         >
           <p>AI can make mistakes. Please verify important information before relying on it.</p>
         </div>
-        <div className="pt-3 text-xs text-[#c0c5cf]">
+        <div className="pt-4 text-xs text-[#5f6368]">
           <span>© 2026 GetProjectHelper. All rights reserved.</span>
         </div>
       </div>

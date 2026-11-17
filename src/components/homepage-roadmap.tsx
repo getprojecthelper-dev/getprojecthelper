@@ -70,28 +70,24 @@ const steps = [
 
 export function HomepageRoadmap() {
   return (
-    <section id="how-it-works" className="homepage-roadmap" aria-labelledby="roadmap-heading">
-      <div className="roadmap-heading-row">
+    <section id="how-it-works" className="homepage-roadmap landing-scroll-reveal" aria-labelledby="roadmap-heading">
+      <div className="roadmap-heading-row landing-scroll-reveal">
         <div>
           <p className="roadmap-eyebrow">YOUR ROADMAP</p>
           <h2 id="roadmap-heading">What happens next</h2>
         </div>
-        <span className="roadmap-count">01 / 07 · PROJECT FLOW</span>
       </div>
       <p className="roadmap-subtitle">One clear next step, with AI guidance along the way.</p>
 
-      <ol className="roadmap-timeline">
+      <ol className="roadmap-timeline landing-scroll-reveal">
         {steps.map((step) => (
           <li className="roadmap-step" key={step.number}>
             <span className="roadmap-step-number">{step.number}</span>
             <h3>{step.title}</h3>
             <p className="roadmap-step-description">{step.description}</p>
-            <details className="roadmap-step-details">
-              <summary>See what’s included</summary>
-              <ul>
-                {step.details.map((detail) => <li key={detail}>{detail}</li>)}
-              </ul>
-            </details>
+            <ul className="roadmap-step-details" aria-label={`${step.title} description`}>
+              {step.details.map((detail) => <li key={detail}>{detail}</li>)}
+            </ul>
           </li>
         ))}
       </ol>

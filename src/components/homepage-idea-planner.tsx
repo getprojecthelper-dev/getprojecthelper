@@ -1,5 +1,5 @@
 import { ArrowRight, MousePointer2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 const suggestions = ["Habit tracker app", "Portfolio website", "Weather dashboard"];
@@ -33,15 +33,17 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
   const [idea, setIdea] = useState("");
   const [plannedIdea, setPlannedIdea] = useState(featuredIdeas[0]!);
   const [animationStopped, setAnimationStopped] = useState(false);
-  const [demoPhase, setDemoPhase] = useState<"typing" | "moving" | "clicking" | "idle">("typing");
+  const [demoPhase, setDemoPhase] = useState<"typing" | "moving" | "hovering" | "clicking" | "idle">("typing");
   const [demoClick, setDemoClick] = useState(0);
   const [run, setRun] = useState(0);
   const [activeStep, setActiveStep] = useState<number | null>(null);
+  const animationStoppedRef = useRef(false);
   const steps = buildSteps(plannedIdea);
 
   useEffect(() => {
     if (animationStopped || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    const timeoutIds: number[] = [];
     let titleIndex = 0;
     let characterIndex = 0;
     let deleting = false;
@@ -64,18 +66,21 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
           if (lastPlannedTitle !== title) {
             lastPlannedTitle = title;
             setDemoPhase("moving");
-            window.setTimeout(() => {
+            timeoutIds.push(window.setTimeout(() => {
+              if (animationStoppedRef.current) return;
               setDemoPhase("hovering");
-              window.setTimeout(() => {
+              timeoutIds.push(window.setTimeout(() => {
+                if (animationStoppedRef.current) return;
                 setDemoPhase("clicking");
                 setDemoClick((value) => value + 1);
-                window.setTimeout(() => {
+                timeoutIds.push(window.setTimeout(() => {
+                  if (animationStoppedRef.current) return;
                   setPlannedIdea(title);
                   setRun((value) => value + 1);
                   setDemoPhase("idle");
-                }, 220);
-              }, 520);
-            }, 700);
+                }, 220));
+              }, 520));
+            }, 700));
           }
         }
       } else {
@@ -89,14 +94,24 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
       }
     }, 75);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      timeoutIds.forEach(window.clearTimeout);
+    };
   }, [animationStopped]);
+
+  const stopDemo = () => {
+    animationStoppedRef.current = true;
+    setAnimationStopped(true);
+    setDemoPhase("idle");
+  };
 
   useEffect(() => {
     if (animationStopped && idea.trim()) setPlannedIdea(idea.trim());
   }, [animationStopped, idea]);
 
   const plan = () => {
+    stopDemo();
     setPlannedIdea(idea.trim() || "your project");
     setRun((value) => value + 1);
   };
@@ -107,7 +122,7 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
       aria-label="Try a project roadmap"
     >
       <div className="homepage-idea-planner__glow" aria-hidden="true" />
-      <div className="homepage-idea-planner__card" onPointerDown={() => setAnimationStopped(true)}>
+      <div className="homepage-idea-planner__card">
         <h2 className="font-display text-2xl font-semibold leading-tight tracking-[-0.035em] text-white sm:text-3xl">
           Type an idea. Get a roadmap.
         </h2>
@@ -122,10 +137,10 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
           <input
             value={idea}
             onChange={(event) => {
-              setAnimationStopped(true);
+              stopDemo();
               setIdea(event.target.value);
             }}
-            onFocus={() => setAnimationStopped(true)}
+            onFocus={stopDemo}
             aria-label="Your project idea"
             placeholder="e.g. Expense tracker app"
             aria-live="polite"
@@ -147,7 +162,9 @@ export function HomepageIdeaPlanner({ signedIn }: { signedIn: boolean }) {
               key={suggestion}
               type="button"
               className="homepage-idea-planner__chip"
+              aria-label={`Use idea: ${suggestion}`}
               onClick={() => {
+                stopDemo();
                 setIdea(suggestion);
                 setPlannedIdea(suggestion);
                 setRun((value) => value + 1);

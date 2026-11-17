@@ -11,18 +11,18 @@ export const Route = createFileRoute("/pricing")({
       { title: "Plans & Pricing — Free, Starter, Student, Professional | Project Helper" },
       {
         name: "description",
-        content: "Start free, then choose Starter (₹199), Student (₹399) or Professional (₹999) monthly plans with AI credits and active-project limits.",
+        content: "Start free, then choose a paid plan with AI credits and active-project limits.",
       },
       { property: "og:title", content: "Project Helper plans: Free, Starter, Student, Professional" },
       {
         property: "og:description",
-        content: "Monthly plans from ₹199 with 1M to 10M token-equivalent AI credits.",
+        content: "Flexible monthly plans with 1M to 10M token-equivalent AI credits.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://getprojecthelper.com/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AI Project Builder Pricing | Project Helper" },
-      { name: "twitter:description", content: "Monthly student plans from ₹199 with AI credits and project limits." },
+      { name: "twitter:description", content: "Monthly student plans with AI credits and project limits." },
     ],
     links: [{ rel: "canonical", href: "https://getprojecthelper.com/pricing" }],
   }),
@@ -50,17 +50,17 @@ const FAQ = [
 
 function PricingPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border/60">
+    <main className="pricing-page min-h-screen">
+      <header className="pricing-header border-b">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
-          <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Button asChild variant="ghost" size="sm" className="pricing-back -ml-2">
             <Link to="/">
               <ArrowLeft className="h-4 w-4" />
               Project Helper
             </Link>
           </Button>
           <div className="flex items-center gap-2">
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="pricing-start">
               <Link to="/auth" search={{ mode: "signup" }}>
                 Start free
               </Link>
@@ -69,21 +69,22 @@ function PricingPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
-        <div className="mx-auto max-w-2xl text-center">
+      <div className="pricing-content mx-auto max-w-6xl px-5 py-10 sm:py-14">
+        <div className="pricing-intro mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Pricing</p>
           <h1 className="mt-3 font-display text-4xl sm:text-5xl">
             A plan for every stage of your project
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Every new account starts free with 100K token-equivalent credits. Upgrade any time —
-            credits reset each month, and AI pauses when you reach your plan's limit.
+          <p className="mt-4 text-lg">
+            Every new account starts free with 100K token-equivalent credits. Upgrade any time.
+            Credits reset monthly, and AI pauses when you reach your plan limit.
           </p>
+          <p className="pricing-region-note mt-3 text-sm">Prices are shown in your local currency where available.</p>
         </div>
 
         <PlanCards className="mt-12" />
 
-        <section className="mt-12 rounded-2xl border border-border bg-card p-6 text-center">
+        <section className="pricing-bonus mt-10 rounded-2xl border p-6 text-center">
           <p className="flex items-center justify-center gap-2 font-display text-lg">
             <Gift className="h-4 w-4 text-primary" />
             {STARTER_CREDITS} free credits on signup
@@ -99,11 +100,11 @@ function PricingPage() {
           </Button>
         </section>
 
-        <section className="mx-auto mt-16 max-w-3xl">
+        <section className="pricing-faq mx-auto mt-14 max-w-3xl">
           <h2 className="text-center font-display text-2xl">Questions</h2>
           <dl className="mt-8 grid gap-6 sm:grid-cols-2">
             {FAQ.map((item) => (
-              <div key={item.q} className="rounded-xl border border-border bg-card p-5">
+              <div key={item.q} className="pricing-faq-item rounded-xl border p-5">
                 <dt className="flex items-start gap-2 font-medium">
                   <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   {item.q}

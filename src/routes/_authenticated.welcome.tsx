@@ -1,6 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useRouterState } from "@tanstack/react-router";
-import { ArrowRight, Compass, LockKeyhole, Plus, WalletCards, Settings2 } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Compass,
+  LockKeyhole,
+  Plus,
+  WalletCards,
+  Settings2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/material-icon";
@@ -78,62 +86,6 @@ export const Route = createFileRoute("/_authenticated/welcome")({
   component: WelcomePage,
 });
 
-function ProjectPicker({ target }: { target: "documents" | "review" | "mentor" }) {
-  const { data: overviews, isLoading } = useProjectsOverview();
-
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading your projects…</p>;
-  }
-  if (!overviews?.length) {
-    return (
-      <div className="workspace-home__tool-empty">
-        <span>Available once you have a project</span>
-        <Link to="/new-project" className="workspace-home__tool-link">
-          Start one <ArrowRight aria-hidden="true" />
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1.5">
-      {overviews.slice(0, 5).map(({ project }) =>
-        target === "documents" ? (
-          <Link
-            key={project.id}
-            to="/projects/$projectId/documents"
-            params={{ projectId: project.id }}
-            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
-          >
-            <span className="truncate">{project.name}</span>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          </Link>
-        ) : target === "review" ? (
-          <Link
-            key={project.id}
-            to="/projects/$projectId/review"
-            params={{ projectId: project.id }}
-            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
-          >
-            <span className="truncate">{project.name}</span>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          </Link>
-        ) : (
-          <Link
-            key={project.id}
-            to="/projects/$projectId/mentor"
-            params={{ projectId: project.id }}
-            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
-          >
-            <span className="truncate">{project.name}</span>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          </Link>
-        ),
-      )}
-    </div>
-  );
-}
-
 function ResumeProjects() {
   const { data: overviews, isLoading } = useProjectsOverview();
 
@@ -154,11 +106,6 @@ function ResumeProjects() {
             </p>
           </div>
         </div>
-        <Button asChild size="sm" className="workspace-home__empty-action">
-          <Link to="/new-project">
-            Start a project <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
       </div>
     );
   }
@@ -212,6 +159,49 @@ function ResumeProjects() {
   );
 }
 
+function ProjectPicker({ target }: { target: "documents" | "review" | "mentor" }) {
+  const { data: overviews, isLoading } = useProjectsOverview();
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Loading your projects…</p>;
+  }
+  if (!overviews?.length) {
+    return (
+      <div className="workspace-home__tool-empty">
+        <span>Available once you have a project</span>
+        <Link to="/new-project" className="workspace-home__tool-link">
+          Start one <ArrowRight aria-hidden="true" />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {overviews.slice(0, 5).map(({ project }) => {
+        const destination =
+          target === "documents"
+            ? "/projects/$projectId/documents"
+            : target === "review"
+              ? "/projects/$projectId/review"
+              : "/projects/$projectId/mentor";
+
+        return (
+          <Link
+            key={project.id}
+            to={destination}
+            params={{ projectId: project.id }}
+            className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            <span className="truncate">{project.name}</span>
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 function ProjectTool({
   title,
   description,
@@ -238,6 +228,88 @@ function ProjectTool({
         <ProjectPicker target={target} />
       </div>
     </div>
+  );
+}
+
+function WorkspaceTools() {
+  const { data: overviews, isLoading } = useProjectsOverview();
+  const tools = [
+    { title: "Documentation", icon: "description", target: "documents" as const },
+    { title: "Viva practice", icon: "record_voice_over", target: "review" as const },
+    { title: "Project support", icon: "support_agent", target: "mentor" as const },
+  ];
+
+  return (
+    <div className="workspace-home-sidebar__tools">
+      <p className="workspace-home-sidebar__label">Project tools</p>
+      {tools.map((tool) => (
+        <details className="workspace-home-sidebar__tool" key={tool.target}>
+          <summary>
+            <MaterialIcon name={tool.icon} />
+            <span>{tool.title}</span>
+            <ChevronDown className="workspace-home-sidebar__tool-chevron" aria-hidden="true" />
+          </summary>
+          <div className="workspace-home-sidebar__tool-projects">
+            {isLoading ? (
+              <span className="workspace-home-sidebar__tool-message">Loading projects…</span>
+            ) : overviews?.length ? (
+              overviews
+                .slice(0, 5)
+                .map(({ project }) => (
+                  <ToolProjectLink
+                    key={project.id}
+                    target={tool.target}
+                    projectId={project.id}
+                    name={project.name}
+                  />
+                ))
+            ) : (
+              <Link to="/new-project" className="workspace-home-sidebar__tool-project">
+                Start a project <ArrowRight aria-hidden="true" />
+              </Link>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+function ToolProjectLink({
+  target,
+  projectId,
+  name,
+}: {
+  target: "documents" | "review" | "mentor";
+  projectId: string;
+  name: string;
+}) {
+  const className = "workspace-home-sidebar__tool-project";
+  const content = (
+    <>
+      <span>{name}</span>
+      <ArrowRight aria-hidden="true" />
+    </>
+  );
+
+  if (target === "documents") {
+    return (
+      <Link to="/projects/$projectId/documents" params={{ projectId }} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  if (target === "review") {
+    return (
+      <Link to="/projects/$projectId/review" params={{ projectId }} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/projects/$projectId/mentor" params={{ projectId }} className={className}>
+      {content}
+    </Link>
   );
 }
 
@@ -281,6 +353,7 @@ function WelcomePage() {
               <span>Settings</span>
             </Link>
           </nav>
+          <WorkspaceTools />
         </aside>
         <main className="workspace-home min-w-0">
           <header className="workspace-home__header flex flex-wrap items-end justify-between gap-5 border-b border-border pb-6 sm:pb-8">
@@ -296,14 +369,6 @@ function WelcomePage() {
                 Pick up where you left off, or start something new.
               </p>
             </div>
-            <Button
-              asChild
-              className="h-11 gap-2 rounded-xl bg-[#0866e8] px-5 text-white shadow-none hover:bg-[#0757c7]"
-            >
-              <Link to="/dashboard">
-                View all projects <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
           </header>
           <WorkspacePlanStatus justPaid={justPaid} />
 

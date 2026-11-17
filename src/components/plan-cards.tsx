@@ -7,18 +7,29 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useCurrency } from "@/hooks/use-currency";
 import { getLocalizedPlanPrices, getPaddleEnvironment, openPlanCheckout } from "@/lib/paddle";
 import { cancelPlan, changePlan, getMyPlan } from "@/lib/plans.functions";
 import { PLANS, getPlan } from "@/lib/plans";
+import { CURRENCIES, formatMoney } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
-const fallbackPrices = () =>
-  Object.fromEntries(PLANS.flatMap((p) => (p.priceId ? [[p.priceId, `₹${p.inrPrice}`]] : [])));
+const fallbackPrices = (currency: keyof typeof CURRENCIES) =>
+  Object.fromEntries(
+    PLANS.flatMap((plan) => {
+      if (!plan.priceId) return [];
+      const amount = currency === "INR"
+        ? plan.inrPrice
+        : (plan.inrPrice / CURRENCIES.INR.fx) * CURRENCIES[currency].fx;
+      return [[plan.priceId, formatMoney(amount, currency)]];
+    }),
+  );
 
 const RANK = { free: 0, starter: 1, student: 2, professional: 3 } as const;
 
 export function PlanCards({ className }: { className?: string }) {
   const { user } = useAuth();
+  const { currency } = useCurrency();
   const queryClient = useQueryClient();
   const environment = getPaddleEnvironment();
   const fetchPlan = useServerFn(getMyPlan);
@@ -28,10 +39,16 @@ export function PlanCards({ className }: { className?: string }) {
   const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
     getLocalizedPlanPrices(PLANS.flatMap((p) => (p.priceId ? [p.priceId] : [])))
-      .then((found) => setPrices(Object.keys(found).length ? found : fallbackPrices()))
-      .catch(() => setPrices(fallbackPrices()));
-  }, []);
+      .then((found) => {
+        if (active) setPrices(Object.keys(found).length ? found : fallbackPrices(currency));
+      })
+      .catch(() => {
+        if (active) setPrices(fallbackPrices(currency));
+      });
+    return () => { active = false; };
+  }, [currency]);
 
   const { data: mine } = useQuery({
     queryKey: ["my-plan", user?.id, environment],
@@ -80,40 +97,37 @@ export function PlanCards({ className }: { className?: string }) {
         return (
           <div
             key={plan.id}
-            className={cn(
-              "relative flex flex-col rounded-2xl border bg-card p-6",
-              plan.badge ? "border-primary shadow-lg" : "border-border",
-            )}
+            className={cn("pricing-plan-card relative flex flex-col rounded-2xl border p-6", plan.badge && "pricing-plan-card--featured")}
           >
             {plan.badge && (
-              <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+              <span className="pricing-plan-badge absolute -top-3 left-6 rounded-full px-3 py-0.5 text-xs font-semibold">
                 {plan.badge}
               </span>
             )}
-            <h3 className="font-display text-xl">{plan.name}</h3>
-            <p className="text-sm text-muted-foreground">{plan.tagline}</p>
-            <p className="mt-4">
+            <h3 className="pricing-plan-name font-display text-xl">{plan.name}</h3>
+            <p className="pricing-plan-tagline text-sm">{plan.tagline}</p>
+            <p className="pricing-plan-price mt-4">
               <span className="font-display text-4xl">{price}</span>
-              {plan.priceId && <span className="text-sm text-muted-foreground"> / month</span>}
+              {plan.priceId && <span className="pricing-plan-period text-sm"> / month</span>}
             </p>
             <ul className="mt-5 flex-1 space-y-2 text-sm">
               {plan.features.map((f) => (
-                <li key={f} className="flex gap-2">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <li key={f} className="pricing-plan-feature flex gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0" />
                   {f}
                 </li>
               ))}
             </ul>
             <div className="mt-6 space-y-2">
               {!user ? (
-                <Button asChild className="w-full" variant={plan.badge ? "default" : "outline"}>
+                <Button asChild className="pricing-plan-action w-full" variant={plan.badge ? "default" : "outline"}>
                   <Link to="/auth" search={{ mode: "signup" }}>{plan.priceId ? `Get ${plan.name}` : "Start free"}</Link>
                 </Button>
               ) : isCurrent ? (
                 <>
-                  <Button className="w-full" variant="secondary" disabled>Current plan</Button>
+                  <Button className="pricing-plan-action w-full" variant="secondary" disabled>Current plan</Button>
                   {plan.priceId && !mine?.cancelAtPeriodEnd && (
-                    <Button className="w-full" variant="ghost" size="sm" disabled={busy !== null} onClick={cancel}>
+                    <Button className="pricing-plan-action pricing-plan-action--quiet w-full" variant="ghost" size="sm" disabled={busy !== null} onClick={cancel}>
                       Cancel plan
                     </Button>
                   )}
@@ -125,7 +139,7 @@ export function PlanCards({ className }: { className?: string }) {
                 </>
               ) : plan.priceId ? (
                 <Button
-                  className="w-full"
+                  className="pricing-plan-action w-full"
                   variant={plan.badge ? "default" : "outline"}
                   disabled={busy !== null}
                   onClick={() => choose(plan.id)}

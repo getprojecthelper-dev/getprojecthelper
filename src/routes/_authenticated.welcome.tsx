@@ -3,11 +3,7 @@ import { useRouterState } from "@tanstack/react-router";
 import {
   ArrowRight,
   ChevronDown,
-  Compass,
-  LockKeyhole,
   Plus,
-  WalletCards,
-  Settings2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,11 +24,11 @@ function BuyProjectsCard() {
     return (
       <Link
         to="/premade"
-        className="group relative flex min-h-48 flex-col gap-3 overflow-hidden rounded-xl border border-primary/25 bg-primary/[0.045] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg sm:p-6"
+        className="workspace-home__buy group relative flex min-h-48 flex-col gap-3 overflow-hidden rounded-xl border border-primary/25 bg-primary/[0.045] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg sm:p-6"
       >
         <div className="flex items-start justify-between gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-primary shadow-sm">
-            <MaterialIcon name="shopping_bag" filled />
+          <span className="workspace-home__buy-icon">
+            <MaterialIcon name="shopping_bag" />
           </span>
           <span className="rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
             One-time purchase
@@ -51,10 +47,10 @@ function BuyProjectsCard() {
   }
 
   return (
-    <div className="panel flex min-h-48 flex-col gap-3 p-5 sm:p-6">
+    <div className="workspace-home__buy panel flex min-h-48 flex-col gap-3 p-5 sm:p-6">
       <div className="flex items-start justify-between gap-2">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-          <LockKeyhole className="h-5 w-5" />
+        <span className="workspace-home__buy-icon">
+          <MaterialIcon name="lock" />
         </span>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
           Launching soon
@@ -323,7 +319,7 @@ function WelcomePage() {
   const firstName = fullName.split(/\s+/)[0] || "there";
 
   return (
-    <div className="workspace-home-surface landing-editorial min-h-[calc(100vh-4rem)] w-full">
+    <div className="welcome-screen workspace-home-surface landing-editorial min-h-[calc(100vh-4rem)] w-full">
       <div className="workspace-home-layout mx-auto grid w-full max-w-none grid-cols-1 gap-5 px-4 py-6 sm:px-6 sm:py-9 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10 xl:px-10">
         <aside className="workspace-home-sidebar" aria-label="Workspace sidebar">
           <p className="workspace-home-sidebar__label">Workspace</p>
@@ -333,7 +329,7 @@ function WelcomePage() {
               className={`workspace-home-sidebar__link ${pathname === "/dashboard" ? "is-active" : ""}`}
               aria-current={pathname === "/dashboard" ? "page" : undefined}
             >
-              <Compass aria-hidden="true" />
+              <MaterialIcon name="dashboard" />
               <span>Dashboard</span>
             </Link>
             <Link
@@ -341,7 +337,7 @@ function WelcomePage() {
               className={`workspace-home-sidebar__link ${pathname === "/credits" ? "is-active" : ""}`}
               aria-current={pathname === "/credits" ? "page" : undefined}
             >
-              <WalletCards aria-hidden="true" />
+              <MaterialIcon name="account_balance_wallet" />
               <span>Credits</span>
             </Link>
             <Link
@@ -349,7 +345,7 @@ function WelcomePage() {
               className={`workspace-home-sidebar__link ${pathname === "/settings" ? "is-active" : ""}`}
               aria-current={pathname === "/settings" ? "page" : undefined}
             >
-              <Settings2 aria-hidden="true" />
+              <MaterialIcon name="tune" />
               <span>Settings</span>
             </Link>
           </nav>
@@ -380,8 +376,8 @@ function WelcomePage() {
               to="/new-project"
               className="workspace-home__primary group relative flex min-h-48 flex-col gap-3 overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.035] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:p-6"
             >
-              <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-[#0866e8] text-white shadow-sm">
-                <Plus className="h-5 w-5" />
+              <span className="workspace-home__primary-icon relative z-10 flex h-10 w-10 items-center justify-center">
+                <MaterialIcon name="add" />
               </span>
               <h2 className="relative z-10 font-display text-xl sm:text-2xl">
                 Turn your idea into a project

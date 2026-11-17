@@ -1,7 +1,7 @@
 import brandMark from "@/assets/mentor-mark.png";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Check, Eye, EyeOff, Layers3, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -39,6 +39,25 @@ const credentials = z.object({
   password: z.string().min(8, "Use at least 8 characters").max(72),
 });
 
+function getPasswordFeedback(password: string) {
+  if (!password) return null;
+  if (password.length < 8) {
+    return { score: 0, label: "Use at least 8 characters", tone: "short" };
+  }
+
+  const score =
+    1 +
+    Number(password.length >= 12) +
+    Number(/[a-z]/i.test(password) && /\d|[^a-z\d]/i.test(password)) +
+    Number(/[a-z]/.test(password) && /[A-Z]/.test(password));
+
+  return {
+    score,
+    label: score >= 4 ? "Strong password" : score >= 2 ? "Good password" : "Password meets the minimum",
+    tone: score >= 4 ? "strong" : score >= 2 ? "good" : "minimum",
+  };
+}
+
 function AuthPage() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
@@ -51,6 +70,7 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const passwordFeedback = mode === "signup" ? getPasswordFeedback(password) : null;
   const isLocalPreview =
     typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
@@ -191,52 +211,49 @@ function AuthPage() {
         className="auth-promise relative hidden min-w-0 overflow-hidden px-10 py-10 text-auth-pine lg:flex lg:flex-col xl:px-[clamp(3rem,8vw,9rem)]"
         aria-label="Project Helper overview"
       >
-        <div className="auth-orb auth-orb-one" aria-hidden="true" />
-        <div className="auth-orb auth-orb-two" aria-hidden="true" />
-        <Link
-          to="/"
-          className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-semibold text-auth-mist transition-colors hover:text-auth-pine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-coral"
-        >
-          <MaterialIcon name="arrow_back" className="text-base" /> Back to home
-        </Link>
-        <div className="relative z-10 my-auto max-w-xl py-12">
-          <div className="mb-7 flex size-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 shadow-xl backdrop-blur-sm">
+        <div className="auth-promise-art" aria-hidden="true">
+          <svg viewBox="0 0 1000 800" preserveAspectRatio="none">
+            <path className="auth-promise-route auth-promise-route--blue" d="M-80 560 C155 470 280 650 500 505 S790 300 1080 365" />
+            <path className="auth-promise-route auth-promise-route--red" d="M-80 300 C190 380 310 120 555 225 S820 390 1080 150" />
+            <path className="auth-promise-route auth-promise-route--green" d="M-80 625 C190 680 330 360 570 415 S835 590 1080 245" />
+            <path className="auth-promise-route auth-promise-route--yellow" d="M180 850 C320 650 390 350 635 190 S900 185 1080 60" />
+            <circle className="auth-promise-node auth-promise-node--blue" cx="500" cy="505" r="5" />
+            <circle className="auth-promise-node auth-promise-node--red" cx="555" cy="225" r="5" />
+            <circle className="auth-promise-node auth-promise-node--green" cx="570" cy="415" r="5" />
+            <circle className="auth-promise-node auth-promise-node--yellow" cx="635" cy="190" r="5" />
+          </svg>
+        </div>
+        <header className="auth-promise-header relative z-10 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-3 font-display text-lg font-semibold tracking-[-.04em] text-auth-pine">
             <img
               src={brandMark}
-              alt="Project Helper"
+              alt=""
               width={512}
               height={512}
-              className="size-8 object-contain"
+              className="size-8 rounded-xl object-cover"
             />
+            <span>GetProjectHelper</span>
           </div>
-          <p className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-auth-coral">
-            <MaterialIcon name="architecture" className="text-base" /> Project Helper
+          <Link
+            to="/"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-auth-mist transition-colors hover:text-auth-pine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-coral"
+          >
+            <MaterialIcon name="arrow_back" className="text-base" /> Back to home
+          </Link>
+        </header>
+        <div className="auth-promise-copy relative z-10 my-auto max-w-2xl py-12">
+          <p className="auth-promise-eyebrow mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-auth-coral">
+            <span className="auth-google-dots" aria-hidden="true">
+              <i /> <i /> <i /> <i />
+            </span>
+            YOUR NEXT PROJECT STARTS HERE
           </p>
-          <h1 className="max-w-lg font-display text-4xl font-semibold leading-[.98] tracking-[-0.065em] text-auth-pine xl:text-6xl">
-            Turn a bright idea into a project you can stand behind.
+          <h1 className="max-w-[13ch] font-display text-[clamp(2.75rem,4.2vw,4.75rem)] font-semibold leading-[0.99] tracking-[-.07em] text-auth-pine">
+            From a first brief to a finished project.
           </h1>
-          <p className="mt-6 max-w-md text-base leading-7 text-auth-mist">
-            Plan, research, build, and present your work in one clear workspace — without losing the
-            thread.
+          <p className="mt-6 max-w-xl text-base leading-7 text-auth-mist sm:text-lg sm:leading-8">
+            Start with a job description, a college brief, or a professional goal. Get a clear plan and step-by-step support to build an end-to-end project.
           </p>
-          <ul className="mt-9 grid gap-3 text-sm font-medium text-auth-pine/90 sm:grid-cols-2">
-            {[
-              "Guided project planning",
-              "Research that stays organised",
-              "A clear path to your final outcome",
-              "Made for focused work",
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-2.5">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-auth-coral text-white">
-                  <Check className="size-3.5 stroke-[3]" />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="relative z-10 flex items-center gap-3 text-sm text-auth-mist">
-          <Layers3 className="size-4 text-auth-coral" /> A calm space for ambitious work.
         </div>
       </section>
 
@@ -245,7 +262,12 @@ function AuthPage() {
           className="auth-mobile-glow pointer-events-none absolute inset-0 lg:hidden"
           aria-hidden="true"
         />
-        <div className="relative z-10 w-full min-w-0 max-w-[360px] py-0 auth-entrance">
+        <div className="auth-motion-art" aria-hidden="true">
+          <span className="auth-motion-orbit auth-motion-orbit--blue" />
+          <span className="auth-motion-orbit auth-motion-orbit--green" />
+          <span className="auth-motion-orbit auth-motion-orbit--yellow" />
+        </div>
+        <div className="relative z-10 w-full min-w-0 max-w-[400px] py-0 auth-entrance">
           <Link
             to="/"
             className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-auth-mist transition-colors hover:text-auth-pine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-coral lg:hidden"
@@ -254,23 +276,26 @@ function AuthPage() {
           </Link>
 
           <section
-            className="auth-sheet rounded-[24px] border border-white/70 bg-auth-light text-auth-pine shadow-auth-sheet"
+            className="auth-sheet rounded-[20px] border border-auth-line bg-auth-light text-auth-pine shadow-auth-sheet"
             aria-labelledby="auth-heading"
           >
-            <div className="px-5 py-3 sm:px-7 sm:py-4">
-              <div className={`text-center ${mode === "login" ? "mb-4" : "mb-3"}`}>
-                <span className="auth-brand-mark mx-auto mb-3 flex size-10 items-center justify-center rounded-2xl bg-auth-pine shadow-lg">
-                  <img
-                    src={brandMark}
-                    alt=""
-                    width={512}
-                    height={512}
-                    className="size-7 object-contain"
-                  />
+            <div className="px-5 py-5 sm:px-7 sm:py-6">
+              <div className="auth-card-brand flex items-center gap-3">
+                <img
+                  src={brandMark}
+                  alt=""
+                  width={512}
+                  height={512}
+                  className="auth-brand-mark size-8 rounded-xl object-cover"
+                />
+                <span className="font-display text-base font-semibold tracking-[-.03em] text-auth-pine">
+                  GetProjectHelper
                 </span>
+              </div>
+              <div className={`text-left ${mode === "login" ? "mb-5 mt-7" : "mb-4 mt-6"}`}>
                 <h2
                   id="auth-heading"
-                  className="font-display text-[26px] font-bold tracking-[-0.045em] text-auth-pine sm:text-[30px]"
+                  className="font-display text-[26px] font-semibold tracking-[-0.045em] text-auth-pine sm:text-[28px]"
                 >
                   {mode === "signup" ? "Create your workspace" : "Welcome back"}
                 </h2>
@@ -282,9 +307,13 @@ function AuthPage() {
               </div>
 
               <div
-                className={`grid grid-cols-2 border-b border-auth-line ${mode === "login" ? "mb-3" : "mb-2"}`}
+                className={`auth-mode-tabs relative grid grid-cols-2 border-b border-auth-line ${mode === "login" ? "mb-3" : "mb-2"}`}
                 aria-label="Account mode"
               >
+                <span
+                  className={`auth-mode-indicator ${mode === "signup" ? "is-signup" : ""}`}
+                  aria-hidden="true"
+                />
                 {(["login", "signup"] as const).map((option) => (
                   <Button
                     key={option}
@@ -295,7 +324,7 @@ function AuthPage() {
                       setNotice(null);
                       void navigate({ to: "/auth", search: { mode: option } });
                     }}
-                    className={`relative h-10 rounded-none bg-transparent font-semibold shadow-none transition-colors hover:bg-auth-pine/5 ${mode === option ? "text-auth-pine after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-auth-coral" : "text-auth-sage"}`}
+                    className={`relative z-10 h-10 rounded-none bg-transparent font-semibold shadow-none transition-colors hover:bg-auth-pine/5 ${mode === option ? "text-auth-pine" : "text-auth-sage"}`}
                   >
                     {option === "login" ? "Log in" : "Sign up"}
                   </Button>
@@ -312,7 +341,7 @@ function AuthPage() {
               >
                 {mode === "signup" && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="full-name" className="text-xs font-bold text-auth-pine">
+                    <Label htmlFor="full-name" className="text-sm font-medium text-auth-pine">
                       Display name
                     </Label>
                     <Input
@@ -322,12 +351,12 @@ function AuthPage() {
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Your name"
                       disabled={busy}
-                      className="auth-input h-11 rounded-xl border-auth-line bg-auth-field px-4 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
+                      className="auth-input h-11 rounded-lg border-auth-line bg-auth-field px-4 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
                     />
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-bold text-auth-pine">
+                  <Label htmlFor="email" className="text-sm font-medium text-auth-pine">
                     Email address
                   </Label>
                   <Input
@@ -336,14 +365,14 @@ function AuthPage() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@university.edu"
+                    placeholder="you@example.com"
                     disabled={busy}
-                    className="auth-input h-11 rounded-xl border-auth-line bg-auth-field px-4 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
+                    className="auth-input h-11 rounded-lg border-auth-line bg-auth-field px-4 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor="password" className="text-xs font-bold text-auth-pine">
+                    <Label htmlFor="password" className="text-sm font-medium text-auth-pine">
                       Password
                     </Label>
                     {mode === "login" && (
@@ -368,7 +397,7 @@ function AuthPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={mode === "signup" ? "At least 8 characters" : "Your password"}
                       disabled={busy}
-                      className="auth-input h-11 rounded-xl border-auth-line bg-auth-field px-4 pr-12 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
+                      className="auth-input h-11 rounded-lg border-auth-line bg-auth-field px-4 pr-12 text-auth-pine placeholder:text-auth-sage/70 focus-visible:ring-auth-coral"
                     />
                     <Button
                       type="button"
@@ -382,6 +411,19 @@ function AuthPage() {
                       {showPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   </div>
+                  {passwordFeedback ? (
+                    <div className={`auth-password-feedback is-${passwordFeedback.tone}`} aria-live="polite">
+                      <div className="auth-password-feedback__meter" aria-hidden="true">
+                        {[0, 1, 2, 3].map((segment) => (
+                          <span
+                            key={segment}
+                            className={segment < passwordFeedback.score ? "is-filled" : ""}
+                          />
+                        ))}
+                      </div>
+                      <span>{passwordFeedback.label}</span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {mode === "signup" && (
@@ -419,7 +461,7 @@ function AuthPage() {
                 <Button
                   type="submit"
                   disabled={busy || (mode === "signup" && cooldown > 0)}
-                  className="auth-primary-action group mt-1 h-11 w-full rounded-xl bg-auth-coral font-display font-semibold text-white shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:bg-auth-coral-ink active:translate-y-0 active:scale-[.99] focus-visible:ring-2 focus-visible:ring-auth-pine"
+                  className="auth-primary-action group mt-1 h-11 w-full rounded-lg bg-auth-coral font-display font-semibold text-white shadow-none transition-all duration-200 hover:bg-auth-coral-ink active:scale-[.99] focus-visible:ring-2 focus-visible:ring-auth-pine"
                 >
                   {busy
                     ? mode === "signup"
@@ -443,7 +485,7 @@ function AuthPage() {
               </div>
               <Button
                 variant="outline"
-                className="auth-secondary-action h-11 w-full rounded-xl border-auth-line bg-transparent font-semibold text-auth-pine shadow-none transition-all duration-200 hover:-translate-y-0.5 hover:border-auth-pine hover:bg-auth-pine/5 hover:text-auth-pine active:translate-y-0"
+                className="auth-secondary-action h-11 w-full rounded-lg border-auth-line bg-transparent font-semibold text-auth-pine shadow-none transition-colors duration-150 hover:border-auth-pine hover:bg-auth-pine/5 hover:text-auth-pine"
                 disabled={busy}
                 onClick={() => void google()}
               >
@@ -455,11 +497,6 @@ function AuthPage() {
                 </svg>
                 Continue with Google
               </Button>
-              {isLocalPreview && (
-                <p className="auth-local-preview-note mt-2 text-center text-xs text-auth-sage">
-                  Google sign-in is enabled on the published site.
-                </p>
-              )}
               <p className="mt-2 border-t border-auth-line pt-2 text-center text-sm text-auth-sage">
                 {mode === "signup" ? "Already have an account?" : "New to Project Helper?"}{" "}
                 <Link

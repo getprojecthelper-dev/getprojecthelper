@@ -6255,3 +6255,98 @@ body:has(.workspace-canvas--build) {
   .credit-run-toast,
   .credit-run-toast__progress { animation: none !important; transition: none !important; }
 }
+
+/* Document tools use a paper-like workspace, even when the surrounding studio is dark. */
+.documents-viewer,
+.documents-ai-dialog {
+  --background: #fff;
+  --foreground: #172033;
+  --card: #fff;
+  --card-foreground: #172033;
+  --popover: #fff;
+  --popover-foreground: #172033;
+  --primary: #1769e8;
+  --primary-foreground: #fff;
+  --secondary: #f1f5fb;
+  --secondary-foreground: #24324a;
+  --muted: #f3f6fb;
+  --muted-foreground: #64748b;
+  --accent: #eaf2ff;
+  --accent-foreground: #1559bd;
+  --border: #dce4ef;
+  --input: #d5deeb;
+  --ring: #4285f4;
+  color: var(--foreground);
+  background: var(--background);
+  border-color: var(--border);
+}
+
+.documents-viewer-overlay {
+  background: rgb(18 29 48 / 58%) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.documents-ai-overlay {
+  background: rgb(18 29 48 / 36%) !important;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.documents-viewer {
+  box-shadow: 0 28px 90px -32px rgb(8 24 50 / 48%);
+}
+
+.documents-viewer__tabs [data-state="active"] {
+  color: #1559bd;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(15 35 65 / 12%);
+}
+
+.documents-viewer__tab-panel {
+  scrollbar-color: #b7c7dc transparent;
+  scrollbar-width: thin;
+}
+
+.documents-viewer__paper-stage {
+  background:
+    radial-gradient(circle at 12% 4%, rgb(66 133 244 / 7%), transparent 24rem),
+    #edf2f8;
+}
+
+.documents-viewer .paper-sheet {
+  min-height: 10in;
+  box-shadow: 0 4px 18px rgb(23 32 51 / 14%), 0 1px 3px rgb(23 32 51 / 8%);
+}
+
+.documents-viewer .panel {
+  border-color: #dce4ef;
+  background: linear-gradient(145deg, #fff, #f7f9fd);
+  box-shadow: 0 1px 2px rgb(23 32 51 / 4%), 0 10px 24px -20px rgb(23 32 51 / 22%);
+}
+
+.documents-ai-dialog {
+  box-shadow: 0 24px 70px -24px rgb(8 24 50 / 35%);
+}
+
+@media (max-width: 640px) {
+  .documents-viewer {
+    width: calc(100vw - 1rem);
+    height: calc(100dvh - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: 1.25rem;
+  }
+
+  .documents-viewer__paper-stage {
+    padding: 0.75rem;
+  }
+
+  .documents-viewer .paper-sheet {
+    min-height: auto;
+    padding: 0.35in;
+  }
+
+  .documents-viewer .paper-columns {
+    column-count: 1;
+  }
+}

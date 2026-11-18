@@ -518,9 +518,9 @@ function Landing() {
                           kind={demoPreviewKinds[product.id] ?? "campus"}
                           title={product.title}
                         />
-                      ) : product.imageUrl ? (
+                      ) : "imageUrl" in product && typeof product.imageUrl === "string" && product.imageUrl ? (
                         <img
-                          src={product.imageUrl}
+                          src={String((product as { imageUrl?: string }).imageUrl)}
                           alt={`Preview image for ${product.title}`}
                           loading="lazy"
                           className="aspect-[16/10] w-full border-b border-[#e4e4e7] object-cover"
@@ -541,9 +541,9 @@ function Landing() {
                       )}
                       {product.demo && demoProjectBadges[product.id] ? (
                         <span
-                          className={`landing-product-badge landing-product-badge--${demoProjectBadges[product.id].tone}`}
+                          className={`landing-product-badge landing-product-badge--${demoProjectBadges[product.id]!.tone}`}
                         >
-                          {demoProjectBadges[product.id].label}
+                          {demoProjectBadges[product.id]!.label}
                         </span>
                       ) : null}
                     </div>

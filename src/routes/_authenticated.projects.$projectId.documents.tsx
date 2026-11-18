@@ -820,19 +820,22 @@ function DocumentViewer({
 
   return (
     <Dialog open onOpenChange={(v) => (v ? null : onClose())}>
-      <DialogContent className="max-h-[92vh] overflow-hidden sm:max-w-5xl">
-        <DialogHeader>
+      <DialogContent
+        overlayClassName="documents-viewer-overlay"
+        className="documents-viewer flex h-[min(92dvh,58rem)] max-h-[92dvh] w-[min(86rem,calc(100vw-2rem))] max-w-none flex-col gap-0 overflow-hidden rounded-3xl border p-0 shadow-2xl sm:max-w-none"
+      >
+        <DialogHeader className="shrink-0 border-b border-border/80 px-6 py-5 pr-14 text-left sm:px-8">
           <DialogTitle className="pr-8">{title}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm leading-relaxed">
             {doc.meta?.["doc_type_label"] ?? doc.doc_type} ·{" "}
             {doc.meta?.["format_label"] ?? doc.format}
             {doc.authors.length ? ` · ${doc.authors.map((a) => a.name).join(", ")}` : ""}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="paper" className="flex min-h-0 flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <TabsList>
+        <Tabs defaultValue="paper" className="documents-viewer__tabs flex min-h-0 flex-1 flex-col gap-0">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border/80 px-6 py-3 sm:px-8">
+            <TabsList className="h-10 rounded-full border border-border bg-muted/70 p-1">
               <TabsTrigger value="paper">Paper</TabsTrigger>
               <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="latex">LaTeX</TabsTrigger>
@@ -860,17 +863,19 @@ function DocumentViewer({
           </div>
 
           {/* Rendered paper — typeset like the real template */}
-          <TabsContent value="paper" className="mt-4 max-h-[64vh] overflow-y-auto pr-1">
-            <PaperSheet
-              title={title}
-              authors={doc.authors}
-              keywords={keywords}
-              sections={sections}
-            />
+          <TabsContent value="paper" className="documents-viewer__tab-panel mt-0 min-h-0 flex-1 overflow-auto p-5 sm:p-8">
+            <div className="documents-viewer__paper-stage min-h-full rounded-2xl p-4 sm:p-8">
+              <PaperSheet
+                title={title}
+                authors={doc.authors}
+                keywords={keywords}
+                sections={sections}
+              />
+            </div>
           </TabsContent>
 
           {/* Manual editing */}
-          <TabsContent value="edit" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">
+          <TabsContent value="edit" className="documents-viewer__tab-panel mt-0 min-h-0 flex-1 space-y-5 overflow-auto px-6 py-5 sm:px-8">
             <div className="space-y-2">
               <Label htmlFor="edit-title">Title</Label>
               <Input
@@ -902,7 +907,7 @@ function DocumentViewer({
                 />
               </div>
             ))}
-            <div className="sticky bottom-0 flex justify-end gap-2 bg-background/90 py-2 backdrop-blur">
+            <div className="sticky bottom-0 -mx-6 flex justify-end gap-2 border-t border-border/80 bg-background/95 px-6 py-3 backdrop-blur sm:-mx-8 sm:px-8">
               <Button disabled={!dirty || saveEdits.isPending} onClick={() => saveEdits.mutate()}>
                 {saveEdits.isPending ? (
                   <>
@@ -917,7 +922,7 @@ function DocumentViewer({
             </div>
           </TabsContent>
 
-          <TabsContent value="latex" className="mt-4 max-h-[64vh] overflow-y-auto">
+          <TabsContent value="latex" className="documents-viewer__tab-panel mt-0 min-h-0 flex-1 overflow-auto px-6 py-5 sm:px-8">
             <div className="mb-3 flex justify-end">
               <Button size="sm" variant="outline" disabled={!latex} onClick={copyLatex}>
                 {copied ? (
@@ -939,8 +944,8 @@ function DocumentViewer({
           </TabsContent>
 
           {/* Explicit originality / AI score check */}
-          <TabsContent value="score" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">
-            <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+          <TabsContent value="score" className="documents-viewer__tab-panel mt-0 min-h-0 flex-1 space-y-4 overflow-auto px-6 py-5 sm:px-8">
+            <div className="panel flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
               <div>
                 <p className="font-medium">AI &amp; plagiarism check</p>
                 <p className="text-xs text-muted-foreground">
@@ -1014,7 +1019,10 @@ function DocumentViewer({
 
         {askOpen ? (
           <Dialog open onOpenChange={(v) => (v ? null : setAskOpen(false))}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent
+              overlayClassName="documents-ai-overlay"
+              className="documents-ai-dialog w-[min(34rem,calc(100vw-2rem))] gap-5 rounded-3xl border p-6 shadow-2xl sm:max-w-lg sm:p-7"
+            >
               <DialogHeader>
                 <DialogTitle>Ask AI to edit</DialogTitle>
                 <DialogDescription>

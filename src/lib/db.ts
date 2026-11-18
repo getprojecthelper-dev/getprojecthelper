@@ -169,14 +169,15 @@ export function useProjectsOverview() {
       if (!projects?.length) return [];
 
       const [tasks, requirements, tests, docs, risks, build] = await Promise.all([
-        supabase.from("tasks").select("project_id,title,status,due_date,priority"),
-        supabase.from("requirements").select("project_id,status"),
-        supabase.from("test_cases").select("project_id,status"),
-        supabase.from("document_sections").select("project_id,status"),
-        supabase.from("risks").select("project_id,status,severity"),
+        supabase.from("tasks").select("project_id,title,status,due_date,priority").eq("user_id", uid),
+        supabase.from("requirements").select("project_id,status").eq("user_id", uid),
+        supabase.from("test_cases").select("project_id,status").eq("user_id", uid),
+        supabase.from("document_sections").select("project_id,status").eq("user_id", uid),
+        supabase.from("risks").select("project_id,status,severity").eq("user_id", uid),
         supabase
           .from("build_sections")
           .select("id,project_id,title,status,position")
+          .eq("user_id", uid)
           .order("position"),
       ]);
 

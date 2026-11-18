@@ -67,9 +67,9 @@ export const Route = createFileRoute("/_authenticated/new-project")({
 const STEPS = ["Your idea", "Pick a project", "Research papers", "Dataset", "Finalise"];
 
 const DIFFICULTIES = [
-  { value: "easy", label: "Easy" },
-  { value: "intermediate", label: "Intermediate" },
-  { value: "hard", label: "Hard" },
+  { value: "easy", label: "Easy", detail: "A guided first build", level: 1 },
+  { value: "intermediate", label: "Intermediate", detail: "A balanced challenge", level: 2 },
+  { value: "hard", label: "Hard", detail: "A deeper technical build", level: 3 },
 ] as const;
 
 type Difficulty = (typeof DIFFICULTIES)[number]["value"];
@@ -319,117 +319,277 @@ function NewProject() {
 
         {step === 0 ? (
           <div className="workspace-builder__form panel">
+            <div className="workspace-builder__form-intro">
+              <span>STEP 01 <span aria-hidden="true">/</span> PROJECT BRIEF</span>
+              <h2>Where should we start?</h2>
+              <p>Choose a starting point. You can shape the details in the next step.</p>
+            </div>
             <div className="workspace-builder__modes" role="group" aria-label="How to start">
               {(
                 [
-                  ["idea", "I have an idea"],
-                  ["suggest", "Suggest a project"],
-                  ["job", "From a job description"],
+                  {
+                    id: "idea",
+                    title: "I have an idea",
+                    detail: "Shape a project from a thought you already have.",
+                  },
+                  {
+                    id: "suggest",
+                    title: "Suggest a project",
+                    detail: "Choose a field and let us find a useful direction.",
+                  },
+                  {
+                    id: "job",
+                    title: "From a job description",
+                    detail: "Turn role requirements into a project you can show.",
+                  },
                 ] as const
-              ).map(([value, label]) => (
+              ).map((option) => (
                 <button
-                  key={value}
+                  key={option.id}
                   type="button"
-                  aria-pressed={mode === value}
-                  onClick={() => setMode(value)}
-                  className={cn("workspace-builder__mode", mode === value && "is-active")}
+                  aria-pressed={mode === option.id}
+                  onClick={() => setMode(option.id)}
+                  className={cn("workspace-builder__mode", mode === option.id && "is-active")}
                 >
-                  {label}
+                  <span
+                    className={`workspace-builder__mode-art workspace-builder__mode-art--${option.id}`}
+                    aria-hidden="true"
+                  >
+                    {option.id === "idea" ? (
+                      <span className="workspace-builder__idea-card-image" />
+                    ) : option.id === "suggest" ? (
+                      <span className="mode-art__idea-grid"><i /><i /><i /><i /></span>
+                    ) : (
+                      <span className="mode-art__document"><i /><i /><i /></span>
+                    )}
+                  </span>
+                  <span className="workspace-builder__mode-copy">
+                    <span className="workspace-builder__mode-title">{option.title}</span>
+                    <span className="workspace-builder__mode-detail">{option.detail}</span>
+                  </span>
+                  <span className="workspace-builder__mode-select" aria-hidden="true" />
                 </button>
               ))}
             </div>
 
             {mode === "job" ? (
-              <div className="space-y-2">
-                <Label htmlFor="jd">Paste the job description</Label>
-                <Textarea
-                  id="jd"
-                  rows={9}
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the full job posting — responsibilities, required skills and tools. We'll suggest projects that prove those skills."
-                  className="max-h-72"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {jobDescription.trim().length} characters — the more of the posting you paste, the
-                  closer the project matches.
-                </p>
+              <div className="workspace-builder__job-panel">
+                <div className="workspace-builder__job-entry">
+                  <div className="workspace-builder__job-label">
+                    <Label htmlFor="jd">Paste the job description</Label>
+                    <span>ROLE BRIEF</span>
+                  </div>
+                  <Textarea
+                    id="jd"
+                    rows={9}
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="Paste the role, required skills, responsibilities, or tools here. We’ll use them to shape a project that demonstrates what the employer needs."
+                    className="max-h-72"
+                  />
+                  <div className="workspace-builder__job-meta">
+                    <span>Include as much of the posting as you can for a closer match.</span>
+                    <span className="workspace-builder__job-count">
+                      <strong>{jobDescription.trim().length}</strong> characters
+                    </span>
+                  </div>
+                </div>
+                <aside
+                  className="workspace-builder__job-guide"
+                  aria-label="Helpful job description details"
+                >
+                  <div className="workspace-builder__job-art" aria-hidden="true">
+                    <span className="workspace-builder__job-paper">
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <span className="workspace-builder__job-highlight" />
+                  </div>
+                  <p className="workspace-builder__job-guide-label">FOR THE BEST MATCH</p>
+                  <h3>What to include</h3>
+                  <ul>
+                    <li>Key responsibilities</li>
+                    <li>Required skills and tools</li>
+                    <li>What success looks like</li>
+                  </ul>
+                  <p className="workspace-builder__job-guide-note">
+                    We’ll turn the role requirements into a project you can build and discuss.
+                  </p>
+                </aside>
               </div>
             ) : null}
 
             {mode === "idea" ? (
-              <div className="space-y-2">
-                <Label htmlFor="idea">Enter the project idea you want to build</Label>
-                <Textarea
-                  id="idea"
-                  rows={4}
-                  value={idea}
-                  onChange={(e) => setIdea(e.target.value)}
-                  placeholder="e.g. Something that predicts flight delays from historical data"
-                />
-              </div>
-            ) : null}
-
-            <div className="space-y-2">
-              <Label>Which domain does it belong to?</Label>
-              <Select value={domain} onValueChange={setDomain}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOMAINS.map((d) => (
-                    <SelectItem key={d.value} value={d.value}>
-                      {d.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {needsDataset
-                  ? "Data domains include a dataset selection step."
-                  : "This domain skips datasets and goes straight to implementation."}
-              </p>
-            </div>
-
-            {mode === "suggest" ? (
-              <div className="space-y-2">
-                <Label>How hard should it be?</Label>
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTIES.map((d) => (
-                    <button
-                      key={d.value}
-                      type="button"
-                      onClick={() => setDifficulty(d.value)}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-sm",
-                        difficulty === d.value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground",
-                      )}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <Label htmlFor="skills">
-                    Your skills <span className="text-muted-foreground">(optional)</span>
-                  </Label>
+              <div className="workspace-builder__idea-layout">
+                <div className="workspace-builder__idea-field space-y-2">
+                  <div className="workspace-builder__idea-label">
+                    <Label htmlFor="idea">Describe what you want to build</Label>
+                    <span>PROJECT IDEA</span>
+                  </div>
                   <Textarea
-                    id="skills"
-                    value={skills}
-                    onChange={(e) => setSkills(e.target.value)}
-                    rows={2}
-                    placeholder="e.g. Python, SQL, Excel, networking basics, stakeholder communication"
+                    id="idea"
+                    rows={5}
+                    value={idea}
+                    onChange={(e) => setIdea(e.target.value)}
+                    placeholder="For example: a dashboard that predicts flight delays from historical data"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Add tools or skills you already know (or want to learn) and we'll match the
-                    suggestions to them.
-                  </p>
+                  <div className="workspace-builder__examples" aria-label="Example project ideas">
+                    <span>START WITH</span>
+                    {[
+                      "Predict customer churn",
+                      "Track campus events",
+                      "Analyse energy use",
+                    ].map((example) => (
+                      <button key={example} type="button" onClick={() => setIdea(example)}>
+                        {example}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                <aside
+                  className="workspace-builder__idea-guide"
+                  aria-label="Project idea guidance"
+                >
+                  <div className="workspace-builder__idea-graphic" aria-hidden="true">
+                    <span className="workspace-builder__idea-ring" />
+                    <span className="workspace-builder__idea-core" />
+                    <span className="workspace-builder__idea-node workspace-builder__idea-node--one" />
+                    <span className="workspace-builder__idea-node workspace-builder__idea-node--two" />
+                    <span className="workspace-builder__idea-node workspace-builder__idea-node--three" />
+                    <span className="workspace-builder__idea-caption">A ROUGH IDEA IS ENOUGH</span>
+                  </div>
+                  <span className="workspace-builder__idea-guide-kicker">START WITH ONE THING</span>
+                  <h3>A problem worth solving.</h3>
+                  <p>Tell us who it helps, what it should do, or what you want to learn.</p>
+                  <div className="workspace-builder__idea-guide-steps">
+                    <span>
+                      <b>01</b> The problem
+                    </span>
+                    <span>
+                      <b>02</b> The people
+                    </span>
+                    <span>
+                      <b>03</b> The outcome
+                    </span>
+                  </div>
+                </aside>
               </div>
             ) : null}
+
+            <div
+              className={cn(
+                "workspace-builder__config-grid",
+                mode === "suggest" ? "is-suggesting" : "is-single",
+              )}
+            >
+              <section className="workspace-builder__config-card workspace-builder__domain-card">
+                <div className="workspace-builder__config-heading">
+                  <span>PROJECT AREA</span>
+                  <Label htmlFor="project-domain">Which domain does it belong to?</Label>
+                </div>
+                <Select value={domain} onValueChange={setDomain}>
+                  <SelectTrigger id="project-domain">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOMAINS.map((d) => (
+                      <SelectItem key={d.value} value={d.value}>
+                        {d.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="workspace-builder__domain-note">
+                  <span className={needsDataset ? "is-data" : "is-build"} aria-hidden="true" />
+                  {needsDataset
+                    ? "Includes a dataset selection step."
+                    : "Goes straight to implementation."}
+                </p>
+              </section>
+
+              {mode === "suggest" ? (
+                <>
+                  <section className="workspace-builder__config-card workspace-builder__difficulty-card">
+                    <div className="workspace-builder__config-heading">
+                      <span>PROJECT LEVEL</span>
+                      <p>How challenging should it be?</p>
+                    </div>
+                    <div
+                      className="workspace-builder__difficulty-options"
+                      role="group"
+                      aria-label="Project difficulty"
+                    >
+                      {DIFFICULTIES.map((d) => (
+                        <button
+                          key={d.value}
+                          type="button"
+                          aria-pressed={difficulty === d.value}
+                          onClick={() => setDifficulty(d.value)}
+                          className={cn(
+                            "workspace-builder__difficulty-option",
+                            difficulty === d.value && "is-selected",
+                          )}
+                        >
+                          <span className="workspace-builder__difficulty-scale" aria-hidden="true">
+                            {[1, 2, 3].map((step) => (
+                              <i key={step} className={step <= d.level ? "is-filled" : ""} />
+                            ))}
+                          </span>
+                          <span className="workspace-builder__difficulty-name">{d.label}</span>
+                          <span className="workspace-builder__difficulty-detail">{d.detail}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="workspace-builder__config-card workspace-builder__skills-card">
+                    <div className="workspace-builder__config-heading">
+                      <span>YOUR TOOLKIT <span className="is-optional">OPTIONAL</span></span>
+                      <Label htmlFor="skills">What do you already know?</Label>
+                    </div>
+                    <Textarea
+                      id="skills"
+                      value={skills}
+                      onChange={(e) => setSkills(e.target.value)}
+                      rows={2}
+                      placeholder="Add languages, tools, or skills you want to use"
+                    />
+                    <div
+                      className="workspace-builder__skill-suggestions"
+                      aria-label="Suggested skills"
+                    >
+                      <span>QUICK ADD</span>
+                      {["Python", "SQL", "React", "Figma"].map((skill) => (
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() =>
+                            setSkills((current) => {
+                              const values = current
+                                .split(/[\n,;]/)
+                                .map((value) => value.trim())
+                                .filter(Boolean);
+                              return values.some(
+                                (value) => value.toLowerCase() === skill.toLowerCase(),
+                              )
+                                ? current
+                                : [...values, skill].join(", ");
+                            })
+                          }
+                        >
+                          + {skill}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="workspace-builder__skills-note">
+                      We’ll use your toolkit to tailor the project ideas to your experience.
+                    </p>
+                  </section>
+                </>
+              ) : null}
+            </div>
 
             <div className="workspace-builder__form-footer">
               <p className="text-xs text-muted-foreground">

@@ -20,10 +20,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const backTarget = peekBackTarget(pathname);
   const isWorkspaceHome = pathname === "/welcome";
   const isProjectOverview = /^\/projects\/[^/]+\/?$/.test(pathname);
-  const backAction = backTarget ? "history" : "workspace";
+  const isDocumentation = /\/documents$/.test(pathname);
+  const backAction = backTarget ? "history" : isWorkspaceHome ? "landing" : "workspace";
   return (
     <div
-      className={`workspace-canvas min-h-screen w-full ${pathname.endsWith("/build") ? "workspace-canvas--build" : ""} ${isProjectOverview ? "workspace-canvas--overview" : ""}`}
+      className={`workspace-canvas min-h-screen w-full ${pathname.endsWith("/build") ? "workspace-canvas--build" : ""} ${isProjectOverview ? "workspace-canvas--overview" : ""} ${isDocumentation ? "workspace-canvas--documents" : ""}`}
     >
       <header className="workspace-topbar sticky top-0 z-30 border-b backdrop-blur">
         <div className="workspace-topbar__inner mx-auto flex h-[4.5rem] w-full max-w-[96rem] items-center justify-between gap-3 px-4 sm:px-7 lg:px-10">
@@ -31,13 +32,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Back"
-              title={backAction === "workspace" ? "Back to workspace" : "Previous page"}
-              disabled={isWorkspaceHome && !backTarget}
+              aria-label={backAction === "landing" ? "Go to landing page" : "Back"}
+              title={
+                backAction === "landing"
+                  ? "Back to landing page"
+                  : backAction === "workspace"
+                    ? "Back to workspace"
+                    : "Previous page"
+              }
               className="workspace-topbar__back size-10 rounded-full text-[#52525b] hover:bg-[#f4f4f5] hover:text-[#111] disabled:cursor-not-allowed disabled:opacity-40"
               onClick={() => {
                 const target = takeBackTarget(pathname);
                 if (target) void navigate({ to: target as never });
+                else if (isWorkspaceHome) void navigate({ to: "/" });
                 else void navigate({ to: "/welcome", replace: true });
               }}
             >

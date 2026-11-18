@@ -6,10 +6,13 @@ import { withMeter } from "@/components/credit-meter";
 import {
   ArrowLeft,
   ArrowRight,
+  BookOpenText,
   Check,
+  ClipboardList,
   Copy,
   Download,
   FileText,
+  Lightbulb,
   Loader2,
   Plus,
   Save,
@@ -101,6 +104,13 @@ function DocumentsPage() {
     queryFn: () => list({ data: { projectId } }),
   });
 
+  const templateIcons = {
+    research_paper: FileText,
+    literature_review: BookOpenText,
+    project_report: ClipboardList,
+    synopsis: Lightbulb,
+  } as const;
+
   const del = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
@@ -111,78 +121,140 @@ function DocumentsPage() {
   });
 
   return (
-    <div className="space-y-8 p-6">
-      <PageHeader
-        title="Documentation"
-        description="Choose a template, tell us who is on the team, import your project — the AI writes the document, shows it here, and hands you compile-ready LaTeX."
-      />
+    <div className="documents-page space-y-9 p-5 sm:p-7 lg:p-9">
+      <header className="documents-page__header">
+        <div className="documents-page__eyebrow">PROJECT DELIVERABLES</div>
+        <PageHeader
+          title="Documentation"
+          description="Turn your project into a paper, review, report, or proposal. Choose a format to get started."
+        />
+        <p className="documents-page__note">
+          Drafts stay editable here and can be exported as compile-ready LaTeX.
+        </p>
+      </header>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Templates
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {DOC_TYPES.map((type) => (
-            <button
-              key={type.id}
-              type="button"
-              onClick={() => setWizardType(type)}
-              className="panel flex h-full flex-col gap-3 p-5 text-left transition-colors"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileText className="h-4.5 w-4.5" />
-              </span>
-              <span className="font-display text-base">{type.label}</span>
-              <span className="text-sm text-muted-foreground">{type.description}</span>
-              <span className="mt-auto flex flex-wrap gap-1 pt-2">
-                {type.formats.slice(0, 3).map((f) => (
-                  <Badge key={f.id} variant="secondary" className="text-[11px]">
-                    {f.label}
-                  </Badge>
-                ))}
-                {type.formats.length > 3 ? (
-                  <Badge variant="secondary" className="text-[11px]">
-                    +{type.formats.length - 3}
-                  </Badge>
-                ) : null}
-              </span>
-            </button>
-          ))}
+      <section className="documents-page__section" aria-labelledby="document-templates-title">
+        <div className="documents-page__section-heading">
+          <div>
+            <h2 id="document-templates-title">Choose a document</h2>
+            <p>Start with a structure that fits the work you need to present.</p>
+          </div>
+          <span>{String(DOC_TYPES.length).padStart(2, "0")} document types</span>
+        </div>
+        <div className="documents-page__templates">
+          {DOC_TYPES.map((type, index) => {
+            const TemplateIcon = templateIcons[type.id as keyof typeof templateIcons] ?? FileText;
+            return (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => setWizardType(type)}
+                className={`documents-page__template documents-page__template--${type.id}`}
+              >
+                <span className="documents-page__template-topline">
+                  <span className="documents-page__template-icon">
+                    <TemplateIcon aria-hidden="true" />
+                  </span>
+                  <span className="documents-page__template-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </span>
+                <span className="documents-page__template-title">{type.label}</span>
+                <span className="documents-page__template-description">{type.description}</span>
+                <span className="documents-page__template-formats">
+                  {type.formats.slice(0, 2).map((f) => (
+                    <Badge key={f.id} variant="secondary" className="documents-page__format-badge">
+                      {f.label}
+                    </Badge>
+                  ))}
+                  {type.formats.length > 2 ? (
+                    <span className="documents-page__more-formats">
+                      +{type.formats.length - 2} more
+                    </span>
+                  ) : null}
+                </span>
+                <span className="documents-page__template-action">
+                  Choose format <ArrowRight aria-hidden="true" />
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Your documents
-        </h2>
+      <section
+        className="documents-page__section documents-page__saved"
+        aria-labelledby="saved-documents-title"
+      >
+        <div className="documents-page__section-heading">
+          <div>
+            <h2 id="saved-documents-title">Your documents</h2>
+            <p>Documents created for this project appear here.</p>
+          </div>
+          {(docs.data ?? []).length > 0 ? <span>{(docs.data ?? []).length} saved</span> : null}
+        </div>
         {docs.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="documents-page__empty" role="status">
+            Loading your documents…
+          </div>
+        ) : docs.isError ? (
+          <div className="documents-page__empty" role="alert">
+            <span className="documents-page__empty-mark">
+              <FileText aria-hidden="true" />
+            </span>
+            <div>
+              <p>Couldn’t load your documents</p>
+              <span>Try again in a moment.</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="documents-page__open-button ml-auto"
+              onClick={() => void docs.refetch()}
+            >
+              Try again
+            </Button>
+          </div>
         ) : (docs.data ?? []).length === 0 ? (
-          <p className="panel p-6 text-sm text-muted-foreground">
-            Nothing generated yet. Pick a template above to create your first document.
-          </p>
+          <div className="documents-page__empty">
+            <span className="documents-page__empty-mark">
+              <FileText aria-hidden="true" />
+            </span>
+            <div>
+              <p>No documents yet</p>
+              <span>Choose a template above to create the first one.</span>
+            </div>
+          </div>
         ) : (
-          <div className="space-y-2">
+          <div className="documents-page__document-list">
             {(docs.data ?? []).map((doc) => (
-              <div
-                key={doc.id}
-                className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{doc.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+              <div key={doc.id} className="documents-page__document">
+                <span className="documents-page__document-icon">
+                  <FileText aria-hidden="true" />
+                </span>
+                <div className="documents-page__document-copy">
+                  <p className="documents-page__document-title">{doc.title}</p>
+                  <p className="documents-page__document-meta">
                     {doc.meta?.["doc_type_label"] ?? doc.doc_type} ·{" "}
                     {doc.meta?.["format_label"] ?? doc.format} ·{" "}
-                    {new Date(doc.created_at).toLocaleDateString()}
+                    {new Date(doc.created_at).toLocaleDateString(undefined, {
+                      dateStyle: "medium",
+                    })}
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setOpen(doc)}>
+                <div className="documents-page__document-actions">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="documents-page__open-button"
+                    onClick={() => setOpen(doc)}
+                  >
                     Open
                   </Button>
                   <Button
                     size="icon"
                     variant="ghost"
+                    className="documents-page__delete-button"
                     aria-label="Delete document"
                     onClick={() => del.mutate(doc.id)}
                   >
@@ -224,7 +296,7 @@ function DocumentsPage() {
 /* ------------------------------------------------------------------ */
 
 function CreditBreakdown({ importedCount }: { importedCount: number }) {
-  const draft = CREDIT_HOLDS.generate_document + Math.min(importedCount, 3);
+  const draft = CREDIT_HOLDS.generate_document;
   const rows: { step: string; note: string; cost: number }[] = [
     { step: "Format selection", note: "Choosing a template layout", cost: 0 },
     {
@@ -232,14 +304,18 @@ function CreditBreakdown({ importedCount }: { importedCount: number }) {
       note: importedCount
         ? `${importedCount} extra project${importedCount > 1 ? "s" : ""} added as context`
         : "This project is always included",
-      cost: importedCount ? Math.min(importedCount, 3) : 0,
+      cost: 0,
     },
-    { step: "AI draft", note: "Writing and formatting the document", cost: CREDIT_HOLDS.generate_document },
+    {
+      step: "AI draft",
+      note: "Writing and formatting the document",
+      cost: CREDIT_HOLDS.generate_document,
+    },
     { step: "Export (LaTeX / text)", note: "Copy and download are free", cost: 0 },
   ];
 
   return (
-    <div className="panel space-y-3 p-4">
+    <div className="documents-wizard__credits panel space-y-3 p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Credit breakdown
@@ -268,8 +344,8 @@ function CreditBreakdown({ importedCount }: { importedCount: number }) {
         <span className="font-display text-base">{formatCredits(draft)} credits</span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Credits are held up front and settled to your real usage once the document is ready — you
-        are only charged for what the AI actually uses.
+        {formatCredits(draft)} credits are held up front. The final charge follows actual AI usage,
+        and any unused credits are returned when the document is ready.
       </p>
     </div>
   );
@@ -358,46 +434,47 @@ function DocumentWizard({
 
   return (
     <Dialog open onOpenChange={(v) => (v ? null : onClose())}>
-      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="documents-wizard max-h-[92dvh] overflow-y-auto sm:max-w-3xl">
+        <DialogHeader className="documents-wizard__header pr-10">
           <DialogTitle>{type.label}</DialogTitle>
           <DialogDescription>
             {["Choose a format", "Import project data", "Paper details & members"][step]}
           </DialogDescription>
         </DialogHeader>
 
-        <ol className="flex items-center gap-2 text-xs text-muted-foreground">
+        <ol className="documents-wizard__steps">
           {["Format", "Import", "Details"].map((label, i) => (
-            <li key={label} className="flex items-center gap-2">
-              <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
-                  i <= step ? "bg-primary text-primary-foreground" : "bg-muted"
-                }`}
-              >
+            <li
+              key={label}
+              className={`documents-wizard__step ${i === step ? "is-current" : i < step ? "is-complete" : ""}`}
+              aria-current={i === step ? "step" : undefined}
+            >
+              <span className="documents-wizard__step-number">
                 {i < step ? <Check className="h-3 w-3" /> : i + 1}
               </span>
-              {label}
-              {i < 2 ? <span className="mx-1 h-px w-6 bg-border" /> : null}
+              <span>{label}</span>
+              {i < 2 ? <span className="documents-wizard__step-rule" /> : null}
             </li>
           ))}
         </ol>
 
         {step === 0 ? (
-          <div className="space-y-2">
+          <div className="documents-wizard__formats">
             {type.formats.map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => setFormat(f)}
-                className={`w-full rounded-xl border p-4 text-left ${
-                  format?.id === f.id ? "border-primary bg-primary/5" : "border-border"
-                }`}
+                className={`documents-wizard__format ${format?.id === f.id ? "is-selected" : ""}`}
+                aria-pressed={format?.id === f.id}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium">{f.label}</span>
-                  {format?.id === f.id ? <Check className="h-4 w-4 text-primary" /> : null}
+                <div className="documents-wizard__format-heading">
+                  <span>{f.label}</span>
+                  <span className="documents-wizard__format-check">
+                    {format?.id === f.id ? <Check aria-hidden="true" /> : null}
+                  </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{f.hint}</p>
+                <p>{f.hint}</p>
               </button>
             ))}
           </div>
@@ -552,8 +629,7 @@ function DocumentWizard({
 
         <CreditBreakdown importedCount={imported.length} />
 
-        <DialogFooter className="gap-2 sm:justify-between">
-
+        <DialogFooter className="documents-wizard__footer gap-2 sm:justify-between">
           <Button
             variant="ghost"
             onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}
@@ -785,9 +861,13 @@ function DocumentViewer({
 
           {/* Rendered paper — typeset like the real template */}
           <TabsContent value="paper" className="mt-4 max-h-[64vh] overflow-y-auto pr-1">
-            <PaperSheet title={title} authors={doc.authors} keywords={keywords} sections={sections} />
+            <PaperSheet
+              title={title}
+              authors={doc.authors}
+              keywords={keywords}
+              sections={sections}
+            />
           </TabsContent>
-
 
           {/* Manual editing */}
           <TabsContent value="edit" className="mt-4 max-h-[64vh] space-y-4 overflow-y-auto pr-1">

@@ -18,6 +18,7 @@ export interface JsonRequest {
   input: string;
   name: string;
   schema: Record<string, unknown>;
+  maxOutputTokens?: number;
   usage?: UsageMeta;
 }
 
@@ -69,6 +70,7 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
       model: MODEL,
       instructions: req.instructions,
       input: req.input,
+      ...(req.maxOutputTokens ? { max_output_tokens: req.maxOutputTokens } : {}),
       stream: true,
       reasoning: { effort: "low", summary: "auto" },
       text: {

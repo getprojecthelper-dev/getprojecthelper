@@ -26,30 +26,20 @@ export function LowCreditsBanner() {
   const cheapest = cheapestPack();
 
   return (
-    <div
-      role="status"
-      className={
-        empty
-          ? "border-b border-destructive/30 bg-destructive/10"
-          : "border-b border-primary/30 bg-primary/10"
-      }
-    >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-5 py-2 text-sm">
-        <AlertTriangle
-          className={empty ? "h-4 w-4 text-destructive" : "h-4 w-4 text-primary"}
-        />
-        <span className="font-medium">
-          {empty ? "You're out of AI credits." : `Only ${formatCredits(data.balance)} AI credits left.`}
+    <div role="status" data-empty={empty} className="workspace-credit-notice">
+      <div className="workspace-credit-notice__inner">
+        <AlertTriangle className="workspace-credit-notice__icon" aria-hidden="true" />
+        <span className="workspace-credit-notice__title">
+          {empty
+            ? "You're out of AI credits."
+            : `Only ${formatCredits(data.balance)} AI credits left.`}
         </span>
-        <span className="text-muted-foreground">
+        <span className="workspace-credit-notice__detail">
           {empty
             ? "Redeem a code or grab a pack to keep generating."
             : `Top up from ${formatMoney(cheapest.priceUsd, "USD")} for ${cheapest.credits} credits.`}
         </span>
-        <Link
-          to="/credits"
-          className="font-semibold text-primary underline-offset-4 hover:underline"
-        >
+        <Link to="/credits" className="workspace-credit-notice__action">
           Add credits
         </Link>
       </div>

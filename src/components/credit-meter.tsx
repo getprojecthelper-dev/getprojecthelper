@@ -4,7 +4,7 @@
  */
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Sparkles, Zap } from "lucide-react";
+import { Check, Loader2, Sparkles, Zap } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { ACTION_LABELS, formatCredits } from "@/lib/credit-costs";
@@ -168,43 +168,65 @@ export function CreditMeter() {
   const overHold = meter.active && running > meter.estimate;
 
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-50 w-[19rem] max-w-[calc(100vw-2.5rem)]">
+    <div className="pointer-events-none fixed bottom-5 right-5 z-50 w-[21rem] max-w-[calc(100vw-2.5rem)]">
       <div
         className={cn(
-          "pointer-events-auto rounded-xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur",
+          "credit-run-toast pointer-events-auto rounded-2xl border p-4 shadow-xl backdrop-blur",
           "animate-in fade-in slide-in-from-bottom-2",
+          meter.active ? "is-running" : meter.settling ? "is-settling" : "is-complete",
         )}
       >
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-sm font-medium">
-            {meter.active ? (
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            ) : (
-              <Sparkles className="h-4 w-4 text-primary" />
-            )}
-            {meter.active ? meter.label : meter.settling ? "Settling credits" : "Run complete"}
-          </span>
-          <span className="flex items-center gap-1 font-mono text-sm tabular-nums text-foreground">
-            <Zap className="h-3.5 w-3.5 text-primary" />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="credit-run-toast__mark" aria-hidden="true">
+              {meter.active ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : meter.settling ? (
+                <Sparkles className="h-4 w-4" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold leading-5">
+                {meter.active ? meter.label : meter.settling ? "Settling credits" : "Run complete"}
+              </span>
+              <span className="credit-run-toast__eyebrow">
+                {meter.active ? "AI IN PROGRESS" : meter.settling ? "FINALISING USAGE" : "USAGE SUMMARY"}
+              </span>
+            </span>
+          </div>
+          <span className="credit-run-toast__amount">
+            <Zap className="h-3.5 w-3.5" />
             {meter.settling ? "…" : formatCredits(meter.active ? running : meter.spent)}
+            <span>credits</span>
           </span>
         </div>
 
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+        <div
+          className="credit-run-toast__track mt-4 h-1.5 overflow-hidden rounded-full"
+          role="progressbar"
+          aria-label={meter.active ? "AI run progress" : "AI run complete"}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(Math.min(100, progress * 100))}
+        >
           <div
-            className="h-full rounded-full bg-primary transition-[width] duration-150 ease-out"
+            className="credit-run-toast__progress h-full rounded-full transition-[width] duration-300 ease-out"
             style={{ width: `${Math.min(100, progress * 100)}%` }}
           />
         </div>
 
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="credit-run-toast__message mt-3 text-xs">
           {meter.active
             ? overHold
               ? `Above the ${formatCredits(meter.estimate)}-credit hold — the run continues and you pay what it uses.`
               : `Holding ${formatCredits(meter.estimate)} credits — you only pay for what the run uses.`
             : meter.settling
               ? "Working out the exact cost…"
-              : `Charged ${formatCredits(meter.spent)} credits for this run.`}
+              : meter.spent === 0
+                ? "No credits were used for this run."
+                : `Charged ${formatCredits(meter.spent)} credits for this run.`}
         </p>
       </div>
     </div>

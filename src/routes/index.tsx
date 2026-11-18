@@ -160,7 +160,7 @@ function Landing() {
   }, []);
 
   return (
-    <div className={`landing-editorial min-h-screen bg-white text-[#111111] selection:bg-[#d4f5df] selection:text-[#111111]${motionReady ? " landing-motion-ready" : ""}`}>
+    <div className={`landing-editorial min-h-screen bg-[#f3f6fb] text-[#111111] selection:bg-[#d4f5df] selection:text-[#111111]${motionReady ? " landing-motion-ready" : ""}`}>
       <Header
         getStarted={getStarted}
         signup={signup}
@@ -637,7 +637,7 @@ function Landing() {
                 id="landing-faq-title"
                 className="mt-4 max-w-md font-display text-4xl font-semibold leading-[1.02] tracking-[-.055em] sm:text-[3.25rem]"
               >
-                Good to know
+                Frequently asked questions
               </h2>
               <p className="mt-4 max-w-sm text-base leading-7 text-[#5f6368]">
                 A few quick answers about turning a starting point into a project you can build and share.
@@ -806,11 +806,13 @@ function Footer({
   return (
     <footer className="landing-footer mx-2 mb-2 rounded-2xl border px-5 py-6 text-[#202124] sm:mx-4 sm:px-8 sm:py-8">
       <div className="mx-auto max-w-[90rem]">
-        <div className="border-b border-[#dadce0] pb-5">
-          <p className="font-display text-lg font-semibold tracking-[-.025em]">GetProjectHelper</p>
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#5f6368]">
-            From ideas to working solutions. Explore, plan, and build projects with confidence.
-          </p>
+        <div className="landing-footer__brandbar border-b border-[#dadce0] pb-5">
+          <div>
+            <p className="font-display text-lg font-semibold tracking-[-.025em]">GetProjectHelper</p>
+            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#5f6368]">
+              From ideas to working solutions. Explore, plan, and build projects with confidence.
+            </p>
+          </div>
         </div>
         <div className="grid gap-x-8 gap-y-7 border-b border-[#dadce0] py-6 sm:grid-cols-2 lg:grid-cols-4">
           <div>

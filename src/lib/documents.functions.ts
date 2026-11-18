@@ -121,6 +121,7 @@ export const generateDocument = createServerFn({ method: "POST" })
       latex: string;
     }>({
       usage: { userId: context.userId, projectId: data.projectId, feature: "generate_document" },
+      maxOutputTokens: 8000,
       name: "academic_document",
       instructions: `You are an academic writing assistant for students. You write a complete ${data.docTypeLabel} in the ${data.formatLabel} template. ${data.formatBrief}
 Rules:

@@ -38,7 +38,10 @@ export const CREDIT_HOLDS: Record<CreditAction, number> = {
   section_review: 4,
   section_fix: 5,
   mentor_chat: 3,
-  generate_document: 12,
+  // Reserve for a substantial draft while avoiding an inflated upfront hold.
+  // The document generation output is capped at 8K tokens (40 credits), with
+  // the remaining allowance covering prompt input; actual usage is settled.
+  generate_document: 50,
   revise_document: 8,
   analyze_document: 5,
   pm_schedule: 6,
@@ -59,7 +62,7 @@ export const ACTION_LABELS: Record<string, { label: string; estimate: number }> 
   generate_section: { label: "Writing this step", estimate: 10 },
   fix_section: { label: "Fixing your error", estimate: 5 },
   mentor_chat: { label: "Mentor is thinking", estimate: 3 },
-  generate_document: { label: "Writing your document", estimate: 12 },
+  generate_document: { label: "Writing your document", estimate: 50 },
   revise_document: { label: "Revising your paper", estimate: 8 },
   analyze_document: { label: "Checking originality", estimate: 5 },
   pm_schedule: { label: "Building your schedule", estimate: 6 },

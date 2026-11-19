@@ -13,12 +13,12 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border/60">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-display font-semibold">
+    <div className="landing-editorial legal-page min-h-screen">
+      <header className="landing-header border-b border-border/60">
+        <div className="landing-header__inner mx-auto flex max-w-5xl items-center justify-between px-5 sm:px-6">
+          <Link to="/" className="landing-header__brand flex items-center gap-2 font-display font-semibold">
             <img src={brandMark} alt="" width={512} height={512} className="h-6 w-6" />
-            Project Helper
+            GetProjectHelper
           </Link>
         </div>
       </header>
@@ -34,12 +34,12 @@ export function LegalPage({
         </article>
       </main>
 
-      <footer className="border-t border-border">
+      <footer className="landing-footer border-t border-border">
         <nav className="mx-auto flex max-w-3xl flex-wrap gap-x-6 gap-y-2 px-5 py-8 text-sm text-muted-foreground sm:px-6" aria-label="Legal">
           <Link to="/terms" className="hover:text-foreground">Terms</Link>
           <Link to="/refund-policy" className="hover:text-foreground">Refund policy</Link>
           <Link to="/privacy" className="hover:text-foreground">Privacy notice</Link>
-          <span className="sm:ml-auto">© 2026 Sizcon Studios</span>
+          <span className="sm:ml-auto">© 2026 GetProjectHelper</span>
         </nav>
       </footer>
     </div>

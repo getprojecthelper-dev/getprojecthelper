@@ -56,6 +56,8 @@ const technologyColors: Record<string, string> = {
   fastapi: "#00897b",
 };
 
+const COOKIE_CONSENT_KEY = "project-helper-cookie-consent";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -83,6 +85,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [motionReady, setMotionReady] = useState(false);
+  const [showCookieNotice, setShowCookieNotice] = useState(false);
   const environment = getPaddleEnvironment();
   const fetchListings = useServerFn(listHomepageListings);
   const { data: listings = [] } = useQuery({
@@ -158,6 +161,15 @@ function Landing() {
     targets.forEach((target) => observer.observe(target));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    setShowCookieNotice(window.localStorage.getItem(COOKIE_CONSENT_KEY) === null);
+  }, []);
+
+  const saveCookiePreference = (preference: "accepted" | "declined") => {
+    window.localStorage.setItem(COOKIE_CONSENT_KEY, preference);
+    setShowCookieNotice(false);
+  };
 
   return (
     <div className={`landing-editorial min-h-screen bg-[#f3f6fb] text-[#111111] selection:bg-[#d4f5df] selection:text-[#111111]${motionReady ? " landing-motion-ready" : ""}`}>
@@ -670,7 +682,54 @@ function Landing() {
         products={products}
         productSearch={productSearch}
       />
+      {showCookieNotice && <CookieNotice onChoice={saveCookiePreference} />}
     </div>
+  );
+}
+
+function CookieNotice({
+  onChoice,
+}: {
+  onChoice: (preference: "accepted" | "declined") => void;
+}) {
+  return (
+    <section
+      className="landing-cookie-notice"
+      aria-labelledby="cookie-notice-title"
+      aria-describedby="cookie-notice-description"
+    >
+      <div className="landing-cookie-notice__content">
+        <div>
+          <h2 id="cookie-notice-title">Your cookie choice</h2>
+          <p id="cookie-notice-description">
+            We use essential cookies to keep Project Helper working. You can also allow optional
+            cookies that help us improve the website.
+          </p>
+        </div>
+      </div>
+      <div className="landing-cookie-notice__footer">
+        <Link to="/privacy" className="landing-cookie-notice__policy">
+          Read our Privacy Notice
+        </Link>
+        <div className="landing-cookie-notice__actions">
+          <Button
+            type="button"
+            variant="outline"
+            className="landing-cookie-notice__reject"
+            onClick={() => onChoice("declined")}
+          >
+            Do not accept
+          </Button>
+          <Button
+            type="button"
+            className="landing-cookie-notice__accept"
+            onClick={() => onChoice("accepted")}
+          >
+            Accept cookies
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -827,10 +886,10 @@ function Footer({
               >
                 Buy a Product
               </Link>
-              <a href="#how-it-works">
+              <a href="/how-it-works">
                 How It Works
               </a>
-              <a href="mailto:support@getprojecthelper.com">
+              <a href="/contact">
                 Contact Us
               </a>
             </div>
@@ -847,32 +906,30 @@ function Footer({
               <Link to="/refund-policy">
                 Refund Policy
               </Link>
-              <Link to="/privacy">
+              <a href="/cookie-policy">
                 Cookie Policy
-              </Link>
-              <Link to="/terms">
+              </a>
+              <a href="/license-agreement">
                 License Agreement
-              </Link>
+              </a>
             </div>
           </div>
           <div>
             <p className="font-display text-sm font-semibold text-[#202124]">Trust &amp; Safety</p>
             <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
-              <a href="#ai-usage-disclaimer">
+              <a href="/ai-usage-disclaimer">
                 AI Usage Disclaimer
               </a>
-              <Link to="/privacy">
+              <a href="/data-protection">
                 Data Protection
-              </Link>
-              <Link to="/terms">
+              </a>
+              <a href="/acceptable-use">
                 Acceptable Use
-              </Link>
-              <Link to="/privacy">
+              </a>
+              <a href="/security">
                 Security
-              </Link>
-              <a
-                href="mailto:support@getprojecthelper.com?subject=Report%20an%20issue"
-              >
+              </a>
+              <a href="/report-an-issue">
                 Report an Issue
               </a>
             </div>
@@ -880,27 +937,19 @@ function Footer({
           <div>
             <p className="font-display text-sm font-semibold text-[#202124]">Company &amp; Support</p>
             <div className="landing-footer__links mt-3 grid justify-items-start gap-1 text-sm text-[#5f6368]">
-              <a href="#get-project">
+              <a href="/about-us">
                 About Us
               </a>
-              <a
-                href="mailto:support@getprojecthelper.com?subject=Help%20request"
-              >
+              <a href="/help-center">
                 Help Center
               </a>
-              <a
-                href="mailto:support@getprojecthelper.com?subject=Grievance%20redressal"
-              >
+              <a href="/grievance-redressal">
                 Grievance Redressal
               </a>
-              <a
-                href="mailto:support@getprojecthelper.com"
-              >
+              <a href="/contact">
                 Contact
               </a>
-              <a
-                href="mailto:support@getprojecthelper.com?subject=Accessibility%20feedback"
-              >
+              <a href="/accessibility">
                 Accessibility
               </a>
             </div>

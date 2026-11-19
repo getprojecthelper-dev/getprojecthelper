@@ -71,6 +71,13 @@
       "when": 1794682825746,
       "tag": "0009_lock_plan_lookup_and_reopen_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795091983000,
+      "tag": "0010_three_public_plans",
+      "breakpoints": true
     }
   ]
 }

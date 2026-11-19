@@ -1,4 +1,4 @@
-/** Subscription plans. 1 credit ≈ 1,000 tokens, so credits = tokens / 1000. */
+/** Subscription plan allowances are expressed in customer-facing AI credits. */
 export type PlanId = "free" | "starter" | "student" | "professional";
 
 export interface Plan {
@@ -7,33 +7,83 @@ export interface Plan {
   inrPrice: number;
   priceId: string | null;
   tagline: string;
-  tokens: string;
   credits: number;
   projectLimit: number;
   badge?: string;
+  /** Hidden from new purchases while existing subscribers keep their plan. */
+  isPublic?: boolean;
   features: string[];
 }
 
 export const PLANS: Plan[] = [
   {
-    id: "free", name: "New User", inrPrice: 0, priceId: null, tagline: "One-time welcome allowance",
-    tokens: "100K", credits: 100, projectLimit: 1,
-    features: ["100K token-equivalent credits", "1 project trial", "Basic project ideas", "Sample documentation", "Limited AI Mentor"],
+    id: "free",
+    name: "Free",
+    inrPrice: 0,
+    priceId: null,
+    tagline: "Explore your first project idea",
+    credits: 100,
+    projectLimit: 1,
+    features: [
+      "100 free joining credits",
+      "1 active project",
+      "Download files and folders as ZIP",
+      "Project documentation",
+    ],
   },
   {
-    id: "starter", name: "Starter", inrPrice: 199, priceId: "starter_monthly", tagline: "For beginners",
-    tokens: "1M", credits: 1000, projectLimit: 2,
-    features: ["1M token-equivalent credits", "2 active projects", "Problem statements and abstracts", "Basic code generation", "README and documentation", "ZIP downloads"],
+    id: "starter",
+    name: "Starter",
+    inrPrice: 199,
+    priceId: "starter_monthly",
+    tagline: "Plan your first complete project",
+    credits: 1000,
+    projectLimit: 2,
+    isPublic: false,
+    features: [
+      "1,000 AI credits",
+      "2 active projects",
+      "Everything in Free",
+      "Requirements, tasks and schedule",
+      "Research and dataset guidance",
+      "Core project documents",
+      "Standard AI Mentor",
+    ],
   },
   {
-    id: "student", name: "Student", inrPrice: 399, priceId: "student_monthly", tagline: "Best value", badge: "Best value",
-    tokens: "3M", credits: 3000, projectLimit: 5,
-    features: ["3M token-equivalent credits", "5 active projects", "Complete Python and ML projects", "Dataset recommendations", "Full project documentation", "Code debugging and regeneration", "AI Mentor", "ZIP downloads"],
+    id: "student",
+    name: "Student",
+    inrPrice: 399,
+    priceId: "student_monthly",
+    tagline: "For students building standout projects",
+    badge: "Best value",
+    credits: 1000,
+    projectLimit: 3,
+    features: [
+      "1,000 credits each month",
+      "3 active projects",
+      "Better project suggestions",
+      "Find relevant research papers",
+      "Student viva practice",
+      "Project documentation",
+      "AI Project Mentor",
+      "Build projects from a job description",
+    ],
   },
   {
-    id: "professional", name: "Professional", inrPrice: 999, priceId: "professional_monthly", tagline: "For serious builders",
-    tokens: "10M", credits: 10000, projectLimit: 15,
-    features: ["10M token-equivalent credits", "15 active projects", "Advanced full-stack development", "More code regeneration", "Advanced debugging", "Priority processing", "Complete project documentation", "Higher usage limits"],
+    id: "professional",
+    name: "Max",
+    inrPrice: 999,
+    priceId: "professional_monthly",
+    tagline: "For serious, production-ready builds",
+    credits: 3000,
+    projectLimit: 15,
+    features: [
+      "3,000 total credits",
+      "15 active projects",
+      "Everything in Student",
+      "Production-level code",
+    ],
   },
 ];
 

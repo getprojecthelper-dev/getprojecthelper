@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
 import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
+import { ProjectFolderSetup } from "@/components/project-folder-setup";
 import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
@@ -472,7 +473,7 @@ function BuildPage() {
   return (
     <div
       ref={workspaceRef}
-      className="build-screen workspace-home-surface grid min-w-0 gap-5 md:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]"
+      className="build-screen workspace-home-surface grid min-w-0 gap-5 md:grid-cols-[minmax(20rem,0.72fr)_minmax(0,1.28fr)]"
       style={workspaceHeight ? { height: workspaceHeight } : undefined}
     >
       <div className="build-roadmap min-w-0 md:h-full md:min-h-0 md:overflow-y-auto md:pr-2">
@@ -485,10 +486,14 @@ function BuildPage() {
           projectName={meta?.name ?? "Project"}
           activeFile={editor}
           generating={generateMutation.isPending}
-          terminal={(editorSection?.blocks ?? [])
-            .filter(isTerminalBlock)
-            .map((b) => b.code)
-            .join("\n\n")}
+          terminal={
+            editorSection?.structure
+              ? ""
+              : (editorSection?.blocks ?? [])
+                  .filter(isTerminalBlock)
+                  .map((b) => b.code)
+                  .join("\n\n")
+          }
         />
       </aside>
     </div>
@@ -632,49 +637,79 @@ function briefTone(title: string) {
 function OverviewBrief({ blocks }: { blocks: Block[] }) {
   if (!blocks.length) return null;
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="overview-brief grid gap-4">
       {blocks.map((block, i) => {
-        const tone = briefTone(block.title);
-        const Icon = tone.icon;
-        const body = (block.code ?? "").trim();
-        const bullets = block.explanation ?? [];
-        return (
-          <div
-            key={`${block.title}-${i}`}
-            className={cn(
-              "space-y-3 rounded-xl border bg-card p-5 shadow-sm",
-              tone.ring,
-              blocks.length % 2 === 1 && i === blocks.length - 1 ? "md:col-span-2" : "",
-            )}
-          >
-            <div className="flex items-center gap-2.5">
-              <span
-                className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}
-              >
-                <Icon className={cn("h-4 w-4", tone.text)} />
-              </span>
-              <p className="font-display text-base font-semibold tracking-tight">{block.title}</p>
-            </div>
-
-            {body ? (
-              <div className="space-y-2 text-[15px] leading-7 text-foreground/90">
-                {body.split(/\n{2,}/).map((para, p) => (
-                  <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
-                ))}
-              </div>
-            ) : null}
-
-            {bullets.length ? (
-              <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
-                {bullets.map((line, li) => (
-                  <li key={`b-${li}-${line.slice(0, 10)}`}>{line}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        );
+        return <OverviewBriefCard key={`${block.title}-${i}`} block={block} />;
       })}
     </div>
+  );
+}
+
+function OverviewBriefCard({ block }: { block: Block }) {
+  const [expanded, setExpanded] = useState(false);
+  const tone = briefTone(block.title);
+  const Icon = tone.icon;
+  const body = (block.code ?? "").trim();
+  const bullets = (block.explanation ?? []).flatMap((line) =>
+    line
+      .split(/(?<=[.!?])\s+(?=[A-Z])/)
+      .map((sentence) => sentence.trim())
+      .filter(Boolean),
+  );
+  const contentLength = body.length + bullets.join(" ").length;
+  const isLong = contentLength > 460;
+  const sectionLabel = /problem/i.test(block.title)
+    ? "The challenge"
+    : /solution|approach/i.test(block.title)
+      ? "How it works"
+      : /objective|criteria/i.test(block.title)
+        ? "What success looks like"
+        : "What you will use";
+
+  return (
+    <article className={cn("space-y-3 rounded-xl border bg-card p-4 shadow-sm", tone.ring)}>
+      <div className="flex items-center gap-2.5">
+        <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
+          <Icon className={cn("h-4 w-4", tone.text)} />
+        </span>
+        <div>
+          <p className="overview-brief__eyebrow">{sectionLabel}</p>
+          <h2 className="font-display text-lg font-bold tracking-tight">{block.title}</h2>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          "overview-brief__copy space-y-2 text-sm leading-6 text-foreground/90",
+          isLong && !expanded && "is-collapsed",
+        )}
+      >
+        {body.split(/\n{2,}/).map((para, p) => (
+          <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
+        ))}
+        {bullets.length ? (
+          <ul className="overview-brief__bullets space-y-2 text-sm leading-6 text-muted-foreground">
+            {bullets.map((line, li) => (
+              <li key={`b-${li}-${line.slice(0, 10)}`}>
+                <span className="overview-brief__bullet" aria-hidden="true" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      {isLong ? (
+        <button
+          type="button"
+          className="overview-brief__toggle text-sm font-medium text-primary"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show less" : "Read full details"}
+        </button>
+      ) : null}
+    </article>
   );
 }
 
@@ -1081,6 +1116,7 @@ function SectionCard({
           }, new Map<string, FileSpec>())
           .values(),
       );
+  const isSetupSection = Boolean(section.structure && playbook.buildsCode);
 
   // Data projects work inside notebooks: group this step's cells per notebook
   // so the student can download a ready-to-run .ipynb instead of copying cells.
@@ -1189,7 +1225,7 @@ function SectionCard({
               ) : (
                 <RefreshCw className="h-4 w-4" />
               )}
-              {generating ? "Regenerating…" : "Regenerate"}
+              {generating ? "Simplifying…" : isOverview ? "Make simpler" : "Regenerate"}
             </Button>
           ) : null}
           <Button
@@ -1205,7 +1241,7 @@ function SectionCard({
 
       {open ? (
         <div className="build-roadmap__step-body">
-          {section.question ? (
+          {section.question && !isSetupSection ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
           ) : null}
 
@@ -1216,28 +1252,31 @@ function SectionCard({
           ) : null}
 
           {section.structure && playbook.buildsCode ? (
-            <div className="space-y-3 rounded-xl border border-border bg-card p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="flex items-center gap-2 font-display text-base">
-                    <FolderTree className="h-4 w-4 text-primary" /> Project structure
-                  </p>
-                  <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                    Only the files this project actually needs. Every file comes down empty — you
-                    fill them in as you work through the steps below.
-                  </p>
+            <>
+              <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-2 font-display text-base">
+                      <FolderTree className="h-4 w-4 text-primary" /> Project structure
+                    </p>
+                    <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                      Your project is ready to download. The files are empty now and fill up as you
+                      complete each build step.
+                    </p>
+                  </div>
+                  <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
+                    {zipping ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Download className="h-5 w-5" />
+                    )}
+                    {zipping ? "Preparing…" : "Download project folder (.zip)"}
+                  </Button>
                 </div>
-                <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
-                  {zipping ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Download className="h-5 w-5" />
-                  )}
-                  {zipping ? "Preparing…" : "Download project folder (.zip)"}
-                </Button>
+                <CodeBlock code={section.structure} filename="project structure" />
               </div>
-              <CodeBlock code={section.structure} filename="project structure" />
-            </div>
+              <ProjectFolderSetup />
+            </>
           ) : null}
 
           {!playbook.buildsCode && stepSpecs.length ? (
@@ -1250,7 +1289,7 @@ function SectionCard({
 
           {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
 
-          {isOverview
+          {isOverview || isSetupSection
             ? null
             : blocks.map((block, i) => {
                 const hasCode = Boolean(block.code?.trim());
@@ -1336,7 +1375,8 @@ function SectionCard({
                 );
               })}
 
-          {section.walkthrough &&
+          {!isSetupSection &&
+          section.walkthrough &&
           (section.walkthrough.completed?.length ||
             section.walkthrough.whats_next?.length ||
             section.walkthrough.analogy) ? (

@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Coins,
   CreditCard,
+  ClipboardList,
   Cpu,
   Gauge,
   Hammer,
@@ -30,6 +31,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getAdminStats, getAdminUserDetails } from "@/lib/admin.functions";
+import { listSupportRequests } from "@/lib/support.functions";
 import { cn } from "@/lib/utils";
 
 const SECTIONS = [
@@ -38,6 +40,7 @@ const SECTIONS = [
   { id: "building", label: "Building", icon: Hammer },
   { id: "tokens", label: "Token Tracker", icon: Gauge },
   { id: "premade", label: "Premade Project Listing", icon: Package },
+  { id: "requests", label: "Support requests", icon: ClipboardList },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -91,6 +94,7 @@ function AdminDashboard() {
   const [range, setRange] = useState<"daily" | "weekly" | "monthly">("daily");
   const fetchStats = useServerFn(getAdminStats);
   const fetchUserDetails = useServerFn(getAdminUserDetails);
+  const fetchSupportRequests = useServerFn(listSupportRequests);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["admin-stats"],
@@ -100,6 +104,11 @@ function AdminDashboard() {
     queryKey: ["admin-user-details", selectedUserId],
     queryFn: () => fetchUserDetails({ data: { userId: selectedUserId! } }),
     enabled: selectedUserId !== null,
+  });
+  const supportRequestsQuery = useQuery({
+    queryKey: ["support-requests"],
+    queryFn: () => fetchSupportRequests(),
+    enabled: tab === "requests",
   });
 
   if (isPending) return <LoadingState label="Loading admin metrics…" />;
@@ -500,6 +509,31 @@ function AdminDashboard() {
           )}
           {tab === "tokens" && <AdminModelUsage />}
           {tab === "premade" && <AdminProjectPricing />}
+          {tab === "requests" && (
+            <section className="panel p-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-lg">Support requests</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Messages submitted from Contact, Report an Issue and Grievance pages.</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => void supportRequestsQuery.refetch()}>Refresh</Button>
+              </div>
+              {supportRequestsQuery.isPending && <p className="mt-5 text-sm text-muted-foreground">Loading requests…</p>}
+              {supportRequestsQuery.isError && <ErrorState message={supportRequestsQuery.error.message ?? "Could not load support requests."} onRetry={() => void supportRequestsQuery.refetch()} />}
+              {supportRequestsQuery.data?.length === 0 && <p className="mt-5 text-sm text-muted-foreground">No support requests yet.</p>}
+              <div className="mt-5 space-y-3">
+                {supportRequestsQuery.data?.map((request) => (
+                  <article key={request.id} className="rounded-lg border border-border/60 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div><p className="font-medium">{request.subject}</p><p className="mt-1 text-xs text-muted-foreground">{request.name} · {request.email} · {new Date(request.createdAt).toLocaleString()}</p></div>
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-muted-foreground">{request.kind}</span>
+                    </div>
+                    <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{request.message}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
 

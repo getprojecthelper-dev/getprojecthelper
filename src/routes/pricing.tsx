@@ -8,21 +8,24 @@ import { STARTER_CREDITS } from "@/lib/credit-costs";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Plans & Pricing — Free, Starter, Student, Professional | Project Helper" },
+      { title: "Plans & Pricing — Free, Student, Max | GetProjectHelper" },
       {
         name: "description",
         content: "Start free, then choose a paid plan with AI credits and active-project limits.",
       },
-      { property: "og:title", content: "Project Helper plans: Free, Starter, Student, Professional" },
+      { property: "og:title", content: "GetProjectHelper plans: Free, Student, Max" },
       {
         property: "og:description",
-        content: "Flexible monthly plans with 1M to 10M token-equivalent AI credits.",
+        content: "Flexible monthly plans with 100 to 3,000 AI credits.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://getprojecthelper.com/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AI Project Builder Pricing | Project Helper" },
-      { name: "twitter:description", content: "Monthly student plans with AI credits and project limits." },
+      {
+        name: "twitter:description",
+        content: "Monthly student plans with AI credits and project limits.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://getprojecthelper.com/pricing" }],
   }),
@@ -31,8 +34,8 @@ export const Route = createFileRoute("/pricing")({
 
 const FAQ = [
   {
-    q: "What is a token-equivalent credit?",
-    a: "It measures how much AI work you use. 1M token-equivalent credits covers many build steps, documents and Mentor chats.",
+    q: "What is a credit?",
+    a: "Credits measure your AI usage across build steps, documents and Mentor chats.",
   },
   {
     q: "Do unused credits roll over?",
@@ -76,10 +79,12 @@ function PricingPage() {
             A plan for every stage of your project
           </h1>
           <p className="mt-4 text-lg">
-            Every new account starts free with 100K token-equivalent credits. Upgrade any time.
-            Credits reset monthly, and AI pauses when you reach your plan limit.
+            Every new account starts free with 100 credits. Upgrade any time. Credits reset monthly,
+            and AI pauses when you reach your plan limit.
           </p>
-          <p className="pricing-region-note mt-3 text-sm">Prices are shown in your local currency where available.</p>
+          <p className="pricing-region-note mt-3 text-sm">
+            All plans are priced and billed in USD.
+          </p>
         </div>
 
         <PlanCards className="mt-12" />

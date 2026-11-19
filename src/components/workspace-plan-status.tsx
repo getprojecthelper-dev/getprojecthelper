@@ -49,7 +49,7 @@ export function WorkspacePlanStatus({ justPaid }: { justPaid: boolean }) {
             {plan.name} plan {paid ? <span className="ml-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">{data.cancelAtPeriodEnd ? "Active until period end" : "Active"}</span> : null}
           </p>
           <p className="text-xs text-muted-foreground">
-            {plan.tokens} token-equivalent credits · {plan.projectLimit} active project{plan.projectLimit > 1 ? "s" : ""}
+            {plan.credits.toLocaleString()} credits · {plan.projectLimit} active project{plan.projectLimit > 1 ? "s" : ""}
             {paid && ends ? ` · ${data.cancelAtPeriodEnd ? "ends" : "renews"} ${ends}` : ""}
           </p>
         </div>

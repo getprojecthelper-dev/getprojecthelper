@@ -136,19 +136,28 @@ export async function generateJson<T>(req: JsonRequest): Promise<T> {
   }
 
   await recordUsage(req.usage, tokens);
-  if (holdId) await settleCredits(holdId, tokens.input, tokens.output);
 
-  if (!text.trim()) throw new Error("The AI returned an empty response. Please try again.");
-
-
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start >= 0 && end > start) return JSON.parse(text.slice(start, end + 1)) as T;
-    throw new Error("The AI response could not be read. Please try again.");
+  // Charge only when a usable answer came back; a cut-off or unreadable reply returns the hold.
+  let parsed: T | undefined;
+  if (text.trim()) {
+    try {
+      parsed = JSON.parse(text) as T;
+    } catch {
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}");
+      if (start >= 0 && end > start) {
+        try { parsed = JSON.parse(text.slice(start, end + 1)) as T; } catch { /* unreadable */ }
+      }
+    }
   }
+  if (parsed === undefined) {
+    if (holdId) await releaseCredits(holdId);
+    throw new Error(text.trim()
+      ? "The AI response could not be read. Please try again — no credits were charged."
+      : "The AI returned an empty response. Please try again — no credits were charged.");
+  }
+  if (holdId) await settleCredits(holdId, tokens.input, tokens.output);
+  return parsed;
 }
 
 export const str = { type: "string" } as const;

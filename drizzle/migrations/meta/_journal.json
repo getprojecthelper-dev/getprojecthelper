@@ -85,6 +85,20 @@
       "when": 1795091983000,
       "tag": "0011_three_public_plans",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795169846438,
+      "tag": "0012_support_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795169851730,
+      "tag": "0013_support_requests_admin_grants",
+      "breakpoints": true
     }
   ]
 }

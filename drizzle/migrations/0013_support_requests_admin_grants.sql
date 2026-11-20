@@ -1,0 +1,1 @@
+GRANT SELECT, UPDATE ON public.support_requests TO authenticated;

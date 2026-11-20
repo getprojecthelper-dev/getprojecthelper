@@ -49,7 +49,7 @@ export function LiveCodeEditor({
   const [tabs, setTabs] = useState<string[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [closed, setClosed] = useState<Set<string>>(new Set());
-  const [terminalOpen, setTerminalOpen] = useState(true);
+  const [terminalOpen, setTerminalOpen] = useState(() => Boolean(terminal.trim()));
   const tree = useMemo(
     () =>
       workspaceTree(
@@ -70,6 +70,9 @@ export function LiveCodeEditor({
       if (first) open(first.path);
     }
   }, [activeFile, entries]);
+  useEffect(() => {
+    setTerminalOpen(Boolean(terminal.trim()));
+  }, [terminal]);
   const active = entries.find((e) => e.path === selected && e.type === "file");
   const content = active ? (drafts[active.path] ?? active.content) : "";
   const dirty = active ? content !== active.content : false;
@@ -157,7 +160,7 @@ export function LiveCodeEditor({
       </header>
       <div className="live-code-editor__body flex min-h-0 flex-1">
         <nav
-          className="live-code-editor__explorer w-44 shrink-0 overflow-auto border-r py-3 sm:w-48 xl:w-60"
+          className="live-code-editor__explorer w-44 shrink-0 overflow-auto border-r py-3 sm:w-48 xl:w-52"
           aria-label="Project Explorer"
         >
           <p className="px-4 py-1 text-[10px] font-bold tracking-[0.14em] text-muted-foreground">

@@ -35,7 +35,6 @@ const initial: MeterState = {
   revision: 0,
 };
 
-
 let state: MeterState = initial;
 const listeners = new Set<() => void>();
 
@@ -104,14 +103,10 @@ export const creditMeter = {
       revision: state.revision + 1,
     });
   },
-
 };
 
 /** Wrap any AI server function so the meter runs while it is in flight. */
-export function withMeter<A extends unknown[], R>(
-  action: string,
-  fn: (...args: A) => Promise<R>,
-) {
+export function withMeter<A extends unknown[], R>(action: string, fn: (...args: A) => Promise<R>) {
   return async (...args: A): Promise<R> => {
     creditMeter.start(action);
     try {
@@ -125,8 +120,7 @@ export function withMeter<A extends unknown[], R>(
   };
 }
 
-const useMeter = () =>
-  useSyncExternalStore(creditMeter.subscribe, creditMeter.get, () => initial);
+const useMeter = () => useSyncExternalStore(creditMeter.subscribe, creditMeter.get, () => initial);
 
 export function CreditMeter() {
   const meter = useMeter();
@@ -155,7 +149,6 @@ export function CreditMeter() {
     return undefined;
   }, [meter.active, meter.settling, meter.finishedAt]);
 
-
   if (!visible) return null;
 
   // The hold is only a reservation: the live counter keeps climbing past it
@@ -163,7 +156,9 @@ export function CreditMeter() {
   const elapsed = (Date.now() - meter.startedAt) / 1000 + tick * 0;
   const progress = meter.active ? 1 - Math.exp(-elapsed / 14) : 1;
   const running = Number(
-    (meter.estimate * (elapsed <= 14 ? progress : 1 - Math.exp(-1) + (elapsed - 14) / 28)).toFixed(2),
+    (meter.estimate * (elapsed <= 14 ? progress : 1 - Math.exp(-1) + (elapsed - 14) / 28)).toFixed(
+      2,
+    ),
   );
   const overHold = meter.active && running > meter.estimate;
 
@@ -171,10 +166,12 @@ export function CreditMeter() {
     <div className="pointer-events-none fixed bottom-5 right-5 z-50 w-[21rem] max-w-[calc(100vw-2.5rem)]">
       <div
         className={cn(
-          "credit-run-toast pointer-events-auto rounded-2xl border p-4 shadow-xl backdrop-blur",
+          "credit-run-toast rounded-2xl border p-4 shadow-xl backdrop-blur",
           "animate-in fade-in slide-in-from-bottom-2",
           meter.active ? "is-running" : meter.settling ? "is-settling" : "is-complete",
         )}
+        aria-live="polite"
+        role="status"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -192,7 +189,11 @@ export function CreditMeter() {
                 {meter.active ? meter.label : meter.settling ? "Settling credits" : "Run complete"}
               </span>
               <span className="credit-run-toast__eyebrow">
-                {meter.active ? "AI IN PROGRESS" : meter.settling ? "FINALISING USAGE" : "USAGE SUMMARY"}
+                {meter.active
+                  ? "AI IN PROGRESS"
+                  : meter.settling
+                    ? "FINALISING USAGE"
+                    : "USAGE SUMMARY"}
               </span>
             </span>
           </div>

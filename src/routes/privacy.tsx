@@ -6,9 +6,9 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Notice | Project Helper" },
-      { name: "description", content: "How Sizcon Studios collects, uses, protects and shares personal data through Project Helper." },
+      { name: "description", content: "How GetProjectHelper collects, uses, protects and shares personal data." },
       { property: "og:title", content: "Project Helper Privacy Notice" },
-      { property: "og:description", content: "How Sizcon Studios collects, uses, protects and shares personal data through Project Helper." },
+      { property: "og:description", content: "How GetProjectHelper collects, uses, protects and shares personal data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -19,10 +19,10 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Notice" description="This notice explains how Sizcon Studios handles personal data when you use Project Helper.">
+    <LegalPage title="Privacy Notice" description="This notice explains how GetProjectHelper handles personal data when you use the service.">
       <section>
         <h2>1. Who controls your data</h2>
-        <p><strong>Sizcon Studios</strong>, based in India, is the data controller for personal data processed through Project Helper, except where another provider acts independently for its own purposes.</p>
+        <p><strong>GetProjectHelper</strong> controls personal data processed through this service, except where another provider acts independently for its own purposes.</p>
       </section>
       <section>
         <h2>2. Data we collect</h2>

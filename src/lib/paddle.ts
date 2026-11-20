@@ -7,12 +7,17 @@ type CheckoutEvent = { name?: string };
 type PaddleWindow = Window & {
   Paddle?: {
     Environment: { set: (environment: "sandbox" | "production") => void };
-    Initialize: (options: { token: string; eventCallback?: (event: CheckoutEvent) => void }) => void;
+    Initialize: (options: {
+      token: string;
+      eventCallback?: (event: CheckoutEvent) => void;
+    }) => void;
     Checkout: { open: (options: Record<string, unknown>) => void };
     PricePreview: (options: Record<string, unknown>) => Promise<{
       data?: {
         currencyCode?: string;
-        details?: { lineItems?: Array<{ totals?: { total?: string }; formattedTotals?: { total?: string } }> };
+        details?: {
+          lineItems?: Array<{ totals?: { total?: string }; formattedTotals?: { total?: string } }>;
+        };
       };
     }>;
   };
@@ -79,9 +84,12 @@ export async function getLocalizedProjectPricing(
   const amount = Number(lineItem?.totals?.total);
   const currency = preview.data?.currencyCode;
   const fraction = (100 - discountPercent) / 100;
-  const regularPrice = amount > 0 && currency && fraction > 0
-    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(amount / 100 / fraction)
-    : null;
+  const regularPrice =
+    amount > 0 && currency && fraction > 0
+      ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(
+          amount / 100 / fraction,
+        )
+      : null;
   return { salePrice, regularPrice };
 }
 
@@ -108,12 +116,21 @@ export async function openProjectCheckout(options: {
     },
   });
 }
-export async function getLocalizedPlanPrices(priceIds: string[]): Promise<Record<string, string>> {
+export async function getLocalizedPlanPrices(
+  priceIds: string[],
+  options?: { countryCode?: string | null | undefined; currencyCode?: string; discountId?: string },
+): Promise<Record<string, string>> {
   await initializePaddle();
   const paddle = (window as PaddleWindow).Paddle;
   if (!paddle) return {};
   const ids = await Promise.all(priceIds.map((id) => getPaddlePriceId(id)));
-  const preview = await paddle.PricePreview({ items: ids.map((priceId) => ({ priceId, quantity: 1 })) });
+  const countryCode = options?.countryCode?.trim().toUpperCase();
+  const preview = await paddle.PricePreview({
+    items: ids.map((priceId) => ({ priceId, quantity: 1 })),
+    ...(countryCode && /^[A-Z]{2}$/.test(countryCode) ? { address: { countryCode } } : {}),
+    ...(options?.currencyCode ? { currencyCode: options.currencyCode } : {}),
+    ...(options?.discountId ? { discountId: options.discountId } : {}),
+  });
   const out: Record<string, string> = {};
   preview.data?.details?.lineItems?.forEach((item, i) => {
     const v = item.formattedTotals?.total;
@@ -122,7 +139,12 @@ export async function getLocalizedPlanPrices(priceIds: string[]): Promise<Record
   return out;
 }
 
-export async function openPlanCheckout(options: { priceId: string; userId: string; customerEmail?: string | undefined }) {
+export async function openPlanCheckout(options: {
+  priceId: string;
+  userId: string;
+  customerEmail?: string | undefined;
+  discountId?: string;
+}) {
   await initializePaddle();
   const paddle = (window as PaddleWindow).Paddle;
   if (!paddle) throw new Error("Checkout could not be loaded.");
@@ -131,6 +153,7 @@ export async function openPlanCheckout(options: { priceId: string; userId: strin
     items: [{ priceId: internalPriceId, quantity: 1 }],
     customer: options.customerEmail ? { email: options.customerEmail } : undefined,
     customData: { userId: options.userId },
+    ...(options.discountId ? { discountId: options.discountId } : {}),
     settings: {
       displayMode: "overlay",
       successUrl: `${window.location.origin}/welcome?plan=success`,

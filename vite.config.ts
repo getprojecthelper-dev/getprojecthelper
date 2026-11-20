@@ -11,6 +11,13 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 Object.assign(process.env, loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd(), ""));
 
 export default defineConfig({
+  vite: {
+    // Development modules are intentionally served as source files by Vite.
+    // Keep that server local so they cannot be reached from another device.
+    server: { host: "127.0.0.1" },
+    // Production clients receive compiled assets only; never publish source maps.
+    build: { sourcemap: false },
+  },
   tanstackStart: {
     server: { entry: "server" },
   },

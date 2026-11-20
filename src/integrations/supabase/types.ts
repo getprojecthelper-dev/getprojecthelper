@@ -1309,45 +1309,6 @@ export type Database = {
         }
         Relationships: []
       }
-      support_requests: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          kind: string
-          message: string
-          name: string
-          page_url: string | null
-          status: string
-          subject: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          kind: string
-          message: string
-          name: string
-          page_url?: string | null
-          status?: string
-          subject: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          kind?: string
-          message?: string
-          name?: string
-          page_url?: string | null
-          status?: string
-          subject?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       tasks: {
         Row: {
           created_at: string

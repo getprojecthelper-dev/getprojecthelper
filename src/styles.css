@@ -5267,7 +5267,7 @@
 
 .build-roadmap__header {
   border-bottom: 1px solid #dfe3e8;
-  padding: 0.25rem 0 1rem;
+  padding: 0.1rem 0 0.8rem;
 }
 
 .build-roadmap__eyebrow {
@@ -5288,7 +5288,7 @@
 
 .build-roadmap__title-row h1 {
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 2.5vw, 2rem);
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
   font-weight: 650;
   letter-spacing: -0.045em;
   line-height: 1.12;
@@ -5306,7 +5306,7 @@
 }
 
 .build-roadmap__subhead {
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   color: #5f6875;
   font-size: 0.88rem;
   line-height: 1.55;
@@ -5314,7 +5314,7 @@
 
 .build-roadmap__progress-track {
   height: 3px;
-  margin-top: 0.9rem;
+  margin-top: 0.7rem;
   overflow: hidden;
   background: #e8ebef;
 }
@@ -5341,8 +5341,10 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
-  border-bottom: 1px solid #dfe3e8;
-  padding: 0.1rem 0 1rem;
+  border: 1px solid #d9e7ff;
+  border-radius: 0.9rem;
+  background: #f7faff;
+  padding: 0.9rem 1rem;
 }
 
 .build-roadmap__dataset .font-display {
@@ -5352,7 +5354,11 @@
 }
 
 .build-roadmap__dataset p.text-sm {
+  display: -webkit-box;
   max-width: 52rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-size: 0.78rem;
   line-height: 1.5;
 }
@@ -5586,6 +5592,9 @@
   --muted: #f5f5f7;
   --muted-foreground: #6e6e73;
   --border: #e5e5ea;
+  --primary: #6e5ae6;
+  --primary-foreground: #ffffff;
+  --ring: #6e5ae6;
   background: #f5f5f7 !important;
   background-image: none !important;
   color: #1d1d1f;
@@ -5625,11 +5634,11 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .build-roadmap {
-  border: 1px solid #e5e5ea;
-  border-radius: 1rem;
-  background: #ffffff;
+  border: 1px solid rgb(0 0 0 / 0.07);
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 0.86);
   padding: 1.15rem 1.25rem;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.025);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.045);
   scrollbar-color: #c7c7cc transparent;
 }
 
@@ -5662,12 +5671,58 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .build-roadmap__progress-track {
-  background: #e5e5ea;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #e7e5e1;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.06);
 }
 
 .workspace-canvas--build .build-roadmap__progress-track span,
 .workspace-canvas--build .build-roadmap__number:not(.is-confirmed):not(.is-locked) {
-  background: #007aff;
+  background: linear-gradient(90deg, #9b8cf4, #6e5ae6);
+  box-shadow: 0 1px 3px rgb(110 90 230 / 0.28);
+}
+
+.workspace-canvas--build .build-roadmap__header {
+  border-color: rgb(0 0 0 / 0.08);
+}
+
+.workspace-canvas--build .build-roadmap__eyebrow {
+  color: #6e6e73;
+  letter-spacing: 0.13em;
+}
+
+.workspace-canvas--build .build-roadmap__title-row h1 {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.workspace-canvas--build .build-roadmap__completion {
+  border-color: transparent;
+  background: #f2f2f7;
+  color: #515154;
+  font-weight: 600;
+}
+
+.workspace-canvas--build .build-roadmap__dataset {
+  border-color: #e5e1f2;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fbfaff 0%, #f8f7fc 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+
+.workspace-canvas--build .build-roadmap__dataset button {
+  border-color: #ddd8f0;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.06);
+  color: #6351cf;
+}
+
+.workspace-canvas--build .build-roadmap__dataset button:hover {
+  border-color: #beb5ed;
+  background: #ffffff;
+  color: #5543ba;
 }
 
 .workspace-canvas--build .build-roadmap__dataset button {
@@ -5691,7 +5746,7 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .build-roadmap__number:not(.is-confirmed):not(.is-locked) {
-  border-color: #007aff;
+  border-color: #6e5ae6;
   color: #ffffff;
 }
 
@@ -5702,18 +5757,75 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .build-roadmap__step.is-open .build-roadmap__step-name {
-  color: #0066cc;
+  color: #5543ba;
 }
 
 .workspace-canvas--build .build-roadmap__step-body {
-  margin-left: 0.7rem;
-  border-color: #e5e5ea;
-  padding-left: 0.8rem;
+  margin-left: 0;
+  border-left: 0;
+  padding-left: 0;
+}
+
+.workspace-canvas--build .build-roadmap__steps {
+  border-top-color: rgb(0 0 0 / 0.08);
+}
+
+.workspace-canvas--build .build-roadmap__step {
+  border-bottom-color: rgb(0 0 0 / 0.08);
+}
+
+.workspace-canvas--build .build-roadmap__step-header {
+  gap: 0.6rem;
+  padding: 0.75rem 0.1rem;
+}
+
+.workspace-canvas--build .build-roadmap__number {
+  width: 2rem;
+  height: 2rem;
+  border-color: #e6e3ef;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.05);
+  font-size: 0.72rem;
+}
+
+.workspace-canvas--build .build-roadmap__step-name {
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.workspace-canvas--build .build-roadmap__objective {
+  max-width: 28rem;
+  margin-top: 0.18rem;
+  color: #787774;
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.workspace-canvas--build .build-roadmap__step-actions {
+  gap: 0.2rem;
+}
+
+.workspace-canvas--build .build-roadmap__step-actions > button:first-child:not(:last-child) {
+  min-width: 7.85rem;
+  min-height: 2.15rem;
+  border-radius: 0.55rem;
+  padding-inline: 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.workspace-canvas--build .build-roadmap__step-actions > button.bg-primary {
+  background: #6e5ae6;
+  box-shadow: 0 2px 6px rgb(110 90 230 / 0.18);
+}
+
+.workspace-canvas--build .build-roadmap__step-actions > button.bg-primary:hover {
+  background: #5c49cb;
 }
 
 .workspace-canvas--build .build-roadmap__step-body > :first-child.rounded-lg {
-  border-left-color: #007aff;
-  background: #f2f7ff;
+  border-left-color: #6e5ae6;
+  background: #f7f5ff;
 }
 
 .workspace-canvas--build .build-roadmap__step-actions > button[aria-label]:hover {
@@ -5726,38 +5838,51 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .overview-brief > article {
-  padding: 1rem;
+  padding: 0.95rem 1.05rem;
+  border-color: #e9e9e7;
+  border-radius: 0.7rem;
+  background: #ffffff;
   box-shadow: none;
 }
 
 .workspace-canvas--build .overview-brief__eyebrow {
-  margin-bottom: 0.1rem;
-  color: #6e6e73;
-  font-size: 0.65rem;
+  margin-bottom: 0.2rem;
+  color: #787774;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   line-height: 1.2;
   text-transform: uppercase;
 }
 
+.workspace-canvas--build .overview-brief h2 {
+  color: #37352f;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
 .workspace-canvas--build .overview-brief__bullets {
   display: grid;
-  padding: 0;
+  padding: 0.1rem 0 0;
+  gap: 0.7rem;
 }
 
 .workspace-canvas--build .overview-brief__bullets li {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   align-items: flex-start;
+  color: #37352f;
+  font-size: 0.94rem;
+  line-height: 1.55;
 }
 
 .workspace-canvas--build .overview-brief__bullet {
-  width: 0.38rem;
-  height: 0.38rem;
+  width: 0.32rem;
+  height: 0.32rem;
   flex: 0 0 auto;
   margin-top: 0.55rem;
   border-radius: 999px;
-  background: #007aff;
+  background: #9b9a97;
 }
 
 .workspace-canvas--build .overview-brief__copy.is-collapsed {
@@ -5768,37 +5893,39 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .overview-brief__toggle {
-  min-height: 2.25rem;
-  border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
+  min-height: 2rem;
+  margin-top: 0.1rem;
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.3rem;
+  color: #6351cf;
 }
 
 .workspace-canvas--build .overview-brief__toggle:hover {
-  background: #f2f7ff;
+  background: #f4f3f8;
 }
 
 .workspace-canvas--build .overview-brief__toggle:focus-visible {
-  outline: 2px solid #007aff;
+  outline: 2px solid #6e5ae6;
   outline-offset: 2px;
 }
 
 .workspace-canvas--build .live-code-editor {
-  border-color: #e5e5ea;
-  border-radius: 1rem;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.035);
+  border-color: rgb(0 0 0 / 0.08);
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.055);
   font-family: inherit;
 }
 
 .workspace-canvas--build .live-code-editor__header {
-  border-color: #e5e5ea;
-  background: #ffffff;
+  border-color: rgb(0 0 0 / 0.07);
+  background: rgb(255 255 255 / 0.72);
   color: #1d1d1f;
 }
 
 .workspace-canvas--build .live-code-editor__explorer {
-  border-color: #e5e5ea;
-  background: #fafafd;
+  border-color: rgb(0 0 0 / 0.06);
+  background: #f7f7fa;
 }
 
 .workspace-canvas--build .live-code-editor__explorer > p:nth-child(2) {
@@ -5806,8 +5933,8 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .live-code-editor__tabs {
-  border-color: #e5e5ea;
-  background: #f5f5f7;
+  border-color: rgb(0 0 0 / 0.06);
+  background: #f2f2f7;
 }
 
 .workspace-canvas--build .live-code-editor__tab {
@@ -5816,8 +5943,8 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .live-code-editor__tab.is-active {
-  border-top: 2px solid #007aff;
-  background: #ffffff;
+  border-top: 2px solid #6e5ae6;
+  background: rgb(255 255 255 / 0.96);
   color: #1d1d1f;
 }
 

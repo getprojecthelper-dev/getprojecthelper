@@ -29,7 +29,7 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
@@ -271,7 +271,10 @@ function BuildPage() {
 
   const generateMutation = useMutation({
     mutationFn: (sectionId: string) => generate({ data: { sectionId } }),
-    onMutate: (sectionId) => setEditor({ sectionId, path: null }),
+    onMutate: (sectionId) => {
+      setOpenId(sectionId);
+      setEditor({ sectionId, path: null });
+    },
     onSuccess: async (_r, sectionId) => {
       await invalidate();
       setOpenId(sectionId);
@@ -282,6 +285,20 @@ function BuildPage() {
     onError: (error: unknown) =>
       toast.error(error instanceof Error ? error.message : "Generation failed."),
   });
+
+  // The overview is the orientation page for a new project. Generate it once
+  // automatically so students start with the problem, solution and tools in view.
+  const autoOverviewRef = useRef<string | null>(null);
+  useEffect(() => {
+    const overview = sections.find(
+      (section) =>
+        section.status === "pending" &&
+        (section.kind === "overview" || /problem\s*statement/i.test(section.title)),
+    );
+    if (!overview || generateMutation.isPending || autoOverviewRef.current === overview.id) return;
+    autoOverviewRef.current = overview.id;
+    generateMutation.mutate(overview.id);
+  }, [sections, generateMutation]);
 
   // Bumped per section when a fix succeeds, so the card can clear its input.
   const [fixTokens, setFixTokens] = useState<Record<string, number>>({});
@@ -375,25 +392,23 @@ function BuildPage() {
 
       {meta?.dataset ? (
         <section className="build-roadmap__dataset">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <Database className="h-4 w-4 text-primary" />
-                Dataset you selected
-              </div>
-              <p className="mt-2 font-display text-lg">{meta.dataset.name}</p>
-              {datasetFacts(meta.dataset) ? (
-                <p className="mt-1 text-sm text-muted-foreground">{datasetFacts(meta.dataset)}</p>
-              ) : null}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Database className="h-4 w-4 text-primary" />
+              Dataset
             </div>
-            {meta.dataset.url ? (
-              <Button asChild variant="outline" size="sm" className="shrink-0">
-                <a href={meta.dataset.url} target="_blank" rel="noreferrer">
-                  View dataset <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
+            <p className="mt-1.5 font-display text-lg">{meta.dataset.name}</p>
+            {datasetFacts(meta.dataset) ? (
+              <p className="mt-1 text-sm text-muted-foreground">{datasetFacts(meta.dataset)}</p>
             ) : null}
           </div>
+          {meta.dataset.url ? (
+            <Button asChild variant="outline" size="sm" className="shrink-0">
+              <a href={meta.dataset.url} target="_blank" rel="noreferrer">
+                View dataset <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          ) : null}
         </section>
       ) : null}
 
@@ -656,8 +671,8 @@ function OverviewBriefCard({ block }: { block: Block }) {
       .map((sentence) => sentence.trim())
       .filter(Boolean),
   );
-  const contentLength = body.length + bullets.join(" ").length;
-  const isLong = contentLength > 460;
+  const hasExtraDetails = bullets.length > 3 || body.length > 260;
+  const visibleBullets = expanded ? bullets : bullets.slice(0, 3);
   const sectionLabel = /problem/i.test(block.title)
     ? "The challenge"
     : /solution|approach/i.test(block.title)
@@ -678,38 +693,71 @@ function OverviewBriefCard({ block }: { block: Block }) {
         </div>
       </div>
 
-      <div
-        className={cn(
-          "overview-brief__copy space-y-2 text-sm leading-6 text-foreground/90",
-          isLong && !expanded && "is-collapsed",
-        )}
-      >
+      <div className="overview-brief__copy space-y-2 text-sm leading-6 text-foreground/90">
         {body.split(/\n{2,}/).map((para, p) => (
           <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
         ))}
-        {bullets.length ? (
-          <ul className="overview-brief__bullets space-y-2 text-sm leading-6 text-muted-foreground">
-            {bullets.map((line, li) => (
+        {visibleBullets.length ? (
+          <ul className="overview-brief__bullets text-sm leading-6 text-muted-foreground">
+            {visibleBullets.map((line, li) => (
               <li key={`b-${li}-${line.slice(0, 10)}`}>
                 <span className="overview-brief__bullet" aria-hidden="true" />
-                <span>{line}</span>
+                <EmphasizedText text={line} />
               </li>
             ))}
           </ul>
         ) : null}
       </div>
 
-      {isLong ? (
+      {hasExtraDetails ? (
         <button
           type="button"
           className="overview-brief__toggle text-sm font-medium text-primary"
           onClick={() => setExpanded((value) => !value)}
           aria-expanded={expanded}
         >
-          {expanded ? "Show less" : "Read full details"}
+          {expanded ? "Show less" : "Show more"}
         </button>
       ) : null}
     </article>
+  );
+}
+
+function EmphasizedText({ text }: { text: string }) {
+  const markdownSegments = text.split(/(\*\*[^*]+\*\*)/g);
+  if (markdownSegments.some((segment) => segment.startsWith("**") && segment.endsWith("**"))) {
+    return (
+      <span>
+        {markdownSegments.map((segment, index) =>
+          segment.startsWith("**") && segment.endsWith("**") ? (
+            <strong key={index} className="font-semibold text-foreground">
+              {segment.slice(2, -2)}
+            </strong>
+          ) : (
+            segment
+          ),
+        )}
+      </span>
+    );
+  }
+
+  const lead = (
+    text.match(/^(.{1,48}?)(?=\s+—)/)?.[1] ??
+    text.match(
+      /^(.{1,48}?)(?=\s+(?:need|needs|can|will|does|do|is|are|has|have|should|must)\b)/i,
+    )?.[1] ??
+    text.match(
+      /^((?:use|compare|show|create|download|open|add|run|check|build|set up|find|review|load|clean|train|test)(?:\s+\S+){0,7}?)(?=\s+(?:to|with|for|from|in|and)\b)/i,
+    )?.[1] ??
+    text.match(/^(\S+(?:\s+\S+){0,2})/)?.[1]
+  )?.trim();
+  if (!lead) return <span>{text}</span>;
+
+  return (
+    <span>
+      <strong className="font-semibold text-foreground">{lead}</strong>
+      {text.slice(lead.length)}
+    </span>
   );
 }
 
@@ -738,7 +786,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
             </h4>
             <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
               {what.map((line, li) => (
-                <li key={`w-${li}-${line.slice(0, 10)}`}>{line}</li>
+                <li key={`w-${li}-${line.slice(0, 10)}`}>
+                  <EmphasizedText text={line} />
+                </li>
               ))}
             </ul>
           </section>
@@ -751,7 +801,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
             </h4>
             <ul className="list-disc space-y-1.5 pl-5 text-foreground/90 marker:text-muted-foreground">
               {why.map((line, li) => (
-                <li key={`y-${li}-${line.slice(0, 10)}`}>{line}</li>
+                <li key={`y-${li}-${line.slice(0, 10)}`}>
+                  <EmphasizedText text={line} />
+                </li>
               ))}
             </ul>
           </section>
@@ -764,7 +816,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Quick example
                 </h4>
-                <p className="mt-1.5 text-sm leading-6 text-foreground/90">{example}</p>
+                <p className="mt-1.5 text-sm leading-6 text-foreground/90">
+                  <EmphasizedText text={example} />
+                </p>
               </section>
             ) : null}
             {analogy ? (
@@ -772,7 +826,9 @@ function BlockExplanation({ block, hasCode }: { block: Block; hasCode: boolean }
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Think of it like
                 </h4>
-                <p className="mt-1.5 text-sm leading-6 text-foreground/90">{analogy}</p>
+                <p className="mt-1.5 text-sm leading-6 text-foreground/90">
+                  <EmphasizedText text={analogy} />
+                </p>
               </section>
             ) : null}
           </div>
@@ -1175,80 +1231,92 @@ function SectionCard({
         locked && "is-locked",
       )}
     >
-      <div className="build-roadmap__step-header">
-        <button
-          type="button"
-          onClick={onToggle}
-          className="build-roadmap__step-title"
-          aria-expanded={open}
-        >
-          <span
-            className={cn(
-              "build-roadmap__number",
-              confirmed ? "is-confirmed" : locked ? "is-locked" : "",
-            )}
-          >
-            {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
-          </span>
-          <span className="build-roadmap__step-copy">
-            <span className="build-roadmap__step-name">
-              {section.title}
-              {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
-            </span>
-            {section.objective ? (
-              <span className="build-roadmap__objective">{section.objective}</span>
-            ) : null}
-          </span>
-        </button>
-
-        <div className="build-roadmap__step-actions">
-          {!locked && !generated ? (
-            <Button size="sm" onClick={onGenerate} disabled={generating}>
-              {generating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {generating ? "Generating…" : "Generate"}
-            </Button>
-          ) : null}
-          {!locked && generated ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onGenerate}
-              disabled={generating}
-              title="Generate this step again"
-            >
-              {generating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              {generating ? "Simplifying…" : isOverview ? "Make simpler" : "Regenerate"}
-            </Button>
-          ) : null}
-          <Button
-            size="icon"
-            variant="ghost"
+      {!isOverview ? (
+        <div className="build-roadmap__step-header">
+          <button
+            type="button"
             onClick={onToggle}
-            aria-label={open ? "Close section" : "Open section"}
+            className="build-roadmap__step-title"
+            aria-expanded={open}
           >
-            {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
+            <span
+              className={cn(
+                "build-roadmap__number",
+                confirmed ? "is-confirmed" : locked ? "is-locked" : "",
+              )}
+            >
+              {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+            </span>
+            <span className="build-roadmap__step-copy">
+              <span className="build-roadmap__step-name">
+                {section.title}
+                {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
+              </span>
+              {section.objective ? (
+                <span className="build-roadmap__objective">{section.objective}</span>
+              ) : null}
+            </span>
+          </button>
 
-      {open ? (
+          <div className="build-roadmap__step-actions">
+            {!locked && !generated ? (
+              <Button size="sm" onClick={onGenerate} disabled={generating}>
+                {generating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {generating ? "Generating…" : "Generate"}
+              </Button>
+            ) : null}
+            {!locked && generated ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onGenerate}
+                disabled={generating}
+                title="Generate this step again"
+              >
+                {generating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                {generating ? "Simplifying…" : isOverview ? "Make simpler" : "Regenerate"}
+              </Button>
+            ) : null}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={onToggle}
+              aria-label={open ? "Close section" : "Open section"}
+            >
+              {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {open || isOverview ? (
         <div className="build-roadmap__step-body">
-          {section.question && !isSetupSection ? (
+          {section.question && !isSetupSection && !isOverview ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
           ) : null}
 
           {!generated ? (
-            <p className="text-sm text-muted-foreground">
-              Nothing generated yet. Press Generate when you're ready to work on this step.
-            </p>
+            isOverview ? (
+              <div
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground"
+                role="status"
+              >
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Creating your Problem Statement, Solution, and Technology Stack…
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nothing generated yet. Press Generate when you&apos;re ready to work on this step.
+              </p>
+            )
           ) : null}
 
           {section.structure && playbook.buildsCode ? (
@@ -1273,9 +1341,8 @@ function SectionCard({
                     {zipping ? "Preparing…" : "Download project folder (.zip)"}
                   </Button>
                 </div>
-                <CodeBlock code={section.structure} filename="project structure" />
               </div>
-              <ProjectFolderSetup />
+              <ProjectFolderSetup structure={section.structure} />
             </>
           ) : null}
 
@@ -1392,7 +1459,9 @@ function SectionCard({
                     </p>
                     <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
                       {section.walkthrough.completed.map((line, i) => (
-                        <li key={`done-${i}-${line.slice(0, 10)}`}>{line}</li>
+                        <li key={`done-${i}-${line.slice(0, 10)}`}>
+                          <EmphasizedText text={line} />
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -1406,7 +1475,9 @@ function SectionCard({
                     </p>
                     <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-6 text-muted-foreground">
                       {section.walkthrough.whats_next.map((line, i) => (
-                        <li key={`next-${i}-${line.slice(0, 10)}`}>{line}</li>
+                        <li key={`next-${i}-${line.slice(0, 10)}`}>
+                          <EmphasizedText text={line} />
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -1666,7 +1737,9 @@ function FixRoundCard({
                     </p>
                     <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
                       {block.explanation.map((line, li) => (
-                        <li key={`fx-${li}-${line.slice(0, 10)}`}>{line}</li>
+                        <li key={`fx-${li}-${line.slice(0, 10)}`}>
+                          <EmphasizedText text={line} />
+                        </li>
                       ))}
                     </ul>
                   </div>

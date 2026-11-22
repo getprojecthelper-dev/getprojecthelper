@@ -125,7 +125,7 @@ export function PlanCards({ className }: { className?: string }) {
   return (
     <div className={className}>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {PLANS.filter((plan) => plan.isPublic !== false).map((plan) => {
+        {PLANS.filter((plan) => plan.isPublic !== false || current.id === plan.id).map((plan) => {
           const isCurrent = Boolean(user) && current.id === plan.id;
           const price = plan.priceId ? (prices[plan.priceId] ?? "…") : "Free";
           const regularPrice = plan.priceId ? regularPrices[plan.priceId] : undefined;

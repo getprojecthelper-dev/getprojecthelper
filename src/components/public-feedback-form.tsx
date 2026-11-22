@@ -34,7 +34,8 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formEl = event.currentTarget;
+    const form = new FormData(formEl);
     setIsSending(true);
     try {
       await submit({
@@ -47,7 +48,7 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
           pageUrl: window.location.href,
         },
       });
-      event.currentTarget.reset();
+      formEl.reset();
       toast.success("Thanks — your message has been sent.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Your message could not be sent.");

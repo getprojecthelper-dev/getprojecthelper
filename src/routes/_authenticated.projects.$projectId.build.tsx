@@ -14,7 +14,6 @@ import {
   FileSpreadsheet,
   FileText,
   FileType,
-  FolderTree,
   Loader2,
   Lightbulb,
   ListChecks,
@@ -450,6 +449,7 @@ function BuildPage() {
               section={section}
               playbook={playbook}
               index={index}
+              totalSteps={sections.length}
               locked={locked}
               open={openId === section.id}
               onToggle={() => {
@@ -1104,6 +1104,7 @@ function SectionCard({
   section,
   playbook,
   index,
+  totalSteps,
   locked,
   open,
   onToggle,
@@ -1120,6 +1121,7 @@ function SectionCard({
   section: BuildSection;
   playbook: DomainPlaybook;
   index: number;
+  totalSteps: number;
   fileOrigins: Map<string, number>;
   locked: boolean;
   open: boolean;
@@ -1248,10 +1250,17 @@ function SectionCard({
               {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
             </span>
             <span className="build-roadmap__step-copy">
+              <span
+                className="build-roadmap__step-position"
+                aria-label={`Step ${index + 1} of ${totalSteps}`}
+              >
+                Step {index + 1} of {totalSteps}
+              </span>
               <span className="build-roadmap__step-name">
-                {section.title}
+                {`Step ${index + 1} of ${totalSteps}`}
                 {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
               </span>
+              <span className="build-roadmap__step-subtitle">{section.title}</span>
               {section.objective ? (
                 <span className="build-roadmap__objective">{section.objective}</span>
               ) : null}
@@ -1320,30 +1329,11 @@ function SectionCard({
           ) : null}
 
           {section.structure && playbook.buildsCode ? (
-            <>
-              <div className="space-y-3 rounded-xl border border-border bg-card p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="flex items-center gap-2 font-display text-base">
-                      <FolderTree className="h-4 w-4 text-primary" /> Project structure
-                    </p>
-                    <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                      Your project is ready to download. The files are empty now and fill up as you
-                      complete each build step.
-                    </p>
-                  </div>
-                  <Button size="lg" onClick={downloadZip} disabled={zipping} className="gap-2">
-                    {zipping ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Download className="h-5 w-5" />
-                    )}
-                    {zipping ? "Preparing…" : "Download project folder (.zip)"}
-                  </Button>
-                </div>
-              </div>
-              <ProjectFolderSetup structure={section.structure} />
-            </>
+            <ProjectFolderSetup
+              structure={section.structure}
+              onDownload={downloadZip}
+              downloading={zipping}
+            />
           ) : null}
 
           {!playbook.buildsCode && stepSpecs.length ? (
@@ -1510,25 +1500,25 @@ function SectionCard({
           {generated && !isOverview ? (
             <div
               className={cn(
-                "overflow-hidden rounded-xl border transition-colors",
-                showFix ? "border-warning/50 bg-warning/5" : "border-border bg-card",
+                "build-roadmap__repair overflow-hidden rounded-xl border transition-colors",
+                showFix ? "is-open" : "",
               )}
             >
               <button
                 type="button"
-                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                className="build-roadmap__repair-toggle flex w-full items-center gap-3 px-4 py-3 text-left"
                 onClick={() => setShowFix((v) => !v)}
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15">
-                  <Wrench className="h-4 w-4 text-warning" />
+                <span className="build-roadmap__repair-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                  <Wrench className="h-4 w-4" />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold">
-                    {playbook.buildsCode ? "Something not working?" : "Ask for a revision"}
+                    {playbook.buildsCode ? "Fix a code error" : "Ask for a revision"}
                   </span>
                   <span className="block text-xs text-muted-foreground">
                     {playbook.buildsCode
-                      ? "Paste the error and we'll fix this step and show you exactly what changed."
+                      ? "Paste the error message or broken code. We’ll find the issue, fix this step, and explain the change."
                       : "Tell us what's off and we'll rewrite this deliverable."}
                   </span>
                 </span>
@@ -1540,21 +1530,21 @@ function SectionCard({
               </button>
 
               {showFix ? (
-                <div className="space-y-3 border-t border-warning/30 p-4">
+                <div className="build-roadmap__repair-body space-y-3 border-t p-4">
                   <Textarea
-                    rows={5}
+                    rows={4}
                     value={errorText}
                     onChange={(e) => setErrorText(e.target.value)}
                     disabled={fixing}
-                    className="resize-y bg-card font-mono text-[12.5px]"
+                    className="build-roadmap__repair-input resize-y bg-card font-mono text-[12.5px]"
                     placeholder={
                       playbook.buildsCode
-                        ? "Paste the full error message here, e.g.\nTraceback (most recent call last):\n  File \"app.py\", line 12, in <module>\nNameError: name 'data' is not defined"
+                        ? "Paste the full error message or the code that is not working, e.g.\nTraceback (most recent call last):\n  File \"app.py\", line 12, in <module>\nNameError: name 'data' is not defined"
                         : "Tell us what's wrong or unrealistic in this deliverable…"
                     }
                   />
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="build-roadmap__repair-actions flex flex-wrap items-center gap-2">
                     <Button
                       size="sm"
                       disabled={fixing || errorText.trim().length < 3}
@@ -1568,7 +1558,7 @@ function SectionCard({
                       {fixing
                         ? "Fixing…"
                         : playbook.buildsCode
-                          ? "Fix my code"
+                          ? "Analyze & fix"
                           : "Revise this deliverable"}
                     </Button>
                     {errorText.trim().length && !fixing ? (

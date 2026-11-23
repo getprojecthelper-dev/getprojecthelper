@@ -12,26 +12,62 @@ export interface WorkspaceSection {
   structure?: string | null;
   files?: { path: string; content: string }[];
   blocks?: { file?: string; action?: string; title?: string; code?: string }[];
-  fix_notes?: { rounds?: { fixed_blocks?: { part_number?: number; file?: string; code?: string; title?: string; action?: string }[] }[] } | null;
+  fix_notes?: {
+    rounds?: {
+      fixed_blocks?: {
+        part_number?: number;
+        file?: string;
+        code?: string;
+        title?: string;
+        action?: string;
+      }[];
+    }[];
+  } | null;
 }
 
 const SETUP_FILLED = /(^|\/)(readme(\.md|\.txt)?|requirements[\w-]*\.txt|package\.json)$/i;
+const DEFAULT_GITIGNORE = [
+  "__pycache__/",
+  "*.py[cod]",
+  ".venv/",
+  "venv/",
+  "env/",
+  ".env",
+  ".env.*",
+  "!.env.example",
+  ".pytest_cache/",
+  ".ipynb_checkpoints/",
+  ".DS_Store",
+  "Thumbs.db",
+].join("\n");
 
 function looksLikeFile(path: string): boolean {
   const name = path.split("/").at(-1) ?? "";
-  return /^[\w.@+-]+$/.test(name) && (/\.[\w]+$/.test(name) || /^(Dockerfile|Makefile|Procfile|LICENSE)$/i.test(name));
+  return (
+    /^[\w.@+-]+$/.test(name) &&
+    (/\.[\w]+$/.test(name) || /^(Dockerfile|Makefile|Procfile|LICENSE)$/i.test(name))
+  );
 }
 
 /** Setup content: README and dependencies keep their text; notebooks start empty but valid; others start blank. */
 export function starterContent(path: string, content: string): string {
   if (SETUP_FILLED.test(path)) return content;
+  if (/(^|\/)\.gitignore$/i.test(path)) return content || DEFAULT_GITIGNORE;
   if (/\.ipynb$/i.test(path)) return JSON.stringify(buildNotebook([]), null, 2);
   return "";
 }
 
 export function workspacePath(raw: string): string {
-  const path = (/\.ipynb\b/i.test(raw) ? notebookPath(raw) : raw).trim().replace(/^\.\//, "").replace(/\/$/, "");
-  if (!path || path.startsWith("/") || path.includes("\\") || path.split("/").some((p) => !p || p === ".." || p === ".")) {
+  const path = (/\.ipynb\b/i.test(raw) ? notebookPath(raw) : raw)
+    .trim()
+    .replace(/^\.\//, "")
+    .replace(/\/$/, "");
+  if (
+    !path ||
+    path.startsWith("/") ||
+    path.includes("\\") ||
+    path.split("/").some((p) => !p || p === ".." || p === ".")
+  ) {
     throw new Error("Invalid workspace file path.");
   }
   if (path.length > 500) throw new Error("Workspace file path is too long.");
@@ -39,7 +75,10 @@ export function workspacePath(raw: string): string {
 }
 
 export function isTerminalBlock(block: { file?: string; action?: string }): boolean {
-  return block.action === "run" || /^(terminal|shell|bash|commands?|powershell)(\b|$)/i.test(block.file?.trim() ?? "");
+  return (
+    block.action === "run" ||
+    /^(terminal|shell|bash|commands?|powershell)(\b|$)/i.test(block.file?.trim() ?? "")
+  );
 }
 
 export function structurePaths(tree: string): string[] {
@@ -58,7 +97,9 @@ export function structurePaths(tree: string): string[] {
     result.push(stack.filter(Boolean).join("/") + (name.endsWith("/") ? "/" : ""));
   }
   // ASCII trees often omit the slash on nonempty folders.
-  return result.map((p) => result.some((q) => q.startsWith(p.replace(/\/$/, "") + "/")) ? p.replace(/\/$/, "") + "/" : p);
+  return result.map((p) =>
+    result.some((q) => q.startsWith(p.replace(/\/$/, "") + "/")) ? p.replace(/\/$/, "") + "/" : p,
+  );
 }
 
 /** Use the same project-root normalization for saved files and editor requests. */
@@ -82,15 +123,31 @@ export function collectWorkspace(sections: WorkspaceSection[]): WorkspaceEntry[]
     const parts = path.split("/");
     for (let i = 1; i < parts.length; i++) {
       const parent = parts.slice(0, i).join("/");
-      entries.set(parent, { path: parent, name: parts[i - 1] ?? parent, type: "directory", content: "" });
+      entries.set(parent, {
+        path: parent,
+        name: parts[i - 1] ?? parent,
+        type: "directory",
+        content: "",
+      });
     }
     const existing = entries.get(path);
-    entries.set(path, { path, name: parts.at(-1) ?? path, type, content: content || existing?.content || "" });
+    entries.set(path, {
+      path,
+      name: parts.at(-1) ?? path,
+      type,
+      content: content || existing?.content || "",
+    });
   };
   for (const path of trees) {
     // Every folder and file in the plan exists up front; labels are stripped by structurePaths.
     if (path.endsWith("/")) put(path, "directory");
     else if (looksLikeFile(path)) put(path, "file", starterContent(path, ""));
+  }
+  if (sections.some((section) => Boolean(section.structure))) {
+    put(".gitignore", "file", DEFAULT_GITIGNORE);
+    if (!trees.some((path) => /(^|\/)package\.json$/i.test(path))) {
+      put("requirements.txt", "file", "");
+    }
   }
   for (const section of [...sections].sort((a, b) => a.position - b.position)) {
     const complete = new Set<string>();
@@ -119,7 +176,10 @@ export function collectWorkspace(sections: WorkspaceSection[]): WorkspaceEntry[]
       if (complete.has(path)) continue;
       if (path.endsWith(".ipynb")) {
         const cells = notebooks.get(path) ?? new Map();
-        cells.set(notebookCellIndex(block.file) ?? cells.size + 1, { title: block.title ?? "", code: block.code });
+        cells.set(notebookCellIndex(block.file) ?? cells.size + 1, {
+          title: block.title ?? "",
+          code: block.code,
+        });
         notebooks.set(path, cells);
       } else {
         const list = pieces.get(path) ?? [];
@@ -131,41 +191,93 @@ export function collectWorkspace(sections: WorkspaceSection[]): WorkspaceEntry[]
       const content = parts.join("\n\n");
       const prior = entries.get(path)?.content;
       // Legacy dependency blocks are append-only; new files[] contain full files.
-      put(path, "file", path.endsWith("requirements.txt") && prior ? [...new Set([...prior.split("\n"), ...content.split("\n")])].join("\n") : content);
+      put(
+        path,
+        "file",
+        path.endsWith("requirements.txt") && prior
+          ? [...new Set([...prior.split("\n"), ...content.split("\n")])].join("\n")
+          : content,
+      );
     }
     for (const [path, cells] of notebooks) {
-      if (!complete.has(path)) put(path, "file", JSON.stringify(buildNotebook([...cells.entries()].sort(([a], [b]) => a - b).map(([, c]) => c)), null, 2));
+      if (!complete.has(path))
+        put(
+          path,
+          "file",
+          JSON.stringify(
+            buildNotebook([...cells.entries()].sort(([a], [b]) => a - b).map(([, c]) => c)),
+            null,
+            2,
+          ),
+        );
     }
   }
   return [...entries.values()].sort((a, b) => a.path.localeCompare(b.path));
 }
 
-export interface WorkspaceTreeNode extends WorkspaceEntry { children: WorkspaceTreeNode[] }
+export interface WorkspaceTreeNode extends WorkspaceEntry {
+  children: WorkspaceTreeNode[];
+}
 export function workspaceTree(entries: WorkspaceEntry[]): WorkspaceTreeNode[] {
-  const nodes = new Map(entries.map((e) => [e.path, { ...e, children: [] as WorkspaceTreeNode[] }]));
+  const nodes = new Map(
+    entries.map((e) => [e.path, { ...e, children: [] as WorkspaceTreeNode[] }]),
+  );
   const roots: WorkspaceTreeNode[] = [];
   for (const node of nodes.values()) {
     const parent = nodes.get(node.path.split("/").slice(0, -1).join("/"));
-    if (parent) parent.children.push(node); else roots.push(node);
+    if (parent) parent.children.push(node);
+    else roots.push(node);
   }
-  const sort = (children: WorkspaceTreeNode[]): WorkspaceTreeNode[] => children.sort((a, b) => Number(b.type === "directory") - Number(a.type === "directory") || a.name.localeCompare(b.name)).map((n) => ({ ...n, children: sort(n.children) }));
+  const sort = (children: WorkspaceTreeNode[]): WorkspaceTreeNode[] =>
+    children
+      .sort(
+        (a, b) =>
+          Number(b.type === "directory") - Number(a.type === "directory") ||
+          a.name.localeCompare(b.name),
+      )
+      .map((n) => ({ ...n, children: sort(n.children) }));
   return sort(roots);
 }
 
 export function fileLanguage(path: string): string {
   const ext = path.split(".").at(-1)?.toLowerCase() ?? "";
-  return ({ py: "python", ipynb: "python", json: "json", ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript", md: "markdown", html: "html", css: "css", sql: "sql", yml: "yaml", yaml: "yaml", sh: "shell" } as Record<string, string>)[ext] ?? "plaintext";
+  return (
+    (
+      {
+        py: "python",
+        ipynb: "python",
+        json: "json",
+        ts: "typescript",
+        tsx: "typescript",
+        js: "javascript",
+        jsx: "javascript",
+        md: "markdown",
+        html: "html",
+        css: "css",
+        sql: "sql",
+        yml: "yaml",
+        yaml: "yaml",
+        sh: "shell",
+      } as Record<string, string>
+    )[ext] ?? "plaintext"
+  );
 }
 /** Show a notebook as plain Python: each cell starts with a `# %%` marker, markdown cells become comments. */
 export function notebookToPython(json: string): string {
   try {
     const nb = JSON.parse(json) as { cells?: { cell_type?: string; source?: string | string[] }[] };
     if (!Array.isArray(nb.cells)) return json;
-    return nb.cells.map((cell) => {
-      const src = Array.isArray(cell.source) ? cell.source.join("") : cell.source ?? "";
-      if (cell.cell_type === "markdown") return `# %% [markdown]\n${src.split("\n").map((l) => `# ${l}`.trimEnd()).join("\n")}`;
-      return `# %%\n${src}`;
-    }).join("\n\n");
+    return nb.cells
+      .map((cell) => {
+        const src = Array.isArray(cell.source) ? cell.source.join("") : (cell.source ?? "");
+        if (cell.cell_type === "markdown")
+          return `# %% [markdown]\n${src
+            .split("\n")
+            .map((l) => `# ${l}`.trimEnd())
+            .join("\n")}`;
+        return `# %%\n${src}`;
+      })
+      .join("\n\n");
   } catch {
     return json;
   }
@@ -174,15 +286,28 @@ export function notebookToPython(json: string): string {
 /** Turn edited `# %%` Python back into notebook JSON, keeping the original notebook's metadata. */
 export function pythonToNotebook(python: string, original: string): string {
   let base: Record<string, unknown> = { metadata: {}, nbformat: 4, nbformat_minor: 5 };
-  try { base = JSON.parse(original); } catch { /* use default */ }
-  const cells = python.split(/^# %%/m).map((chunk, i) => ({ chunk, lead: i === 0 })).filter(({ chunk, lead }) => !lead || chunk.trim()).map(({ chunk, lead }) => {
-    const markdown = !lead && chunk.startsWith(" [markdown]");
-    const body = (lead ? chunk : chunk.replace(/^[^\n]*\n?/, "")).replace(/\n+$/, "");
-    const text = markdown ? body.split("\n").map((l) => l.replace(/^# ?/, "")).join("\n") : body;
-    const source = text.split("\n").map((l, i, a) => (i < a.length - 1 ? `${l}\n` : l));
-    return markdown
-      ? { cell_type: "markdown", metadata: {}, source }
-      : { cell_type: "code", execution_count: null, metadata: {}, outputs: [], source };
-  });
+  try {
+    base = JSON.parse(original);
+  } catch {
+    /* use default */
+  }
+  const cells = python
+    .split(/^# %%/m)
+    .map((chunk, i) => ({ chunk, lead: i === 0 }))
+    .filter(({ chunk, lead }) => !lead || chunk.trim())
+    .map(({ chunk, lead }) => {
+      const markdown = !lead && chunk.startsWith(" [markdown]");
+      const body = (lead ? chunk : chunk.replace(/^[^\n]*\n?/, "")).replace(/\n+$/, "");
+      const text = markdown
+        ? body
+            .split("\n")
+            .map((l) => l.replace(/^# ?/, ""))
+            .join("\n")
+        : body;
+      const source = text.split("\n").map((l, i, a) => (i < a.length - 1 ? `${l}\n` : l));
+      return markdown
+        ? { cell_type: "markdown", metadata: {}, source }
+        : { cell_type: "code", execution_count: null, metadata: {}, outputs: [], source };
+    });
   return JSON.stringify({ ...base, cells }, null, 1);
 }

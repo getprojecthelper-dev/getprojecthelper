@@ -163,7 +163,7 @@ export function CreditMeter() {
   const overHold = meter.active && running > meter.estimate;
 
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-50 w-[21rem] max-w-[calc(100vw-2.5rem)]">
+    <div className="credit-run-toast-layer pointer-events-none fixed bottom-5 right-5 w-[21rem] max-w-[calc(100vw-2.5rem)]">
       <div
         className={cn(
           "credit-run-toast rounded-2xl border p-4 shadow-xl backdrop-blur",

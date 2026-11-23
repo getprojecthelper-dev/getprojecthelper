@@ -2,12 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  ArrowLeft,
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Database,
   Download,
+  Expand,
   ExternalLink,
   Code2,
   FileCode2,
@@ -39,6 +42,13 @@ import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { fixSectionError, generateSection } from "@/lib/builder.functions";
@@ -448,6 +458,7 @@ function BuildPage() {
               key={section.id}
               section={section}
               playbook={playbook}
+              projectName={meta?.name ?? "Project"}
               index={index}
               totalSteps={sections.length}
               locked={locked}
@@ -463,6 +474,33 @@ function BuildPage() {
               fixToken={fixTokens[section.id] ?? 0}
               fileOrigins={fileOrigins}
               onConfirm={() => confirmMutation.mutate(section.id)}
+              sections={sections}
+              onProceedToNext={async (fromIndex) => {
+                const currentSection = sections[fromIndex];
+                const nextSection = sections[fromIndex + 1];
+                if (currentSection && currentSection.status !== "confirmed") {
+                  await confirmMutation.mutateAsync(currentSection.id);
+                }
+                if (nextSection) {
+                  setOpenId(nextSection.id);
+                  setEditor({ sectionId: nextSection.id, path: null });
+                }
+              }}
+              onGenerateSection={(stepIndex) => {
+                const targetSection = sections[stepIndex];
+                return targetSection
+                  ? generateMutation.mutateAsync(targetSection.id)
+                  : Promise.resolve();
+              }}
+              onOpenEditor={(stepIndex, file) => {
+                const targetSection = sections[stepIndex];
+                if (!targetSection) return;
+                setOpenId(targetSection.id);
+                setEditor({
+                  sectionId: targetSection.id,
+                  path: file ? workspaceFilePath(file, sections) : null,
+                });
+              }}
               onOpenFile={
                 playbook.buildsCode
                   ? (file) =>
@@ -649,18 +687,56 @@ function briefTone(title: string) {
 }
 
 /** The project brief (problem, solution, tools, objectives) as readable cards. */
-function OverviewBrief({ blocks }: { blocks: Block[] }) {
+function OverviewBrief({
+  blocks,
+  onViewFullScreen,
+  stepNumber,
+  totalSteps,
+  hideFullScreenButton = false,
+  showAllDetails = false,
+}: {
+  blocks: Block[];
+  onViewFullScreen: () => void;
+  stepNumber: number;
+  totalSteps: number;
+  hideFullScreenButton?: boolean;
+  showAllDetails?: boolean;
+}) {
   if (!blocks.length) return null;
   return (
     <div className="overview-brief grid gap-4">
       {blocks.map((block, i) => {
-        return <OverviewBriefCard key={`${block.title}-${i}`} block={block} />;
+        return (
+          <OverviewBriefCard
+            key={`${block.title}-${i}`}
+            block={block}
+            onViewFullScreen={onViewFullScreen}
+            stepNumber={stepNumber}
+            totalSteps={totalSteps}
+            hideFullScreenButton={hideFullScreenButton}
+            showAllDetails={showAllDetails}
+          />
+        );
       })}
     </div>
   );
 }
 
-function OverviewBriefCard({ block }: { block: Block }) {
+function OverviewBriefCard({
+  block,
+  onViewFullScreen,
+  stepNumber,
+  totalSteps,
+  hideFullScreenButton = false,
+  showAllDetails = false,
+}: {
+  block: Block;
+  onViewFullScreen: () => void;
+  stepNumber: number;
+  totalSteps: number;
+  hideFullScreenButton?: boolean;
+  showAllDetails?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
   const tone = briefTone(block.title);
   const Icon = tone.icon;
@@ -672,7 +748,7 @@ function OverviewBriefCard({ block }: { block: Block }) {
       .filter(Boolean),
   );
   const hasExtraDetails = bullets.length > 3 || body.length > 260;
-  const visibleBullets = expanded ? bullets : bullets.slice(0, 3);
+  const visibleBullets = showAllDetails || expanded ? bullets : bullets.slice(0, 3);
   const sectionLabel = /problem/i.test(block.title)
     ? "The challenge"
     : /solution|approach/i.test(block.title)
@@ -682,7 +758,22 @@ function OverviewBriefCard({ block }: { block: Block }) {
         : "What you will use";
 
   return (
-    <article className={cn("space-y-3 rounded-xl border bg-card p-4 shadow-sm", tone.ring)}>
+    <article
+      className={cn(
+        "overview-brief__card space-y-3 rounded-xl border bg-card p-4 shadow-sm",
+        tone.ring,
+      )}
+    >
+      {!hideFullScreenButton && /problem/i.test(block.title) ? (
+        <div className="overview-brief__toolbar">
+          <span>
+            Step {stepNumber} of {totalSteps}
+          </span>
+          <Button type="button" size="sm" variant="outline" onClick={onViewFullScreen}>
+            <Expand className="h-4 w-4" /> View full screen
+          </Button>
+        </div>
+      ) : null}
       <div className="flex items-center gap-2.5">
         <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
           <Icon className={cn("h-4 w-4", tone.text)} />
@@ -709,7 +800,7 @@ function OverviewBriefCard({ block }: { block: Block }) {
         ) : null}
       </div>
 
-      {hasExtraDetails ? (
+      {hasExtraDetails && !showAllDetails ? (
         <button
           type="button"
           className="overview-brief__toggle text-sm font-medium text-primary"
@@ -1103,8 +1194,10 @@ function CodeFileBar({ file, action }: { file: string; action?: string | undefin
 function SectionCard({
   section,
   playbook,
+  projectName,
   index,
   totalSteps,
+  sections,
   locked,
   open,
   onToggle,
@@ -1114,14 +1207,19 @@ function SectionCard({
   onGenerate,
   onFix,
   onConfirm,
+  onProceedToNext,
+  onGenerateSection,
+  onOpenEditor,
   fileOrigins,
   onOpenFile,
 }: {
   onOpenFile?: ((file: string) => void) | undefined;
   section: BuildSection;
   playbook: DomainPlaybook;
+  projectName: string;
   index: number;
   totalSteps: number;
+  sections: BuildSection[];
   fileOrigins: Map<string, number>;
   locked: boolean;
   open: boolean;
@@ -1132,8 +1230,15 @@ function SectionCard({
   onGenerate: () => void;
   onFix: (errorText: string) => void;
   onConfirm: () => void;
+  onProceedToNext: (fromIndex: number) => Promise<void>;
+  onGenerateSection: (sectionIndex: number) => Promise<unknown>;
+  onOpenEditor: (sectionIndex: number, file?: string) => void;
 }) {
   const [showFix, setShowFix] = useState(false);
+  const [showFullScreen, setShowFullScreen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(index);
+  const [showNextGeneratePrompt, setShowNextGeneratePrompt] = useState(false);
+  const [generatingPreviewStep, setGeneratingPreviewStep] = useState(false);
   const [errorText, setErrorText] = useState("");
 
   // A successful fix wipes the box so the next error starts from a clean slate.
@@ -1144,6 +1249,46 @@ function SectionCard({
     }
   }, [fixToken]);
   const [zipping, setZipping] = useState(false);
+  const openFullScreen = () => {
+    setPreviewIndex(index);
+    setShowNextGeneratePrompt(false);
+    setShowFullScreen(true);
+  };
+
+  const goToPreviousPreview = () => {
+    setShowNextGeneratePrompt(false);
+    setPreviewIndex((current) => Math.max(0, current - 1));
+  };
+
+  const advancePreview = async () => {
+    if (!previewNextSection) return;
+    if (!previewNextHasGeneratedContent) {
+      setShowNextGeneratePrompt(true);
+      return;
+    }
+    try {
+      await onProceedToNext(previewIndex);
+      setPreviewIndex((current) => Math.min(sections.length - 1, current + 1));
+    } catch {
+      // The mutation shows an error toast; keep the current preview open.
+    }
+  };
+
+  const generateAndPreviewNext = async () => {
+    if (!previewNextSection) return;
+    setGeneratingPreviewStep(true);
+    try {
+      await onProceedToNext(previewIndex);
+      await onGenerateSection(previewIndex + 1);
+      setPreviewIndex((current) => Math.min(sections.length - 1, current + 1));
+      setShowNextGeneratePrompt(false);
+    } catch {
+      // The mutation shows an error toast; keep the prompt open to retry.
+    } finally {
+      setGeneratingPreviewStep(false);
+    }
+  };
+
   const confirmed = section.status === "confirmed";
   const isOverview =
     section.kind === "overview" ||
@@ -1157,6 +1302,23 @@ function SectionCard({
         ? [{ title: "Code", code: section.code, explanation: section.explanation }]
         : [];
 
+  const previewSection = sections[previewIndex] ?? section;
+  const previewNextSection = sections[previewIndex + 1] ?? null;
+  const previewNextHasGeneratedContent = previewNextSection
+    ? Boolean(previewNextSection.code) ||
+      previewNextSection.blocks.length > 0 ||
+      Boolean(previewNextSection.structure && playbook.buildsCode)
+    : false;
+  const previewIsOverview =
+    previewSection.kind === "overview" ||
+    (previewSection.position === 0 && /problem\s*statement/i.test(previewSection.title));
+  const previewBlocks: Block[] =
+    previewSection.blocks.length > 0
+      ? previewSection.blocks
+      : previewSection.code
+        ? [{ title: "Code", code: previewSection.code, explanation: previewSection.explanation }]
+        : [];
+  const previewIsSetupSection = Boolean(previewSection.structure && playbook.buildsCode);
   // Which office files this step touches (de-duplicated) and whether the
   // student has to create them here or already has them from an earlier step.
   const specIsNew = (spec: FileSpec) =>
@@ -1193,14 +1355,14 @@ function SectionCard({
       ).map(([path, cells]) => ({ path, cells }))
     : [];
 
-  const downloadZip = async () => {
+  const downloadZip = async (targetSection: BuildSection = section) => {
     setZipping(true);
     try {
       const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
-      const files = section.files.filter((f) => f.path && !f.path.endsWith("/"));
+      const files = targetSection.files.filter((f) => f.path && !f.path.endsWith("/"));
       if (files.length === 0) {
-        zip.file("project-structure.txt", section.structure ?? "");
+        zip.file("project-structure.txt", targetSection.structure ?? "");
       } else {
         for (const file of files) {
           const path = file.path.replace(/^\.?\//, "");
@@ -1208,13 +1370,13 @@ function SectionCard({
           // Jupyter can open it.
           zip.file(path, isNotebookFile(path) ? JSON.stringify(buildNotebook([]), null, 1) : "");
         }
-        if (section.structure) zip.file("PROJECT_STRUCTURE.txt", section.structure);
+        if (targetSection.structure) zip.file("PROJECT_STRUCTURE.txt", targetSection.structure);
       }
       const blob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "project-structure.zip";
+      a.download = `${targetSection.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "project"}.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -1268,6 +1430,17 @@ function SectionCard({
           </button>
 
           <div className="build-roadmap__step-actions">
+            {generated ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="build-roadmap__fullscreen-trigger"
+                onClick={openFullScreen}
+              >
+                <Expand className="h-4 w-4" /> View full screen
+              </Button>
+            ) : null}
             {!locked && !generated ? (
               <Button size="sm" onClick={onGenerate} disabled={generating}>
                 {generating ? (
@@ -1305,6 +1478,239 @@ function SectionCard({
           </div>
         </div>
       ) : null}
+
+      <Dialog open={showFullScreen} onOpenChange={setShowFullScreen}>
+        <DialogContent
+          fullScreen
+          className="build-section-fullscreen__viewport"
+          overlayClassName="build-section-fullscreen__overlay"
+        >
+          <div className="build-section-fullscreen">
+            <DialogHeader className="build-section-fullscreen__header">
+              <DialogTitle className="sr-only">{previewSection.title}</DialogTitle>
+              <p className="build-section-fullscreen__project-name">{projectName}</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="build-section-fullscreen__close"
+                onClick={() => setShowFullScreen(false)}
+              >
+                Close
+              </Button>
+            </DialogHeader>
+            <div
+              className="build-section-fullscreen__progress"
+              role="progressbar"
+              aria-label="Preview progress"
+              aria-valuemin={0}
+              aria-valuemax={totalSteps}
+              aria-valuenow={previewIndex + 1}
+            >
+              <span
+                style={{
+                  width: `${Math.min(100, ((previewIndex + 1) / Math.max(totalSteps, 1)) * 100)}%`,
+                }}
+              />
+            </div>
+            <div className="build-section-fullscreen__content">
+              {showNextGeneratePrompt && previewNextSection ? (
+                generatingPreviewStep ? (
+                  <section
+                    className="build-section-fullscreen__generation-card"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <span aria-hidden="true">
+                      <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" />
+                    </span>
+                    <div>
+                      <p>
+                        Generating step {previewIndex + 2} of {totalSteps}
+                      </p>
+                      <h2>{previewNextSection.title}</h2>
+                      <p>
+                        We’re preparing this implementation. It will appear here as soon as it’s
+                        ready.
+                      </p>
+                    </div>
+                  </section>
+                ) : (
+                  <section className="build-section-fullscreen__generate-prompt">
+                    <p className="build-section-fullscreen__eyebrow">
+                      Step {previewIndex + 2} of {totalSteps}
+                    </p>
+                    <h2>{previewNextSection.title}</h2>
+                    <p>
+                      This implementation hasn’t been generated yet. Would you like to generate it
+                      now and continue to the next step?
+                    </p>
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowNextGeneratePrompt(false)}
+                      >
+                        Go back
+                      </Button>
+                      <Button type="button" onClick={generateAndPreviewNext}>
+                        <Sparkles className="h-4 w-4" /> Generate this step
+                      </Button>
+                    </div>
+                  </section>
+                )
+              ) : (
+                <>
+                  {previewIndex > 0 ? (
+                    <header className="build-section-fullscreen__step-intro">
+                      <p>
+                        Step {previewIndex + 1} of {totalSteps}
+                      </p>
+                      <h2>{previewSection.title}</h2>
+                      {previewSection.objective || previewSection.question ? (
+                        <div>{previewSection.objective || previewSection.question}</div>
+                      ) : null}
+                    </header>
+                  ) : null}
+                  {previewIsOverview ? (
+                    <OverviewBrief
+                      blocks={previewBlocks}
+                      onViewFullScreen={() => setShowFullScreen(false)}
+                      stepNumber={previewIndex + 1}
+                      totalSteps={totalSteps}
+                      hideFullScreenButton
+                      showAllDetails
+                    />
+                  ) : null}
+                  {previewSection.structure && playbook.buildsCode ? (
+                    <ProjectFolderSetup
+                      structure={previewSection.structure}
+                      onDownload={() => downloadZip(previewSection)}
+                      downloading={zipping}
+                    />
+                  ) : null}
+                  {!previewIsOverview && !previewIsSetupSection
+                    ? previewBlocks.map((block, i) => {
+                        const hasCode = Boolean(block.code?.trim());
+                        return (
+                          <article
+                            key={`fullscreen-${block.title}-${i}`}
+                            className="build-section-fullscreen__block"
+                          >
+                            <div className="build-section-fullscreen__block-heading">
+                              <span>
+                                {previewBlocks.length > 1 ? `Part ${i + 1}` : "Generated section"}
+                              </span>
+                              <h3>{block.title}</h3>
+                              {block.file ? <code>{block.file}</code> : null}
+                            </div>
+                            {hasCode ? (
+                              isNotebookFile(block.file) ? (
+                                <NotebookCellView
+                                  code={block.code}
+                                  notebook={notebookName(block.file ?? "")}
+                                  index={notebookCellIndex(block.file) ?? i + 1}
+                                />
+                              ) : isTerminalBlock(block) ? (
+                                <CodeBlock code={block.code} language="bash" filename="terminal" />
+                              ) : (
+                                <CodeBlock
+                                  code={block.code}
+                                  language={previewSection.language}
+                                  filename={block.file}
+                                />
+                              )
+                            ) : null}
+                            <BlockExplanation block={block} hasCode={hasCode} />
+                          </article>
+                        );
+                      })
+                    : null}
+                  {!previewIsSetupSection && previewSection.walkthrough ? (
+                    <article className="build-section-fullscreen__recap">
+                      <h3>Step recap</h3>
+                      {previewSection.walkthrough.completed?.length ? (
+                        <section>
+                          <h4>What you finished</h4>
+                          <ul>
+                            {previewSection.walkthrough.completed.map((item, itemIndex) => (
+                              <li key={`complete-${itemIndex}`}>
+                                <EmphasizedText text={item} />
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      ) : null}
+                      {previewSection.walkthrough.whats_next?.length ? (
+                        <section>
+                          <h4>What’s next</h4>
+                          <ul>
+                            {previewSection.walkthrough.whats_next.map((item, itemIndex) => (
+                              <li key={`up-next-${itemIndex}`}>
+                                <EmphasizedText text={item} />
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      ) : null}
+                      {previewSection.walkthrough.analogy ? (
+                        <p>
+                          <strong>Think of it like: </strong>
+                          {previewSection.walkthrough.analogy}
+                        </p>
+                      ) : null}
+                    </article>
+                  ) : null}
+                  {fixRounds(previewSection.fix_notes).map((round, roundIndex) => (
+                    <FixRoundCard
+                      key={`fullscreen-fix-${round.at ?? roundIndex}`}
+                      round={round}
+                      index={roundIndex}
+                      language={round.language || previewSection.language}
+                      partLabel={playbook.buildsCode ? "Part" : "Deliverable"}
+                      buildsCode={playbook.buildsCode}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+            {!showNextGeneratePrompt && (previewIndex > 0 || previewNextSection) ? (
+              <footer className="build-section-fullscreen__footer">
+                {previewIndex > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="build-section-fullscreen__previous"
+                    onClick={goToPreviousPreview}
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Previous step
+                  </Button>
+                ) : null}
+                {playbook.buildsCode ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="build-section-fullscreen__previous"
+                    onClick={() => {
+                      const firstCodeFile = previewBlocks.find(
+                        (block) => block.code?.trim() && block.file && !isTerminalBlock(block),
+                      )?.file;
+                      onOpenEditor(previewIndex, firstCodeFile);
+                      setShowFullScreen(false);
+                    }}
+                  >
+                    <Code2 className="h-4 w-4" /> Open code editor
+                  </Button>
+                ) : null}
+                {previewNextSection ? (
+                  <Button type="button" onClick={advancePreview}>
+                    Proceed to next step <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : null}
+              </footer>
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {open || isOverview ? (
         <div className="build-roadmap__step-body">
@@ -1344,7 +1750,14 @@ function SectionCard({
             <NotebookActions notebooks={notebooks} language={section.language} />
           ) : null}
 
-          {isOverview && generated ? <OverviewBrief blocks={blocks} /> : null}
+          {isOverview && generated ? (
+            <OverviewBrief
+              blocks={blocks}
+              onViewFullScreen={openFullScreen}
+              stepNumber={index + 1}
+              totalSteps={totalSteps}
+            />
+          ) : null}
 
           {isOverview || isSetupSection
             ? null

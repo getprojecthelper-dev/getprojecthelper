@@ -21,4 +21,4 @@
 - Shared checkout price resolution allows configured monthly plan external IDs independently of the store lock; all other prices retain live-listing checks to prevent arbitrary catalog access.
 - AI JSON calls settle credits only after the reply parses; unreadable or cut-off replies release the hold so users are never charged for nothing.
 
-- Turnstile human checks are verified server-side (`src/lib/turnstile.server.ts`) before auth actions and support submissions; the site key is served by a server function so both keys live in secrets.
+- Turnstile is redeemed inside each auth/support handler with exact action and request-host checks and a timeout; reset each widget after attempts so tokens cannot be replayed. Keep both keys in platform secrets and return only the public site key.

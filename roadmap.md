@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Reuse the existing Turnstile widget and saved keys; gate auth and support handlers on action/hostname verification.
+- [ ] Verify fresh-token acceptance and replay rejection against the existing widget (blocked: Cloudflare refuses automated-browser challenges; requires a real human check after publishing).
+
 - [x] Persist actual generated project files and folders without overwriting saved edits.
 - [x] Connect the complete Explorer, Monaco editor, file tabs, saving, and separate terminal.
 - [x] Verify generation, file opening, editing, and restoration in a signed-in project.

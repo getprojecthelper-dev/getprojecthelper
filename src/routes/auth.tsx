@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { TurnstileWidget } from "@/components/turnstile-widget";
-import { verifyTurnstile } from "@/lib/turnstile.functions";
+import { submitVerifiedAuth } from "@/lib/turnstile.functions";
 
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).default("login").catch("login"),
@@ -111,28 +111,15 @@ function AuthPage() {
     setBusy(true);
     setNotice(null);
     try {
-      await verifyTurnstile({ data: { token: captchaToken } });
-      if (kind === "signup") {
-        if (fullName.trim().length < 2) {
-          toast.error("Enter the name you want shown in Project Helper.");
-          return;
-        }
-        const { data, error } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName.trim() },
-          },
-        });
+      const result = await submitVerifiedAuth({ data: {
+        kind, token: captchaToken, ...parsed.data,
+        ...(kind === "signup" ? { fullName: fullName.trim(), termsAccepted } : {}),
+      } });
+      if (result.session) {
+        const { error } = await supabase.auth.setSession(result.session);
         if (error) throw error;
-        if (!data.session) {
-          setNotice("Check your email to confirm your account, then log in.");
-          return;
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword(parsed.data);
-        if (error) throw error;
+      } else if (kind === "signup") {
+        setNotice("Check your email to confirm your account, then log in.");
       }
     } catch (error) {
       const raw = error instanceof Error ? error.message : "Authentication failed";
@@ -157,6 +144,7 @@ function AuthPage() {
       }
     } finally {
       setBusy(false);
+      setCaptchaToken(null);
       setCaptchaReset((k) => k + 1);
     }
   };
@@ -174,16 +162,13 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      await verifyTurnstile({ data: { token: captchaToken } });
-      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) throw error;
+      await submitVerifiedAuth({ data: { kind: "reset", token: captchaToken, email: parsed.data } });
       setNotice("If that address has an account, a reset link is on its way.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We couldn't send the reset link.");
     } finally {
       setBusy(false);
+      setCaptchaToken(null);
       setCaptchaReset((k) => k + 1);
     }
   };
@@ -474,7 +459,7 @@ function AuthPage() {
                   </p>
                 )}
 
-                <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaReset} />
+                <TurnstileWidget action={mode} onToken={setCaptchaToken} resetKey={captchaReset} />
 
                 <Button
                   type="submit"

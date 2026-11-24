@@ -59,6 +59,7 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
       toast.error(error instanceof Error ? error.message : "Your message could not be sent.");
     } finally {
       setIsSending(false);
+      setToken(null);
       setResetKey((k) => k + 1);
     }
   }
@@ -74,7 +75,7 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
         </div>
         <label className="grid gap-1.5 text-sm font-medium">Subject<Input name="subject" required minLength={3} maxLength={180} /></label>
         <label className="grid gap-1.5 text-sm font-medium">Message<Textarea name="message" required minLength={10} maxLength={5000} rows={6} /></label>
-        <TurnstileWidget onToken={setToken} resetKey={resetKey} />
+        <TurnstileWidget action={kind} onToken={setToken} resetKey={resetKey} />
         <Button type="submit" className="w-full sm:w-auto" disabled={isSending || !token}>{isSending ? "Sending…" : text.button}</Button>
       </form>
     </section>

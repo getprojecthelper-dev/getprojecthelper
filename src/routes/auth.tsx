@@ -13,6 +13,8 @@ import { MaterialIcon } from "@/components/material-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import { verifyTurnstile } from "@/lib/turnstile.functions";
 
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).default("login").catch("login"),
@@ -70,6 +72,8 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
   const passwordFeedback = mode === "signup" ? getPasswordFeedback(password) : null;
   const isLocalPreview =
     typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
@@ -100,9 +104,14 @@ function AuthPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Check your details");
       return;
     }
+    if (!captchaToken) {
+      toast.error("Please complete the human verification.");
+      return;
+    }
     setBusy(true);
     setNotice(null);
     try {
+      await verifyTurnstile({ data: { token: captchaToken } });
       if (kind === "signup") {
         if (fullName.trim().length < 2) {
           toast.error("Enter the name you want shown in Project Helper.");
@@ -148,6 +157,7 @@ function AuthPage() {
       }
     } finally {
       setBusy(false);
+      setCaptchaReset((k) => k + 1);
     }
   };
 
@@ -158,8 +168,13 @@ function AuthPage() {
       toast.error("Enter your email address first, then choose Forgot password.");
       return;
     }
+    if (!captchaToken) {
+      toast.error("Please complete the human verification.");
+      return;
+    }
     setBusy(true);
     try {
+      await verifyTurnstile({ data: { token: captchaToken } });
       const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -169,6 +184,7 @@ function AuthPage() {
       toast.error(error instanceof Error ? error.message : "We couldn't send the reset link.");
     } finally {
       setBusy(false);
+      setCaptchaReset((k) => k + 1);
     }
   };
 
@@ -458,9 +474,11 @@ function AuthPage() {
                   </p>
                 )}
 
+                <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaReset} />
+
                 <Button
                   type="submit"
-                  disabled={busy || (mode === "signup" && cooldown > 0)}
+                  disabled={busy || !captchaToken || (mode === "signup" && cooldown > 0)}
                   className="auth-primary-action group mt-1 h-11 w-full rounded-lg bg-auth-coral font-display font-semibold text-white shadow-none transition-all duration-200 hover:bg-auth-coral-ink active:scale-[.99] focus-visible:ring-2 focus-visible:ring-auth-pine"
                 >
                   {busy

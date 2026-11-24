@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { submitSupportRequest } from "@/lib/support.functions";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 
 type RequestKind = "contact" | "issue" | "grievance";
 
@@ -30,12 +31,15 @@ const copy: Record<RequestKind, { title: string; intro: string; button: string }
 export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
   const submit = useServerFn(submitSupportRequest);
   const [isSending, setIsSending] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState(0);
   const text = copy[kind];
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formEl = event.currentTarget;
     const form = new FormData(formEl);
+    if (!token) { toast.error("Please complete the human verification."); return; }
     setIsSending(true);
     try {
       await submit({
@@ -46,6 +50,7 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
           subject: String(form.get("subject") ?? ""),
           message: String(form.get("message") ?? ""),
           pageUrl: window.location.href,
+          turnstileToken: token,
         },
       });
       formEl.reset();
@@ -54,6 +59,7 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
       toast.error(error instanceof Error ? error.message : "Your message could not be sent.");
     } finally {
       setIsSending(false);
+      setResetKey((k) => k + 1);
     }
   }
 
@@ -68,7 +74,8 @@ export function PublicFeedbackForm({ kind }: { kind: RequestKind }) {
         </div>
         <label className="grid gap-1.5 text-sm font-medium">Subject<Input name="subject" required minLength={3} maxLength={180} /></label>
         <label className="grid gap-1.5 text-sm font-medium">Message<Textarea name="message" required minLength={10} maxLength={5000} rows={6} /></label>
-        <Button type="submit" className="w-full sm:w-auto" disabled={isSending}>{isSending ? "Sending…" : text.button}</Button>
+        <TurnstileWidget onToken={setToken} resetKey={resetKey} />
+        <Button type="submit" className="w-full sm:w-auto" disabled={isSending || !token}>{isSending ? "Sending…" : text.button}</Button>
       </form>
     </section>
   );

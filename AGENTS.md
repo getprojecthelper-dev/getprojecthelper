@@ -20,3 +20,5 @@
 - Buy-project listings live in `premade_listings` (admin-written via role-checked server functions, live rows publicly readable); each listing owns its own one-time checkout price so admins can add projects without code changes.
 - Shared checkout price resolution allows configured monthly plan external IDs independently of the store lock; all other prices retain live-listing checks to prevent arbitrary catalog access.
 - AI JSON calls settle credits only after the reply parses; unreadable or cut-off replies release the hold so users are never charged for nothing.
+
+- Turnstile human checks are verified server-side (`src/lib/turnstile.server.ts`) before auth actions and support submissions; the site key is served by a server function so both keys live in secrets.

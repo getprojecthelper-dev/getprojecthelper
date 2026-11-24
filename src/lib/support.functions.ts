@@ -11,6 +11,7 @@ const supportRequestSchema = z.object({
   subject: z.string().trim().min(3).max(180),
   message: z.string().trim().min(10).max(5000),
   pageUrl: z.string().url().max(2000).optional(),
+  turnstileToken: z.string().min(1).max(4096),
 });
 
 export type SupportRequest = {
@@ -28,6 +29,9 @@ export type SupportRequest = {
 export const submitSupportRequest = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => supportRequestSchema.parse(input))
   .handler(async ({ data }) => {
+    const { verifyTurnstileToken } = await import("./turnstile.server");
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    await verifyTurnstileToken(data.turnstileToken, getRequestHeader("cf-connecting-ip"));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("support_requests").insert({
       kind: data.kind,

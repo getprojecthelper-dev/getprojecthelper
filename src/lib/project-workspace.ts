@@ -1,6 +1,7 @@
 import { buildNotebook, notebookCellIndex, notebookPath } from "@/lib/notebook";
 
 export const PROJECT_DOWNLOAD_FOLDER = "GetprojectHelper";
+export const workspaceKey = (projectId: string) => ["project-workspace", projectId] as const;
 
 export interface WorkspaceEntry {
   path: string;

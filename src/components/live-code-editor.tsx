@@ -21,14 +21,13 @@ import { Button } from "@/components/ui/button";
 import { loadProjectWorkspace, saveWorkspaceFile } from "@/lib/project-workspace.functions";
 import {
   PROJECT_DOWNLOAD_FOLDER,
+  workspaceKey,
   workspaceTree,
   type WorkspaceTreeNode,
 } from "@/lib/project-workspace";
 import { cn } from "@/lib/utils";
 
 const Monaco = lazy(() => import("@/components/workspace-monaco"));
-export const workspaceKey = (projectId: string) => ["project-workspace", projectId] as const;
-
 export function LiveCodeEditor({
   projectId,
   projectName,

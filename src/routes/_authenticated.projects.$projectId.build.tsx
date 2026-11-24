@@ -36,12 +36,13 @@ import { toast } from "sonner";
 
 import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
-import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
+import { LiveCodeEditor } from "@/components/live-code-editor";
 import { ProjectFolderSetup } from "@/components/project-folder-setup";
 import {
   isTerminalBlock,
   PROJECT_DOWNLOAD_FOLDER,
   workspaceFilePath,
+  workspaceKey,
 } from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";

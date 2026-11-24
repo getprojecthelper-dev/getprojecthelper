@@ -41,6 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProjects } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import { clearMentorChat, getMentorHistory, type MentorMessage } from "@/lib/mentor.functions";
+import { workspaceKey } from "@/lib/project-workspace";
 import { cn } from "@/lib/utils";
 
 const STARTERS = [
@@ -104,11 +105,14 @@ export function MentorChat({
       creditMeter.cancel();
       toast.error(error.message || "The mentor could not answer right now.");
     },
-    onFinish: () => {
+    onFinish: ({ message }) => {
       creditMeter.finish();
       void queryClient.invalidateQueries({ queryKey: ["credits"] });
       void queryClient.invalidateQueries({ queryKey: ["mentor-history", threadId] });
       void queryClient.invalidateQueries({ queryKey: ["mentor-threads", projectId] });
+      if (message.parts.some((part) => part.type === "tool-applyWorkspaceChanges")) {
+        void queryClient.invalidateQueries({ queryKey: workspaceKey(projectId) });
+      }
     },
   });
 

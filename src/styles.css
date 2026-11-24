@@ -736,20 +736,25 @@
 }
 
 .workspace-home-sidebar__tool-row {
+  position: relative;
   display: flex;
   min-height: 2.6rem;
   align-items: center;
   gap: 0.6rem;
   border: 1px solid transparent;
   border-radius: 0.65rem;
-  padding: 0 0.35rem 0 0.65rem;
+  padding: 0 0.65rem;
   color: #334155;
+  font-family: inherit;
   font-size: 0.82rem;
   font-weight: 550;
+  line-height: 1.25;
+  cursor: pointer;
 }
 
 .workspace-home-sidebar__tool-row:hover,
-.workspace-home-sidebar__tool:has(.workspace-home-sidebar__tool-projects)
+.workspace-home-sidebar__tool-row:focus-within,
+.workspace-home-sidebar__tool:has(.workspace-home-sidebar__tool-toggle[aria-expanded="true"])
   .workspace-home-sidebar__tool-row {
   border-color: #bfdbfe;
   background: #fff;
@@ -757,27 +762,37 @@
 }
 
 .workspace-home-sidebar__tool-row > .material-symbols-rounded {
+  width: 1.1rem;
+  flex: 0 0 1.1rem;
   color: #0866e8;
   font-size: 1.1rem;
+  line-height: 1;
+  text-align: center;
 }
 
 .workspace-home-sidebar__tool-link {
+  display: block;
   min-width: 0;
   flex: 1;
   color: inherit;
+  font: inherit;
   text-decoration: none;
 }
 
-.workspace-home-sidebar__tool-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.workspace-home-sidebar__tool-link::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
 }
 
 .workspace-home-sidebar__tool-toggle {
+  position: relative;
+  z-index: 2;
   display: grid;
-  width: 2rem;
+  width: 1.1rem;
   height: 2rem;
-  flex: 0 0 auto;
+  flex: 0 0 1.1rem;
   place-items: center;
   border: 0;
   border-radius: 0.45rem;
@@ -786,7 +801,12 @@
 }
 
 .workspace-home-sidebar__tool-toggle:hover {
-  background: #eff6ff;
+  color: #0757ad;
+}
+
+.workspace-home-sidebar__tool-toggle:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
 }
 
 .workspace-home-sidebar__tool-toggle[aria-expanded="true"] .workspace-home-sidebar__tool-chevron {

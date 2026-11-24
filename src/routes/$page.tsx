@@ -12,6 +12,9 @@ const feedbackPages = {
 };
 
 export const Route = createFileRoute("/$page")({
+  beforeLoad: ({ params }) => {
+    if (!(params.page in publicPages) && !(params.page in feedbackPages)) throw notFound();
+  },
   head: ({ params }) => {
     const page = feedbackPages[params.page as keyof typeof feedbackPages] ?? publicPages[params.page];
     const title = `${page?.title ?? "Support"} — Project Helper`;
@@ -21,10 +24,6 @@ export const Route = createFileRoute("/$page")({
       { property: "og:title", content: title }, { property: "og:description", content: description },
       { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ] };
-  },
-  beforeLoad: ({ params }) => {
-    if (!(params.page in publicPages) && !(params.page in feedbackPages)) throw notFound();
-    return {};
   },
   component: PublicRoute,
 });

@@ -38,7 +38,11 @@ import { withMeter } from "@/components/credit-meter";
 import { CodeBlock } from "@/components/code-block";
 import { LiveCodeEditor, workspaceKey } from "@/components/live-code-editor";
 import { ProjectFolderSetup } from "@/components/project-folder-setup";
-import { isTerminalBlock, workspaceFilePath } from "@/lib/project-workspace";
+import {
+  isTerminalBlock,
+  PROJECT_DOWNLOAD_FOLDER,
+  workspaceFilePath,
+} from "@/lib/project-workspace";
 import { NotebookCell as NotebookCellView } from "@/components/notebook-cell";
 import { DocSheet } from "@/components/doc-sheet";
 import { Button } from "@/components/ui/button";
@@ -1361,21 +1365,26 @@ function SectionCard({
       const zip = new JSZip();
       const files = targetSection.files.filter((f) => f.path && !f.path.endsWith("/"));
       if (files.length === 0) {
-        zip.file("project-structure.txt", targetSection.structure ?? "");
+        zip.file(`${PROJECT_DOWNLOAD_FOLDER}/project-structure.txt`, targetSection.structure ?? "");
       } else {
         for (const file of files) {
-          const path = file.path.replace(/^\.?\//, "");
+          const path = workspaceFilePath(file.path, sections);
           // Files ship empty on purpose; a notebook still needs valid JSON so
           // Jupyter can open it.
-          zip.file(path, isNotebookFile(path) ? JSON.stringify(buildNotebook([]), null, 1) : "");
+          zip.file(
+            `${PROJECT_DOWNLOAD_FOLDER}/${path}`,
+            isNotebookFile(path) ? JSON.stringify(buildNotebook([]), null, 1) : "",
+          );
         }
-        if (targetSection.structure) zip.file("PROJECT_STRUCTURE.txt", targetSection.structure);
+        if (targetSection.structure) {
+          zip.file(`${PROJECT_DOWNLOAD_FOLDER}/PROJECT_STRUCTURE.txt`, targetSection.structure);
+        }
       }
       const blob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${targetSection.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "project"}.zip`;
+      a.download = `${PROJECT_DOWNLOAD_FOLDER}.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -1440,13 +1449,18 @@ function SectionCard({
             </Button>
           ) : null}
           {!locked && !generated ? (
-            <Button size="sm" onClick={onGenerate} disabled={generating}>
+            <Button
+              size="sm"
+              className="build-roadmap__build-button"
+              onClick={onGenerate}
+              disabled={generating}
+            >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {generating ? "Generating…" : "Generate"}
+              {generating ? "Building…" : "Build"}
             </Button>
           ) : null}
           {!locked && generated ? (
@@ -1455,7 +1469,7 @@ function SectionCard({
               variant="outline"
               onClick={onGenerate}
               disabled={generating}
-              title="Generate this step again"
+              title="Build this step again"
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1522,7 +1536,7 @@ function SectionCard({
                     </span>
                     <div>
                       <p>
-                        Generating step {previewIndex + 2} of {totalSteps}
+                        Building step {previewIndex + 2} of {totalSteps}
                       </p>
                       <h2>{previewNextSection.title}</h2>
                       <p>
@@ -1550,7 +1564,7 @@ function SectionCard({
                         Go back
                       </Button>
                       <Button type="button" onClick={generateAndPreviewNext}>
-                        <Sparkles className="h-4 w-4" /> Generate this step
+                        <Sparkles className="h-4 w-4" /> Build this step
                       </Button>
                     </div>
                   </section>
@@ -1725,7 +1739,7 @@ function SectionCard({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nothing generated yet. Press Generate when you&apos;re ready to work on this step.
+                Nothing has been built yet. Press Build when you&apos;re ready to work on this step.
               </p>
             )
           ) : null}

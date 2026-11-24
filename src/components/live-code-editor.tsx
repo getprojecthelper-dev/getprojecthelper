@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ChevronDown,
   Code2,
+  Download,
   FileCode,
   FileSpreadsheet,
   FileText,
@@ -18,7 +19,11 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { loadProjectWorkspace, saveWorkspaceFile } from "@/lib/project-workspace.functions";
-import { workspaceTree, type WorkspaceTreeNode } from "@/lib/project-workspace";
+import {
+  PROJECT_DOWNLOAD_FOLDER,
+  workspaceTree,
+  type WorkspaceTreeNode,
+} from "@/lib/project-workspace";
 import { cn } from "@/lib/utils";
 
 const Monaco = lazy(() => import("@/components/workspace-monaco"));
@@ -49,6 +54,7 @@ export function LiveCodeEditor({
   const [tabs, setTabs] = useState<string[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [closed, setClosed] = useState<Set<string>>(new Set());
+  const [downloadingProject, setDownloadingProject] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(() => Boolean(terminal.trim()));
   const tree = useMemo(
     () =>
@@ -76,6 +82,39 @@ export function LiveCodeEditor({
   const active = entries.find((e) => e.path === selected && e.type === "file");
   const content = active ? (drafts[active.path] ?? active.content) : "";
   const dirty = active ? content !== active.content : false;
+  const downloadProject = async () => {
+    const files = entries.filter((entry) => entry.type === "file");
+    if (!files.length) {
+      toast.error("There are no project files to download yet.");
+      return;
+    }
+
+    setDownloadingProject(true);
+    try {
+      const { default: JSZip } = await import("jszip");
+      const zip = new JSZip();
+      const folderName = PROJECT_DOWNLOAD_FOLDER;
+
+      for (const file of files) {
+        zip.file(`${folderName}/${file.path}`, drafts[file.path] ?? file.content ?? "");
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${folderName}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast.success("Project ZIP downloaded.");
+    } catch {
+      toast.error("Couldn't download the project files.");
+    } finally {
+      setDownloadingProject(false);
+    }
+  };
   const mutation = useMutation({
     mutationFn: (vars: { path: string; content: string; revision: number }) =>
       save({ data: { projectId, ...vars } }),
@@ -140,6 +179,24 @@ export function LiveCodeEditor({
         {generating || workspace.isFetching ? (
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
         ) : null}
+        <Button
+          size="sm"
+          variant="outline"
+          className="live-code-editor__download-button"
+          aria-label="Download project"
+          title="Download the current project files as a ZIP"
+          disabled={
+            !workspace.data || !entries.some((entry) => entry.type === "file") || downloadingProject
+          }
+          onClick={() => void downloadProject()}
+        >
+          {downloadingProject ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          <span>Download project</span>
+        </Button>
         <span className="text-xs text-muted-foreground">{dirty ? "Unsaved" : "Saved"}</span>
         <Button
           size="icon"

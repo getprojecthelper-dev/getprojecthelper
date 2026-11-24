@@ -1,7 +1,8 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 
 import { MentorDock } from "@/components/mentor-dock";
 import { ErrorState, LoadingState } from "@/components/state-views";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/use-workspace";
 
@@ -60,7 +61,7 @@ function WorkspaceLayout() {
                   isBuild && "project-workspace-header__title",
                 )}
               >
-                {data?.project.name ?? "Loading project…"}
+                {data?.project.name ?? (isError ? "Project unavailable" : "Loading project…")}
               </p>
             </div>
           </div>
@@ -78,10 +79,20 @@ function WorkspaceLayout() {
         {isPending ? (
           <LoadingState label="Loading workspace…" />
         ) : isError ? (
-          <ErrorState
-            message={error instanceof Error ? error.message : "Something went wrong."}
-            onRetry={() => void refetch()}
-          />
+          <>
+            <ErrorState
+              title={
+                error instanceof Error && /project not found|access to it/i.test(error.message)
+                  ? "Project unavailable"
+                  : "Workspace couldn't load"
+              }
+              message={error instanceof Error ? error.message : "Something went wrong."}
+              onRetry={() => void refetch()}
+            />
+            <Button asChild variant="outline" className="mt-3">
+              <Link to="/welcome">Back to your projects</Link>
+            </Button>
+          </>
         ) : (
           <Outlet />
         )}

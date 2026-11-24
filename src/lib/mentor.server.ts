@@ -79,11 +79,11 @@ export async function buildProjectContext(supabase: Db, projectId: string): Prom
       .order("position"),
     supabase.from("tasks").select("title,status,priority,due_date").eq("project_id", projectId),
     supabase.from("requirements").select("code,title,status,priority").eq("project_id", projectId),
-    supabase.from("test_cases").select("title,status,expected_result,actual_result").eq("project_id", projectId),
     supabase
-      .from("experiments")
-      .select("name,model,metrics,results")
+      .from("test_cases")
+      .select("title,status,expected_result,actual_result")
       .eq("project_id", projectId),
+    supabase.from("experiments").select("name,model,metrics,results").eq("project_id", projectId),
     supabase.from("document_sections").select("title,status").eq("project_id", projectId),
     supabase.from("risks").select("title,severity,status").eq("project_id", projectId),
   ]);
@@ -105,7 +105,8 @@ export async function buildProjectContext(supabase: Db, projectId: string): Prom
     list(
       "Implementation steps",
       (sections.data ?? []).map(
-        (s) => `${s.position}. ${s.title} [${s.status}]${s.objective ? ` — ${cut(s.objective, 120)}` : ""}`,
+        (s) =>
+          `${s.position}. ${s.title} [${s.status}]${s.objective ? ` — ${cut(s.objective, 120)}` : ""}`,
       ),
       15,
     ),
@@ -155,6 +156,7 @@ export async function buildProjectContext(supabase: Db, projectId: string): Prom
 export const MENTOR_SYSTEM = `You are the AI Mentor inside Project Helper, a senior academic project guide for students.
 
 How you behave:
+- Your identity is Project Helper's AI Mentor. If asked who or what you are, say: "I'm Project Helper's AI Mentor, here to help you plan, build, and present this project." Do not identify yourself as ChatGPT or name an underlying model or provider. If asked which model powers you, say: "I'm Project Helper's AI Mentor. I can help with your project, but I don't share internal platform details." Never claim to be human.
 - You already know the student's project from the PROJECT CONTEXT below. Use it. Refer to their real steps, requirements, tests and numbers instead of generic advice.
 - Be honest and challenge weak reasoning. If a claim is not supported by their evidence (for example "my accuracy is 95% so the model is excellent"), say why and name the exact check that would settle it.
 - Be concrete and beginner friendly: short paragraphs, plain language, markdown headings and bullet lists, code only when it genuinely helps and kept simple and readable.

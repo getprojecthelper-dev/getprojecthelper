@@ -735,6 +735,68 @@
   display: none;
 }
 
+.workspace-home-sidebar__tool-row {
+  display: flex;
+  min-height: 2.6rem;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  padding: 0 0.35rem 0 0.65rem;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 550;
+}
+
+.workspace-home-sidebar__tool-row:hover,
+.workspace-home-sidebar__tool:has(.workspace-home-sidebar__tool-projects)
+  .workspace-home-sidebar__tool-row {
+  border-color: #bfdbfe;
+  background: #fff;
+  color: #0757ad;
+}
+
+.workspace-home-sidebar__tool-row > .material-symbols-rounded {
+  color: #0866e8;
+  font-size: 1.1rem;
+}
+
+.workspace-home-sidebar__tool-link {
+  min-width: 0;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.workspace-home-sidebar__tool-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.workspace-home-sidebar__tool-toggle {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.workspace-home-sidebar__tool-toggle:hover {
+  background: #eff6ff;
+}
+
+.workspace-home-sidebar__tool-toggle[aria-expanded="true"] .workspace-home-sidebar__tool-chevron {
+  transform: rotate(180deg);
+}
+
+.workspace-home-sidebar__tool-toggle .workspace-home-sidebar__tool-chevron {
+  margin-left: 0;
+}
+
 .workspace-home-sidebar__tool > summary:hover,
 .workspace-home-sidebar__tool[open] > summary {
   border-color: #bfdbfe;
@@ -6250,14 +6312,18 @@ body:has(.workspace-canvas--build) {
   background: #fafafa;
 }
 
-.workspace-canvas--build .build-roadmap__step-actions > button.build-roadmap__build-button:first-child:not(:last-child) {
+.workspace-canvas--build
+  .build-roadmap__step-actions
+  > button.build-roadmap__build-button:first-child:not(:last-child) {
   border-color: #5b50c9;
   background: #5b50c9;
   color: #ffffff;
   box-shadow: 0 2px 8px rgb(91 80 201 / 22%);
 }
 
-.workspace-canvas--build .build-roadmap__step-actions > button.build-roadmap__build-button:first-child:not(:last-child):hover {
+.workspace-canvas--build
+  .build-roadmap__step-actions
+  > button.build-roadmap__build-button:first-child:not(:last-child):hover {
   border-color: #4b40b5;
   background: #4b40b5;
 }

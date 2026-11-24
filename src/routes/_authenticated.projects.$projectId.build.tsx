@@ -774,6 +774,11 @@ function OverviewBriefCard({
           </Button>
         </div>
       ) : null}
+      {hideFullScreenButton && /problem/i.test(block.title) ? (
+        <p className="overview-brief__step-label" aria-label={`Step ${stepNumber} of ${totalSteps}`}>
+          Step {stepNumber} of {totalSteps}
+        </p>
+      ) : null}
       <div className="flex items-center gap-2.5">
         <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
           <Icon className={cn("h-4 w-4", tone.text)} />

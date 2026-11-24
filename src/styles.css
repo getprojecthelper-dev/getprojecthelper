@@ -5634,6 +5634,8 @@ body:has(.workspace-canvas--build) {
 }
 
 .workspace-canvas--build .build-roadmap {
+  container-name: build-roadmap;
+  container-type: inline-size;
   border: 1px solid rgb(0 0 0 / 0.07);
   border-radius: 1.25rem;
   background: rgb(255 255 255 / 0.86);
@@ -6324,6 +6326,16 @@ body:has(.workspace-canvas--build) {
   display: none !important;
 }
 
+.build-section-fullscreen .overview-brief__step-label {
+  margin: 0 0 0.75rem;
+  color: #777777;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
 .build-section-fullscreen .overview-brief__eyebrow {
   color: #777777 !important;
 }
@@ -7002,6 +7014,27 @@ body:has(.workspace-canvas--build) {
 
   .workspace-canvas--build .build-roadmap :is(p, h1, h2, h3) {
     overflow-wrap: anywhere;
+  }
+}
+
+@container build-roadmap (max-width: 680px) {
+  .workspace-canvas--build .build-roadmap__step-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-title {
+    width: 100%;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-copy {
+    flex: 1 1 auto;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 
@@ -8342,5 +8375,26 @@ body:has(.workspace-canvas--build) {
 
   .documents-viewer .paper-columns {
     column-count: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .workspace-canvas--build .build-roadmap__step-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-title {
+    width: 100%;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-copy {
+    flex: 1 1 auto;
+  }
+
+  .workspace-canvas--build .build-roadmap__step-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

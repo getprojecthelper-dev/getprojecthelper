@@ -689,17 +689,15 @@ function briefTone(title: string) {
 /** The project brief (problem, solution, tools, objectives) as readable cards. */
 function OverviewBrief({
   blocks,
-  onViewFullScreen,
   stepNumber,
   totalSteps,
-  hideFullScreenButton = false,
+  showStepLabel = false,
   showAllDetails = false,
 }: {
   blocks: Block[];
-  onViewFullScreen: () => void;
   stepNumber: number;
   totalSteps: number;
-  hideFullScreenButton?: boolean;
+  showStepLabel?: boolean;
   showAllDetails?: boolean;
 }) {
   if (!blocks.length) return null;
@@ -710,10 +708,9 @@ function OverviewBrief({
           <OverviewBriefCard
             key={`${block.title}-${i}`}
             block={block}
-            onViewFullScreen={onViewFullScreen}
             stepNumber={stepNumber}
             totalSteps={totalSteps}
-            hideFullScreenButton={hideFullScreenButton}
+            showStepLabel={showStepLabel}
             showAllDetails={showAllDetails}
           />
         );
@@ -724,17 +721,15 @@ function OverviewBrief({
 
 function OverviewBriefCard({
   block,
-  onViewFullScreen,
   stepNumber,
   totalSteps,
-  hideFullScreenButton = false,
+  showStepLabel = false,
   showAllDetails = false,
 }: {
   block: Block;
-  onViewFullScreen: () => void;
   stepNumber: number;
   totalSteps: number;
-  hideFullScreenButton?: boolean;
+  showStepLabel?: boolean;
   showAllDetails?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -749,7 +744,8 @@ function OverviewBriefCard({
   );
   const hasExtraDetails = bullets.length > 3 || body.length > 260;
   const visibleBullets = showAllDetails || expanded ? bullets : bullets.slice(0, 3);
-  const sectionLabel = /problem/i.test(block.title)
+  const isProblemStatement = /problem/i.test(block.title);
+  const sectionLabel = isProblemStatement
     ? "The challenge"
     : /solution|approach/i.test(block.title)
       ? "How it works"
@@ -764,57 +760,52 @@ function OverviewBriefCard({
         tone.ring,
       )}
     >
-      {!hideFullScreenButton && /problem/i.test(block.title) ? (
-        <div className="overview-brief__toolbar">
-          <span>
-            Step {stepNumber} of {totalSteps}
-          </span>
-          <Button type="button" size="sm" variant="outline" onClick={onViewFullScreen}>
-            <Expand className="h-4 w-4" /> View full screen
-          </Button>
-        </div>
-      ) : null}
-      {hideFullScreenButton && /problem/i.test(block.title) ? (
-        <p className="overview-brief__step-label" aria-label={`Step ${stepNumber} of ${totalSteps}`}>
+      {showStepLabel && isProblemStatement ? (
+        <p
+          className="overview-brief__step-label"
+          aria-label={`Step ${stepNumber} of ${totalSteps}`}
+        >
           Step {stepNumber} of {totalSteps}
         </p>
       ) : null}
-      <div className="flex items-center gap-2.5">
-        <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
-          <Icon className={cn("h-4 w-4", tone.text)} />
-        </span>
-        <div>
-          <p className="overview-brief__eyebrow">{sectionLabel}</p>
-          <h2 className="font-display text-lg font-bold tracking-tight">{block.title}</h2>
+      <div className="overview-brief__details space-y-3">
+        <div className="flex items-center gap-2.5">
+          <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", tone.tint)}>
+            <Icon className={cn("h-4 w-4", tone.text)} />
+          </span>
+          <div>
+            <p className="overview-brief__eyebrow">{sectionLabel}</p>
+            <h2 className="font-display text-lg font-bold tracking-tight">{block.title}</h2>
+          </div>
         </div>
-      </div>
 
-      <div className="overview-brief__copy space-y-2 text-sm leading-6 text-foreground/90">
-        {body.split(/\n{2,}/).map((para, p) => (
-          <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
-        ))}
-        {visibleBullets.length ? (
-          <ul className="overview-brief__bullets text-sm leading-6 text-muted-foreground">
-            {visibleBullets.map((line, li) => (
-              <li key={`b-${li}-${line.slice(0, 10)}`}>
-                <span className="overview-brief__bullet" aria-hidden="true" />
-                <EmphasizedText text={line} />
-              </li>
-            ))}
-          </ul>
+        <div className="overview-brief__copy space-y-2 text-sm leading-6 text-foreground/90">
+          {body.split(/\n{2,}/).map((para, p) => (
+            <p key={`p-${p}`}>{para.replace(/\*\*/g, "").trim()}</p>
+          ))}
+          {visibleBullets.length ? (
+            <ul className="overview-brief__bullets text-sm leading-6 text-muted-foreground">
+              {visibleBullets.map((line, li) => (
+                <li key={`b-${li}-${line.slice(0, 10)}`}>
+                  <span className="overview-brief__bullet" aria-hidden="true" />
+                  <EmphasizedText text={line} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+
+        {hasExtraDetails && !showAllDetails ? (
+          <button
+            type="button"
+            className="overview-brief__toggle text-sm font-medium text-primary"
+            onClick={() => setExpanded((value) => !value)}
+            aria-expanded={expanded}
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
         ) : null}
       </div>
-
-      {hasExtraDetails && !showAllDetails ? (
-        <button
-          type="button"
-          className="overview-brief__toggle text-sm font-medium text-primary"
-          onClick={() => setExpanded((value) => !value)}
-          aria-expanded={expanded}
-        >
-          {expanded ? "Show less" : "Show more"}
-        </button>
-      ) : null}
     </article>
   );
 }
@@ -1240,6 +1231,7 @@ function SectionCard({
   onOpenEditor: (sectionIndex: number, file?: string) => void;
 }) {
   const [showFix, setShowFix] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(true);
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(index);
   const [showNextGeneratePrompt, setShowNextGeneratePrompt] = useState(false);
@@ -1342,6 +1334,8 @@ function SectionCard({
           .values(),
       );
   const isSetupSection = Boolean(section.structure && playbook.buildsCode);
+  const stepOpen = isOverview ? overviewOpen : open;
+  const toggleStep = isOverview ? () => setOverviewOpen((value) => !value) : onToggle;
 
   // Data projects work inside notebooks: group this step's cells per notebook
   // so the student can download a ready-to-run .ipynb instead of copying cells.
@@ -1395,94 +1389,92 @@ function SectionCard({
     <section
       className={cn(
         "build-roadmap__step",
-        open && "is-open",
+        stepOpen && "is-open",
         confirmed && "is-confirmed",
         locked && "is-locked",
       )}
     >
-      {!isOverview ? (
-        <div className="build-roadmap__step-header">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="build-roadmap__step-title"
-            aria-expanded={open}
+      <div className="build-roadmap__step-header">
+        <button
+          type="button"
+          onClick={toggleStep}
+          className="build-roadmap__step-title"
+          aria-expanded={stepOpen}
+        >
+          <span
+            className={cn(
+              "build-roadmap__number",
+              confirmed ? "is-confirmed" : locked ? "is-locked" : "",
+            )}
           >
+            {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+          </span>
+          <span className="build-roadmap__step-copy">
             <span
-              className={cn(
-                "build-roadmap__number",
-                confirmed ? "is-confirmed" : locked ? "is-locked" : "",
-              )}
+              className="build-roadmap__step-position"
+              aria-label={`Step ${index + 1} of ${totalSteps}`}
             >
-              {confirmed ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+              Step {index + 1} of {totalSteps}
             </span>
-            <span className="build-roadmap__step-copy">
-              <span
-                className="build-roadmap__step-position"
-                aria-label={`Step ${index + 1} of ${totalSteps}`}
-              >
-                Step {index + 1} of {totalSteps}
-              </span>
-              <span className="build-roadmap__step-name">
-                {`Step ${index + 1} of ${totalSteps}`}
-                {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
-              </span>
-              <span className="build-roadmap__step-subtitle">{section.title}</span>
-              {section.objective ? (
-                <span className="build-roadmap__objective">{section.objective}</span>
-              ) : null}
+            <span className="build-roadmap__step-name">
+              {`Step ${index + 1} of ${totalSteps}`}
+              {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : null}
             </span>
-          </button>
+            <span className="build-roadmap__step-subtitle">{section.title}</span>
+            {section.objective ? (
+              <span className="build-roadmap__objective">{section.objective}</span>
+            ) : null}
+          </span>
+        </button>
 
-          <div className="build-roadmap__step-actions">
-            {generated ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="build-roadmap__fullscreen-trigger"
-                onClick={openFullScreen}
-              >
-                <Expand className="h-4 w-4" /> View full screen
-              </Button>
-            ) : null}
-            {!locked && !generated ? (
-              <Button size="sm" onClick={onGenerate} disabled={generating}>
-                {generating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-                {generating ? "Generating…" : "Generate"}
-              </Button>
-            ) : null}
-            {!locked && generated ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onGenerate}
-                disabled={generating}
-                title="Generate this step again"
-              >
-                {generating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {generating ? "Simplifying…" : isOverview ? "Make simpler" : "Regenerate"}
-              </Button>
-            ) : null}
+        <div className="build-roadmap__step-actions">
+          {generated ? (
             <Button
-              size="icon"
-              variant="ghost"
-              onClick={onToggle}
-              aria-label={open ? "Close section" : "Open section"}
+              type="button"
+              size="sm"
+              variant="outline"
+              className="build-roadmap__fullscreen-trigger"
+              onClick={openFullScreen}
             >
-              {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <Expand className="h-4 w-4" /> View full screen
             </Button>
-          </div>
+          ) : null}
+          {!locked && !generated ? (
+            <Button size="sm" onClick={onGenerate} disabled={generating}>
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {generating ? "Generating…" : "Generate"}
+            </Button>
+          ) : null}
+          {!locked && generated ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onGenerate}
+              disabled={generating}
+              title="Generate this step again"
+            >
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {generating ? "Simplifying…" : isOverview ? "Make simpler" : "Regenerate"}
+            </Button>
+          ) : null}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={toggleStep}
+            aria-label={stepOpen ? "Close section" : "Open section"}
+          >
+            {stepOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </div>
-      ) : null}
+      </div>
 
       <Dialog open={showFullScreen} onOpenChange={setShowFullScreen}>
         <DialogContent
@@ -1579,10 +1571,9 @@ function SectionCard({
                   {previewIsOverview ? (
                     <OverviewBrief
                       blocks={previewBlocks}
-                      onViewFullScreen={() => setShowFullScreen(false)}
                       stepNumber={previewIndex + 1}
                       totalSteps={totalSteps}
-                      hideFullScreenButton
+                      showStepLabel
                       showAllDetails
                     />
                   ) : null}
@@ -1717,7 +1708,7 @@ function SectionCard({
         </DialogContent>
       </Dialog>
 
-      {open || isOverview ? (
+      {stepOpen ? (
         <div className="build-roadmap__step-body">
           {section.question && !isSetupSection && !isOverview ? (
             <p className="rounded-lg bg-primary/5 p-3 text-sm text-primary">{section.question}</p>
@@ -1756,12 +1747,7 @@ function SectionCard({
           ) : null}
 
           {isOverview && generated ? (
-            <OverviewBrief
-              blocks={blocks}
-              onViewFullScreen={openFullScreen}
-              stepNumber={index + 1}
-              totalSteps={totalSteps}
-            />
+            <OverviewBrief blocks={blocks} stepNumber={index + 1} totalSteps={totalSteps} />
           ) : null}
 
           {isOverview || isSetupSection

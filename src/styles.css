@@ -6121,12 +6121,18 @@ body:has(.workspace-canvas--build) {
   height: 1rem;
 }
 
-:is(.workspace-canvas--build, .build-section-fullscreen) .project-folder-setup__tree > button svg:last-child {
+:is(.workspace-canvas--build, .build-section-fullscreen)
+  .project-folder-setup__tree
+  > button
+  svg:last-child {
   margin-left: 0.05rem;
   transition: transform 160ms ease;
 }
 
-:is(.workspace-canvas--build, .build-section-fullscreen) .project-folder-setup__tree > button svg.is-open {
+:is(.workspace-canvas--build, .build-section-fullscreen)
+  .project-folder-setup__tree
+  > button
+  svg.is-open {
   transform: rotate(180deg);
 }
 
@@ -6320,10 +6326,6 @@ body:has(.workspace-canvas--build) {
   border-radius: 0.55rem !important;
   background: #f1f1ef !important;
   color: #656563 !important;
-}
-
-.build-section-fullscreen .overview-brief__toolbar {
-  display: none !important;
 }
 
 .build-section-fullscreen .overview-brief__step-label {
@@ -6805,37 +6807,6 @@ body:has(.workspace-canvas--build) {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.95),
     0 10px 28px -18px rgb(38 42 60 / 30%);
-}
-
-.workspace-canvas--build .overview-brief__toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  border-bottom: 1px solid #eeeeec;
-  padding-bottom: 0.65rem;
-}
-
-.workspace-canvas--build .overview-brief__toolbar > span {
-  color: #777777;
-  font-size: 0.68rem;
-  font-weight: 650;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.workspace-canvas--build .overview-brief__toolbar button {
-  min-height: 2.25rem;
-  flex: 0 0 auto;
-  border-color: #e1e1df;
-  border-radius: 0.5rem;
-  background: #ffffff;
-  color: #3f3f3f;
-  font-size: 0.76rem;
-}
-
-.workspace-canvas--build .overview-brief__toolbar button:hover {
-  background: #f8f8f7;
 }
 
 .workspace-canvas--build .overview-brief__eyebrow {

@@ -1,10 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useRouterState } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  ChevronDown,
-  Plus,
-} from "lucide-react";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import { ArrowRight, ChevronDown, Plus } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/material-icon";
@@ -229,6 +225,8 @@ function ProjectTool({
 
 function WorkspaceTools() {
   const { data: overviews, isLoading } = useProjectsOverview();
+  const [documentationExpanded, setDocumentationExpanded] = useState(false);
+  const latestProjectId = overviews?.[0]?.project.id;
   const tools = [
     { title: "Documentation", icon: "description", target: "documents" as const },
     { title: "Viva practice", icon: "record_voice_over", target: "review" as const },
@@ -238,35 +236,87 @@ function WorkspaceTools() {
   return (
     <div className="workspace-home-sidebar__tools">
       <p className="workspace-home-sidebar__label">Project tools</p>
-      {tools.map((tool) => (
-        <details className="workspace-home-sidebar__tool" key={tool.target}>
-          <summary>
-            <MaterialIcon name={tool.icon} />
-            <span>{tool.title}</span>
-            <ChevronDown className="workspace-home-sidebar__tool-chevron" aria-hidden="true" />
-          </summary>
-          <div className="workspace-home-sidebar__tool-projects">
-            {isLoading ? (
-              <span className="workspace-home-sidebar__tool-message">Loading projects…</span>
-            ) : overviews?.length ? (
-              overviews
-                .slice(0, 5)
-                .map(({ project }) => (
-                  <ToolProjectLink
-                    key={project.id}
-                    target={tool.target}
-                    projectId={project.id}
-                    name={project.name}
-                  />
-                ))
-            ) : (
-              <Link to="/new-project" className="workspace-home-sidebar__tool-project">
-                Start a project <ArrowRight aria-hidden="true" />
-              </Link>
-            )}
+      {tools.map((tool) =>
+        tool.target === "documents" ? (
+          <div className="workspace-home-sidebar__tool" key={tool.target}>
+            <div className="workspace-home-sidebar__tool-row">
+              <MaterialIcon name={tool.icon} />
+              {latestProjectId ? (
+                <Link
+                  to="/projects/$projectId/documents"
+                  params={{ projectId: latestProjectId }}
+                  className="workspace-home-sidebar__tool-link"
+                >
+                  {tool.title}
+                </Link>
+              ) : (
+                <Link to="/new-project" className="workspace-home-sidebar__tool-link">
+                  {tool.title}
+                </Link>
+              )}
+              <button
+                type="button"
+                className="workspace-home-sidebar__tool-toggle"
+                aria-label={`${documentationExpanded ? "Hide" : "Show"} documentation projects`}
+                aria-expanded={documentationExpanded}
+                onClick={() => setDocumentationExpanded((expanded) => !expanded)}
+              >
+                <ChevronDown className="workspace-home-sidebar__tool-chevron" aria-hidden="true" />
+              </button>
+            </div>
+            {documentationExpanded ? (
+              <div className="workspace-home-sidebar__tool-projects">
+                {isLoading ? (
+                  <span className="workspace-home-sidebar__tool-message">Loading projects…</span>
+                ) : overviews?.length ? (
+                  overviews
+                    .slice(0, 5)
+                    .map(({ project }) => (
+                      <ToolProjectLink
+                        key={project.id}
+                        target="documents"
+                        projectId={project.id}
+                        name={project.name}
+                      />
+                    ))
+                ) : (
+                  <Link to="/new-project" className="workspace-home-sidebar__tool-project">
+                    Start a project <ArrowRight aria-hidden="true" />
+                  </Link>
+                )}
+              </div>
+            ) : null}
           </div>
-        </details>
-      ))}
+        ) : (
+          <details className="workspace-home-sidebar__tool" key={tool.target}>
+            <summary>
+              <MaterialIcon name={tool.icon} />
+              <span>{tool.title}</span>
+              <ChevronDown className="workspace-home-sidebar__tool-chevron" aria-hidden="true" />
+            </summary>
+            <div className="workspace-home-sidebar__tool-projects">
+              {isLoading ? (
+                <span className="workspace-home-sidebar__tool-message">Loading projects…</span>
+              ) : overviews?.length ? (
+                overviews
+                  .slice(0, 5)
+                  .map(({ project }) => (
+                    <ToolProjectLink
+                      key={project.id}
+                      target={tool.target}
+                      projectId={project.id}
+                      name={project.name}
+                    />
+                  ))
+              ) : (
+                <Link to="/new-project" className="workspace-home-sidebar__tool-project">
+                  Start a project <ArrowRight aria-hidden="true" />
+                </Link>
+              )}
+            </div>
+          </details>
+        ),
+      )}
     </div>
   );
 }
